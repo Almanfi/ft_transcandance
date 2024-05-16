@@ -1,0 +1,43 @@
+version : '3.8'
+
+services:
+    postgres:
+      build:
+        context: ./postgres
+        dockerfile: Dockerfile
+        args:
+          PG_ROOT_PASSWORD : ${PG_ROOT_PASSWORD}
+          PG_USERNAME : ${PG_USERNAME}
+          PG_USER_PASSWORD : ${PG_USER_PASSWORD}
+          PG_DB_NAME : ${PG_DB_NAME}
+      image: postgres:pong
+      # volumes:
+      #   - mariadb_volume:/var/lib/mysql
+      networks:
+        - pong
+      container_name: postgres
+      restart : always
+    django:
+      build:
+        context: ./django
+        dockerfile: Dockerfile
+        args:
+          PG_USERNAME : ${PG_USERNAME}
+          PG_USER_PASSWORD : ${PG_USER_PASSWORD}
+          PG_DB_NAME : ${PG_DB_NAME}
+      image: django:pong
+      # volumes:
+      #   - mariadb_volume:/var/lib/mysql
+      depends_on:
+        - postgres
+      networks:
+        - pong
+      ports:
+        - "8000:8000"
+      container_name: django
+      restart : always
+
+networks:
+  pong:
+    driver: bridge
+    name: pong

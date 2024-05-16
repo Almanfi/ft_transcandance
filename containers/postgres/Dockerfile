@@ -28,6 +28,4 @@ RUN pg_ctl start -D /var/lib/postgresql/data -l /var/lib/postgresql/log/postgres
 
 EXPOSE 5432
 
-USER root
-
-CMD ash
+CMD postgres -D /var/lib/postgresql/data
