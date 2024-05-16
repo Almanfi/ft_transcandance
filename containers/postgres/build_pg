@@ -1,0 +1,1 @@
+docker build --build-arg PG_ROOT_PASSWORD=admin123 --build-arg PG_USERNAME=admin --build-arg PG_USER_PASSWORD=assword --build-arg PG_DB_NAME=ass  -t pg:0 .
