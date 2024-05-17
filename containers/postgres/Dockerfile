@@ -11,7 +11,9 @@ RUN apk update \
 
 USER postgres
 
-RUN initdb -D /var/lib/postgresql/data
+RUN initdb -D /var/lib/postgresql/data \
+    && echo "host all all 0.0.0.0/0 md5" >> /var/lib/postgresql/data/pg_hba.conf \
+    && echo "listen_addresses='*'" >> /var/lib/postgresql/data/postgresql.conf
 
 ARG PG_ROOT_PASSWORD
 ARG PG_USERNAME
@@ -22,9 +24,6 @@ RUN pg_ctl start -D /var/lib/postgresql/data -l /var/lib/postgresql/log/postgres
     psql -c "CREATE ROLE $PG_USERNAME WITH SUPERUSER LOGIN PASSWORD '$PG_USER_PASSWORD';" &&\
     psql -c "CREATE DATABASE $PG_DB_NAME OWNER $PG_USERNAME;" &&\
     psql -c "ALTER ROLE postgres WITH PASSWORD '$PG_ROOT_PASSWORD';"
-
-#     ~ $ echo "host all all 0.0.0.0/0 md5" >> /var/lib/postgresql/data/pg_hba.conf
-# ~ $ echo "listen_addresses='*'" >> /var/lib/postgresql/data/postgresql.conf
 
 EXPOSE 5432
 

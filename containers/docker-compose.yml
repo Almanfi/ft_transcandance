@@ -11,8 +11,8 @@ services:
           PG_USER_PASSWORD : ${PG_USER_PASSWORD}
           PG_DB_NAME : ${PG_DB_NAME}
       image: postgres:pong
-      # volumes:
-      #   - mariadb_volume:/var/lib/mysql
+      volumes:
+        - postgres_volume:/var/lib/postgresql/data
       networks:
         - pong
       container_name: postgres
@@ -26,8 +26,8 @@ services:
           PG_USER_PASSWORD : ${PG_USER_PASSWORD}
           PG_DB_NAME : ${PG_DB_NAME}
       image: django:pong
-      # volumes:
-      #   - mariadb_volume:/var/lib/mysql
+      volumes:
+        - django_volume:/usr/backend
       depends_on:
         - postgres
       networks:
@@ -41,3 +41,14 @@ networks:
   pong:
     driver: bridge
     name: pong
+
+volumes:
+  postgres_volume:
+  django_volume:
+    name: django_volume
+    driver: local
+    driver_opts:
+      type: none
+      device: ../backend
+      o: bind
+
