@@ -34,6 +34,9 @@ class UserInfo(ViewSet):
     """
     @action(['post'], True)
     def create_user(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     
     """

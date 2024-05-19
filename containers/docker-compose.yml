@@ -16,7 +16,17 @@ services:
       networks:
         - pong
       container_name: postgres
-      restart : always
+      restart: always
+    pgadmin:
+      image: dpage/pgadmin4
+      environment:
+        PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+        PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      networks:
+        - pong
+      
+      container_name: pgadmin
+      restart: always
     django:
       build:
         context: ./django
