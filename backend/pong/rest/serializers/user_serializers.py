@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from .models import User
+from ..models.user_model import User
 
 class UserSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
     firstname = serializers.CharField()
     lastname = serializers.CharField()
     username = serializers.CharField()
@@ -18,4 +17,3 @@ class UserSerializer(serializers.Serializer):
         instance.password = validated_data.get('password', instance.password)
         instance.display_name = validated_data.get('display_name', instance.display_name)
         return instance
-

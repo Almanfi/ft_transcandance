@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
-from .models import User
-from .serializers import UserSerializer
+from ..models.user_model import User
+from ..serializers.user_serializers import UserSerializer
 
 class UserInfo(ViewSet):
     """
@@ -37,6 +37,7 @@ class UserInfo(ViewSet):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     
     """
