@@ -24,8 +24,11 @@ services:
         PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       networks:
         - pong
-      
+      ports:
+        - "9000:80"
       container_name: pgadmin
+      depends_on:
+        - postgres
       restart: always
     django:
       build:
