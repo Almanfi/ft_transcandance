@@ -4,32 +4,32 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
 from argon2 import PasswordHasher
-from ..models.user_model import User, users_images_path
+from ..models.user_model import User
 from ..serializers.user_serializers import UserSerializer
+from ..helpers import parse_uuid
+from typing import List
 import os
 import binascii
+
 
 class UserInfo(ViewSet):
     """
         Get a Specific User Info
     """
-    def fetch_user(self, id):
-        try:
-            user_id = None
-            if not isinstance(id, uuid.UUID):
-                user_id = uuid.UUID(id)
-            user = User.objects.get(id=user_id)
-            return user
-        except User.DoesNotExist:
-            return None
+    def fetch_users(self, ids):
+        user_ids:List[uuid.UUID] = [id for id in ids if id != None]
+        users = list(User.objects.filter(pk__in=user_ids))
+        return users
 
     @action(['get'], True)
-    def get_user(self, request, id=None):
-        # user = self.fetch_user(id)
-        # if user == None:
-        #     return Response(status=status.HTTP_404_NOT_FOUND)
-        # serialized_user = UserSerializer(user).data
-        return Response({'path':users_images_path()},status=status.HTTP_200_OK)
+    def get_users(self, request):
+        users_ids = parse_uuid(request.data)
+        user = self.fetch_users(users_ids)
+        user = None
+        if user == None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serialized_user = UserSerializer(user)
+        return Response(serialized_user, status=status.HTTP_200_OK)
 
     """
         Create New User,
@@ -55,7 +55,7 @@ class UserInfo(ViewSet):
         Delete Specific User
     """
     @action(['delete'], True)
-    def delete_user(self, request, id=None):
+    def delete_users(self, request):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     # def delete_user(self, request, id):
     #     return Response(status=status.HTTP_401_UNAUTHORIZED)

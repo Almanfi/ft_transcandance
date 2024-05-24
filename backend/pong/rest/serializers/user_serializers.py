@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from ..models.user_model import User
+from ..models.user_model import User, users_images_path
 import re
-import base64
 import binascii
 
 
@@ -32,6 +31,7 @@ class UserSerializer(serializers.Serializer):
     password = serializers.CharField()
     salt = BinaryField()
     display_name = serializers.CharField(max_length = 50)
+    profile_picture = serializers.FilePathField(path=users_images_path(), recursive=True)
 
     def validate_password(self, value):
         if not re.findall(password_regex, value):

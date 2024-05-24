@@ -3,14 +3,10 @@ from ..views.user_views import UserInfo
 
 urlpatterns = [
     path('', UserInfo.as_view({
-        'post':'create_user'
+        'get' :'get_users',
+        'post':'create_user',
+        'delete' : 'delete_users'
         }),
-        name='create_user'
-    ),
-    path('<uuid:id>', UserInfo.as_view({
-        'get':'get_user',
-        'delete':'delete_user'
-        }),
-        name='user_mod'
+        name='user_crud'
     ),
 ]
