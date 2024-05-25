@@ -24,12 +24,17 @@ class UserInfo(ViewSet):
     @action(['get'], True)
     def get_users(self, request):
         users_ids = parse_uuid(request.data)
-        user = self.fetch_users(users_ids)
-        user = None
-        if user == None:
+        users = self.fetch_users(users_ids)
+        if users == None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serialized_user = UserSerializer(user)
-        return Response(serialized_user, status=status.HTTP_200_OK)
+        context = {
+            'exclude': [
+                'password',
+                'salt'
+            ]
+        }
+        serialized_users = UserSerializer(users, many=True, context=context)
+        return Response(serialized_users.data, status=status.HTTP_200_OK)
 
     """
         Create New User,
@@ -57,6 +62,7 @@ class UserInfo(ViewSet):
     @action(['delete'], True)
     def delete_users(self, request):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
     # def delete_user(self, request, id):
     #     return Response(status=status.HTTP_401_UNAUTHORIZED)
 
