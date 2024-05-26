@@ -4,7 +4,7 @@ import re
 import binascii
 
 
-password_regex=r"(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()\\-+=])(?=.{8,})"
+password_regex=r"(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()\-+=])(?=.{8,})"
 
 class BinaryField(serializers.Field):
     def to_representation(self, value):
@@ -46,7 +46,6 @@ class UserSerializer(serializers.Serializer):
         return fields
 
     def validate_password(self, value):
-        print(f"the value of passowrd {value}")
         if len(value) > 0 and not re.findall(password_regex, value):
             raise serializers.ValidationError("Password Given doesn't match Standard [A-Z][a-z][0-9][!@#$%^&*()\\-+=] and len > 8")
         return value

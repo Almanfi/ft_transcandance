@@ -1,12 +1,13 @@
 import uuid
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
 from argon2 import PasswordHasher
-from ..models.user_model import User
+from ..models.user_model import User, users_images_path
 from ..serializers.user_serializers import UserSerializer
-from ..helpers import parse_uuid
+from ..helpers import parse_uuid, save_uploaded_file
 from typing import List
 import os
 import binascii
@@ -45,16 +46,31 @@ class UserInfo(ViewSet):
         ph = PasswordHasher(hash_len=128, salt_len=32)
         user_data['password'] = ph.hash(user_data['password'], salt = user_data['salt'])
 
+    def check_for_user_picture(self, request):
+        filename , fullpath = ("profile.jpg", f"{users_images_path()}/profile.jpg")
+        if 'profile_picture' in request.data and isinstance(request.data['profile_picture'], InMemoryUploadedFile):
+            filename, fullpath = save_uploaded_file(request.data['profile_picture'],['.jpg','.png'])
+            if fullpath == None:
+                return None
+        request.data['profile_picture'] = fullpath
+        return filename
+
     @action(['post'], True)
     def create_user(self, request):
-        request.data['salt'] = binascii.b2a_base64(os.urandom(32)).decode('utf-8') 
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            self.hash_password(serializer)
-            serializer.save()
-            del serializer.validated_data['salt']
-            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+        request.data['salt'] = binascii.b2a_base64(os.urandom(32)).decode('utf-8')
+        filename = self.check_for_user_picture(request)
+        if (filename == None):
+            return Response("Extensions Not allowed should be .jpg, .png",status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        user_data = UserSerializer(data=request.data)
+        if user_data.is_valid(raise_exception=False):
+            self.hash_password(user_data)
+            user_data.validated_data['profile_picture'] = filename
+            user_data.save()
+            del user_data.validated_data['salt']
+            return Response(user_data.validated_data, status=status.HTTP_201_CREATED)
+        if (request.data['profile_picture'] != None):
+            os.remove(request.data['profile_picture'])
+        return Response(user_data.errors, status=status.HTTP_401_UNAUTHORIZED)
     
     """
         Delete Specific User
