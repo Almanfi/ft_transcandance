@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from ..models.user_model import User, users_images_path
+from ..models.user_model import User, users_images_path, user_image_route
 import re
 import binascii
-
 
 password_regex=r"(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()\-+=])(?=.{8,})"
 
@@ -31,12 +30,6 @@ class UserSerializer(serializers.Serializer):
     salt = BinaryField()
     display_name = serializers.CharField(max_length = 50)
     profile_picture = serializers.FilePathField(path=users_images_path(), recursive=True, required=False)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if 'profile_picture' in data :
-            data['profile_picture'] = f"/static/rest/images/users_profiles/{data['profile_picture']}"
-        return data
 
     def get_fields(self):
         fields = super().get_fields()

@@ -6,6 +6,9 @@ import uuid
 def users_images_path():
     return f"{settings.STATICFILES_DIRS[0][1]}/images/users_profiles"
 
+def user_image_route(user_image:str):
+    return f"/static/rest/images/users_profiles/{user_image}"
+
 class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     firstname = models.CharField(max_length=50,blank=False, null=False)
