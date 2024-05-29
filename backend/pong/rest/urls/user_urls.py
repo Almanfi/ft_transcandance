@@ -9,4 +9,7 @@ urlpatterns = [
         }),
         name='user_crud'
     ),
+    path('login/', UserInfo.as_view({
+        'post': 'login_user',
+    }))
 ]

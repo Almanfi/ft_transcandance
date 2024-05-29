@@ -1,27 +1,35 @@
-import uuid
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
-from argon2 import PasswordHasher
 from ..models.user_model import User, users_images_path, user_image_route
 from ..serializers.user_serializers import UserSerializer
 from ..helpers import parse_uuid, save_uploaded_file
 from typing import List
 import os
+import uuid
+import argon2
 import binascii
-
+import jwt
 
 class UserInfo(ViewSet):
     """
         Get Users Info From Db
     """
-    def fetch_users(self, ids):
+    def fetch_users_by_id(self, ids):
         user_ids:List[uuid.UUID] = [id for id in ids if id != None]
         users = list(User.objects.filter(pk__in=user_ids))
         return users
     
+    def fetch_user_by_username(self, username:str):
+        try:
+            user = User.objects.filter(username__exact=username).values('id', 'username', 'password').get()
+            user = {**user, "id" : str(user['id'])}
+            return user
+        except (User.DoesNotExist, User.MultipleObjectsReturned):
+            return None
+
     """
         remove Users From Db
     """
@@ -38,7 +46,7 @@ class UserInfo(ViewSet):
     @action(['get'], True)
     def get_users(self, request):
         users_ids = parse_uuid(request.data)
-        users = self.fetch_users(users_ids)
+        users = self.fetch_users_by_id(users_ids)
         if users == None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         context = {
@@ -54,7 +62,7 @@ class UserInfo(ViewSet):
 
     def hash_password(self, serializer:UserSerializer):
         user_data = serializer.validated_data
-        ph = PasswordHasher(hash_len=128, salt_len=32)
+        ph = argon2.PasswordHasher(hash_len=128, salt_len=32)
         user_data['password'] = ph.hash(user_data['password'], salt = user_data['salt'])
 
     def check_for_user_picture(self, request):
@@ -65,7 +73,7 @@ class UserInfo(ViewSet):
                 return None
         request.data['profile_picture'] = fullpath
         return filename
-
+    
     """
         Create New User Request
     """
@@ -88,7 +96,31 @@ class UserInfo(ViewSet):
         if request.data['profile_picture'] != None:
             os.remove(request.data['profile_picture'])
         return Response(user_data.errors, status=status.HTTP_401_UNAUTHORIZED)
+
+    def verify_password(self, password_hash , password):
+        ph = argon2.PasswordHasher(hash_len=128, salt_len=32)
+        try :
+           return ph.verify(password_hash, password)
+        except argon2.exceptions.VerifyMismatchError:
+            return False
     
+    """
+        Login User Request
+    """
+    @action(['post'], True)
+    def login_user(self, request):
+        login_data = request.data
+        if not 'username' in login_data or not 'password' in login_data:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = self.fetch_user_by_username(login_data['username'])
+        if (user == None):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not self.verify_password(user['password'], login_data['password']):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        signed_jwt = jwt.encode(user, os.getenv("JWT_SECRET"), algorithm="EdDSA")
+        print(f"signed as such {signed_jwt}")
+        return Response(status=status.HTTP_200_OK)
+
     """
         Delete Users Request including their profile pictures
     """
