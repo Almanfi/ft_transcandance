@@ -17,8 +17,8 @@ ENV PG_USERNAME=${PG_USERNAME} \
     JWT_SECRET=${JWT_SECRET} \
     JWT_PUBLIC=${JWT_PUBLIC}
 
-COPY ./requirements.txt ./requirements.txt
-COPY --chmod=777 ./script.sh /usr/script.sh
+COPY ./backend/requirements.txt ./requirements.txt
+COPY --chmod=777 ./containers/django/script.sh /usr/script.sh
 
 RUN python3 -m venv venv && \
     source venv/bin/activate && \

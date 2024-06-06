@@ -119,7 +119,13 @@ class UserInfo(ViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         signed_jwt = jwt.encode(user, os.getenv("JWT_SECRET"), algorithm="EdDSA")
         res = Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_200_OK)
+        cookie = {
+            "max_age" : 3600,
+            "httponly" : True,
+            "path" : "/"
+        }
+        res.set_cookie("id_key", signed_jwt, **cookie)
+        return res
 
     """
         Delete Users Request including their profile pictures
