@@ -3,7 +3,7 @@ FROM alpine:latest
 RUN apk update &&\
     apk add python3 py3-virtualenv py3-pip libpq-dev
 
-WORKDIR /usr/backend
+WORKDIR /usr
 
 ARG PG_USERNAME\
     PG_USER_PASSWORD\
@@ -17,10 +17,13 @@ ENV PG_USERNAME=${PG_USERNAME} \
     JWT_SECRET=${JWT_SECRET} \
     JWT_PUBLIC=${JWT_PUBLIC}
 
-EXPOSE 8000
-
+COPY ./requirements.txt ./requirements.txt
 COPY --chmod=777 ./script.sh /usr/script.sh
 
-WORKDIR /usr
+RUN python3 -m venv venv && \
+    source venv/bin/activate && \
+    pip install -r ./requirements.txt
 
-CMD /usr/script.sh
+EXPOSE 8000
+
+CMD ./script.sh

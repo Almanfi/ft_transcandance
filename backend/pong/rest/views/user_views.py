@@ -118,7 +118,7 @@ class UserInfo(ViewSet):
         if not self.verify_password(user['password'], login_data['password']):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         signed_jwt = jwt.encode(user, os.getenv("JWT_SECRET"), algorithm="EdDSA")
-        print(f"signed as such {signed_jwt}")
+        res = Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_200_OK)
 
     """
