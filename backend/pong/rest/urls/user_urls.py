@@ -5,6 +5,7 @@ urlpatterns = [
     path('', UserInfo.as_view({
         'get' :'get_users',
         'post':'create_user',
+        'patch': 'update_user', 
         'delete' : 'delete_users'
         }),
         name='user_crud'
