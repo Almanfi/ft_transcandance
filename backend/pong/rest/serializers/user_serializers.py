@@ -23,12 +23,12 @@ class BinaryField(serializers.Field):
 
 class UserSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only = True)
-    firstname = serializers.CharField(max_length = 50)
-    lastname = serializers.CharField(max_length = 50)
-    username = serializers.CharField(max_length = 50)
-    password = serializers.CharField()
-    salt = BinaryField()
-    display_name = serializers.CharField(max_length = 50)
+    firstname = serializers.CharField(max_length = 50, required = False)
+    lastname = serializers.CharField(max_length = 50, required = False)
+    username = serializers.CharField(max_length = 50, required = False)
+    password = serializers.CharField(required = False)
+    salt = BinaryField(required = False)
+    display_name = serializers.CharField(max_length = 50, required = False)
     profile_picture = serializers.FilePathField(path=users_images_path(), recursive=True, required=False)
 
     def get_fields(self):
@@ -47,8 +47,13 @@ class UserSerializer(serializers.Serializer):
         return User.objects.create(**validated_data)
     
     def update(self, instance, validated_data):
+        print("the update is happening")
         instance.firstname = validated_data.get('firstname', instance.firstname)
         instance.lastname = validated_data.get('lastname', instance.lastname)
         instance.password = validated_data.get('password', instance.password)
+        instance.username = validated_data.get('username', instance.username)
         instance.display_name = validated_data.get('display_name', instance.display_name)
+        instance.salt = validated_data.get('salt', instance.salt)
+        instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
+        instance.save()
         return instance

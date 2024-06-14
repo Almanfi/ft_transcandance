@@ -63,7 +63,9 @@ class UserInfo(ViewSet):
     def hash_password(self, serializer:UserSerializer):
         user_data = serializer.validated_data
         ph = argon2.PasswordHasher(hash_len=128, salt_len=32)
+        user_data['salt'] = binascii.a2b_base64(binascii.b2a_base64(os.urandom(32)).decode('utf-8'))
         user_data['password'] = ph.hash(user_data['password'], salt = user_data['salt'])
+        return user_data['password']
 
     def check_for_user_picture(self, data):
         filename , fullpath = ("profile.jpg", f"{users_images_path()}/profile.jpg")
@@ -80,7 +82,6 @@ class UserInfo(ViewSet):
     @action(['post'], True)
     def create_user(self, request):
         data = request.data.copy()
-        data['salt'] = binascii.b2a_base64(os.urandom(32)).decode('utf-8')
         filename = self.check_for_user_picture(data)
         if (filename == None):
             return Response("Extensions Not allowed should be .jpg, .png",status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
@@ -128,44 +129,44 @@ class UserInfo(ViewSet):
         res.set_cookie("id_key", signed_jwt, **cookie)
         return res
     
-    def validate_user_update(self, old_user, updated_user, picture=None):
-        new_data = updated_user.validated_data
-        banned_updates = any(key in new_data for key in ['id', 'salt', 'created_at'])
+    def validate_user_update(self, old_user, update_data, picture=None):
+        banned_updates = any(key in update_data for key in ['id', 'salt', 'created_at'])
         if banned_updates:
-            return Response(status=status.HTTP_200_OK)
-        new_data['salt'] = old_user.data['salt']
-        if 'password' in new_data:
-            new_data['password'] = self.hash_password(updated_user)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        old_user = UserSerializer(old_user, data = update_data)
+        if not old_user.is_valid():
+            return Response(old_user.errrors, status= status.HTTP_400_BAD_REQUEST)
+        old_user.validated_data['salt'] = binascii.b2a_base64(os.urandom(32)).decode('utf-8')
+        if 'password' in update_data:
+            self.hash_password(old_user)
         if picture != None:
-            new_data['profile_picture'] = picture
-        old_user.data = {**old_user.data, **new_data}
+            old_user.validated_data['profile_picture'] = picture
         old_user.save()
-        return Response(status=status.HTTP_200_OK)
+        res = {**old_user.data}
+        del res['password']
+        del res['salt']
+        res['profile_picture'] = user_image_route(res['profile_picture'])
+        return Response(res, status=status.HTTP_200_OK)
 
     """
         Update User Request
     """
-    @action(['post'], True)
+    @action(['patch'], True)
     def update_user(self, request):
-        print(f"the data is here {request.data}")
-        request.data = request.data.copy()
-        if not 'id' in request.data:
+        data = request.data.copy()
+        if not 'id' in data:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = parse_uuid([request.data['id']])
+        user = parse_uuid([data['id']])
         user = self.fetch_users_by_id(user)
         if len(user) != 1:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        user = UserSerializer(user[0])
-        picture_update = self.check_for_user_picture(request)
+        user = user[0]
+        picture_update = self.check_for_user_picture(data)
         picture_update = picture_update if picture_update != 'profile.jpg' else None
-        updated_user = UserSerializer(data=request.data)
-        if updated_user.is_valid():
-            return  self.validate_user_update(user, updated_user, picture_update)
-        if picture_update != None:
-            os.remove(request.data['profile_picture'])
-        print("hello brahim =======================")
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
+        if picture_update == None:
+            del data['profile_picture']
+        del data['id']
+        return self.validate_user_update(user, data, picture_update)
 
     """
         Delete Users Request including their profile pictures

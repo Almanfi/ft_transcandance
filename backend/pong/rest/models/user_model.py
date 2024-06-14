@@ -15,7 +15,7 @@ class User(models.Model):
     lastname = models.CharField(max_length=50, blank=False, null=False)
     username = models.CharField(max_length=50, blank=False, null=False, unique=True, db_index=True)
     password = models.CharField(blank=False, null=False)
-    salt = models.BinaryField(max_length=32, editable=False)
+    salt = models.BinaryField(max_length=32)
     display_name = models.CharField(max_length=100, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     profile_picture = models.FilePathField(path=users_images_path, recursive=True, default='profile.jpg')
