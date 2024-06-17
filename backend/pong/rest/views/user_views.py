@@ -17,12 +17,14 @@ class UserInfo(ViewSet):
     """
         Get Users Info From Db
     """
-    def fetch_users_by_id(self, ids):
+    @staticmethod
+    def fetch_users_by_id(ids):
         user_ids:List[uuid.UUID] = [id for id in ids if id != None]
         users = list(User.objects.filter(pk__in=user_ids))
         return users
     
-    def fetch_user_by_username(self, username:str):
+    @staticmethod
+    def fetch_user_by_username(username:str):
         try:
             user = User.objects.filter(username__exact=username).values('id', 'username', 'password').get()
             user = {**user, "id" : str(user['id'])}
@@ -30,15 +32,6 @@ class UserInfo(ViewSet):
         except (User.DoesNotExist, User.MultipleObjectsReturned):
             return None
 
-    """
-        remove Users From Db
-    """
-    def remove_users(self, ids):
-        users_ids:List[uuid.UUID] = [id for id in ids if id != None]
-        users_queryset = User.objects.filter(pk__in=users_ids)
-        deleted_users_data = list(users_queryset)
-        deletion_info = users_queryset.delete()
-        return (deletion_info, deleted_users_data)
 
     """
         Get Users Info Request
@@ -167,6 +160,17 @@ class UserInfo(ViewSet):
             del data['profile_picture']
         del data['id']
         return self.validate_user_update(user, data, picture_update)
+
+    """
+        remove Users From Db
+    """
+    @staticmethod
+    def remove_users(ids):
+        users_ids:List[uuid.UUID] = [id for id in ids if id != None]
+        users_queryset = User.objects.filter(pk__in=users_ids)
+        deleted_users_data = list(users_queryset)
+        deletion_info = users_queryset.delete()
+        return (deletion_info, deleted_users_data)
 
     """
         Delete Users Request including their profile pictures
