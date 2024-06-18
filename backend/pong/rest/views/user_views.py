@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from ..models.user_model import User, users_images_path, user_image_route
 from ..serializers.user_serializers import UserSerializer
-from ..helpers import parse_uuid, save_uploaded_file
+from ..helpers import parse_uuid, save_uploaded_file, CookieAuth
 from typing import List
 import os
 import uuid
@@ -36,7 +36,7 @@ class UserInfo(ViewSet):
     """
         Get Users Info Request
     """
-    @action(['get'], True)
+    @action(['get'], True, authentication_classes = [CookieAuth])
     def get_users(self, request):
         users_ids = parse_uuid(request.data)
         users = self.fetch_users_by_id(users_ids)

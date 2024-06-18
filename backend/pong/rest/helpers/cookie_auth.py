@@ -16,7 +16,7 @@ class CookieAuth(BaseAuthentication):
         if len (user_uuid) != 1:
             raise AuthenticationFailed("Wrong UUID")
         db_user = UserInfo.fetch_users_by_id(user_uuid)
-        if len(db_user != 1):
+        if len(db_user) != 1:
             raise AuthenticationFailed("Couldn't find a user with specific UUID")
         serialized_user = UserSerializer(db_user[0], context={"exclude" : ["password", "salt"]})
         return (serialized_user, token)
