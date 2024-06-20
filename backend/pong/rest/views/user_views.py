@@ -14,24 +14,6 @@ import binascii
 import jwt
 
 class UserInfo(ViewSet):
-    """
-        Get Users Info From Db
-    """
-    @staticmethod
-    def fetch_users_by_id(ids):
-        user_ids:List[uuid.UUID] = [id for id in ids if id != None]
-        users = list(User.objects.filter(pk__in=user_ids))
-        return users
-    
-    @staticmethod
-    def fetch_user_by_username(username:str):
-        try:
-            user = User.objects.filter(username__exact=username).values('id', 'username', 'password').get()
-            user = {**user, "id" : str(user['id'])}
-            return user
-        except (User.DoesNotExist, User.MultipleObjectsReturned):
-            return None
-
 
     """
         Get Users Info Request
@@ -39,7 +21,7 @@ class UserInfo(ViewSet):
     @action(['get'], True, authentication_classes = [CookieAuth])
     def get_users(self, request):
         users_ids = parse_uuid(request.data)
-        users = self.fetch_users_by_id(users_ids)
+        users = User.fetch_users_by_id(users_ids)
         if users == None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         context = {
@@ -107,7 +89,7 @@ class UserInfo(ViewSet):
         login_data = request.data
         if not 'username' in login_data or not 'password' in login_data:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = self.fetch_user_by_username(login_data['username'])
+        user = User.fetch_user_by_username(login_data['username'])
         if (user == None):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if not self.verify_password(user['password'], login_data['password']):
@@ -150,7 +132,7 @@ class UserInfo(ViewSet):
         if not 'id' in data:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = parse_uuid([data['id']])
-        user = self.fetch_users_by_id(user)
+        user = User.fetch_users_by_id(user)
         if len(user) != 1:
             return Response(status=status.HTTP_404_NOT_FOUND)
         user = user[0]
@@ -162,23 +144,12 @@ class UserInfo(ViewSet):
         return self.validate_user_update(user, data, picture_update)
 
     """
-        remove Users From Db
-    """
-    @staticmethod
-    def remove_users(ids):
-        users_ids:List[uuid.UUID] = [id for id in ids if id != None]
-        users_queryset = User.objects.filter(pk__in=users_ids)
-        deleted_users_data = list(users_queryset)
-        deletion_info = users_queryset.delete()
-        return (deletion_info, deleted_users_data)
-
-    """
         Delete Users Request including their profile pictures
     """
     @action(['delete'], True)
     def delete_users(self, request):
         users_ids = parse_uuid(request.data)
-        (deletion_info, deleted_users)= self.remove_users(users_ids)
+        (deletion_info, deleted_users)= User.remove_users(users_ids)
         if (deletion_info[0] <= 0):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         deleted_users = UserSerializer(deleted_users, many=True)
