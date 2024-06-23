@@ -47,7 +47,6 @@ class UserSerializer(serializers.Serializer):
         return User.objects.create(**validated_data)
     
     def update(self, instance, validated_data):
-        print("the update is happening")
         instance.firstname = validated_data.get('firstname', instance.firstname)
         instance.lastname = validated_data.get('lastname', instance.lastname)
         instance.password = validated_data.get('password', instance.password)

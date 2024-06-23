@@ -7,7 +7,9 @@ from jwt import decode
 import os
 
 class CookieAuth(BaseAuthentication):
+
     def authenticate(self, request):
+        print("why the fucker")
         token = request.COOKIES.get("id_key")
         if not token:
             raise AuthenticationFailed("No Cookie Was Given")

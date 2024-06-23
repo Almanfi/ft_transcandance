@@ -43,12 +43,6 @@ INSTALLED_APPS = [
     'rest.apps.RestConfig',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest.helpers.CookieAuth',
-    ]
-}
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

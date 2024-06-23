@@ -1,24 +1,27 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework import status
 from ..models.user_model import User, users_images_path, user_image_route
 from ..serializers.user_serializers import UserSerializer
 from ..helpers import parse_uuid, save_uploaded_file, CookieAuth
-from typing import List
 import os
-import uuid
 import argon2
 import binascii
 import jwt
 
-class UserInfo(ViewSet):
+class UserInfo(GenericViewSet):
 
+    def get_authenticators(self):
+        print(f"the request method is {self.request.method}")
+        if self.request.method in ["GET", "PATCH", "DELETE"]:
+            return [CookieAuth()]
+        return super().get_authenticators()
     """
         Get Users Info Request
     """
-    @action(['get'], True, authentication_classes = [CookieAuth])
+    @action(['get'], True, authentication_classes=[])
     def get_users(self, request):
         users_ids = parse_uuid(request.data)
         users = User.fetch_users_by_id(users_ids)
@@ -54,7 +57,7 @@ class UserInfo(ViewSet):
     """
         Create New User Request
     """
-    @action(['post'], True)
+    @action(['post'], False, authentication_classes=[CookieAuth])
     def create_user(self, request):
         data = request.data.copy()
         filename = self.check_for_user_picture(data)
@@ -84,7 +87,7 @@ class UserInfo(ViewSet):
     """
         Login User Request
     """
-    @action(['post'], True)
+    @action(['post'], False)
     def login_user(self, request):
         login_data = request.data
         if not 'username' in login_data or not 'password' in login_data:
