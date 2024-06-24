@@ -9,12 +9,13 @@ import os
 class CookieAuth(BaseAuthentication):
 
     def authenticate(self, request):
-        print("why the fucker")
         token = request.COOKIES.get("id_key")
         if not token:
             raise AuthenticationFailed("No Cookie Was Given")
         token = decode(token, os.getenv("JWT_SECRET"), algorithms=["EdDSA"])
-        user_uuid = parse_uuid([token])
+        if "id" not in token:
+            raise AuthenticationFailed("No id in token")
+        user_uuid = parse_uuid([token['id']])
         if len (user_uuid) != 1:
             raise AuthenticationFailed("Wrong UUID")
         db_user = User.fetch_users_by_id(user_uuid)

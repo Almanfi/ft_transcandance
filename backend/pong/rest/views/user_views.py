@@ -14,7 +14,6 @@ import jwt
 class UserInfo(GenericViewSet):
 
     def get_authenticators(self):
-        print(f"the request method is {self.request.method}")
         if self.request.method in ["GET", "PATCH", "DELETE"]:
             return [CookieAuth()]
         return super().get_authenticators()
@@ -23,6 +22,10 @@ class UserInfo(GenericViewSet):
     """
     @action(['get'], True, authentication_classes=[])
     def get_users(self, request):
+        if len(request.data) == 0:
+            user_data = request.user.data.copy()
+            user_data['profile_picture'] = user_image_route(user_data["profile_picture"])
+            return Response(user_data, status=status.HTTP_200_OK)
         users_ids = parse_uuid(request.data)
         users = User.fetch_users_by_id(users_ids)
         if users == None:
@@ -97,7 +100,7 @@ class UserInfo(GenericViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if not self.verify_password(user['password'], login_data['password']):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        signed_jwt = jwt.encode(user, os.getenv("JWT_SECRET"), algorithm="EdDSA")
+        signed_jwt = jwt.encode({'id': user['id']}, os.getenv("JWT_SECRET"), algorithm="EdDSA")
         res = Response(status=status.HTTP_200_OK)
         cookie = {
             "max_age" : 3600,
