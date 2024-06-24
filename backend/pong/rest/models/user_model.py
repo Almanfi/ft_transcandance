@@ -19,6 +19,7 @@ class User(models.Model):
     display_name = models.CharField(max_length=100, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     profile_picture = models.FilePathField(path=users_images_path, recursive=True, default='profile.jpg')
+    relationship = models.ManyToManyField('self', through='Relationship', symmetrical = True)
 
     @staticmethod
     def fetch_users_by_id(ids):
@@ -42,3 +43,4 @@ class User(models.Model):
         deleted_users_data = list(users_queryset)
         deletion_info = users_queryset.delete()
         return (deletion_info, deleted_users_data)
+

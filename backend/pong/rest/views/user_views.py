@@ -20,7 +20,7 @@ class UserInfo(GenericViewSet):
     """
         Get Users Info Request
     """
-    @action(['get'], True, authentication_classes=[])
+    @action(['get'], True)
     def get_users(self, request):
         if len(request.data) == 0:
             user_data = request.user.data.copy()
@@ -60,7 +60,7 @@ class UserInfo(GenericViewSet):
     """
         Create New User Request
     """
-    @action(['post'], False, authentication_classes=[CookieAuth])
+    @action(['post'], False)
     def create_user(self, request):
         data = request.data.copy()
         filename = self.check_for_user_picture(data)
@@ -134,9 +134,7 @@ class UserInfo(GenericViewSet):
     """
     @action(['patch'], True)
     def update_user(self, request):
-        data = request.data.copy()
-        if not 'id' in data:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        data = request.user.data.copy()
         user = parse_uuid([data['id']])
         user = User.fetch_users_by_id(user)
         if len(user) != 1:
@@ -152,9 +150,9 @@ class UserInfo(GenericViewSet):
     """
         Delete Users Request including their profile pictures
     """
-    @action(['delete'], True)
+    @action(['delete'], False)
     def delete_users(self, request):
-        users_ids = parse_uuid(request.data)
+        users_ids = parse_uuid([request.user.data['id']])
         (deletion_info, deleted_users)= User.remove_users(users_ids)
         if (deletion_info[0] <= 0):
             return Response(status=status.HTTP_400_BAD_REQUEST)
