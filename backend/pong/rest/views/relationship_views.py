@@ -3,6 +3,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
 from ..helpers import CookieAuth
+from ..helpers import parse_uuid
+from ..models import User
+
 
 class RelationshipView(ViewSet):
     authentication_classes = [CookieAuth]
@@ -13,6 +16,15 @@ class RelationshipView(ViewSet):
 
     @action(methods=['post'], detail=False)
     def invite_friend(self, request):
+        if len(request.data) <= 0:
+            return Response({"message": "The invite should be a list of friends uuid's"}, status=status.HTTP_400_BAD_REQUEST)
+        friends_ids = parse_uuid(request.data)
+        if len(request.data) != len(friends_ids):
+            return Response({"message": "One of the id's is wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        auth_user: User = request.user.instance
+        invites = auth_user.invite_friends()
+        if isinstance(invites, str):
+            return Response({"message": invites}, status = status.HTTP_400_BAD_REQUEST)
         pass
 
     @action(methods=['patch'], detail=False)

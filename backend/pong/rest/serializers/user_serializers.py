@@ -29,7 +29,9 @@ class UserSerializer(serializers.Serializer):
     password = serializers.CharField(required = False)
     salt = BinaryField(required = False)
     display_name = serializers.CharField(max_length = 50, required = False)
+    created_at = serializers.DateTimeField(read_only = True)
     profile_picture = serializers.FilePathField(path=users_images_path(), recursive=True, required=False)
+
 
     def get_fields(self):
         fields = super().get_fields()
