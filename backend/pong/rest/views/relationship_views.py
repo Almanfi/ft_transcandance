@@ -4,8 +4,8 @@ from rest_framework.decorators import action
 from rest_framework import status
 from ..helpers import CookieAuth
 from ..helpers import parse_uuid
-from ..models import User
-
+from ..serializers.relationship_serializers import RelationshipSerializer
+from ..serializers.user_serializers import UserSerializer
 
 class RelationshipView(ViewSet):
     authentication_classes = [CookieAuth]
@@ -16,16 +16,14 @@ class RelationshipView(ViewSet):
 
     @action(methods=['post'], detail=False)
     def invite_friend(self, request):
-        if len(request.data) <= 0:
-            return Response({"message": "The invite should be a list of friends uuid's"}, status=status.HTTP_400_BAD_REQUEST)
-        friends_ids = parse_uuid(request.data)
-        if len(request.data) != len(friends_ids):
-            return Response({"message": "One of the id's is wrong"}, status=status.HTTP_400_BAD_REQUEST)
-        auth_user: User = request.user.instance
-        invites = auth_user.invite_friends()
-        if isinstance(invites, str):
-            return Response({"message": invites}, status = status.HTTP_400_BAD_REQUEST)
-        pass
+        if not "friend_id" in request.data:
+            return Response({"message": "The invite should be an object with a field `friend_id`:`uuid-of-friend`"}, status=status.HTTP_400_BAD_REQUEST)
+        friend_id = parse_uuid([request.data['id']])
+        if len(friend_id) != 1:
+            return Response({"message": "The id is wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        auth_user: UserSerializer = request.user
+        invite : RelationshipSerializer = auth_user.invite_friend(friend_id)
+        return Response(invite.data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=False)
     def handle_invite(self, request):

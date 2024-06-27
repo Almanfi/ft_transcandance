@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from ..models.user_model import User, users_images_path, user_image_route
+from ..models.user_model import User, users_images_path
+from .relationship_serializers import RelationshipSerializer
 import re
 import binascii
 
@@ -58,3 +59,9 @@ class UserSerializer(serializers.Serializer):
         instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
         instance.save()
         return instance
+    
+    def invite_friend(self, friend_id):
+        db_friends = User.fetch_users_by_id([friend_id])
+        friend = UserSerializer(db_friends, context= {'exclude': ['password', 'salt']})
+        friendship = RelationshipSerializer.add_friendship_invitation(self, friend)
+        return friendship
