@@ -18,8 +18,8 @@ class RelationshipView(ViewSet):
     def invite_friend(self, request):
         if not "friend_id" in request.data:
             return Response({"message": "The invite should be an object with a field `friend_id`:`uuid-of-friend`"}, status=status.HTTP_400_BAD_REQUEST)
-        friend_id = parse_uuid([request.data['id']])
-        if len(friend_id) != 1:
+        friend_id = parse_uuid([request.data["friend_id"]])
+        if len(friend_id) != 1 or request.user.data["id"] == request.data["friend_id"]:
             return Response({"message": "The id is wrong"}, status=status.HTTP_400_BAD_REQUEST)
         auth_user: UserSerializer = request.user
         invite : RelationshipSerializer = auth_user.invite_friend(friend_id)

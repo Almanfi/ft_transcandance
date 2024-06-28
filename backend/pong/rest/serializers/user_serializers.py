@@ -1,10 +1,27 @@
-from rest_framework import serializers
+from rest_framework import serializers , status
+from rest_framework.exceptions import APIException
 from ..models.user_model import User, users_images_path
 from .relationship_serializers import RelationshipSerializer
 import re
 import binascii
 
 password_regex=r"(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()\-+=])(?=.{8,})"
+
+
+class UserExceptions(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = "User Exception"
+    default_code = "bad_request"
+
+    def __init__(self, detail=None, error_code=None ,code=None):
+        if detail != None:
+            self.detail = {"message": detail}
+        else:
+            self.detail = {"message": self.default_detail}
+        if error_code != None:
+            self.detail['error_code'] = error_code
+        if code != None:
+            self.status_code = code
 
 class BinaryField(serializers.Field):
     def to_representation(self, value):
@@ -61,7 +78,9 @@ class UserSerializer(serializers.Serializer):
         return instance
     
     def invite_friend(self, friend_id):
-        db_friends = User.fetch_users_by_id([friend_id])
-        friend = UserSerializer(db_friends, context= {'exclude': ['password', 'salt']})
+        db_friends = User.fetch_users_by_id(friend_id)
+        if len(db_friends) != 1:
+            raise UserExceptions({"message": "No user with the id given"}, 1, status.HTTP_404_NOT_FOUND)
+        friend = UserSerializer(db_friends[0], context= {'exclude': ['password', 'salt']})
         friendship = RelationshipSerializer.add_friendship_invitation(self, friend)
         return friendship
