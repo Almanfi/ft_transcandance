@@ -77,6 +77,9 @@ class UserSerializer(serializers.Serializer):
         instance.save()
         return instance
     
+    def get_relations(self):
+        return RelationshipSerializer.get_user_relations(self)
+
     def invite_friend(self, friend_id):
         db_friends = User.fetch_users_by_id(friend_id)
         if len(db_friends) != 1:

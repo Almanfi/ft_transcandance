@@ -26,6 +26,10 @@ class Relationship(models.Model):
         ]
 
     @staticmethod
+    def find_relationship_by_id(id):
+        return list(Relationship.objects.filter(id = id))
+
+    @staticmethod
     def relationship_exists(inviter, invited) -> bool:
         return Relationship.objects.filter(
             models.Q(from_user=inviter.data['id'], to_user=invited.data['id']) | 

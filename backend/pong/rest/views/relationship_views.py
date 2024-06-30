@@ -16,17 +16,25 @@ class RelationshipView(ViewSet):
 
     @action(methods=['post'], detail=False)
     def invite_friend(self, request):
-        if not "friend_id" in request.data:
-            return Response({"message": "The invite should be an object with a field `friend_id`:`uuid-of-friend`"}, status=status.HTTP_400_BAD_REQUEST)
+        if not "friend_id" in request.data or not isinstance(request.data['friend_id'], str):
+            return Response({"message": "The invite should be an object with a field `friend_id`:`uuid-of-friend`", "error_code": 3}, status=status.HTTP_400_BAD_REQUEST)
         friend_id = parse_uuid([request.data["friend_id"]])
         if len(friend_id) != 1 or request.user.data["id"] == request.data["friend_id"]:
-            return Response({"message": "The id is wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "The id is wrong", "error_code": 4}, status=status.HTTP_400_BAD_REQUEST)
         auth_user: UserSerializer = request.user
-        invite : RelationshipSerializer = auth_user.invite_friend(friend_id)
-        return Response(invite.data, status=status.HTTP_200_OK)
+        invite_data = auth_user.invite_friend(friend_id)
+        return Response(invite_data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=False)
-    def handle_invite(self, request):
+    def accept_invite(self, request):
+        if not "invitation_id" in request.data or not isinstance(request.data['invitation_id'], str) :
+            return Response({"message": "No invitation id given to handle", "error_code": 5}, status=status.HTTP_400_BAD_REQUEST)
+        invitation_id = parse_uuid([request.data['invitation_id']])
+        if len(invitation_id) != 1:
+            return Response({"message": "Wrong Invitation Id", "error_code": 7 }, status=status.HTTP_400_BAD_REQUEST)
+        invitation = RelationshipSerializer.get_relation_by_id(invitation_id[0])
+        user = request.user
+        user.accept_invitation(invitation) ###########################
         pass
 
     @action(methods=['patch'], detail=False)

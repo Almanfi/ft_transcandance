@@ -1,6 +1,7 @@
 from rest_framework import serializers , status
 from rest_framework.exceptions import APIException
 from ..models.relationship_model import Relationship, RELATIONSHIP_STATUS
+from typing import List
 
 class RelationshipException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
@@ -38,6 +39,33 @@ class RelationshipSerializer(serializers.Serializer):
         return instance
     
     @staticmethod
+    def get_relation_by_id(id):
+        rel = Relationship.find_relationship_by_id(id)
+        if len(rel) != 1:
+            RelationshipException("No Relationship with the given id", 6, status.HTTP_404_NOT_FOUND)
+        rel = RelationshipSerializer(rel[0])
+        return rel
+
+    @staticmethod
+    def get_user_relations(user):
+        all_relations = Relationship.find_relationships(user)
+        all_relations: List[RelationshipSerializer] = RelationshipSerializer(all_relations, many = True)
+        filtered_relations = {"invites":[], "invited":[] , "friends":[], "blocks":[]}
+        for relation in all_relations:
+            if relation.data['type'] == RELATIONSHIP_STATUS[0][0]:
+                if relation.data['from_user'] == user.data['id']:
+                    filtered_relations['invites'].append(relation)
+                elif relation.data['to_user'] == user.data['id']:
+                    filtered_relations['invited'].append(relation)
+            if relation.data['type'] == RELATIONSHIP_STATUS[1][0]:
+                filtered_relations["friends"].append(relation)
+            if relation.data['type'] == RELATIONSHIP_STATUS[2][0]:
+                if relation.data['from_user'] == user.data['id']:
+                    filtered_relations["blocks"].append(relation)
+            continue
+        return filtered_relations
+
+    @staticmethod
     def add_friendship_invitation(inviter, invited):
         if Relationship.relationship_exists(inviter, invited):
             raise RelationshipException("Relationship Already Exists", 2 ,status.HTTP_400_BAD_REQUEST)
@@ -53,6 +81,6 @@ class RelationshipSerializer(serializers.Serializer):
             new_friendship.validated_data['from_user'] = inviter.instance
             new_friendship.validated_data['to_user'] = invited.instance
             new_friendship.save()
-            return new_friendship
+            return {**new_friendship.data, "from_user" : inviter.data['id'], "to_user": invited.data['id'] }
         else:
             raise RelationshipException("Couldn't create a new Friendship", status.HTTP_500_INTERNAL_SERVER_ERROR)
