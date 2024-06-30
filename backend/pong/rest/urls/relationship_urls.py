@@ -13,17 +13,17 @@ urlpatterns= [
         name='invite_add'
     ),
     path('invite/accept/', RelationshipView.as_view({
-        "patch": "accept_invite"
+        "patch": "accept_friendship"
         }),
         name = "invite_accept"
     ),
     path('invite/refuse/', RelationshipView.as_view({
-        'patch': "refuse_invite"
+        'patch': "refuse_friendship"
         }),
         name = "invite_refuse"
     ),
-    path('invite/remove/', RelationshipView.as_view({
-        "delete": "remove_invite"
+    path('invite/cancel/', RelationshipView.as_view({
+        "delete": "cancel_friendship"
         }),
         name = "invite_remove"
     ),

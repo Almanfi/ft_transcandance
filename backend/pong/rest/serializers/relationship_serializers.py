@@ -38,6 +38,13 @@ class RelationshipSerializer(serializers.Serializer):
         instance.save()
         return instance
     
+    def accept_friendship(self):
+        updated_invitation = RelationshipSerializer(self.instance, data = {"accepted"})
+        if not updated_invitation.is_valid():
+            raise RelationshipException("Couldn't accept invitation", 9, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        updated_invitation.save()
+        return {**updated_invitation.data}
+
     @staticmethod
     def get_relation_by_id(id):
         rel = Relationship.find_relationship_by_id(id)

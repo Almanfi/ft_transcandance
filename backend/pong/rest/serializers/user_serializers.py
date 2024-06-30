@@ -87,3 +87,8 @@ class UserSerializer(serializers.Serializer):
         friend = UserSerializer(db_friends[0], context= {'exclude': ['password', 'salt']})
         friendship = RelationshipSerializer.add_friendship_invitation(self, friend)
         return friendship
+    
+    def accept_friendship(self, invitation: RelationshipSerializer):
+        if self.data['id'] != invitation.data['to_user'] :
+            raise UserExceptions("User Not Allowed to Accept Invitation", 8, status.HTTP_400_BAD_REQUEST)
+        return invitation.accept_friendship()
