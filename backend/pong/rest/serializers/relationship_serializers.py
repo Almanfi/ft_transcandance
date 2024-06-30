@@ -1,7 +1,9 @@
+from django.utils import timezone
 from rest_framework import serializers , status
 from rest_framework.exceptions import APIException
 from ..models.relationship_model import Relationship, RELATIONSHIP_STATUS
 from typing import List
+
 
 class RelationshipException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
@@ -23,10 +25,16 @@ class RelationshipSerializer(serializers.Serializer):
     accepted = serializers.BooleanField(default=False, required=False)
     blocked = serializers.BooleanField(default=False, required=False)
     type = serializers.ChoiceField(choices=RELATIONSHIP_STATUS, default= RELATIONSHIP_STATUS[0][0])
-    from_user = serializers.UUIDField()
-    to_user = serializers.UUIDField()
+    from_user = serializers.UUIDField(required=False)
+    to_user = serializers.UUIDField(required=False)
     created_at = serializers.DateTimeField(read_only = True)
     updated_at = serializers.DateTimeField(required=False)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["from_user"]  = str(instance.from_user.id)
+        representation["to_user"] = str(instance.to_user.id)
+        return representation
 
     def create(self, validated_data):
         return Relationship.objects.create(**validated_data)
@@ -34,16 +42,20 @@ class RelationshipSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.accepted = validated_data.get("accepted", instance.accepted)
         instance.blocked = validated_data.get("blocked", instance.blocked)
+        instance.type = validated_data.get("type", instance.type)
         instance.updated_at = validated_data.get("updated_at", instance.updated_at)
         instance.save()
         return instance
     
     def accept_friendship(self):
-        updated_invitation = RelationshipSerializer(self.instance, data = {"accepted"})
+        if self.data['type'] != RELATIONSHIP_STATUS[0][0] or self.data['accepted'] == True:
+            raise RelationshipException("Relationship is not an invitation", 12, status.HTTP_401_UNAUTHORIZED)
+        update_data = {"accepted": True, "type":RELATIONSHIP_STATUS[1][0], "updated_at": timezone.now()}
+        updated_invitation = RelationshipSerializer(self.instance, data = update_data)
         if not updated_invitation.is_valid():
             raise RelationshipException("Couldn't accept invitation", 9, status.HTTP_500_INTERNAL_SERVER_ERROR)
         updated_invitation.save()
-        return {**updated_invitation.data}
+        return {**updated_invitation.data, **update_data}
 
     @staticmethod
     def get_relation_by_id(id):

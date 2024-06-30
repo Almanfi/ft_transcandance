@@ -28,13 +28,13 @@ class RelationshipView(ViewSet):
     @action(methods=['patch'], detail=False)
     def accept_friendship(self, request):
         if not "invitation_id" in request.data or not isinstance(request.data['invitation_id'], str) :
-            return Response({"message": "No invitation id given to handle", "error_code": 5}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "The Data Should be an Object with a field `invitation_id`: `uuid-of-invitation`", "error_code": 5}, status=status.HTTP_400_BAD_REQUEST)
         invitation_id = parse_uuid([request.data['invitation_id']])
         if len(invitation_id) != 1:
             return Response({"message": "Wrong Invitation Id", "error_code": 7 }, status=status.HTTP_400_BAD_REQUEST)
         invitation = RelationshipSerializer.get_relation_by_id(invitation_id[0])
-        user = request.user
-        friendship = user.accept_invitation(invitation)
+        auth_user:UserSerializer = request.user
+        friendship = auth_user.accept_friendship(invitation)
         return Response(friendship, status= status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=False)

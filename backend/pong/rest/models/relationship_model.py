@@ -16,7 +16,7 @@ class Relationship(models.Model):
     type = models.CharField(choices=RELATIONSHIP_STATUS, default=RELATIONSHIP_STATUS[0][0])
     from_user = models.ForeignKey('User', related_name="inviter" ,on_delete=models.CASCADE)
     to_user = models.ForeignKey('User', related_name="invited", on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

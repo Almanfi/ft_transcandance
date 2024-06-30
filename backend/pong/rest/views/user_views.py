@@ -97,9 +97,11 @@ class UserInfo(GenericViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = User.fetch_user_by_username(login_data['username'])
         if (user == None):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"message":"wrong username", "error_code": 10}, status=status.HTTP_404_NOT_FOUND)
         if not self.verify_password(user['password'], login_data['password']):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message":"wrong password", "error_code": 11},status=status.HTTP_401_UNAUTHORIZED)
+
+        print(f"the user id is {user['id']}")
         signed_jwt = jwt.encode({'id': user['id']}, os.getenv("JWT_SECRET"), algorithm="EdDSA")
         res = Response(status=status.HTTP_200_OK)
         cookie = {
