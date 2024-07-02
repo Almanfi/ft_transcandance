@@ -90,5 +90,10 @@ class UserSerializer(serializers.Serializer):
     
     def accept_friendship(self, invitation: RelationshipSerializer):
         if self.data['id'] != invitation.data['to_user'] :
-            raise UserExceptions("User Not Allowed to Accept Invitation", 8, status.HTTP_400_BAD_REQUEST)
+            raise UserExceptions("User Not Allowed to Accept Invitation", 8, status.HTTP_401_UNAUTHORIZED)
         return invitation.accept_friendship()
+    
+    def refuse_friendship(self, invitation:RelationshipSerializer):
+        if self.data["id"] != invitation.data["to_user"]:
+            raise UserExceptions("User Not Allowed To Refuse Invitation", 15, status.HTTP_401_UNAUTHORIZED)
+        return invitation.refuse_friendship()

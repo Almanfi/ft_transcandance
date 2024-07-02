@@ -39,7 +39,15 @@ class RelationshipView(ViewSet):
 
     @action(methods=['patch'], detail=False)
     def refuse_friendship(self, request):
-        pass
+        if not "invitation_id" in request.data or not isinstance(request.data['invitation_id'], str):
+            return Response({"message": "The Data Should be an Object with a field `invitation_id`: `uuid-of-invitation`", "error_code": 13}, status=status.HTTP_400_BAD_REQUEST)
+        invitation_id = parse_uuid([request.data['invitation_id']])
+        if len(invitation_id) != 1:
+            return Response({"message": "Wrong Invitation Id", "error_code": 14}, status=status.HTTP_400_BAD_REQUEST)
+        invitation = RelationshipSerializer.get_relation_by_id(invitation_id[0])
+        auth_user: UserSerializer = request.user
+        auth_user.refuse_friendship(invitation)
+        return Response({"message":"Invitation Refused"}, status=status.HTTP_200_OK)
 
     @action(methods=['delete'], detail=False)
     def cancel_friendship(self, request):

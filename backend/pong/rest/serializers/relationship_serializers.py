@@ -57,6 +57,13 @@ class RelationshipSerializer(serializers.Serializer):
         updated_invitation.save()
         return {**updated_invitation.data, **update_data}
 
+    def refuse_friendship(self):
+        if self.data['type'] != RELATIONSHIP_STATUS[0][0]:
+            raise RelationshipException("Relationship is not an invitation", 16, status.HTTP_401_UNAUTHORIZED)
+        invtation_db: Relationship =  self.instance
+        return invtation_db.delete()
+        
+
     @staticmethod
     def get_relation_by_id(id):
         rel = Relationship.find_relationship_by_id(id)
@@ -73,14 +80,14 @@ class RelationshipSerializer(serializers.Serializer):
         for relation in all_relations:
             if relation.data['type'] == RELATIONSHIP_STATUS[0][0]:
                 if relation.data['from_user'] == user.data['id']:
-                    filtered_relations['invites'].append(relation)
+                    filtered_relations['invites'].append(relation.data)
                 elif relation.data['to_user'] == user.data['id']:
-                    filtered_relations['invited'].append(relation)
-            if relation.data['type'] == RELATIONSHIP_STATUS[1][0]:
-                filtered_relations["friends"].append(relation)
-            if relation.data['type'] == RELATIONSHIP_STATUS[2][0]:
+                    filtered_relations['invited'].append(relation.data)
+            elif relation.data['type'] == RELATIONSHIP_STATUS[1][0]:
+                filtered_relations["friends"].append(relation.data)
+            elif relation.data['type'] == RELATIONSHIP_STATUS[2][0]:
                 if relation.data['from_user'] == user.data['id']:
-                    filtered_relations["blocks"].append(relation)
+                    filtered_relations["blocks"].append(relation.data)
             continue
         return filtered_relations
 
