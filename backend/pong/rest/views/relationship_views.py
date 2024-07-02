@@ -6,6 +6,7 @@ from ..helpers import CookieAuth
 from ..helpers import parse_uuid
 from ..serializers.relationship_serializers import RelationshipSerializer
 from ..serializers.user_serializers import UserSerializer
+from ..
 
 class RelationshipView(ViewSet):
     authentication_classes = [CookieAuth]
@@ -50,13 +51,32 @@ class RelationshipView(ViewSet):
         return Response({"message":"Invitation Refused"}, status=status.HTTP_200_OK)
 
     @action(methods=['delete'], detail=False)
-    def cancel_friendship(self, request):
-        pass
+    def cancel_invitation(self, request):
+        if not "invitation_id" in request.data or not isinstance(request.data['invitation_id'], str):
+            return Response({"message": "The Data Should be an Object with a field `invitation_id`: `uuid-of-invitation`", "error_code": 17}, status=status.HTTP_400_BAD_REQUEST)
+        invitation_id = parse_uuid([request.data['invitation_id']])
+        if len(invitation_id) != 1:
+            return Response({"message" : "Wrong Invitation Id", "error_code": 18}, status=status.HTTP_400_BAD_REQUEST)
+        invitation = RelationshipSerializer.get_relation_by_id(invitation_id[0])
+        auth_user: UserSerializer = request.user
+        auth_user.cancel_friendship(invitation)
+        return Response({"message": "Invitation Canceled"}, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=False)
     def block_user(self, request):
+        if not "user_id" in request.data or not isinstance(request.data['user_id'], str):
+            return Response({"message": "The Data Should be an Object with a field `user_id`: `uuid-of-invitation`"})
+        user_id = parse_uuid([request.data['user_id']])
+        if len(user_id) != 1:
+            return Response({"message": "Wrong User Id", "error_code": 21}, status=status.HTTP_400_BAD_REQUEST)
+        auth_user : UserSerializer = request.user
+        auth_user.block_user(user_id[0])
         pass
-    
+
+    @action(methods=['patch'], detail=False)
+    def unblock_user(self, request):
+        pass
+
     @action(methods=['delete'], detail=False)
     def remove_friend(self, request):
         pass

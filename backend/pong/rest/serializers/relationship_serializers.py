@@ -62,7 +62,12 @@ class RelationshipSerializer(serializers.Serializer):
             raise RelationshipException("Relationship is not an invitation", 16, status.HTTP_401_UNAUTHORIZED)
         invtation_db: Relationship =  self.instance
         return invtation_db.delete()
-        
+    
+    def cancel_invitation(self):
+        if self.data['type'] != RELATIONSHIP_STATUS[0][0]:
+            raise RelationshipException("Relationship is not an invitation", 20, status.HTTP_401_UNAUTHORIZED)
+        invitation_db: Relationship = self.instance
+        return invitation_db.delete()
 
     @staticmethod
     def get_relation_by_id(id):

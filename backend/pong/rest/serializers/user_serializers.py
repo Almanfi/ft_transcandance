@@ -97,3 +97,8 @@ class UserSerializer(serializers.Serializer):
         if self.data["id"] != invitation.data["to_user"]:
             raise UserExceptions("User Not Allowed To Refuse Invitation", 15, status.HTTP_401_UNAUTHORIZED)
         return invitation.refuse_friendship()
+    
+    def cancel_invitation(self, invitation:RelationshipSerializer):
+        if self.data["id"] != invitation.data["from_user"]:
+            raise UserExceptions("User Not Allowed To Cancel Invitation", 19, status.HTTP_401_UNAUTHORIZED)
+        return invitation.cancel_invitation()
