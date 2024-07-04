@@ -112,5 +112,10 @@ class UserSerializer(serializers.Serializer):
     
     def unblock_user(self, block:RelationshipSerializer):
         if self.data["id"] != block.data["from_user"]:
-            raise UserExceptions("User Not Allowed To Unblock Invitation", 27, status.HTTP_400_BAD_REQUEST)
+            raise UserExceptions("User Not Allowed To Unblock Invitation", 27, status.HTTP_401_UNAUTHORIZED)
         return block.unblock()
+    
+    def unfriend_user(self, friendship:RelationshipSerializer):
+        if self.data['id'] not in [friendship.data['from_user'], friendship.data['to_user']]:
+            raise UserExceptions("User Not Allowed To Unfriend", 32, status.HTTP_401_UNAUTHORIZED)
+        return friendship.unfriend()

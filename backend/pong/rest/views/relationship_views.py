@@ -86,5 +86,13 @@ class RelationshipView(ViewSet):
 
     @action(methods=['delete'], detail=False)
     def remove_friend(self, request):
-        pass
+        if not "friendship_id" in request.data or not isinstance(request.data['friendship_id'], str):
+            return Response({"message": "The Data Should be an Object with a field `friendship_id`: `uuid-of-friendship_relation`", "error_code":30}, status=status.HTTP_400_BAD_REQUEST)
+        friendship_id = parse_uuid([request.data["friendship_id"]])
+        if len(friendship_id) != 1:
+            return Response({"message": "Wrong Friendship Id", "error_code": 31}, status=status.HTTP_400_BAD_REQUEST)
+        friendship = RelationshipSerializer.get_relation_by_id(friendship_id[0])
+        auth_user:UserSerializer = request.user
+        auth_user.unfriend_user(friendship)
+        return Response(status=status.HTTP_200_OK)
 

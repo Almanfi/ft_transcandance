@@ -69,6 +69,23 @@ class RelationshipSerializer(serializers.Serializer):
         invitation_db: Relationship = self.instance
         return invitation_db.delete()
     
+    def unblock(self):
+        if self.data['type'] != RELATIONSHIP_STATUS[2][0]:
+            raise RelationshipException("Relationship is not a block", 28, status.HTTP_401_UNAUTHORIZED)
+        if not self.data['accepted'] == False:
+            self.instance.delete()
+            return
+        update_data = {"blocked": False, "updated_at": timezone.now()}
+        updated_block = RelationshipSerializer(self.instance, data = update_data)
+        if not updated_block.is_valid():
+            raise RelationshipException("Couldn't unblock user", 29,status.HTTP_500_INTERNAL_SERVER_ERROR)
+        updated_block.save()
+        return
+    
+    def unfriend(self):
+        if self.data['type'] != RELATIONSHIP_STATUS[1][0]:
+            raise RelationshipException("Relationship is not a friendship", 32, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return self.instance.delete()
 
     @staticmethod
     def get_relation_by_id(id):
@@ -94,7 +111,6 @@ class RelationshipSerializer(serializers.Serializer):
             elif relation.data['type'] == RELATIONSHIP_STATUS[2][0]:
                 if relation.data['from_user'] == user.data['id']:
                     filtered_relations["blocks"].append(relation.data)
-            continue
         return filtered_relations
 
     @staticmethod
