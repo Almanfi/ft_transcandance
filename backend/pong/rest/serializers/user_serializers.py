@@ -102,3 +102,15 @@ class UserSerializer(serializers.Serializer):
         if self.data["id"] != invitation.data["from_user"]:
             raise UserExceptions("User Not Allowed To Cancel Invitation", 19, status.HTTP_401_UNAUTHORIZED)
         return invitation.cancel_invitation()
+    
+    def block_user(self, blocked_user):
+        db_user = User.fetch_users_by_id(blocked_user)
+        if len(db_user) != 1:
+            raise UserExceptions("No User With Such Id", 22, status.HTTP_404_NOT_FOUND)
+        blocked_user = UserSerializer(db_user[0])
+        return RelationshipSerializer.block_user(self, blocked_user)
+    
+    def unblock_user(self, block:RelationshipSerializer):
+        if self.data["id"] != block.data["from_user"]:
+            raise UserExceptions("User Not Allowed To Unblock Invitation", 27, status.HTTP_400_BAD_REQUEST)
+        return block.unblock()

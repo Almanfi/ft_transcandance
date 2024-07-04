@@ -35,6 +35,13 @@ class Relationship(models.Model):
             models.Q(from_user=inviter.data['id'], to_user=invited.data['id']) | 
             models.Q(from_user=invited.data['id'], to_user=inviter.data['id'])
         ).exists()
+    
+    @staticmethod
+    def get_relationship_between(user_1, user_2) :
+        return list(Relationship.objects.filter(
+            models.Q(from_user=user_1.data['id'], to_user=user_2.data['id']) |
+            models.Q(from_user=user_2.data['id'], to_user=user_1.data['id'])
+        ))
 
     @staticmethod
     def find_relationships(user):

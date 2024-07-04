@@ -68,6 +68,7 @@ class RelationshipSerializer(serializers.Serializer):
             raise RelationshipException("Relationship is not an invitation", 20, status.HTTP_401_UNAUTHORIZED)
         invitation_db: Relationship = self.instance
         return invitation_db.delete()
+    
 
     @staticmethod
     def get_relation_by_id(id):
@@ -115,3 +116,27 @@ class RelationshipSerializer(serializers.Serializer):
             return {**new_friendship.data, "from_user" : inviter.data['id'], "to_user": invited.data['id'] }
         else:
             raise RelationshipException("Couldn't create a new Friendship", status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @staticmethod
+    def block_user(blocker, blocked):
+        block_data = {
+            "accepted" : False,
+            "blocked" : True,
+            "type" : RELATIONSHIP_STATUS[2][0],
+            "from_user": blocker.data['id'],
+            "to_user": blocker.data['id']
+        }
+        if Relationship.relationship_exists(blocker, blocked):
+            rel = Relationship.get_relationship_between(blocker, blocked)[0]
+            rel = RelationshipSerializer(rel)
+            if rel.data['type'] == RELATIONSHIP_STATUS[1][0]:
+                block_data["accepted"] = True
+            rel.instance.delete()
+        new_block = RelationshipSerializer(data= block_data)
+        if new_block.is_valid():
+            new_block.validated_data['from_user'] = blocker.instance
+            new_block.validated_data['to_user'] = blocked.instance
+            new_block.save()
+            return {**new_block.data, "from_user": blocker.data['id'], "to_user": blocked.data['id']}
+        else:
+            raise RelationshipException("Couldn't Block the user", 23, status.HTTP_500_INTERNAL_SERVER_ERROR)
