@@ -23,14 +23,19 @@ urlpatterns= [
         name = "invite_refuse"
     ),
     path('invite/cancel/', RelationshipView.as_view({
-        "delete": "cancel_friendship"
+        "delete": "cancel_invitation"
         }),
-        name = "invite_remove"
+        name = "invite_cancel"
     ),
     path('block/', RelationshipView.as_view({
-        'patch' : 'block_user'
+        'post' : 'block_user'
         }),
         name='block_handle'
+    ),
+    path('unblock/', RelationshipView.as_view({
+        'patch' : 'unblock_user'
+        }),
+        name= 'unblock_handle'
     ),
     path('unfriend/', RelationshipView.as_view({
         'delete': 'remove_friend'

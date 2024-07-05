@@ -12,7 +12,11 @@ class RelationshipView(ViewSet):
 
     @action(methods=['get'], detail=False)
     def get_relations(self, request):
-        pass
+        auth_user:UserSerializer = request.user
+        relations = auth_user.get_relations()
+        print(f"the relations are {relations}")
+
+        return Response(relations, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False)
     def invite_friend(self, request):
@@ -58,15 +62,15 @@ class RelationshipView(ViewSet):
             return Response({"message" : "Wrong Invitation Id", "error_code": 18}, status=status.HTTP_400_BAD_REQUEST)
         invitation = RelationshipSerializer.get_relation_by_id(invitation_id[0])
         auth_user: UserSerializer = request.user
-        auth_user.cancel_friendship(invitation)
+        auth_user.cancel_invitation(invitation)
         return Response({"message": "Invitation Canceled"}, status=status.HTTP_200_OK)
 
-    @action(methods=['patch'], detail=False)
+    @action(methods=['post'], detail=False)
     def block_user(self, request):
         if not "user_id" in request.data or not isinstance(request.data['user_id'], str):
             return Response({"message": "The Data Should be an Object with a field `user_id`: `uuid-of-invitation`", "error_code": 24}, status=status.HTTP_400_BAD_REQUEST)
         user_id = parse_uuid([request.data['user_id']])
-        if len(user_id) != 1:
+        if len(user_id) != 1 or request.data['user_id'] == request.user.data['id']:
             return Response({"message": "Wrong User Id", "error_code": 21}, status=status.HTTP_400_BAD_REQUEST)
         auth_user : UserSerializer = request.user
         block_data = auth_user.block_user(user_id[0])
@@ -82,7 +86,7 @@ class RelationshipView(ViewSet):
         block = RelationshipSerializer.get_relation_by_id(block_id[0])
         auth_user:UserSerializer = request.user
         auth_user.unblock_user(block)
-        return Response(status=status.HTTP_200_OK)
+        return Response({"message": "user unblocked"}, status=status.HTTP_200_OK)
 
     @action(methods=['delete'], detail=False)
     def remove_friend(self, request):
@@ -94,5 +98,5 @@ class RelationshipView(ViewSet):
         friendship = RelationshipSerializer.get_relation_by_id(friendship_id[0])
         auth_user:UserSerializer = request.user
         auth_user.unfriend_user(friendship)
-        return Response(status=status.HTTP_200_OK)
+        return Response({"message": "friendship removed"} ,status=status.HTTP_200_OK)
 

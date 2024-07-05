@@ -72,15 +72,16 @@ class RelationshipSerializer(serializers.Serializer):
     def unblock(self):
         if self.data['type'] != RELATIONSHIP_STATUS[2][0]:
             raise RelationshipException("Relationship is not a block", 28, status.HTTP_401_UNAUTHORIZED)
-        if not self.data['accepted'] == False:
-            self.instance.delete()
-            return
-        update_data = {"blocked": False, "updated_at": timezone.now()}
-        updated_block = RelationshipSerializer(self.instance, data = update_data)
+        block_db: Relationship = self.instance
+        if self.data['accepted'] == False:
+            block_db.delete()
+            return None
+        update_data = {"blocked": False, "type": RELATIONSHIP_STATUS[1][0], "updated_at": timezone.now()}
+        updated_block = RelationshipSerializer(block_db, data = update_data)
         if not updated_block.is_valid():
             raise RelationshipException("Couldn't unblock user", 29,status.HTTP_500_INTERNAL_SERVER_ERROR)
         updated_block.save()
-        return
+        return None
     
     def unfriend(self):
         if self.data['type'] != RELATIONSHIP_STATUS[1][0]:
@@ -91,26 +92,26 @@ class RelationshipSerializer(serializers.Serializer):
     def get_relation_by_id(id):
         rel = Relationship.find_relationship_by_id(id)
         if len(rel) != 1:
-            RelationshipException("No Relationship with the given id", 6, status.HTTP_404_NOT_FOUND)
+            raise RelationshipException("No Relationship with the given id", 6, status.HTTP_404_NOT_FOUND)
         rel = RelationshipSerializer(rel[0])
         return rel
 
     @staticmethod
     def get_user_relations(user):
         all_relations = Relationship.find_relationships(user)
-        all_relations: List[RelationshipSerializer] = RelationshipSerializer(all_relations, many = True)
+        all_relations: List = RelationshipSerializer(all_relations, many = True).data[:]
         filtered_relations = {"invites":[], "invited":[] , "friends":[], "blocks":[]}
         for relation in all_relations:
-            if relation.data['type'] == RELATIONSHIP_STATUS[0][0]:
-                if relation.data['from_user'] == user.data['id']:
-                    filtered_relations['invites'].append(relation.data)
-                elif relation.data['to_user'] == user.data['id']:
-                    filtered_relations['invited'].append(relation.data)
-            elif relation.data['type'] == RELATIONSHIP_STATUS[1][0]:
-                filtered_relations["friends"].append(relation.data)
-            elif relation.data['type'] == RELATIONSHIP_STATUS[2][0]:
-                if relation.data['from_user'] == user.data['id']:
-                    filtered_relations["blocks"].append(relation.data)
+            if relation['type'] == RELATIONSHIP_STATUS[0][0]:
+                if relation['from_user'] == user.data['id']:
+                    filtered_relations['invites'].append(relation)
+                elif relation['to_user'] == user.data['id']:
+                    filtered_relations['invited'].append(relation)
+            elif relation['type'] == RELATIONSHIP_STATUS[1][0]:
+                filtered_relations["friends"].append(relation)
+            elif relation['type'] == RELATIONSHIP_STATUS[2][0]:
+                if relation['from_user'] == user.data['id']:
+                    filtered_relations["blocks"].append(relation)
         return filtered_relations
 
     @staticmethod
