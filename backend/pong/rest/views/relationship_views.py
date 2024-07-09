@@ -14,8 +14,6 @@ class RelationshipView(ViewSet):
     def get_relations(self, request):
         auth_user:UserSerializer = request.user
         relations = auth_user.get_relations()
-        print(f"the relations are {relations}")
-
         return Response(relations, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False)
