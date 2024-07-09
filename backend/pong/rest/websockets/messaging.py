@@ -1,7 +1,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 
-
 class MessagingSocket(WebsocketConsumer):
     def connect(self):
         return super().connect()

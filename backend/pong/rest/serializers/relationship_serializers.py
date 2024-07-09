@@ -85,7 +85,7 @@ class RelationshipSerializer(serializers.Serializer):
     
     def unfriend(self):
         if self.data['type'] != RELATIONSHIP_STATUS[1][0]:
-            raise RelationshipException("Relationship is not a friendship", 32, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise RelationshipException("Relationship is not a friendship", 33, status.HTTP_500_INTERNAL_SERVER_ERROR)
         return self.instance.delete()
 
     @staticmethod
