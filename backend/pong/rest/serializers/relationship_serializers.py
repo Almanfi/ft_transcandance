@@ -29,6 +29,7 @@ class RelationshipSerializer(serializers.Serializer):
     to_user = serializers.UUIDField(required=False)
     created_at = serializers.DateTimeField(read_only = True)
     updated_at = serializers.DateTimeField(required=False)
+    messages = serializers.UUIDField(required=False)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

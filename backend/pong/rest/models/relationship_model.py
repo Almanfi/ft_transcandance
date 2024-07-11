@@ -16,7 +16,6 @@ class Relationship(models.Model):
     to_user = models.ForeignKey('User', related_name="invited", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
-    messages = models.ForeignKey("MessageGroup", on_delete=models.DO_NOTHING)
 
     class Meta:
         indexes = [
