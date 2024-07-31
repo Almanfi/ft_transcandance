@@ -1,7 +1,11 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
-from ..models.message_model import MessageGroup, Message
+from ..models.message_model import Message
 
+MESSAGE_STATUS=[
+    ("sent", "Sent"),
+    ("read", "Read")
+]
 
 class MessagingException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
@@ -18,33 +22,13 @@ class MessagingException(APIException):
         if code != None:
             self.status_code = code
 
-class MessageGroup(serializers.Serializer):
-    id = serializers.UUIDField(read_only=True)
-    name = serializers.CharField(required=False, min_length=1)
 
-    def create(self, validated_data):
-        return MessageGroup.objects.create(**validated_data)
-    
-    def update(self, instance, validated_data):
-        instance.name = validated_data.get("name", instance.name)
-        instance.save()
-        return instance
-    
-    @staticmethod
-    def create_message_group(group_name):
-        msg_grp_data = {"name": group_name}
-        new_msg_grp = MessageGroup(data= msg_grp_data)
-        if new_msg_grp.is_valid():
-            new_msg_grp.save()
-            return new_msg_grp
-        else:
-            raise MessagingException("Couldn't create a New Messaging Group", 34, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class Message(serializers.Serializer):
+class MessageSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
     content = serializers.CharField(trim_whitespace=True, allow_blank=False)
     timestamp = serializers.DateTimeField(required=False)
     read = serializers.BooleanField(required=False)
+    relationship = serializers.UUIDField(required=False)
     group = serializers.UUIDField(required=False)
 
     def create(self, validated_data):

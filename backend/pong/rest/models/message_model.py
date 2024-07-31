@@ -11,7 +11,7 @@ class Message(models.Model):
     content = models.CharField(blank=False, null=False)
     timestamp = models.DateTimeField(auto_now_add=True, editable=False)
     read = models.BooleanField(default=False)
-    relationship = models.ForeignKey('MessageGroup',on_delete=models.CASCADE, null=True)
+    relationship = models.ForeignKey('Relationship',on_delete=models.CASCADE, null=True)
     type = models.CharField(choices=MESSAGE_TYPE)
 
     @staticmethod
