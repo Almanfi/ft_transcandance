@@ -1,6 +1,6 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
-from ..models.message_model import Message
+from ..models.message_model import Message, MESSAGE_TYPE
 
 MESSAGE_STATUS=[
     ("sent", "Sent"),
@@ -25,11 +25,22 @@ class MessagingException(APIException):
 
 class MessageSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
+    sender = serializers.UUIDField(required=False)
     content = serializers.CharField(trim_whitespace=True, allow_blank=False)
     timestamp = serializers.DateTimeField(required=False)
     read = serializers.BooleanField(required=False)
     relationship = serializers.UUIDField(required=False)
-    group = serializers.UUIDField(required=False)
+    type = serializers.ChoiceField(choices=MESSAGE_TYPE)
+    game = serializers.UUIDField(required=False)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['sender'] = str(instance.sender.id)
+        if instance.relationship:
+            representation['relationship'] = str(instance.relationship.id)
+        if instance.game:
+            representation['game'] = str(instance.game.id)
+
 
     def create(self, validated_data):
         return Message.objects.create(**validated_data)
@@ -38,3 +49,14 @@ class MessageSerializer(serializers.Serializer):
         instance.read = validated_data.get("read", instance.read)
         instance.save()
         return instance
+    
+    @staticmethod
+    def retrieve_messages(self, relationship=None, game=None):
+        conversation = None
+        if relationship != None:
+            conversation = Message.retrieve_messages(relation=relationship)
+        elif game != None:
+            conversation = Message.retrieve_messages(game=game)
+        if conversation != None:
+            conversation = MessageSerializer(conversation, many=True).data
+        return conversation

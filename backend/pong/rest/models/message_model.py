@@ -8,6 +8,7 @@ MESSAGE_TYPE = {
 
 class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sender = models.ForeignKey('User', on_delete=models.CASCADE)
     content = models.CharField(blank=False, null=False)
     timestamp = models.DateTimeField(auto_now_add=True, editable=False)
     read = models.BooleanField(default=False)
@@ -15,8 +16,15 @@ class Message(models.Model):
     type = models.CharField(choices=MESSAGE_TYPE)
 
     @staticmethod
-    def create_new_message(content, relation=None, game=None):
+    def create_new_message(sender, content, relation=None, game=None):
         if relation != None:
-            return Message.objects.create(content=content, read=False, relationship=relation)
+            return Message.objects.create(sender=sender, content=content, read=False, relationship=relation)
         elif game != None:
-            return Message.objects.create(content=content, read=True, game=game)
+            return Message.objects.create(sender=sender, content=content, read=True, game=game)
+        
+    @staticmethod
+    def retrieve_messages(relation=None, game=None):
+        if relation != None:
+            return list(Message.objects.filter(relationship=relation))
+        elif game != None:
+            return list(Message.objects.filter(game=game))

@@ -1,3 +1,6 @@
-Handle Duplication and uniquness of keys
-use the relationship serializer to implement invites
-21
+Private Key in Config File
+Friendship Invite/Cancel Push Notification
+Game Invite/Cancel Push Notification
+Redis Container for Channels
+
+38
