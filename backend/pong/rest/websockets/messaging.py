@@ -3,7 +3,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from ..helpers import parse_uuid
 from ..serializers.user_serializers import UserSerializer
-from ..serializers.message_serializers import MESSAGE_STATUS
+from ..serializers.message_serializers import MessageSerializer, MESSAGE_STATUS
 from ..models.message_model import Message
 from ..models.relationship_model import Relationship, RELATIONSHIP_STATUS
 from ..models.user_model import User
@@ -30,7 +30,7 @@ class MessagingSocket(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(friend.data['username'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
         return {"status": MESSAGE_STATUS[0][0], "message": new_message.content}
 
-    def retrieve_message(self, data):
+    def retrieve_messages(self, data):
         source = User.fetch_users_by_id(data['source_id'])
         if len(source) != 1:
             return {"error_code": 40, "message": "No User With Such Id"}
@@ -38,8 +38,9 @@ class MessagingSocket(WebsocketConsumer):
         relationship = Relationship.get_relationship_between(self.scope['user'], source)
         if len(relationship) != 1 :
             return {"error_code": 41, "message": "No Relationship with the given user"}
-        messages = Message.retrieve_messages(relationship)
-        return messages
+        messages = Message.retrieve_messages(relation=relationship[0])
+        messages = MessageSerializer(messages, many=True)
+        return messages.data
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
@@ -50,7 +51,7 @@ class MessagingSocket(WebsocketConsumer):
             payload_json['friend_id'] = destination_uuid
             message_status = self.handle_friendship_message(payload_json)
             return self.send(text_data=json.dumps(message_status))
-        if payload_json['type'] ==  "chat.message.retrieve":
+        elif payload_json['type'] ==  "chat.message.retrieve":
             source_uuid = parse_uuid([payload_json['from_id']])
             if len(source_uuid) != 1:
                 return self.send(text_data=json.dumps({"error_code":39, "message":"Wrong Source UUID"}))

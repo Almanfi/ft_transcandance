@@ -1,10 +1,10 @@
 from django.db import models
 import uuid
 
-MESSAGE_TYPE = {
+MESSAGE_TYPE = [
     ("relationship", "Relationship"),
     ("game", "Game"),
-}
+]
 
 class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -18,9 +18,9 @@ class Message(models.Model):
     @staticmethod
     def create_new_message(sender, content, relation=None, game=None):
         if relation != None:
-            return Message.objects.create(sender=sender, content=content, read=False, relationship=relation)
+            return Message.objects.create(sender=sender, content=content, read=False, relationship=relation, type=MESSAGE_TYPE[0][0])
         elif game != None:
-            return Message.objects.create(sender=sender, content=content, read=True, game=game)
+            return Message.objects.create(sender=sender, content=content, read=True, game=game, type=MESSAGE_TYPE[1][0])
         
     @staticmethod
     def retrieve_messages(relation=None, game=None):

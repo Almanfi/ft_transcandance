@@ -36,11 +36,11 @@ class MessageSerializer(serializers.Serializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['sender'] = str(instance.sender.id)
-        if instance.relationship:
+        if hasattr(instance, 'relationship'):
             representation['relationship'] = str(instance.relationship.id)
-        if instance.game:
+        if hasattr(instance, 'game'):
             representation['game'] = str(instance.game.id)
-
+        return representation
 
     def create(self, validated_data):
         return Message.objects.create(**validated_data)
