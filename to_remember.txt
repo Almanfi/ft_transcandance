@@ -3,4 +3,15 @@ Friendship Invite/Cancel Push Notification
 Game Invite/Cancel Push Notification
 Redis Container for Channels
 
+// User Changes
+    Connection Activity (Online, Offline)
+
+// Game api
+    Game Lobby Creation 
+    Game Lobby Invite
+    Game Lobby Team Movement
+    Game Lobby Quit
+    Game Start
+    Game Cancel
+
 38
