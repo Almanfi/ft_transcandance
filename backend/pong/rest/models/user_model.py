@@ -20,6 +20,7 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     profile_picture = models.FilePathField(path=users_images_path, recursive=True, default='profile.jpg')
     relationship = models.ManyToManyField('self', through='Relationship', symmetrical = True)
+    status = models.BooleanField(default=False)
 
     @staticmethod
     def fetch_users_by_id(ids):

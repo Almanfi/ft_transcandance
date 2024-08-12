@@ -5,7 +5,7 @@ from ..models.game_model import WINNER_CHOICES , Game
 
 class GameException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
-    default_detail = "Bad RelationShip Request"
+    default_detail = "Bad Game Request"
     default_code = "bad_request"
 
     def __init__(self, detail=None, error_code=None ,code=None):
@@ -20,6 +20,7 @@ class GameException(APIException):
 
 class GameSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
+    owner = UserSerializer(required=False)
     team_a = UserSerializer(many = True, required=False)
     team_b = UserSerializer(many = True, required=False)
     team_a_score = serializers.IntegerField(required=False)
@@ -41,3 +42,9 @@ class GameSerializer(serializers.Serializer):
         instance.game_ended = validated_data.get("game_ended", instance.game_ended)
         instance.save()
         return instance
+    
+    @staticmethod
+    def create_new_game(user:UserSerializer):
+        new_game =  Game.new_game(user.instance)
+        new_game = GameSerializer(new_game)
+        return new_game

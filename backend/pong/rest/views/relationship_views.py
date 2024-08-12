@@ -2,8 +2,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
-from ..helpers import CookieAuth
-from ..helpers import parse_uuid
+from ..helpers import CookieAuth, parse_uuid
 from ..serializers.relationship_serializers import RelationshipSerializer
 from ..serializers.user_serializers import UserSerializer
 
