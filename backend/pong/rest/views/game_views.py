@@ -28,7 +28,14 @@ class GameView(ViewSet):
         return Response(game_invitation.data, status=status.HTTP_200_OK)
     
     def cancel_invite(self, request):
-        pass
+        auth_user: UserSerializer = self.user
+        if not "invite_id" in request.data:
+            return Response({"message": "The data should contain 'invite_id' ", "error_code": 56})
+        invite_id = parse_uuid([request.data['invite_id']])
+        if len(invite_id) != 1:
+            return Response({"message": "Wrong invite_id", "error_code": 57})
+        canceled_invite = InviteSerializer.cancel_game_invite(auth_user, invite_id)
+        return Response({"message": "Canceled successfully"}, status=status.HTTP_200_OK)
 
     def accept_invite(self, request):
         auth_user: UserSerializer = self.user

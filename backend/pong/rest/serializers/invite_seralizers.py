@@ -43,6 +43,7 @@ class InviteSerializer(serializers.Serializer):
 
     @staticmethod
     def invite_in_game(inviter:UserSerializer, invited_id, game_id):
+        ## add check for users not being able to invite to a game more than once
         invited = User.fetch_users_by_id(invited_id)
         if len(invited) != 1:
             raise InviteException("No Valid user to invite wrong uuid", 43, status.HTTP_404_NOT_FOUND)
@@ -52,6 +53,16 @@ class InviteSerializer(serializers.Serializer):
         new_invite = Invite.create_new_game_invite(inviter.instance, invited[0], game[0])
         return InviteSerializer(new_invite)
     
+    @staticmethod
+    def cancel_game_invite(inviter:UserSerializer, invite_id):
+        db_invite = Invite.fetch_invites_by_id(invite_id)
+        if len(db_invite) != 1:
+            raise InviteException("No such game invite found", 58, status.HTTP_404_NOT_FOUND)
+        invite = InviteSerializer(db_invite)
+        if invite.data['invited'] != inviter.data['id'] or invite.data['accepted'] == True or invite.data['type'] != INVITE_TYPE[0][0]:
+            raise InviteException("Not a valid invite to cancel", 59, status.HTTP_401_UNAUTHORIZED)
+        return db_invite.delete()
+
     @staticmethod
     def accept_game_invite(invited: UserSerializer, invite_id):
         db_invite = Invite.fetch_invites_by_id(invite_id)
