@@ -18,3 +18,9 @@ class Invite(models.Model):
     @staticmethod
     def create_new_game_invite(inviter, invited, game):
         new_invitation = Invite.objects.create(type=INVITE_TYPE[0][0], game = game, inviter=inviter, invited=invited)
+        return new_invitation
+
+    @staticmethod
+    def fetch_invites_by_id(invites):
+        invites = Invite.objects.filter(pk__in=invites)
+        return list(invites)

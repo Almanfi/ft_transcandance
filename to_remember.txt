@@ -7,8 +7,9 @@ Redis Container for Channels
     Connection Activity (Online, Offline)
 
 // Game api
+    Game Lobby Socket for updates and messaging (To connect to the game lobby)
     Game Lobby Creation 
-    Game Lobby Invite
+    Game Lobby Invite (Notify invite)
     Game Lobby Team Movement
     Game Lobby Quit
     Game Start
