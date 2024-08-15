@@ -6,31 +6,35 @@ urlpatterns = [
         'post': "create_game"
         })
     ),
-    path('/invite', GameView.as_view({
+    path('invite/', GameView.as_view({
         'post': "invite_player"
         })
     ),
-    path('/invite/accept', GameView.as_view({
-        'put': "accept_invite"
+    path('invite/cancel/', GameView.as_view({
+        'delete': "cancel_invite"
         })
     ),
-    path('/invite/refuse', GameView.as_view({
-        'put': "refuse_invite"
+    path('invite/accept/', GameView.as_view({
+        'patch': "accept_invite"
         })
     ),
-    path('/move', GameView.as_view({
-        'put': "move_team"
+    path('invite/refuse/', GameView.as_view({
+        'patch': "refuse_invite"
         })
     ),
-    path('/quit', GameView.as_view({
-        'put': "quit_game"
+    path('move/', GameView.as_view({
+        'patch': "move_team"
         })
     ),
-    path('/start', GameView.as_view({
-        'put': "start_game"
+    path('quit/', GameView.as_view({
+        'patch': "quit_game"
         })
     ),
-    path('/cancel', GameView.as_view({
+    path('start/', GameView.as_view({
+        'patch': "start_game"
+        })
+    ),
+    path('cancel/', GameView.as_view({
         'delete': "cancel_game"
         })
     )

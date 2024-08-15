@@ -15,6 +15,16 @@ class Invite(models.Model):
     invited = models.ForeignKey('User',related_name="game_invited",on_delete=models.CASCADE)
     accepted = models.BooleanField(default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["invited"], name="invited_idx"),
+            models.Index(fields=["game"], name="game_idx")
+        ]
+
+    @staticmethod
+    def player_is_invited(game, invited):
+        return Invite.objects.filter(game=game, invited=invited).exists()
+
     @staticmethod
     def create_new_game_invite(inviter, invited, game):
         new_invitation = Invite.objects.create(type=INVITE_TYPE[0][0], game = game, inviter=inviter, invited=invited)
