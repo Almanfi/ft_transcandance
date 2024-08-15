@@ -20,14 +20,26 @@ class GameException(APIException):
 
 class GameSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
-    owner = UserSerializer(required=False)
-    team_a = UserSerializer(many = True, required=False)
-    team_b = UserSerializer(many = True, required=False)
+    owner = UserSerializer(required=False, context={"exclude": ['password', 'salt']})
+    team_a = UserSerializer(many = True, required=False, context={"exclude": ['password', 'salt']})
+    team_b = UserSerializer(many = True, required=False, context={"exclude": ['password', 'salt']})
     team_a_score = serializers.IntegerField(required=False)
     team_b_score = serializers.IntegerField(required=False)
     winner = serializers.ChoiceField(choices=WINNER_CHOICES, required=False)
     game_started = serializers.BooleanField(required=False)
     game_ended = serializers.BooleanField(required=False)
+
+    def to_representation(self, instance):
+        og_repr = super().to_representation(instance)
+        del og_repr['owner']['password']
+        del og_repr['owner']['salt']
+        for player_a in og_repr['team_a']:
+            del player_a['password']
+            del player_a['salt']
+        for player_b in og_repr['team_b']:
+            del player_b['password']
+            del player_b['salt']
+        return og_repr
 
     def create(self, validated_data):
         return Game.objects.create(**validated_data)

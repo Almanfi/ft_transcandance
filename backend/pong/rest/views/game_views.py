@@ -12,12 +12,12 @@ class GameView(ViewSet):
 
     @action(methods=['post'], detail=False)
     def create_game(self, request):
-        auth_user: UserSerializer = self.user
+        auth_user: UserSerializer = request.user
         created_game = GameSerializer.create_new_game(auth_user)
         return Response(created_game.data, status=status.HTTP_200_OK)
 
     def invite_player(self, request):
-        auth_user:UserSerializer = self.user
+        auth_user:UserSerializer = request.user
         if not "invited_id" in request.data or not "game_id" in request.data or request.data['invited_id'] == auth_user.data['id']:
             return Response({"message": "The data should contain 'invited_id' and 'game_id' , or the inviter is the same as the invited", "error_code" :45}, status=status.HTTP_400_BAD_REQUEST)
         invited_id = parse_uuid([request.data['invited_id']])
@@ -28,7 +28,7 @@ class GameView(ViewSet):
         return Response(game_invitation.data, status=status.HTTP_200_OK)
     
     def cancel_invite(self, request):
-        auth_user: UserSerializer = self.user
+        auth_user: UserSerializer = request.user
         if not "invite_id" in request.data:
             return Response({"message": "The data should contain 'invite_id' ", "error_code": 56})
         invite_id = parse_uuid([request.data['invite_id']])
@@ -38,7 +38,7 @@ class GameView(ViewSet):
         return Response({"message": "Canceled successfully"}, status=status.HTTP_200_OK)
 
     def accept_invite(self, request):
-        auth_user: UserSerializer = self.user
+        auth_user: UserSerializer = request.user
         if not "invite_id" in request.data:
             return Response({"message": "The data should contain 'invite_id' ", "error_code": 47})
         invite_id = parse_uuid([request.data['invite_id']])
@@ -48,10 +48,10 @@ class GameView(ViewSet):
         return Response(accepted_invite.data, status=status.HTTP_200_OK)
         
     def refuse_invite(self, request):
-        auth_user:UserSerializer = self.user
+        auth_user:UserSerializer = request.user
         if not "invite_id" in request.data:
             return Response({"message": "The data should contain 'invite_id'"})
-        invite_id = parse_uuid([request.data['invite_id']])
+        invite_id = parse_uuid([request.data['invite_id']]) 
         if len(invite_id) != 1:
             return Response({"message": "Wrong invite_id", "error_code": 52})
         refused_invite = InviteSerializer.refuse_game_invite(auth_user, invite_id)

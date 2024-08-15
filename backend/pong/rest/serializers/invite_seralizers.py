@@ -24,8 +24,8 @@ class InviteSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=INVITE_TYPE, required=False)
     game = GameSerializer(required=False)
     seen = serializers.BooleanField(required=False)
-    inviter = UserSerializer(required=False)
-    invited = UserSerializer(required=False)
+    inviter = UserSerializer(required=False, context={"exclude": ['password', 'salt']})
+    invited = UserSerializer(required=False, context={"exclude": ['password', 'salt']})
     accepted = serializers.BooleanField(required=False)
 
     def create(self, validated_data):

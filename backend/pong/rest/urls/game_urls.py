@@ -1,8 +1,8 @@
 from django.urls import path
 from ..views.game_views import GameView
 
-url_patterns = [
-    path('/', GameView.as_view({
+urlpatterns = [
+    path('', GameView.as_view({
         'post': "create_game"
         })
     ),
