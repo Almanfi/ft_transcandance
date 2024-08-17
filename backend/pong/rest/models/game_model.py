@@ -1,5 +1,6 @@
 from django.db import models
 from typing import List
+from django.db import transaction
 import uuid
 
 
@@ -20,6 +21,24 @@ class Game(models.Model):
     winner = models.CharField(choices=WINNER_CHOICES, default= WINNER_CHOICES[0][0])
     game_started = models.BooleanField(default=False)
     game_ended = models.BooleanField(default=False)
+
+    def add_player_to_team(self, user, dist_team):
+        if dist_team == 'A':
+            self.team_a.add(user)
+        elif dist_team == 'B':
+            self.team_b.add(user)
+        self.save()
+        return self
+
+    def move_player_team(self, user, curr_team):
+        with transaction.atomic():
+            if curr_team == 'A':
+                self.team_a.remove(user)
+                self.team_b.add(user)
+            elif curr_team == 'B':
+                self.team_b.remove(user)
+                self.team_a.add(user)
+        return self
 
     @staticmethod
     def new_game(user):

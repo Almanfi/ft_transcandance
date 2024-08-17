@@ -100,5 +100,17 @@ class InviteSerializer(serializers.Serializer):
         refused_invite.save()
         return refused_invite
 
-
+    @staticmethod
+    def connect_to_game(game_id, invited:UserSerializer):
+        game = Game.fetch_games_by_id(game_id)
+        if len(game_id) != 1:
+            raise InviteException("No such game_id is found", 71, status.HTTP_404_NOT_FOUND)
+        invite = Invite.fetch_user_game_invite(game[0], invited.instance)
+        if len(invite) != 1:
+            raise InviteException("The user isn't invited to the game", 72, status.HTTP_401_UNAUTHORIZED)
+        invite = InviteSerializer(invite[0])
+        if invite.data['accepted'] != True:
+            raise InviteException("The user didn't accept the game invite", 73, status.HTTP_401_UNAUTHORIZED)
+        game = GameSerializer(game[0])
+        return game.connect_player(invited)
     

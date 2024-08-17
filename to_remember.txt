@@ -10,6 +10,7 @@ Redis Container for Channels
     Game Lobby Socket for updates and messaging (To connect to the game lobby)
     Game Lobby Creation 
     Game Lobby Invite (Notify invite)
+// in game Socket
     Game Lobby Team Movement
     Game Lobby Quit
     Game Start

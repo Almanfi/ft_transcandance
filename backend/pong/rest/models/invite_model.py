@@ -34,3 +34,8 @@ class Invite(models.Model):
     def fetch_invites_by_id(invites):
         invites = Invite.objects.filter(pk__in=invites)
         return list(invites)
+    
+    @staticmethod
+    def fetch_user_game_invite(game, user):
+        invite = Invite.objects.filter(game=game, invited=user)
+        return list(invite)

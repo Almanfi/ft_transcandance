@@ -55,6 +55,45 @@ class GameSerializer(serializers.Serializer):
         instance.save()
         return instance
     
+    def connect_player(self, user:UserSerializer):
+        team_a_len = len(self.data['team_a'])
+        team_b_len = len(self.data['team_b'])
+        if self.data['game_started'] == True or team_a_len + team_b_len >= 4:
+            raise GameException("Can't join game already full or started", 74, status.HTTP_403_FORBIDDEN)
+        game: Game = self.instance
+        if team_a_len >= team_b_len:
+           game = game.add_player(user, 'A')
+        else:
+           game = game.add_player(user, 'B')
+        return GameSerializer(game)
+
+    def disconect_player(self, user:UserSerializer):
+        pass
+
+    def find_player_in_game(self, user:UserSerializer):
+        is_a_player = (False, 'None')
+        for player_a in self.team_a:
+            if user.data['id'] == player_a['id']:
+                is_a_player[0] = True
+                is_a_player[1] = 'A'
+                break
+        for player_b in self.team_b:
+            if is_a_player[0]:
+                break
+            if user.data['id'] == player_b:
+                is_a_player[0] = True
+                is_a_player[1] = 'B'
+                break
+        return is_a_player
+
+    def move_team(self, user:UserSerializer):
+        player_in_game = self.find_player_in_game(user)
+        if player_in_game[0] == False:
+            raise GameException("User is not a player in this game", 69, status.HTTP_401_UNAUTHORIZED)
+        db_game: Game = self.instance
+        moved_game = db_game.move_player_team(user, player_in_game[1])
+        return GameSerializer(moved_game)
+    
     @staticmethod
     def create_new_game(user:UserSerializer):
         new_game =  Game.new_game(user.instance)
