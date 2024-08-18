@@ -2,6 +2,7 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 from .user_serializers import UserSerializer
 from ..models.game_model import WINNER_CHOICES , Game
+from ..helpers import parse_uuid
 
 class GameException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
@@ -58,6 +59,9 @@ class GameSerializer(serializers.Serializer):
     def connect_player(self, user:UserSerializer):
         team_a_len = len(self.data['team_a'])
         team_b_len = len(self.data['team_b'])
+        player_in_lobby = self.find_player_in_game(user)
+        if player_in_lobby[0]:
+            return self
         if self.data['game_started'] == True or team_a_len + team_b_len >= 4:
             raise GameException("Can't join game already full or started", 74, status.HTTP_403_FORBIDDEN)
         game: Game = self.instance
@@ -68,28 +72,62 @@ class GameSerializer(serializers.Serializer):
         pass
 
     def find_player_in_game(self, user:UserSerializer):
-        is_a_player = (False, 'None')
-        for player_a in self.team_a:
+        is_a_player = [False, 'None']
+        for player_a in self.data['team_a']:
             if user.data['id'] == player_a['id']:
                 is_a_player[0] = True
                 is_a_player[1] = 'A'
                 break
-        for player_b in self.team_b:
-            if is_a_player[0]:
-                break
-            if user.data['id'] == player_b:
+        if is_a_player[0] == True:
+            return is_a_player
+        for player_b in self.data['team_b']:
+            if user.data['id'] == player_b['id']:
                 is_a_player[0] = True
                 is_a_player[1] = 'B'
                 break
         return is_a_player
+
+    def find_owner_replacement(self, user:UserSerializer):
+        replacement_uuid = None
+        for player_a in self.data['team_a']:
+            if user.data['id'] != player_a['id']:
+                replacement_uuid = parse_uuid([player_a['id']])
+                break
+        if replacement_uuid != None:
+            return replacement_uuid
+        for player_b in self.data['team_b']:
+            if user.data['id'] != player_b['id']:
+                replacement_uuid = parse_uuid([player_b['id']])
+                break
+        return replacement_uuid
+        
 
     def move_team(self, user:UserSerializer):
         player_in_game = self.find_player_in_game(user)
         if player_in_game[0] == False:
             raise GameException("User is not a player in this game", 69, status.HTTP_401_UNAUTHORIZED)
         db_game: Game = self.instance
-        moved_game = db_game.move_player_team(user, player_in_game[1])
+        moved_game = db_game.move_player_team(user.instance, player_in_game[1])
         return GameSerializer(moved_game)
+    
+    def quite_game(self, user:UserSerializer):
+        player_in_game = self.find_player_in_game(user)
+        if player_in_game[0] == False:
+            raise GameException("User is not a player in this game", 80, status.HTTP_401_UNAUTHORIZED)
+        owner_replacement = None
+        db_game : Game = self.instance
+        if user.data['id'] == self.data['owner']['id']:
+            owner_replacement = self.find_owner_replacement(user)
+            if owner_replacement == None or len(owner_replacement) != 1:
+                print("why dont u delete the game")
+
+                db_game.delete()
+                return None
+            owner_replacement = owner_replacement[0]
+        db_game = db_game.remove_player(user.instance, player_in_game[1], owner_replacement)
+        return GameSerializer(db_game)
+            
+        
     
     @staticmethod
     def create_new_game(user:UserSerializer):

@@ -40,10 +40,19 @@ class Game(models.Model):
                 self.team_a.add(user)
         return self
 
+    def remove_player(self, user, curr_team, new_owner = None):
+        with transaction.atomic():
+            if curr_team == 'A':
+                self.team_a.remove(user)
+            elif curr_team == 'B':
+                self.team_b.remove(user)
+            if new_owner != None:
+                self.owner = new_owner
+        return self
+
     @staticmethod
     def new_game(user):
         game = Game.objects.create(owner=user)
-        game.team_a.add(user)
         game.save()
         return game
     

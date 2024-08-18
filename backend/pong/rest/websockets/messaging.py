@@ -29,7 +29,6 @@ class MessagingSocket(WebsocketConsumer):
             self.scope['user'].disconnect()
             self.scope['user'] = None
         return super().disconnect(code)
-        # return super().disconnect(code)
     
     def handle_friendship_message(self, data):
         friend = User.fetch_users_by_id(data['friend_id'])
