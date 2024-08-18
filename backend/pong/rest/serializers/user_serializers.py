@@ -1,6 +1,6 @@
 from rest_framework import serializers , status
 from rest_framework.exceptions import APIException
-from ..models.user_model import User, users_images_path
+from ..models.user_model import User, users_images_path, USER_STATUS
 from .relationship_serializers import RelationshipSerializer
 import re
 import binascii
@@ -49,6 +49,7 @@ class UserSerializer(serializers.Serializer):
     display_name = serializers.CharField(max_length = 50, required = False)
     created_at = serializers.DateTimeField(read_only = True)
     profile_picture = serializers.FilePathField(path=users_images_path(), recursive=True, required=False)
+    status = serializers.ChoiceField(choices=USER_STATUS, required=False)
 
 
     def get_fields(self):
@@ -74,9 +75,38 @@ class UserSerializer(serializers.Serializer):
         instance.display_name = validated_data.get('display_name', instance.display_name)
         instance.salt = validated_data.get('salt', instance.salt)
         instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
+        instance.status = validated_data.get('status', instance.status)
         instance.save()
         return instance
     
+    def connect(self):
+        connection_update = UserSerializer(self.instance, data = {"status" : USER_STATUS[1][0]})
+        if not connection_update.is_valid():
+            raise UserExceptions("Couldn't update online status", 75, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        connection_update.save()
+        return connection_update
+    
+    def disconnect(self):
+        disconnection_update = UserSerializer(self.instance, data = {"status": USER_STATUS[0][0]})
+        if not disconnection_update.is_valid():
+            raise UserExceptions("Couldn't update offline status", 76, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        disconnection_update.save()
+        return disconnection_update
+    
+    def enter_lobby(self):
+        lobby_update = UserSerializer(self.instance, data = {"status": USER_STATUS[2][0]})
+        if not lobby_update.is_valid():
+            raise UserExceptions("Couldn't update lobby status", 77, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        lobby_update.save()
+        return lobby_update
+
+    def enter_game(self):
+        game_update = UserSerializer(self.instance, data= {"status": USER_STATUS[3][0]})
+        if not game_update.is_valid():
+            raise UserExceptions("Couldn't update game status", 78, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        game_update.save()
+        return game_update
+
     def get_relations(self):
         return RelationshipSerializer.get_user_relations(self)
 

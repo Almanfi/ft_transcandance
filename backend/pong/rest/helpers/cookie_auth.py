@@ -1,6 +1,7 @@
 from channels.middleware import BaseMiddleware
 from channels.sessions import CookieMiddleware, SessionMiddleware
 from channels.db import database_sync_to_async
+from channels.exceptions import DenyConnection
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.authentication import BaseAuthentication
 from ..serializers.user_serializers import UserSerializer
@@ -44,13 +45,14 @@ class WebSocketAuth(BaseMiddleware):
         super().__init__(inner)
 
     async def __call__(self, scope, receive, send):
+        scope['user'] = None
         if 'id_key' not in scope.get("cookies"):
-            raise ValueError("No Valid Authentication Cookie Was given `id_key` is mandatory")
+            return await self.inner(scope, receive, send)
         id_key: str = scope.get("cookies")['id_key']
         id_key = id_key.split(';')[0]
         authentication_data = await asyn_authenticate_user(id_key)
         if authentication_data == None:
-            raise ValueError("Bad Authentication Cookie")
+            return await self.inner(scope, receive, send)
         scope['user'] = authentication_data[0]
         ## fetch the user data and put it in the scope
         return await self.inner(scope, receive, send)

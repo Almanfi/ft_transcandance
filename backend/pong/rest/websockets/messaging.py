@@ -1,4 +1,3 @@
-import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from ..helpers import parse_uuid
@@ -7,16 +6,30 @@ from ..serializers.message_serializers import MessageSerializer, MESSAGE_STATUS
 from ..models.message_model import Message
 from ..models.relationship_model import Relationship, RELATIONSHIP_STATUS
 from ..models.user_model import User
+import json
 
 class MessagingSocket(WebsocketConsumer):
     def connect(self):
+        if not self.scope['user']:
+            return self.close(79, "No User Given in Cookie")
         self.room_group_name = self.scope['user'].data['username']
+        self.groups.append(self.room_group_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
+        self.scope['user'] = self.scope['user'].connect()
         return super().connect()
     
-    def disconnect(self, code):
-        async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+    def close(self, code=None, reason=None):
+        if self.scope['user'] != None:
+            self.scope['user'].disconnect()
+            self.scope['user'] = None
+        return super().close(10, reason)
+
+    def disconnect(self, code = None):
+        if self.scope['user'] != None:
+            self.scope['user'].disconnect()
+            self.scope['user'] = None
         return super().disconnect(code)
+        # return super().disconnect(code)
     
     def handle_friendship_message(self, data):
         friend = User.fetch_users_by_id(data['friend_id'])

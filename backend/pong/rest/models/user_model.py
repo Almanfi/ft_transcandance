@@ -3,6 +3,13 @@ from django.conf import settings
 from typing import List
 import uuid
 
+USER_STATUS = [
+    ("disconected", "Disconected"),
+    ("connected", "Connected"),
+    ("in_lobby", "In_Lobby"),
+    ("in_game", "In_Game")
+]
+
 def users_images_path():
     return f"{settings.STATICFILES_DIRS[0][1]}/images/users_profiles"
 
@@ -20,7 +27,7 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     profile_picture = models.FilePathField(path=users_images_path, recursive=True, default='profile.jpg')
     relationship = models.ManyToManyField('self', through='Relationship', symmetrical = True)
-    status = models.BooleanField(default=False)
+    status = models.CharField(choices=USER_STATUS, default=USER_STATUS[0][0])
 
     @staticmethod
     def fetch_users_by_id(ids):

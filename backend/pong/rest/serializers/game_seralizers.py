@@ -61,10 +61,7 @@ class GameSerializer(serializers.Serializer):
         if self.data['game_started'] == True or team_a_len + team_b_len >= 4:
             raise GameException("Can't join game already full or started", 74, status.HTTP_403_FORBIDDEN)
         game: Game = self.instance
-        if team_a_len >= team_b_len:
-           game = game.add_player(user, 'A')
-        else:
-           game = game.add_player(user, 'B')
+        game = game.add_player_to_team(user.instance, 'B' if team_a_len > team_b_len else 'A')
         return GameSerializer(game)
 
     def disconect_player(self, user:UserSerializer):

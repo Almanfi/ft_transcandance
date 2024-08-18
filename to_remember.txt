@@ -8,11 +8,11 @@ Redis Container for Channels
 
 // Game api
     Game Lobby Socket for updates and messaging (To connect to the game lobby)
-    Game Lobby Creation 
+    Game Lobby Creation (Remove user automatic addition to Team_A)
     Game Lobby Invite (Notify invite)
 // in game Socket
     Game Lobby Team Movement
-    Game Lobby Quit
+    Game Lobby Quit (Remove player from db team)
     Game Start
     Game Cancel
 
