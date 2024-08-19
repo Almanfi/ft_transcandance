@@ -66,9 +66,6 @@ class GameSerializer(serializers.Serializer):
         game = game.add_player_to_team(user.instance, 'B' if team_a_len > team_b_len else 'A')
         return GameSerializer(game)
 
-    def disconect_player(self, user:UserSerializer):
-        pass
-
     def find_player_in_game(self, user:UserSerializer):
         is_a_player = [False, 'None']
         for player_a in self.data['team_a']:
@@ -137,6 +134,13 @@ class GameSerializer(serializers.Serializer):
         started_game.save()
         return started_game
     
+    def cancel_game(self, user:UserSerializer):
+        if user.data['id'] != self.data['owner']['id']:
+            raise GameException("User is not the game owner", 88, status.HTTP_401_UNAUTHORIZED)
+        db_game:Game = self.instance
+        db_game.delete()
+
+
     @staticmethod
     def create_new_game(user:UserSerializer):
         new_game =  Game.new_game(user.instance)

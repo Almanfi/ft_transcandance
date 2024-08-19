@@ -78,7 +78,7 @@ class InviteSerializer(serializers.Serializer):
         if len(db_invite) != 1:
             raise InviteException("No such game invite found", 49, status.HTTP_404_NOT_FOUND)
         invite  = InviteSerializer(db_invite[0])
-        if invite.data['invited']['id'] != invited.data['id'] or (invite.data['seen'] == True and invite.data['accepted'] == False) or  invite.data['type'] != INVITE_TYPE[0][0]:
+        if invite.data['game']['game_started'] == True or invite.data['invited']['id'] != invited.data['id'] or (invite.data['seen'] == True and invite.data['accepted'] == False) or  invite.data['type'] != INVITE_TYPE[0][0]:
             raise InviteException("Not a valid game Invitation to accept", 50, status.HTTP_401_UNAUTHORIZED)
         accepted_invite = InviteSerializer(db_invite[0], data = {"seen": True, "accepted": True})
         if not accepted_invite.is_valid():

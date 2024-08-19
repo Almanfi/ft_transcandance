@@ -3,18 +3,9 @@ Friendship Invite/Cancel Push Notification
 Game Invite/Cancel Push Notification
 Redis Container for Channels
 
-// User Changes
-    Connection Activity (Online, Offline)
-
 // Game api
-    Game Lobby Socket for updates and messaging (To connect to the game lobby)
-    Game Lobby Creation (Remove user automatic addition to Team_A)
+    Game Lobby Socket for messaging
     Game Lobby Invite (Notify invite)
-// in game Socket
-    Game Lobby Team Movement
-    Game Lobby Quit (Remove player from db team)
-    Game Start
-    Game Cancel
 
 // Search bar Backend
 
