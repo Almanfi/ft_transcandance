@@ -1,6 +1,9 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 from ..models.message_model import Message, MESSAGE_TYPE
+from .game_seralizers import GameSerializer
+from .relationship_serializers import RelationshipSerializer
+from .user_serializers import UserSerializer
 
 MESSAGE_STATUS=[
     ("sent", "Sent"),
@@ -25,22 +28,14 @@ class MessagingException(APIException):
 
 class MessageSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
-    sender = serializers.UUIDField(required=False)
+    sender = UserSerializer(required = False)
     content = serializers.CharField(trim_whitespace=True, allow_blank=False)
     timestamp = serializers.DateTimeField(required=False)
     read = serializers.BooleanField(required=False)
-    relationship = serializers.UUIDField(required=False)
+    relationship = RelationshipSerializer(required= False)
+    game = GameSerializer(required= False)
     type = serializers.ChoiceField(choices=MESSAGE_TYPE)
-    game = serializers.UUIDField(required=False)
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['sender'] = str(instance.sender.id)
-        if hasattr(instance, 'relationship'):
-            representation['relationship'] = str(instance.relationship.id)
-        if hasattr(instance, 'game'):
-            representation['game'] = str(instance.game.id)
-        return representation
 
     def create(self, validated_data):
         return Message.objects.create(**validated_data)

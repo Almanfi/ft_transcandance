@@ -3,6 +3,7 @@ from asgiref.sync import async_to_sync
 from ..serializers.invite_seralizers import InviteSerializer, InviteException
 from ..serializers.game_seralizers import GameSerializer, GameException, Game
 from ..serializers.user_serializers import UserExceptions
+from ..serializers.message_serializers import MessageSerializer, Message,MessagingException
 import json
 
 class GameSocket(WebsocketConsumer):
@@ -97,6 +98,24 @@ class GameSocket(WebsocketConsumer):
             response = e.detail
         return response
 
+    def handle_game_message(self, payload):
+        game = self.get_game()
+        response = None
+        if not "message" in payload:
+            return {"message":"No message given" , "error_code": 88}
+        new_message = Message.create_new_message(self.scope['user'].instance, payload['message'],game = game.instance)
+        new_message = MessageSerializer(new_message)
+        response = {"type": "game.message", "broadcaster_id": self.scope['user'].data['id'], "message": new_message.data}
+        async_to_sync(self.channel_layer.group_send)(self.room_group_name, response)
+        return response
+
+    def handle_retrieve_game_messages(self):
+        game = self.get_game()
+        messages = Message.retrieve_messages(game = game.instance)
+        messages = MessageSerializer(messages, many=True)
+        return messages.data
+
+
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
         response = None
@@ -108,6 +127,10 @@ class GameSocket(WebsocketConsumer):
             response = self.handle_game_start()
         elif payload_json['type'] == "game.cancel":
             response = self.handle_game_cancel()
+        elif payload_json['type'] == "game.message":
+            response = self.handle_game_message(payload_json)
+        elif payload_json['type'] == "game.retrieve_messages":
+            response = self.handle_retrieve_game_messages()
         else:
             return self.send(text_data=json.dumps({"error_code":83, "message":"Wrong Game Socket event"}))
         return self.send(text_data=json.dumps(response)) if response != None else None
@@ -116,5 +139,9 @@ class GameSocket(WebsocketConsumer):
         if self.scope['user'] != None and event["broadcaster_id"] != self.scope['user'].data['id']:
             return self.send(text_data=json.dumps(event))
     
+    def game_message(self, event):
+        if self.scope['user'] != None and event["broadcaster_id"] != self.scope['user'].data['id']:
+            return self.send(text_data=json.dumps(event))
+        
     def game_canceled(self, event):
         return self.close(reason="Game Canceled")

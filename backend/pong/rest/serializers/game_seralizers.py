@@ -113,7 +113,7 @@ class GameSerializer(serializers.Serializer):
         db_game : Game = self.instance
         if user.data['id'] == self.data['owner']['id']:
             owner_replacement = self.find_owner_replacement(user)
-            owner_replacement = None if len(owner_replacement) != 1 else owner_replacement[0]
+            owner_replacement = None if owner_replacement == None or len(owner_replacement) != 1 else owner_replacement[0]
         db_game = db_game.remove_player(user.instance, player_in_game[1], owner_replacement)
         quited_game = GameSerializer(db_game)
         if len(quited_game.data['team_a']) + len(quited_game.data['team_b']) == 0:

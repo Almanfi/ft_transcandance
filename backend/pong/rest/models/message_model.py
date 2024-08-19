@@ -13,6 +13,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, editable=False)
     read = models.BooleanField(default=False)
     relationship = models.ForeignKey('Relationship',on_delete=models.CASCADE, null=True)
+    game = models.ForeignKey('Game', on_delete=models.CASCADE, null=True)
     type = models.CharField(choices=MESSAGE_TYPE)
 
     @staticmethod
