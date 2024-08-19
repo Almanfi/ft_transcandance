@@ -8,7 +8,9 @@ from ..serializers.user_serializers import UserSerializer
 from ..models.user_model import User
 from .parse_uuid import parse_uuid
 from jwt import decode
+from typing import Any
 import os
+
 
 
 def authenticate_user(token):
@@ -57,5 +59,21 @@ class WebSocketAuth(BaseMiddleware):
         ## fetch the user data and put it in the scope
         return await self.inner(scope, receive, send)
 
+
+class ExceptionCatcher(BaseMiddleware):
+    def __init__(self, inner):
+        super().__init__(inner)
+
+    async def __call__(self, scope, receive, send):
+        try:
+            return await super().__call__(scope, receive, send)
+        except ValueError as e:
+            return await send({
+                'type': "websocket.close",
+                'code': 84,
+                'reason' : str(e)
+            })
+
+
 def WebSocketAuthStack(app):
-    return CookieMiddleware(SessionMiddleware(WebSocketAuth(app)))
+    return CookieMiddleware(SessionMiddleware(WebSocketAuth(ExceptionCatcher(app))))

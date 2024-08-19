@@ -8,6 +8,8 @@ import json
 class GameSocket(WebsocketConsumer):
     def connect(self):
         game_id = self.scope['url_route']['kwargs']['game_id']
+        if self.scope['user'] == None:
+            return self.close(82, "No Valid connection cookie given")
         try:
             game:GameSerializer = InviteSerializer.connect_to_game([game_id], self.scope['user'])
             self.scope['user'] = self.scope['user'].enter_lobby()
@@ -69,6 +71,19 @@ class GameSocket(WebsocketConsumer):
             response = e.detail
         return response
 
+    def handle_game_start(self):
+        game = self.get_game()
+        response = None
+        try:
+            started_game = game.start_game(self.scope['user'])
+            response = {"type": "game.broadcast", "broadcaster_id": str(self.scope['user'].data['id']), "game": started_game.data}
+            async_to_sync(self.channel_layer.group_send)(self.room_group_name, response)
+        except GameException as e:
+            response = e.detail
+            print("is it passed in here")
+
+        return response
+
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
         response = None
@@ -77,7 +92,7 @@ class GameSocket(WebsocketConsumer):
         elif payload_json['type']  == "game.quit":
             response = self.handle_game_quit()
         elif payload_json['type'] == "game.start":
-            response = self.handle_game_start(payload_json)
+            response = self.handle_game_start()
         elif payload_json['type'] == "game.cancel":
             response = self.handle_game_cancel(payload_json)
         else:

@@ -46,8 +46,6 @@ class GameSerializer(serializers.Serializer):
         return Game.objects.create(**validated_data)
     
     def update(self, instance, validated_data):
-        instance.team_a = validated_data.get('team_a', instance.team_a)
-        instance.team_b = validated_data.get('team_b', instance.team_b)
         instance.team_a_score = validated_data.get("team_a_score", instance.team_a_score)
         instance.team_b_score = validated_data.get("team_b_score", instance.team_b_score)
         instance.winner = validated_data.get('winner', instance.winner)
@@ -118,16 +116,26 @@ class GameSerializer(serializers.Serializer):
         db_game : Game = self.instance
         if user.data['id'] == self.data['owner']['id']:
             owner_replacement = self.find_owner_replacement(user)
-            if owner_replacement == None or len(owner_replacement) != 1:
-                print("why dont u delete the game")
-
-                db_game.delete()
-                return None
-            owner_replacement = owner_replacement[0]
+            owner_replacement = None if len(owner_replacement) != 1 else owner_replacement[0]
         db_game = db_game.remove_player(user.instance, player_in_game[1], owner_replacement)
-        return GameSerializer(db_game)
-            
+        quited_game = GameSerializer(db_game)
+        if len(quited_game.data['team_a']) + len(quited_game.data['team_b']) == 0:
+            db_game.delete()
+            quited_game = None
+        return quited_game
         
+    def start_game(self, user:UserSerializer):
+        if user.data['id'] != self.data['owner']['id']:
+            raise GameException("User is not the game owner", 85, status.HTTP_401_UNAUTHORIZED)
+        team_a_len = len(self.data['team_a'])
+        team_b_len = len(self.data['team_b'])
+        if team_a_len <= 0 or team_a_len != team_b_len:
+            raise GameException("The Game team are uneven", 86, status.HTTP_401_UNAUTHORIZED)
+        started_game = GameSerializer(self.instance, data = {"game_started" : True})
+        if not started_game.is_valid():
+            raise GameException("The game couldn't start", 87, status.HTTP_401_UNAUTHORIZED)
+        started_game.save()
+        return started_game
     
     @staticmethod
     def create_new_game(user:UserSerializer):

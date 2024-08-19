@@ -71,15 +71,6 @@ class GameView(ViewSet):
         moved_game = game.move_team(auth_user)
         return Response(moved_game.data, status=status.HTTP_200_OK)
 
-    # def quit_game(self, request):
-    #     auth_user: UserSerializer = request.user
-    #     if not "game_id" in request.data:
-    #         return Response({"message": "The data should contain 'game_id' ", "error_code": 63}, status=status.HTTP_400_BAD_REQUEST)
-    #     game_id = parse_uuid([request.data['game_id']])
-    #     if len(game_id) != 1:
-    #         return Response({"message": "Wrong game_id", "error_code": 64}, status=status.HTTP_400_BAD_REQUEST)
-    #     quited_game = GameSerializer.quit_game(game_id, auth_user)
-    #     return Response({"message": "Game quited succesfully"}, status=status.HTTP_200_OK)
 
     def start_game(self, request):
         auth_user: UserSerializer = request.user
