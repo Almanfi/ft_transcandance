@@ -29,6 +29,17 @@ services:
       depends_on:
         - postgres
       restart: always
+    redis:
+      build:
+        context: ./redis
+        dockerfile: Dockerfile
+      image: redis:pong
+      volumes:
+        - redis_volume:/data
+      networks:
+        - pong
+      container_name: redis
+      restart: always
     django:
       build:
         context: ../
@@ -44,6 +55,7 @@ services:
         - django_volume:/usr/backend
       depends_on:
         - postgres
+        - redis
       networks:
         - pong
       ports:
@@ -57,6 +69,7 @@ networks:
     name: pong
 
 volumes:
+  redis_volume:
   postgres_volume:
   django_volume:
     name: django_volume

@@ -29,9 +29,13 @@ SECRET_KEY = 'django-insecure-a1ql_(_3z4t6x*xszrn5kga*o*x^o_ry(=$b1e_xhvsgm5k1=3
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("REDIS_HOST", "redis"), os.getenv("REDIS_PORT", 6379))]
+        }
     }
 }
 
