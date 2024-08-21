@@ -3,12 +3,17 @@ from typing import List
 from django.db import transaction
 import uuid
 
-
 WINNER_CHOICES = [
     ('none',"None"),
     ('draw', "Draw"),
     ('team_a', "Team_A"),
     ('team_b', "Team_B")
+]
+
+GAME_TYPES = [
+    ('custom', 'Custom'),
+    ('matchmaking', 'Matchmaking')
+    ('tournament', 'Tournament')
 ]
 
 class Game(models.Model):
@@ -21,6 +26,7 @@ class Game(models.Model):
     winner = models.CharField(choices=WINNER_CHOICES, default= WINNER_CHOICES[0][0])
     game_started = models.BooleanField(default=False)
     game_ended = models.BooleanField(default=False)
+    type = models.CharField(choices=GAME_TYPES, default=GAME_TYPES[0][0])
 
     def add_player_to_team(self, user, dist_team):
         if dist_team == 'A':
@@ -51,8 +57,8 @@ class Game(models.Model):
         return self
 
     @staticmethod
-    def new_game(user):
-        game = Game.objects.create(owner=user)
+    def new_game(user, type):
+        game = Game.objects.create(owner=user, type=type)
         game.save()
         return game
     

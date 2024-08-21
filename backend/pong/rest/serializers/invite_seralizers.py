@@ -115,3 +115,7 @@ class InviteSerializer(serializers.Serializer):
             raise InviteException("The user didn't accept the game invite", 73, status.HTTP_401_UNAUTHORIZED)
         return game.connect_player(invited)
     
+    @staticmethod
+    def matchmaking_invite(game:GameSerializer, inviter:UserSerializer, invited:UserSerializer):
+        accepted_invite = Invite.create_matchmaking_invite(game.instance, inviter.instance, invited.instance)
+        return InviteSerializer(accepted_invite)

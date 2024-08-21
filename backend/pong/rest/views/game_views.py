@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 from ..helpers import CookieAuth, parse_uuid
-from ..serializers.game_seralizers import GameSerializer, Game
+from ..serializers.game_seralizers import GameSerializer, Game, GAME_TYPES
 from ..serializers.user_serializers import UserSerializer
 from ..serializers.invite_seralizers import InviteSerializer
 
@@ -13,7 +13,7 @@ class GameView(ViewSet):
     @action(methods=['post'], detail=False)
     def create_game(self, request):
         auth_user: UserSerializer = request.user
-        created_game = GameSerializer.create_new_game(auth_user)
+        created_game = GameSerializer.create_new_game(auth_user,  GAME_TYPES[0][0])
         return Response(created_game.data, status=status.HTTP_200_OK)
 
     def invite_player(self, request):

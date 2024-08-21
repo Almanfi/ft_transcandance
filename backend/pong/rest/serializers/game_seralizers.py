@@ -1,7 +1,7 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 from .user_serializers import UserSerializer
-from ..models.game_model import WINNER_CHOICES , Game
+from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES
 from ..helpers import parse_uuid
 
 class GameException(APIException):
@@ -142,7 +142,7 @@ class GameSerializer(serializers.Serializer):
 
 
     @staticmethod
-    def create_new_game(user:UserSerializer):
-        new_game =  Game.new_game(user.instance)
+    def create_new_game(user:UserSerializer, type = GAME_TYPES[0][0]):
+        new_game =  Game.new_game(user.instance, type)
         new_game = GameSerializer(new_game)
         return new_game

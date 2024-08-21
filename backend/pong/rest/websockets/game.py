@@ -102,7 +102,7 @@ class GameSocket(WebsocketConsumer):
         game = self.get_game()
         response = None
         if not "message" in payload:
-            return {"message":"No message given" , "error_code": 88}
+            return {"message":"No message given" , "error_code": 89}
         new_message = Message.create_new_message(self.scope['user'].instance, payload['message'],game = game.instance)
         new_message = MessageSerializer(new_message)
         response = {"type": "game.message", "broadcaster_id": self.scope['user'].data['id'], "message": new_message.data}

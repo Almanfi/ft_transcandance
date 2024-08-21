@@ -7,7 +7,7 @@ USER_STATUS = [
     ("disconected", "Disconected"),
     ("connected", "Connected"),
     ("in_lobby", "In_Lobby"),
-    ("in_game", "In_Game")
+    ("in_game", "In_Game"),
 ]
 
 def users_images_path():
