@@ -12,7 +12,7 @@ WINNER_CHOICES = [
 
 GAME_TYPES = [
     ('custom', 'Custom'),
-    ('matchmaking', 'Matchmaking')
+    ('matchmaking', 'Matchmaking'),
     ('tournament', 'Tournament')
 ]
 

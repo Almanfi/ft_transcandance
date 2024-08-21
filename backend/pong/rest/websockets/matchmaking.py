@@ -41,9 +41,11 @@ class MatchmakingSocket(WebsocketConsumer):
         user : UserSerializer = self.scope['user']
         while True:
             queue_len = len(game_queue)
-            if queue_len >= 1:
+            if queue_len >= 2:
                 match_index = random.randrange(0, queue_len)
-                queue_message = {"type": "game.match", "player_id": user.data['id']}
+                if game_queue[match_index] == self.channel_name:
+                    match_index = (match_index + 1) % queue_len
+                queue_message = {"type": "game.match", "player_id": user.data['id'], "player_channel": self.channel_name}
                 async_to_sync(self.channel_layer.send)(game_queue[match_index], queue_message)
                 break
             asyncio.sleep(5)
@@ -58,6 +60,8 @@ class MatchmakingSocket(WebsocketConsumer):
             self.join_game_matchmaking()
         elif payload_json['type'] == 'matchmaking.tournament':
             self.join_tournament_matchmaking()
+        else:
+            self.close(91, "Wrong socket event")
 
     def game_match(self, event):
         matched_uuid = parse_uuid([event['player_id']])
@@ -65,5 +69,11 @@ class MatchmakingSocket(WebsocketConsumer):
         matched_user = UserSerializer(matched_user[0])
         game = GameSerializer.create_new_game(self.scope['user'], GAME_TYPES[1][0])
         InviteSerializer.matchmaking_invite(game, self.scope['user'] ,matched_user)
-        
-        
+        launch_message = {"type": "game.launch", "game_id": game.data['id']}
+        async_to_sync(self.channel_layer.send)(event['player_channel'], launch_message)
+        self.send(text_data=json.dumps(launch_message))
+        self.close(None, None)
+
+    def game_launch(self,event):
+        self.send(text_data=json.dumps(event))
+        self.close(None, None)
