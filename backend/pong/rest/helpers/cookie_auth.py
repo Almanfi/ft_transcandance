@@ -1,14 +1,12 @@
 from channels.middleware import BaseMiddleware
 from channels.sessions import CookieMiddleware, SessionMiddleware
 from channels.db import database_sync_to_async
-from channels.exceptions import DenyConnection
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.authentication import BaseAuthentication
 from ..serializers.user_serializers import UserSerializer
 from ..models.user_model import User
 from .parse_uuid import parse_uuid
 from jwt import decode
-from typing import Any
 import os
 
 

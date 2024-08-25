@@ -1,7 +1,9 @@
 from django.db import models
 from typing import List
 from django.db import transaction
+from asgiref.sync import sync_to_async
 import uuid
+
 
 WINNER_CHOICES = [
     ('none',"None"),

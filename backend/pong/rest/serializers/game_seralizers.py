@@ -3,6 +3,7 @@ from rest_framework.exceptions import APIException
 from .user_serializers import UserSerializer
 from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES
 from ..helpers import parse_uuid
+from asgiref.sync import sync_to_async
 
 class GameException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST

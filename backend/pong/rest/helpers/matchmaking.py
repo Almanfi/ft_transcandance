@@ -6,7 +6,7 @@ class GameMatchmaking:
     def __new__(cls):
         if cls._instance == None:
             cls._instance = super(GameMatchmaking, cls).__new__(cls)
-            return cls._instance
+        return cls._instance
         
     def get_players(self):
         return self._data
@@ -16,5 +16,8 @@ class GameMatchmaking:
         return self._data
     
     def remove_player(self, player_id):
-        self._data.remove(player_id)
+        try:
+            self._data.remove(player_id)
+        except ValueError as e:
+            pass
         return self._data
