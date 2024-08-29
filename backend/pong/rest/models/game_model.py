@@ -1,9 +1,8 @@
 from django.db import models
 from typing import List
 from django.db import transaction
-from asgiref.sync import sync_to_async
+from .invite_model import Invite
 import uuid
-
 
 WINNER_CHOICES = [
     ('none',"None"),
@@ -18,6 +17,13 @@ GAME_TYPES = [
     ('tournament', 'Tournament')
 ]
 
+TOURNAMENT_PHASE = [
+    ('None', 'None'),
+    ('quarters', 'quarters'),
+    ('semis', 'semis'),
+    ('finals', 'finals')
+]
+
 class Game(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name='owner')
@@ -29,6 +35,8 @@ class Game(models.Model):
     game_started = models.BooleanField(default=False)
     game_ended = models.BooleanField(default=False)
     type = models.CharField(choices=GAME_TYPES, default=GAME_TYPES[0][0])
+    tournament_phase = models.CharField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0])
+    tournament_id = models.ForeignKey('Tournament', on_delete=models.CASCADE, null=True)
 
     def add_player_to_team(self, user, dist_team):
         if dist_team == 'A':
@@ -57,6 +65,23 @@ class Game(models.Model):
             if new_owner != None:
                 self.owner = new_owner
         return self
+
+    @staticmethod
+    def create_tournament_games(users, tournament, phase):
+        games = []
+        matches = 0
+        if phase == TOURNAMENT_PHASE[1][0]:
+            matches = 4
+        elif phase == TOURNAMENT_PHASE[2][0]:
+            matches = 2
+        else:
+            matches = 1
+        while len(games) < matches:
+            idx = 0 if len(games) == 0 else (len(games) * 2)
+            game = Game.objects.create(owner = users[idx], tournament_phase = phase ,tournament = tournament)
+            Invite.create_tournament_invite(game, users[idx],  users[idx + 1])
+            games.append(game)
+        return games
 
     @staticmethod
     def new_game(user, type):

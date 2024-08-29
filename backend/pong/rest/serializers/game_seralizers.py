@@ -1,7 +1,8 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 from .user_serializers import UserSerializer
-from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES
+from .tournament_serializers import TournamentSerializer
+from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES, TOURNAMENT_PHASE
 from ..helpers import parse_uuid
 from asgiref.sync import sync_to_async
 
@@ -30,6 +31,8 @@ class GameSerializer(serializers.Serializer):
     winner = serializers.ChoiceField(choices=WINNER_CHOICES, required=False)
     game_started = serializers.BooleanField(required=False)
     game_ended = serializers.BooleanField(required=False)
+    tournament_phase = serializers.CharField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0], required=False)
+    tournament = TournamentSerializer(required=False)
 
     def to_representation(self, instance):
         og_repr = super().to_representation(instance)

@@ -36,6 +36,11 @@ class Invite(models.Model):
         return accepted_invitation
 
     @staticmethod
+    def create_tournament_invite(game, inviter, invited):
+        accepted_invitation = Invite.objects.create(type=INVITE_TYPE[1][0], game=game, inviter=inviter, invited=invited, accepted=True)
+        return accepted_invitation
+
+    @staticmethod
     def fetch_invites_by_id(invites):
         invites = Invite.objects.filter(pk__in=invites)
         return list(invites)

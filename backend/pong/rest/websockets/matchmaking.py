@@ -17,7 +17,7 @@ class MatchmakingSocket(WebsocketConsumer):
             super().connect()
             self.join_game_matchmaking()
         except UserExceptions as e:
-            return self.close(90, "Problem Connection to Matchmaking Lobby")     
+            return self.close(91, "Problem Connection to Matchmaking Lobby")     
     
     def close(self, code=None, reason=None):
         if self.scope['user'] != None:
@@ -49,7 +49,7 @@ class MatchmakingSocket(WebsocketConsumer):
             async_to_sync(self.channel_layer.send)(game_queue[match_index], queue_message)
 
     def receive(self, text_data=None, bytes_data=None):
-        self.close(91, "This channel doesn't receive")
+        self.close(92, "This channel doesn't receive")
 
     def game_match(self, event):
         matched_uuid = parse_uuid([event['player_id']])
