@@ -12,5 +12,5 @@ class Tournament(models.Model):
     @staticmethod
     def user_is_a_participant(tournament_id, user):
         tournament_games = Game.fetch_tournament_games(tournament_id)
-        user_invites = Invite.fetch_tournament_invite(tournament_games, user)
+        user_invites = Invite.fetch_tournament_invite(tournament_games)
         return (tournament_games, user_invites)

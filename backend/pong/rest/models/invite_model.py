@@ -51,7 +51,7 @@ class Invite(models.Model):
         return list(invite)
     
     @staticmethod
-    def fetch_tournament_invite(games, user):
-        invites = Invite.objects.filter(models.Q(game__in=games, inviter=user) | models.Q(game__in=games, invited=user))
+    def fetch_tournament_invite(games):
+        invites = Invite.objects.filter(game__in=games)
         return list(invites)
     
