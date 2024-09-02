@@ -6,7 +6,7 @@ from ..helpers import TournamentMaking
 import json
 import random
 
-class TournamentSocket(WebsocketConsumer):
+class TournamentMakingSocket(WebsocketConsumer):
     def connect(self):
         if self.scope['user'] == None:
             return self.close(93, "No User given")

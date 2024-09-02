@@ -35,6 +35,12 @@ class TournamentSerializer(serializers.Serializer):
         return instance
     
     @staticmethod
+    def join_tournament_lobby(tournament_id, user):
+        tournament = parse_uuid([tournament_id])
+        participation_info = Tournament.user_is_a_participant(tournament[0], user.instance)
+        return participation_info
+
+    @staticmethod
     def create_tournament(users):
         tourney = Tournament.objects.create()
         users = parse_uuid(users)

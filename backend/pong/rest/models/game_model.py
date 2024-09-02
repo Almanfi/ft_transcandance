@@ -36,7 +36,7 @@ class Game(models.Model):
     game_ended = models.BooleanField(default=False)
     type = models.CharField(choices=GAME_TYPES, default=GAME_TYPES[0][0])
     tournament_phase = models.CharField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0])
-    tournament_id = models.ForeignKey('Tournament', on_delete=models.CASCADE, null=True)
+    tournament = models.ForeignKey('Tournament', on_delete=models.CASCADE, null=True)
 
     def add_player_to_team(self, user, dist_team):
         if dist_team == 'A':
@@ -94,3 +94,7 @@ class Game(models.Model):
         games_ids: List[uuid.UUID] = [id for id in games_ids if id != None]
         games = list(Game.objects.filter(pk__in=games_ids))
         return games
+
+    @staticmethod
+    def fetch_tournament_games(tournament_id):
+        return list(Game.objects.filter(tournament=tournament_id))
