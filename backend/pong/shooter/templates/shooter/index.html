@@ -1,0 +1,59 @@
+<!-- shooter/templates/shooter/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shooter Index</title>
+    <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/" } } </script>
+    {% load static %}
+    <script type="module" src="{% static 'shooter/main.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('login-form');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                const formData = new FormData(form);
+                const data = {
+                    username: formData.get('username'),
+                    password: formData.get('password')
+                };
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect_url; // Redirect on success
+                    } else {
+                        alert('Invalid username or password');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</head>
+<body>
+    {% block user %}
+        {% if user %}
+            <h1>Shooter : {{ user.username}} </h1>
+        {% else %}
+            <h1>Login</h1>
+            <form id="login-form" method="post" action="/users/login/">
+                <label for="username">username:</label>
+                <input type="text" id="username" name="username"><br><br>
+                <label for="password">password:</label>
+                <input type="password" id="password" name="password"><br><br>
+                <input type="submit" value="Submit">
+            </form> 
+        {% endif %}
+    {% endblock %}
+</body>
+
+</html>

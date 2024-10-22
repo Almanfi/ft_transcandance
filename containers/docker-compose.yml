@@ -40,6 +40,7 @@ services:
           JWT_SECRET : ${JWT_SECRET}
           JWT_PUBLIC : ${JWT_PUBLIC}
       image: django:pong
+      env_file: ../.env
       volumes:
         - django_volume:/usr/backend
       depends_on:
