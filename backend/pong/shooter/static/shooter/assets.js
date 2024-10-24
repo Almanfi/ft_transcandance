@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { KeyControls } from './keyControl.js';
 
 function applyPlaneRotation(vect, angle) {
 	let cosA = Math.cos(angle);
@@ -87,5 +88,53 @@ export class TurretBullet extends THREE.Mesh {
 
     update() {
 		this.position.addScaledVector(this.speed, 1);
+    }
+}
+
+export class Player extends THREE.Mesh {
+    constructor(position) {
+        let width = 3;
+        let color = 0x0096FF;
+        const geometry = new THREE.BoxGeometry(width, width, width);
+        const material = new THREE.MeshBasicMaterial( {color, side: THREE.DoubleSide} );
+        super(geometry, material);
+        this.position.set(position.x, position.y, position.z);
+    };
+
+    addToScene(scene) {
+        this.scene = scene;
+		scene.add(this);
+	}
+
+    update(keyControls, planeFacingVector) {
+        const projectionOnPlane = planeFacingVector.multiplyScalar(3);
+        const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
+        // const sideOnPlane = planeFacingVector.cross(new THREE.Vector3(0, 1, 0)).multiplyScalar(3);
+        this.rotateY(0.1);
+    
+        if (keyControls.Wkey.hold) {
+            this.position.x += projectionOnPlane.x;
+            this.position.z += projectionOnPlane.z;
+            // camera.position.x += projectionOnPlane.x;
+            // camera.position.z += projectionOnPlane.z;
+        }
+        if (keyControls.Skey.hold) {
+            this.position.x += -projectionOnPlane.x;
+            this.position.z += -projectionOnPlane.z;
+            // camera.position.x += -projectionOnPlane.x;
+            // camera.position.z += -projectionOnPlane.z;
+        }
+        if (keyControls.Akey.hold) {
+            this.position.x += -sideOnPlane.x;
+            this.position.z += -sideOnPlane.z;
+            // camera.position.x += -sideOnPlane.x;
+            // camera.position.z += -sideOnPlane.z;
+        }
+        if (keyControls.Dkey.hold) {
+            this.position.x += sideOnPlane.x;
+            this.position.z += sideOnPlane.z;
+            // camera.position.x += sideOnPlane.x;
+            // camera.position.z += sideOnPlane.z;
+        }
     }
 }

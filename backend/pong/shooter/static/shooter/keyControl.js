@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 
 function release() {
     if (!this.releaseVal)
@@ -126,4 +127,11 @@ export class KeyControls {
             }
         })
     }
+}
+
+export function getCameraDir(camera) {
+   const dir = new THREE.Vector3();
+   camera.getWorldDirection(dir);
+   const projection = dir.projectOnPlane(new THREE.Vector3(0, 1, 0));
+   return projection;
 }

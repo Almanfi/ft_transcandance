@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { KeyControls } from './keyControl.js';
+import { KeyControls, getCameraDir } from './keyControl.js';
 import { gameClock } from './gclock.js';
-import { Turret } from './assets.js';
+import { Turret, Player } from './assets.js';
 import { MusicSync } from './sound.js';
 
 const scene = new THREE.Scene();
@@ -18,7 +18,7 @@ const keyControls = new KeyControls();
 const gClock = new gameClock(scene, camera, renderer);
 
 const musicSyncer = new MusicSync(camera);
-musicSyncer.loadMusic('/static/shooter/assets/8bit_hana_nate.mp3');
+musicSyncer.loadMusic('/static/shooter/assets/8bit_Weight_World.mp3');
 musicSyncer.bullet = musicSyncer.loadNewSound('/static/shooter/assets/a6.mp3');
 
 
@@ -31,7 +31,11 @@ plane.position.x = 0;
 plane.position.y = 0;
 plane.position.z = 0;
 plane.rotateX(Math.PI / 2);
-console.log("plane is ", plane)
+
+const player = new Player({x: 0, y: 0, z: 0});
+
+player.addToScene(scene);
+
 
 camera.position.x = 50;
 camera.position.y = 300;
@@ -51,6 +55,9 @@ scene.add( light );
 let limit1 = 0;
 
 var animate = (ms) => {
+    const planeFacingVector = getCameraDir(camera);
+
+    player.update(keyControls, planeFacingVector);
     // let dateNow = Date.now();
     let dateNow = new Date().valueOf();
     bullets.forEach((elem, key) => {
