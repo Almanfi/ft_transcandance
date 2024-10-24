@@ -37,12 +37,61 @@
                 .catch(error => console.error('Error:', error));
             });
         });
+        {% comment %} var socket;
+        function connect() {
+            console.log('connecting');
+            socket = new WebSocket('wss://' + window.location.host + '/ws/roll/');
+            socket.onopen = function(e) {
+                console.log('open', e);
+            };
+            socket.onmessage = function(e) {
+                console.log('message', e.data);
+                switch (e.data.move) {
+                    case 'left':
+                        moveLeft();
+                        break;
+                    case 'right':
+                        moveRight();
+                        break;
+                    case 'up':
+                        moveUp();
+                        break;
+                    case 'down':
+                        moveDown();
+                        break;
+                }
+            };
+            socket.onclose = function(e) {
+                console.log('close', e);
+            };
+            socket.onerror = function(e) {
+                console.log('error', e);
+            };
+        }
+        function send() {
+            console.log('sending');
+            let data = {
+                "type": "chat.message",
+                "friend_id": document.getElementById('reciever').value,
+                "message": document.getElementById('message').value
+            };
+            socket.send(JSON.stringify(data));
+        } {% endcomment %}
     </script>
 </head>
 <body>
     {% block user %}
         {% if user %}
             <h1>Shooter : {{ user.username}} </h1>
+            <button id="connector" > create socket </button>
+            <div id="messageContainer">
+                <label for="reciever">reciever:</label>
+                <input id="reciever" name="reciever"><br><br>
+                <label for="message">message:</label>
+                <input id="message" name="message"><br><br>
+                <button id="msgSender"> send message </button>
+            </div>
+
         {% else %}
             <h1>Login</h1>
             <form id="login-form" method="post" action="/users/login/">

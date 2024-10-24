@@ -88,7 +88,71 @@ var animate = (ms) => {
 
 	}
     limit1++;
+    if (keyControls.Wkey.hold)
+        sendMove('up');
+    if (keyControls.Akey.hold)
+        sendMove('left');
+    if (keyControls.Skey.hold)
+        sendMove('down');
+    if (keyControls.Dkey.hold)
+        sendMove('right');
 
 }
 
 gClock.loop(animate);
+
+var socket;
+document.getElementById('msgSender').addEventListener('click', send);
+document.getElementById('connector').addEventListener('click', connect);
+function connect() {
+    console.log('connecting');
+    socket = new WebSocket('wss://' + window.location.host + '/ws/roll/');
+    socket.onopen = function(e) {
+        console.log('open', e);
+    };
+    socket.onmessage = function(e) {
+        let data = JSON.parse(e.data).message;
+        console.log('message', data);
+        switch (data.move) {
+            case 'left':
+                player.move('left', getCameraDir(camera));
+                break;
+            case 'right':
+                player.move('right', getCameraDir(camera));
+                break;
+            case 'up':
+                player.move('up', getCameraDir(camera));
+                break;
+            case 'down':
+                player.move('down', getCameraDir(camera));
+                break;
+        }
+    };
+    socket.onclose = function(e) {
+        console.log('close', e);
+    };
+    socket.onerror = function(e) {
+        console.log('error', e);
+    };
+}
+
+function send() {
+    console.log('sending');
+    let data = {
+        "type": "chat.message",
+        "friend_id": document.getElementById('reciever').value,
+        "message": document.getElementById('message').value
+    };
+    socket.send(JSON.stringify(data));
+}
+
+function sendMove(move) {
+    let data = {
+        "type": "chat.message",
+        "friend_id": document.getElementById('reciever').value,
+        "message": {
+            "move": move
+        }
+    };
+    socket.send(JSON.stringify(data));
+}

@@ -137,4 +137,25 @@ export class Player extends THREE.Mesh {
             // camera.position.z += sideOnPlane.z;
         }
     }
+    move(dir, planeFacingVector) {
+        const projectionOnPlane = planeFacingVector.multiplyScalar(3);
+        const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
+    
+        if (dir === 'up') {
+            this.position.x += projectionOnPlane.x;
+            this.position.z += projectionOnPlane.z;
+        }
+        if (dir === 'down') {
+            this.position.x += -projectionOnPlane.x;
+            this.position.z += -projectionOnPlane.z;
+        }
+        if (dir === 'left') {
+            this.position.x += -sideOnPlane.x;
+            this.position.z += -sideOnPlane.z;
+        }
+        if (dir === 'right') {
+            this.position.x += sideOnPlane.x;
+            this.position.z += sideOnPlane.z;
+        }
+    }
 }
