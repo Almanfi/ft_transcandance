@@ -14,9 +14,19 @@ function press() {
     return true;
 }
 
+export class PlayerData {
+    constructor() {
+        this.move = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+        }
+    }
+}
+
 export class KeyControls {
-    #foo = 10;
-    constructor (props = {}) {
+    constructor (player, props = {}) {
         Object.assign(this, {
             Wkey: {press: null, pressVal: false, hold: false, release: null, releaseVal: false },
             Akey: {press: null, pressVal: false, hold: false, release: null, releaseVal: false },
@@ -26,6 +36,10 @@ export class KeyControls {
             Jkey: {press: null, pressVal: false, hold: false, release: null, releaseVal: false },
             Lclick: {press: null, pressVal: false, hold: false, release: null, releaseVal: false },
         }, props);
+
+        this.player = player;
+        this.socket = null;
+        this.data = null;
 
         this.Wkey.press = press.bind(this.Wkey);
         this.Akey.press = press.bind(this.Akey);
@@ -42,10 +56,38 @@ export class KeyControls {
         this.shift.release = release.bind(this.shift);
         this.Jkey.release = release.bind(this.Jkey);
 
-        // console.log("foo is actualy here and it s : ", this.#foo);
         this.keydownListener();
         this.keyupListener();
     }
+
+    attachSocket(socket, reciever) {
+        this.socket = socket;
+        this.data = {
+            "type": "chat.message",
+            "friend_id": reciever,
+            "message": {}
+        };
+        console.log('attaching socket');
+    }
+
+    sendToSocket(move, position) {
+        this.data.message.move = move;
+        this.data.message.position = position ? position : undefined;
+        if (this.webRTC) {
+            this.sendByRTC(JSON.stringify(this.data.message));
+            return;
+        }
+        if (this.socket)
+            this.socket.send(JSON.stringify(this.data));
+    }
+
+    sendByRTC(msg) {
+        if (this.webRTC.sendChannel)
+            this.webRTC.sendChannel.send(msg);
+        else
+            this.webRTC.remoteConnection.channel.send(msg)
+    }
+
 
     keydownListener() {
         window.addEventListener('mousedown', (e) => {
@@ -56,28 +98,37 @@ export class KeyControls {
         window.addEventListener('keydown', (e) => {
             switch (e.code) {
                 case 'KeyW':
-                    if (!this.Wkey.hold)
+                    if (!this.Wkey.hold) {
+                        this.sendToSocket({"up": true});
                         this.Wkey.pressVal = true;
+                    }
                     this.Wkey.hold = true;
                     break;
                 case 'KeyA':
-                    if (!this.Akey.hold)
+                    if (!this.Akey.hold) {
+                        this.sendToSocket({"left": true});
                         this.Akey.pressVal = true;
+                    }
                     this.Akey.hold = true;
                     break;
                 case 'KeyS':
-                    if (!this.Skey.hold)
+                    if (!this.Skey.hold) {
+                        this.sendToSocket({"down": true});
                         this.Skey.pressVal = true;
+                    }
                     this.Skey.hold = true;
                     break;
                 case 'KeyD':
-                    if (!this.Dkey.hold)
+                    if (!this.Dkey.hold) {
+                        this.sendToSocket({"right": true});
                         this.Dkey.pressVal = true;
+                    }
                     this.Dkey.hold = true;
                     break;
                 case 'ShiftLeft':
-                    if (!this.shift.hold)
+                    if (!this.shift.hold) {
                         this.shift.pressVal = true;
+                    }
                     this.shift.hold = true;
                     break;
                 case 'KeyJ':
@@ -90,7 +141,7 @@ export class KeyControls {
                 }
             })
         }
-        
+
         keyupListener() {
             window.addEventListener('mouseup', (e) => {
                 this.Lclick.releaseVal = true;
@@ -99,18 +150,22 @@ export class KeyControls {
             window.addEventListener('keyup', (e) => {
             switch (e.code) {
                 case 'KeyW':
+                    this.sendToSocket({"up": false}, this?.player.position);
                     this.Wkey.releaseVal = true;
                     this.Wkey.hold = false;
                     break;
                 case 'KeyA':
+                    this.sendToSocket({"left": false}, this?.player.position);
                     this.Akey.releaseVal = true;
                     this.Akey.hold = false;
                     break;
                 case 'KeyS':
+                    this.sendToSocket({"down": false}, this?.player.position);
                     this.Skey.releaseVal = true;
                     this.Skey.hold = false;
                     break;
                 case 'KeyD':
+                    this.sendToSocket({"right": false}, this?.player.position);
                     this.Dkey.releaseVal = true;
                     this.Dkey.hold = false;
                     break;

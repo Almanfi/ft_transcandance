@@ -9,6 +9,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('login-form');
+            if (!form) return;
             form.addEventListener('submit', function(event) {
                 event.preventDefault(); // Prevent the default form submission
 
@@ -83,13 +84,21 @@
     {% block user %}
         {% if user %}
             <h1>Shooter : {{ user.username}} </h1>
+            <p> playerId : {{ user.id }} </p>
             <button id="connector" > create socket </button>
+            <span id="socketStatus"> </span>
             <div id="messageContainer">
                 <label for="reciever">reciever:</label>
                 <input id="reciever" name="reciever"><br><br>
                 <label for="message">message:</label>
                 <input id="message" name="message"><br><br>
                 <button id="msgSender"> send message </button>
+            </div>
+            <div id="WebRTC">
+                <button id="RTCconnect"> connect RTCweb </button>
+                <label for="RTCweb">RTCweb:</label>
+                <input id="RTCweb" name="RTCweb"><br><br>
+                <button id="RTCsender"> send RTCweb msg </button>
             </div>
 
         {% else %}

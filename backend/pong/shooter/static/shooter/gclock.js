@@ -21,7 +21,7 @@ export class gameClock {
 		window.requestAnimationFrame(() => this.loop(animate))
 		this.msNow = window.performance.now();
 		this.msPassed = this.msNow - this.msPrev;
-		animate(this.msNow - this.msPrevTrue);
+		animate((this.msNow - this.msPrevTrue) / 1000);
 		this.msPrevTrue = this.msNow;
 		if (this.msPassed < this.msPerFrame)
 			return ;

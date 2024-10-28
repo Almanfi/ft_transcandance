@@ -106,56 +106,59 @@ export class Player extends THREE.Mesh {
 		scene.add(this);
 	}
 
-    update(keyControls, planeFacingVector) {
-        const projectionOnPlane = planeFacingVector.multiplyScalar(3);
+    update(timeS, keyControls, planeFacingVector) {
+        let speed = 3 * timeS;
+        const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
         const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
-        // const sideOnPlane = planeFacingVector.cross(new THREE.Vector3(0, 1, 0)).multiplyScalar(3);
         this.rotateY(0.1);
+
+        let posDiff = new THREE.Vector3(0, 0, 0);
     
         if (keyControls.Wkey.hold) {
-            this.position.x += projectionOnPlane.x;
-            this.position.z += projectionOnPlane.z;
-            // camera.position.x += projectionOnPlane.x;
-            // camera.position.z += projectionOnPlane.z;
+            posDiff.x += projectionOnPlane.x;
+            posDiff.z += projectionOnPlane.z;
         }
         if (keyControls.Skey.hold) {
-            this.position.x += -projectionOnPlane.x;
-            this.position.z += -projectionOnPlane.z;
-            // camera.position.x += -projectionOnPlane.x;
-            // camera.position.z += -projectionOnPlane.z;
+            posDiff.x += -projectionOnPlane.x;
+            posDiff.z += -projectionOnPlane.z;
         }
         if (keyControls.Akey.hold) {
-            this.position.x += -sideOnPlane.x;
-            this.position.z += -sideOnPlane.z;
-            // camera.position.x += -sideOnPlane.x;
-            // camera.position.z += -sideOnPlane.z;
+            posDiff.x += -sideOnPlane.x;
+            posDiff.z += -sideOnPlane.z;
         }
         if (keyControls.Dkey.hold) {
-            this.position.x += sideOnPlane.x;
-            this.position.z += sideOnPlane.z;
-            // camera.position.x += sideOnPlane.x;
-            // camera.position.z += sideOnPlane.z;
+            posDiff.x += sideOnPlane.x;
+            posDiff.z += sideOnPlane.z;
         }
+        posDiff.normalize();
+        this.position.x += posDiff.x;
+        this.position.z += posDiff.z;
     }
-    move(dir, planeFacingVector) {
-        const projectionOnPlane = planeFacingVector.multiplyScalar(3);
+    move(timeS, move, planeFacingVector) {
+        let speed = 3 * timeS;
+        const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
         const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
     
-        if (dir === 'up') {
-            this.position.x += projectionOnPlane.x;
-            this.position.z += projectionOnPlane.z;
+        let posDiff = new THREE.Vector3(0, 0, 0);
+
+        if (move.up) {
+            posDiff.x += projectionOnPlane.x;
+            posDiff.z += projectionOnPlane.z;
         }
-        if (dir === 'down') {
-            this.position.x += -projectionOnPlane.x;
-            this.position.z += -projectionOnPlane.z;
+        if (move.down) {
+            posDiff.x += -projectionOnPlane.x;
+            posDiff.z += -projectionOnPlane.z;
         }
-        if (dir === 'left') {
-            this.position.x += -sideOnPlane.x;
-            this.position.z += -sideOnPlane.z;
+        if (move.left) {
+            posDiff.x += -sideOnPlane.x;
+            posDiff.z += -sideOnPlane.z;
         }
-        if (dir === 'right') {
-            this.position.x += sideOnPlane.x;
-            this.position.z += sideOnPlane.z;
+        if (move.right) {
+            posDiff.x += sideOnPlane.x;
+            posDiff.z += sideOnPlane.z;
         }
+        posDiff.normalize();
+        this.position.x += posDiff.x;
+        this.position.z += posDiff.z;
     }
 }
