@@ -40,6 +40,7 @@ export class KeyControls {
         this.player = player;
         this.socket = null;
         this.data = null;
+        this.connection = null;
 
         this.Wkey.press = press.bind(this.Wkey);
         this.Akey.press = press.bind(this.Akey);
@@ -70,24 +71,20 @@ export class KeyControls {
         console.log('attaching socket');
     }
 
+    attachConnection(connection) {
+        this.connection = connection;
+        this.send = connection.sendAdapter.bind(connection);
+    }
+
+    send(msg) {}
+
     sendToSocket(move, position) {
-        this.data.message.move = move;
-        this.data.message.position = position ? position : undefined;
-        if (this.webRTC) {
-            this.sendByRTC(JSON.stringify(this.data.message));
-            return;
-        }
-        if (this.socket)
-            this.socket.send(JSON.stringify(this.data));
+        let data = {};
+        data.move = move;
+        data.position = position ? position : undefined;
+        
+        this.send(JSON.stringify(data));
     }
-
-    sendByRTC(msg) {
-        if (this.webRTC.sendChannel)
-            this.webRTC.sendChannel.send(msg);
-        else
-            this.webRTC.remoteConnection.channel.send(msg)
-    }
-
 
     keydownListener() {
         window.addEventListener('mousedown', (e) => {

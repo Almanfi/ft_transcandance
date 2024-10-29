@@ -3,6 +3,10 @@
 <html>
 <head>
     <title>Shooter Index</title>
+    <script>
+        window.users = {{ users|safe }};
+        window.user = {{ user|safe}};
+    </script>
     <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/" } } </script>
     {% load static %}
     <script type="module" src="{% static 'shooter/main.js' %}"></script>
@@ -82,7 +86,7 @@
 </head>
 <body>
     {% block user %}
-        {% if user %}
+        {% if user != 'null' %}
             <h1>Shooter : {{ user.username}} </h1>
             <p> playerId : {{ user.id }} </p>
             <button id="connector" > create socket </button>
