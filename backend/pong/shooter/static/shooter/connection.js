@@ -146,7 +146,6 @@ export class Connection {
         console.log("open!!!!");
         this.send = this.sendRtcMsg;
         console.log("sending message by RTC");
-        this.keyControls.webRTC = this.webRTC;
         this.startPing();
         this.RtcConnected = true;
     }
@@ -156,7 +155,6 @@ export class Connection {
         if (this.send === this.sendRtcMsg)
             this.send =  this.sendSocketMsg;
 
-        this.keyControls.webRTC = null;
         this.stopPing();
         this.iceCount = 0;
         this.RtcConnected = false;

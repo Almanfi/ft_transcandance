@@ -91,14 +91,56 @@ export class TurretBullet extends THREE.Mesh {
     }
 }
 
-export class Player extends THREE.Mesh {
+// const spaceShip = new THREE.Object3D();
+
+function createCore() {
+    let scale = 1;
+    const geometry = new THREE.CapsuleGeometry( scale, 1, 4, 6 )
+    // const geometry = new THREE.BoxGeometry( scale, scale, scale );
+    // const geometry = new THREE.LatheGeometry( 
+    //     [ new THREE.Vector2(0, -0.3), new THREE.Vector2(0.4, 0), new THREE.Vector2(0, 0.3), new THREE.Vector2(1, 0) ], 8
+    // );
+    const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 0.3, emissive: 0xeeeef7, emissiveIntensity: 0.8} );
+    const core = new THREE.Mesh( geometry, material );
+    // core.scale.set(scale, scale, scale);
+    core.name = 'core';
+    core.position.y = 0;
+    core.position.z = 0;
+    core.position.x = 0;
+    return core;
+}
+
+function createCanon() {
+    const geometry = new THREE.CylinderGeometry( 0, 0.7, 1.5, 6 );
+    const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 0.1, emissive: 0xeeeef7, emissiveIntensity: 0.8} );
+    const canon = new THREE.Mesh( geometry, material );
+    canon.name = 'canon';
+    canon.position.y = 0;
+    canon.position.z = -2;
+    canon.position.x = 0;
+    canon.rotateX(- Math.PI / 2);
+    return canon;
+}
+
+
+export class Player extends THREE.Object3D {
     constructor(position) {
-        let width = 3;
-        let color = 0x0096FF;
-        const geometry = new THREE.BoxGeometry(width, width, width);
-        const material = new THREE.MeshBasicMaterial( {color, side: THREE.DoubleSide} );
-        super(geometry, material);
+        // let width = 3;
+        // let color = 0x0096FF;
+        // const geometry = new THREE.BoxGeometry(width, width, width);
+        // const material = new THREE.MeshBasicMaterial( {color, side: THREE.DoubleSide} );
+        // super(geometry, material);
+        super();
+        var core = createCore();
+        var canon = createCanon();
+        this.core = core;
+        this.canon = canon;
+        this.add(core);
+        this.add(canon);
         this.position.set(position.x, position.y, position.z);
+        let scale = 2;
+        this.scale.set(scale, scale, scale);
+        
     };
 
     addToScene(scene) {
@@ -106,11 +148,13 @@ export class Player extends THREE.Mesh {
 		scene.add(this);
 	}
 
-    update(timeS, keyControls, planeFacingVector) {
+    update(timeS, keyControls, planeFacingVector, angle, direction) {
         let speed = 3 * timeS;
         const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
         const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
-        this.rotateY(0.1);
+        this.core.rotateY(0.1);
+        this.canon.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
+        this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
 
         let posDiff = new THREE.Vector3(0, 0, 0);
     
@@ -160,5 +204,24 @@ export class Player extends THREE.Mesh {
         posDiff.normalize();
         this.position.x += posDiff.x;
         this.position.z += posDiff.z;
+    }
+
+    fire(keyControls, bullets) {
+        if (keyControls.Lclick.hold) {
+            if (this.canon.position.z > -2.4) {
+                console.log("deploy canon");
+                this.canon.position.z -= 0.1;
+            }
+            console.log('click');
+            // bulletIndex++;
+            // Pbullets.set(bulletIndex, createBullet(spaceShip.position, direction, angle));
+            // bulletSound.stop(); 
+            // bulletSound.setDetune((0.5 - Math.random()) * 50)
+            // bulletSound.play(); 
+        }
+        else {
+            if (this.canon.position.z < -2)
+                this.canon.position.z += 0.2;
+        }
     }
 }

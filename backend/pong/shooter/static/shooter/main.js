@@ -25,8 +25,20 @@ musicSyncer.loadMusic('/static/shooter/assets/8bit_Weight_World.mp3');
 musicSyncer.bullet = musicSyncer.loadNewSound('/static/shooter/assets/a6.mp3');
 
 
+
+
+
+
+// scene.add(spaceShip);
+
+// spaceShip.position.y = 10;
+// spaceShip.position.z = 0;
+// spaceShip.position.x = -60;
+// spaceShip.scale.set(4, 4, 4);
+
+
 const geometry = new THREE.PlaneGeometry( 400, 300 );
-const material = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+const material = new THREE.MeshBasicMaterial( {color: 0xcccccd, side: THREE.DoubleSide} );
 const plane = new THREE.Mesh( geometry, material );
 scene.add( plane );
 plane.receiveShadow = true;
@@ -56,18 +68,70 @@ var bullets = new Map();
 
 
 const light = new THREE.AmbientLight( 0xffffff ); // soft white light 
+light.intensity = 0.5;
 scene.add( light );
 
+const light2 = new THREE.DirectionalLight( 0xffffff, 1);
+light2.position.set(camera.position.x, camera.position.y, camera.position.z);
+light2.intensity = 0.8;
+// light2.decay = 0;
+scene.add( light2 );
+
+let limit = 0;
 let limit1 = 0;
 let limit2 = 0;
 var playerSyncData = new PlayerData();
 
+
+const raycaster = new THREE.Raycaster();
+
+const mouse = new THREE.Vector2( 1, 1 );
+
+function onMouseMove( event ) {
+
+	event.preventDefault();
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
+document.addEventListener( 'mousemove', onMouseMove );
+
+function findPlayerAngle() {
+    raycaster.setFromCamera( mouse, camera );
+
+	const intersection = raycaster.intersectObject( plane );
+
+    if ( intersection.length > 0 ) {
+		// const instanceId = intersection[ 0 ].instanceId;
+		const point = intersection[ 0 ].point;
+		
+		let dx = point.x - player.position.x;
+		let dz = point.z - player.position.z;
+		if (dz)
+			angle = Math.atan(dx / dz) + 0 * Math.PI / 2;
+		if (dz > 0) {
+			angle += 1 * Math.PI;
+	   }
+       direction.set(dx, 0, dz).normalize().multiplyScalar(2);
+	}
+
+}
+
+var angle = 0;
+let direction = new THREE.Vector3(0, 0, 0);
+
 var animate = (s) => {
     const planeFacingVector = getCameraDir(camera);
+    findPlayerAngle();
+    player.update(s, keyControls, planeFacingVector, angle, direction);
 
-    
+    if (limit > 5) {
+        limit = 0;
+        player.fire(keyControls, null);
+    }
 
-    player.update(s, keyControls, planeFacingVector);
+
     // let dateNow = Date.now();
     let dateNow = new Date().valueOf();
     bullets.forEach((elem, key) => {
@@ -79,7 +143,7 @@ var animate = (s) => {
             elem.update();
     })
 
-    if (limit1 > 3) {
+    if (limit1 > 4) {
 		limit1 = 0;
 		let scale = 1;
         switch (musicSyncer.isBigBoom()) {
@@ -97,15 +161,9 @@ var animate = (s) => {
 		turret.scale.set(scale, scale, scale)
 
 	}
-    // if (limit2 > 100) {
-    //     limit2 = 0;
-    // if (socket && document.getElementById('reciever').value != '')
-    //     sendPlayerData({position: player.position});
 
-    //     if (socket && socket.recieverId != '')
-    //         sendPosition(player.position);
-    // }
-    // limit2++;
+    
+    limit++;
     limit1++;
 
     if (playerSyncData.position) {
