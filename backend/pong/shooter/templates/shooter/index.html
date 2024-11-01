@@ -87,7 +87,7 @@
 <body>
     {% block user %}
         {% if user != 'null' %}
-            <h1>Shooter : {{ user.username}} </h1>
+            {% comment %} <h1>Shooter : {{ user.username}} </h1>
             <p> playerId : {{ user.id }} </p>
             <button id="connector" > create socket </button>
             <span id="socketStatus"> </span>
@@ -103,7 +103,7 @@
                 <label for="RTCweb">RTCweb:</label>
                 <input id="RTCweb" name="RTCweb"><br><br>
                 <button id="RTCsender"> send RTCweb msg </button>
-            </div>
+            </div> {% endcomment %}
 
         {% else %}
             <h1>Login</h1>

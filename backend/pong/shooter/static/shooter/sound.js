@@ -39,9 +39,10 @@ export class MusicSync {
         var sound = new THREE.Audio(this.listener);
         this.audioLoader.load( path, (buffer) => {
             sound.setBuffer( buffer );
-            sound.setVolume( 0.3 );
+            sound.setVolume( 0.2 );
             sound.setPlaybackRate(4);
         }, () => {}, (err) => {console.log("loading sound err: ", err)});
+        return sound;
     }
 
     isBigBoom() {

@@ -59,10 +59,10 @@ export class Turret extends THREE.Mesh {
 		bullets.set(bullet3.id, bullet3);
 	};
 
-	update() {
+	update(timeS) {
 		// this.fireAngle += this.rotationSpeed;
         let ballSpeed = 0.3;
-        this.fireAngle += 0.02 / ballSpeed;
+        this.fireAngle += timeS / ballSpeed;
 	};
 
 	addToScene(scene) {
@@ -91,6 +91,30 @@ export class TurretBullet extends THREE.Mesh {
     }
 }
 
+export class Bullet extends THREE.Mesh {
+    constructor(position, speed, angle, scene) {
+        let width = 1.5;
+        let length = 4;
+        // if (color === undefined)
+        let color = 0xffffff;
+        const geometry = new THREE.CapsuleGeometry( 1, 2, 2, 4);
+        // const material = new THREE.MeshPhongMaterial({ color: 0x000000});
+        const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1} );
+        super(geometry, material);
+        this.speed = speed;
+        this.date = new Date().valueOf();
+        this.position.set(position.x, position.y, position.z);
+        this.position.addScaledVector(this.speed, 2);
+        this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
+        this.rotateX(Math.PI / 2);
+        scene.add(this);
+    };
+
+    update() {
+        this.position.addScaledVector(this.speed, 1);
+    }
+}
+
 // const spaceShip = new THREE.Object3D();
 
 function createCore() {
@@ -100,7 +124,7 @@ function createCore() {
     // const geometry = new THREE.LatheGeometry( 
     //     [ new THREE.Vector2(0, -0.3), new THREE.Vector2(0.4, 0), new THREE.Vector2(0, 0.3), new THREE.Vector2(1, 0) ], 8
     // );
-    const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 0.3, emissive: 0xeeeef7, emissiveIntensity: 0.8} );
+    const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 0.3, emissive: 0x777777, emissiveIntensity: 0.8} );
     const core = new THREE.Mesh( geometry, material );
     // core.scale.set(scale, scale, scale);
     core.name = 'core';
@@ -110,16 +134,23 @@ function createCore() {
     return core;
 }
 
-function createCanon() {
+function createCannon() {
+    const cannon = new THREE.Object3D();
+    const invisibleCore = createCore();
+    invisibleCore.visible = false;
     const geometry = new THREE.CylinderGeometry( 0, 0.7, 1.5, 6 );
     const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 0.1, emissive: 0xeeeef7, emissiveIntensity: 0.8} );
-    const canon = new THREE.Mesh( geometry, material );
-    canon.name = 'canon';
-    canon.position.y = 0;
-    canon.position.z = -2;
-    canon.position.x = 0;
-    canon.rotateX(- Math.PI / 2);
-    return canon;
+    const cannonHead = new THREE.Mesh( geometry, material );
+    cannonHead.name = 'cannonHead';
+    cannonHead.position.y = 0;
+    cannonHead.position.z = -2;
+    cannonHead.position.x = 0;
+    cannonHead.rotateX(- Math.PI / 2);
+    cannon.head = cannonHead;
+    cannon.add(invisibleCore);
+    cannon.add(cannonHead);
+    cannon.name = 'cannon';
+    return cannon;
 }
 
 
@@ -132,15 +163,16 @@ export class Player extends THREE.Object3D {
         // super(geometry, material);
         super();
         var core = createCore();
-        var canon = createCanon();
+        var cannon = createCannon();
         this.core = core;
-        this.canon = canon;
+        this.cannon = cannon;
         this.add(core);
-        this.add(canon);
+        this.add(cannon);
         this.position.set(position.x, position.y, position.z);
         let scale = 2;
         this.scale.set(scale, scale, scale);
-        
+        this.fireRate = 0;
+        this.controls = null;
     };
 
     addToScene(scene) {
@@ -148,35 +180,42 @@ export class Player extends THREE.Object3D {
 		scene.add(this);
 	}
 
-    update(timeS, keyControls, planeFacingVector, angle, direction) {
+    attachControls(controls) {
+        this.controls = controls;
+    }
+
+    addBulletSound(sound) {
+        this.bulletSound = sound;
+    }
+
+    // findPlayerDirection(keyControls, projectionOnPlane) {
+    //     const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
+    //     let speedVect = new THREE.Vector3(0, 0, 0);
+    
+    //     speedVect.addScaledVector(projectionOnPlane, keyControls.Wkey.hold - keyControls.Skey.hold);
+    //     speedVect.addScaledVector(sideOnPlane, keyControls.Dkey.hold - keyControls.Akey.hold);
+    //     speedVect.normalize();
+    //     return speedVect;
+    // }
+
+
+    update(timeS, bullets, planeFacingVector) {
         let speed = 3 * timeS;
         const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
-        const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
-        this.core.rotateY(0.1);
-        this.canon.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
-        this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
 
-        let posDiff = new THREE.Vector3(0, 0, 0);
-    
-        if (keyControls.Wkey.hold) {
-            posDiff.x += projectionOnPlane.x;
-            posDiff.z += projectionOnPlane.z;
+        this.core.rotateY(0.1);
+        // this.cannon.head.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
+        this.cannon.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), this.controls.angle);
+        
+        this.position.addScaledVector(this.controls.speedVector(projectionOnPlane), 1);
+        if (!bullets)
+            return;
+        if (this.fireRate > 4) {
+            this.fireRate = 0;
+            this.fire(bullets)
         }
-        if (keyControls.Skey.hold) {
-            posDiff.x += -projectionOnPlane.x;
-            posDiff.z += -projectionOnPlane.z;
-        }
-        if (keyControls.Akey.hold) {
-            posDiff.x += -sideOnPlane.x;
-            posDiff.z += -sideOnPlane.z;
-        }
-        if (keyControls.Dkey.hold) {
-            posDiff.x += sideOnPlane.x;
-            posDiff.z += sideOnPlane.z;
-        }
-        posDiff.normalize();
-        this.position.x += posDiff.x;
-        this.position.z += posDiff.z;
+        this.fireRate++;
+        
     }
     move(timeS, move, planeFacingVector) {
         let speed = 3 * timeS;
@@ -206,22 +245,31 @@ export class Player extends THREE.Object3D {
         this.position.z += posDiff.z;
     }
 
-    fire(keyControls, bullets) {
-        if (keyControls.Lclick.hold) {
-            if (this.canon.position.z > -2.4) {
-                console.log("deploy canon");
-                this.canon.position.z -= 0.1;
-            }
-            console.log('click');
+    createBullet(angle, direction) {
+        let ballSpeed = 2;
+        let vect0 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
+        applyPlaneRotation(vect0, angle + Math.PI / 2);
+        return new Bullet(this.position, vect0, angle, this.scene);
+    }
+    
+    fire(bullets) {
+        if (this.controls.fire()) {
+            if (this.cannon.head.position.z > -2.4)
+                this.cannon.head.position.z -= 0.1;
+            let bullet = this.createBullet(this.controls.angle, this.controls.direction);
+            bullets.set(bullet.id, bullet);
             // bulletIndex++;
             // Pbullets.set(bulletIndex, createBullet(spaceShip.position, direction, angle));
-            // bulletSound.stop(); 
+            this.bulletSound.stop();
+            this.bulletSound.setDetune((0.5 - Math.random()) * 50)
+            this.bulletSound.play();
+            // bulletSound.stop();
             // bulletSound.setDetune((0.5 - Math.random()) * 50)
             // bulletSound.play(); 
         }
         else {
-            if (this.canon.position.z < -2)
-                this.canon.position.z += 0.2;
+            if (this.cannon.head.position.z < -2)
+                this.cannon.head.position.z += 0.2;
         }
     }
 }

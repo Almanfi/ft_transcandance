@@ -14,19 +14,43 @@ function press() {
     return true;
 }
 
-export class PlayerData {
+export class Controls {
+    speedVector(frontVector) {};
+    fire() {};
+}
+
+export class PlayerData extends Controls {
     constructor() {
+        super();
         this.move = {
             up: false,
             down: false,
             left: false,
             right: false,
         }
+        this.angle = 0;
+        this.direction = new THREE.Vector3(0, 0, 0);
+        this.Lclick = false;
+    }
+
+    speedVector(frontVector) {
+        var speedVect = new THREE.Vector3(0, 0, 0);
+        const sideOnPlane = frontVector.clone().cross(new THREE.Vector3(0, 1, 0));
+    
+        speedVect.addScaledVector(frontVector, this.move.up - this.move.down);
+        speedVect.addScaledVector(sideOnPlane, this.move.right - this.move.left);
+        speedVect.normalize();
+        return speedVect;
+    }
+    fire() {
+        return this.Lclick;
     }
 }
 
-export class KeyControls {
-    constructor (player, props = {}) {
+
+export class KeyControls extends Controls {
+    constructor (player, camera, props = {}) {
+        super();
         Object.assign(this, {
             Wkey: {press: null, pressVal: false, hold: false, release: null, releaseVal: false },
             Akey: {press: null, pressVal: false, hold: false, release: null, releaseVal: false },
@@ -38,9 +62,21 @@ export class KeyControls {
         }, props);
 
         this.player = player;
+        this.player.controls = this;
         this.socket = null;
         this.data = null;
         this.connection = null;
+
+        this.raycaster = new THREE.Raycaster();
+        this.plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+        this.mouse = new THREE.Vector2( 1, 1 );
+        if (!camera)
+            throw new Error('KeyControls: camera is required');
+        this.camera = camera;
+        this.angle = 0;
+        this.sentAngle = 0;
+        this.accurateAngleCounter = 0;
+        this.direction = new THREE.Vector3(0, 0, 0);
 
         this.Wkey.press = press.bind(this.Wkey);
         this.Akey.press = press.bind(this.Akey);
@@ -61,6 +97,57 @@ export class KeyControls {
         this.keyupListener();
     }
 
+    findPlayerAngle() {
+        this.raycaster.setFromCamera( this.mouse, this.camera );
+
+        const intersection = new THREE.Vector3();
+        this.raycaster.ray.intersectPlane(this.plane, intersection);
+    
+        // const intersection = this.raycaster.intersectObject( plane );
+    
+        if ( intersection ) {
+            const point = intersection;
+            
+            let dx = point.x - this.player.position.x;
+            let dz = point.z - this.player.position.z;
+            if (dz)
+                this.angle = Math.atan(dx / dz) + 0 * Math.PI / 2;
+            if (dz > 0) {
+                this.angle += 1 * Math.PI;
+           }
+           this.direction.set(dx, 0, dz).normalize();
+        }
+    }
+
+    onMouseMove( event ) {
+        event.preventDefault();
+    
+        this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+        this.findPlayerAngle();
+        if (!this.connection)
+            return;
+        this.accurateAngleCounter++;
+        if (Math.abs(this.sentAngle - this.angle) > 0.1 || this.accurateAngleCounter % 10 === 0) {
+            this.sentAngle = this.angle;
+            this.connection.send(JSON.stringify({direction: this.direction, angle: this.angle}));
+        }
+    }
+
+    speedVector(frontVector) {
+        var speedVect = new THREE.Vector3(0, 0, 0);
+        const sideOnPlane = frontVector.clone().cross(new THREE.Vector3(0, 1, 0));
+    
+        speedVect.addScaledVector(frontVector, this.Wkey.hold - this.Skey.hold);
+        speedVect.addScaledVector(sideOnPlane, this.Dkey.hold - this.Akey.hold);
+        speedVect.normalize();
+        return speedVect;
+    }
+
+    fire() {
+        return this.Lclick.hold;
+    }
+
     attachSocket(socket, reciever) {
         this.socket = socket;
         this.data = {
@@ -78,7 +165,7 @@ export class KeyControls {
 
     send(msg) {}
 
-    sendToSocket(move, position) {
+    sendToSocket(move, position, mouse) {
         let data = {};
         data.move = move;
         data.position = position ? position : undefined;
@@ -87,10 +174,12 @@ export class KeyControls {
     }
 
     keydownListener() {
+        window.addEventListener( 'mousemove', this.onMouseMove.bind(this) );
         window.addEventListener('mousedown', (e) => {
             if (!this.Lclick.hold)
                 this.Lclick.pressVal = true;
             this.Lclick.hold = true;
+            this.send(JSON.stringify({mouse: {Lclick: true}}));
         });
         window.addEventListener('keydown', (e) => {
             switch (e.code) {
@@ -143,26 +232,27 @@ export class KeyControls {
             window.addEventListener('mouseup', (e) => {
                 this.Lclick.releaseVal = true;
                 this.Lclick.hold = false;
+                this.send(JSON.stringify({mouse: {Lclick: false}}));
             });
             window.addEventListener('keyup', (e) => {
             switch (e.code) {
                 case 'KeyW':
-                    this.sendToSocket({"up": false}, this?.player.position);
+                    this.sendToSocket({"up": false}, this.player.position);
                     this.Wkey.releaseVal = true;
                     this.Wkey.hold = false;
                     break;
                 case 'KeyA':
-                    this.sendToSocket({"left": false}, this?.player.position);
+                    this.sendToSocket({"left": false}, this.player.position);
                     this.Akey.releaseVal = true;
                     this.Akey.hold = false;
                     break;
                 case 'KeyS':
-                    this.sendToSocket({"down": false}, this?.player.position);
+                    this.sendToSocket({"down": false}, this.player.position);
                     this.Skey.releaseVal = true;
                     this.Skey.hold = false;
                     break;
                 case 'KeyD':
-                    this.sendToSocket({"right": false}, this?.player.position);
+                    this.sendToSocket({"right": false}, this.player.position);
                     this.Dkey.releaseVal = true;
                     this.Dkey.hold = false;
                     break;

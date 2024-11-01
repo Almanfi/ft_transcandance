@@ -61,14 +61,16 @@ export class Connection {
             return this.handleIceCandidate(data.iceCandidate);
         if (!JSON.parse(e.data).from)
             return;
-        if (data.move)
-            this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
-        if (data.position) {
-            console.log('recieved position');
-            this.playerSyncData.position = data.position;
-        }
-        else
-            this.playerSyncData.position = null;
+        this.handlePlayerAction(data);
+
+        // if (data.move)
+        //     this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
+        // if (data.position) {
+        //     console.log('recieved position');
+        //     this.playerSyncData.position = data.position;
+        // }
+        // else
+        //     this.playerSyncData.position = null;
     }
 
     async handleRtcOffer(offer) {
@@ -165,6 +167,12 @@ export class Connection {
         let iceConfiguration = null;
         this.webRTC.remoteConnection = new RTCPeerConnection(iceConfiguration);
         let remoteConnection = this.webRTC.remoteConnection;
+        remoteConnection.addEventListener('iceconnectionstatechange', (event) => {
+            event.preventDefault();
+            if (remoteConnection.iceConnectionState === 'failed') {
+                console.error('ICE connection failed catched by me'); // ---------------------------- catch ICE connection failure
+            }
+        });
 
         remoteConnection.onicecandidate = (e) => {this.onIceCandidate(e, this.setupRemoteConnection)};
         remoteConnection.onicecandidateerror = this.onIceCandidateErr.bind(this);
@@ -178,7 +186,7 @@ export class Connection {
     }
 
     sendSocketMsg(msg) {
-        console.log('sending socket msg: ');
+        // console.log('sending socket msg: ');
         // console.log('sending socket msg: ', msg);
         let data = {
             "type": "chat.message",
@@ -189,7 +197,7 @@ export class Connection {
     }
 
     sendRtcMsg(msg) {
-        console.log('sending RTC msg: ');
+        // console.log('sending RTC msg: ');
         // console.log('sending RTC msg: ', msg);
         if (this.webRTC.sendChannel)
             this.webRTC.sendChannel.send(msg);
@@ -215,6 +223,12 @@ export class Connection {
         let iceConfiguration = null;
         this.webRTC.localConnection = new RTCPeerConnection(iceConfiguration);
         let localConnection = this.webRTC.localConnection;
+        localConnection.addEventListener('iceconnectionstatechange', (event) => {
+            event.preventDefault();
+            if (localConnection.iceConnectionState === 'failed') {
+                console.error('ICE connection failed catched by me'); // ---------------------------- catch ICE connection failure
+            }
+        });
         
         localConnection.onicecandidate = (e) => this.onIceCandidate(e, this.setupLocalConnection.bind(this));
         localConnection.onicecandidateerror = this.onIceCandidateErr.bind(this);
@@ -242,14 +256,33 @@ export class Connection {
             let latency = pingEndTime - data.timestamp;
             console.log(`Ping: ${latency.toFixed(2)} ms`);
         }
+        else {
+            this.handlePlayerAction(data);
+        }
+        // if (data.move)
+        //     this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
+        // if (data.position) {
+        //     console.log('recieved position');
+        //     this.playerSyncData.position = data.position;
+        // }
+        // else 
+        //     this.playerSyncData.position = null;
+    }
+    
+    handlePlayerAction(data) {
         if (data.move)
             this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
         if (data.position) {
-            console.log('recieved position');
             this.playerSyncData.position = data.position;
         }
-        else 
+        else
             this.playerSyncData.position = null;
+        if (data.direction)
+            this.playerSyncData.direction = data.direction;
+        if (data.angle)
+            this.playerSyncData.angle = data.angle;
+        if (data.mouse)
+            this.playerSyncData.Lclick = data.mouse.Lclick;
     }
 
     startPing() {
