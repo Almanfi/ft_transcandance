@@ -165,8 +165,31 @@ export class Connection {
     initRemoteConnection () {
         this.webRTC = { };
         let iceConfiguration = null;
+        // const iceConfiguration = {
+        //     iceServers: [
+        //         {urls: null}
+        //     ],
+        //     iceCandidatePoolSize: 1,
+        //     sdpSemantics: 'unified-plan',
+
+
+        // };
         this.webRTC.remoteConnection = new RTCPeerConnection(iceConfiguration);
         let remoteConnection = this.webRTC.remoteConnection;
+
+        remoteConnection.addEventListener('connectionstatechange', event => {
+            // event.preventDefault();
+            console.log('+++++++++++++++++++++++++++++++connection state: ', remoteConnection.connectionState);
+            if (remoteConnection.connectionState === 'disconnected') {
+                console.log('disconnected and closing');
+                this.iceCount = 0;
+                this.RtcConnected = false;
+                remoteConnection.close();
+            }
+            // if (localConnection.connectionState === 'connected') {
+            //     // Peers connected!
+            // }
+        });
         remoteConnection.addEventListener('iceconnectionstatechange', (event) => {
             event.preventDefault();
             if (remoteConnection.iceConnectionState === 'failed') {
@@ -221,8 +244,26 @@ export class Connection {
     startRtcConnection() {
         this.webRTC = { };
         let iceConfiguration = null;
+        // const iceConfiguration = {
+        //     iceServers: [
+        //         {urls: null}
+        //     ]
+        // };
         this.webRTC.localConnection = new RTCPeerConnection(iceConfiguration);
         let localConnection = this.webRTC.localConnection;
+        localConnection.addEventListener('connectionstatechange', event => {
+            // event.preventDefault();
+            console.log('+++++++++++++++++++++++++++++++connection state: ', localConnection.connectionState);
+            if (localConnection.connectionState === 'disconnected') {
+                console.log('disconnected and closing');
+                this.iceCount = 0;
+                this.RtcConnected = false;
+                localConnection.close();
+            }
+            // if (localConnection.connectionState === 'connected') {
+            //     // Peers connected!
+            // }
+        });
         localConnection.addEventListener('iceconnectionstatechange', (event) => {
             event.preventDefault();
             if (localConnection.iceConnectionState === 'failed') {
@@ -278,7 +319,7 @@ export class Connection {
         else
             this.playerSyncData.position = null;
         if (data.direction)
-            this.playerSyncData.direction = data.direction;
+            this.playerSyncData.direction.copy(data.direction);
         if (data.angle)
             this.playerSyncData.angle = data.angle;
         if (data.mouse)

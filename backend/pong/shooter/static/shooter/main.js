@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { KeyControls, PlayerData, getCameraDir } from './keyControl.js';
 import { gameClock } from './gclock.js';
-import { Turret, Player } from './assets.js';
+import { Turret, Player, TurretBulletManager, PlayersBulletManager } from './assets.js';
 import { MusicSync } from './sound.js';
 import { Connection } from './connection.js';
 
@@ -75,9 +75,17 @@ player.add(camera);
 var turret = new Turret({initPosition: {x: 10, y: 3, z: 10}, rotationSpeed: 0.1, speed: 1});
 turret.addToScene(scene);
 
-var bullets = new Map();
-var playerBullets = new Map();
-var foeBullets = new Map();
+var turretBulletManager = new TurretBulletManager(scene);
+turret.addBulletManager(turretBulletManager);
+var playerBulletManager = new PlayersBulletManager(scene);
+player.addBulletManager(playerBulletManager);
+var foeBulletManager = new PlayersBulletManager(scene);
+foe.addBulletManager(foeBulletManager);
+
+
+// var bullets = new Map();
+// var playerBullets = new Map();
+// var foeBullets = new Map();
 
 
 const light = new THREE.AmbientLight( 0xffffff ); // soft white light 
@@ -102,8 +110,8 @@ foe.attachControls(playerSyncData);
 var animate = (s) => {
     const planeFacingVector = getCameraDir(camera);
     // findPlayerAngle();
-    player.update(s, playerBullets, planeFacingVector);
-    foe.update(s, foeBullets, planeFacingVector);
+    player.update(s, planeFacingVector);
+    foe.update(s, planeFacingVector);
 
     // if (limit > 5) {
     //     limit = 0;
@@ -112,31 +120,34 @@ var animate = (s) => {
 
 
     // let dateNow = Date.now();
-    let dateNow = new Date().valueOf();
-    bullets.forEach((elem, key) => {
-        if (dateNow > elem.date + 10 * 1000) {
-            scene.remove(elem);
-            bullets.delete(key);
-        }
-        else
-            elem.update();
-    })
-    playerBullets.forEach((elem, key) => {
-        if (dateNow > elem.date + 10 * 1000) {
-            scene.remove(elem);
-            playerBullets.delete(key);
-        }
-        else
-            elem.update();
-    })
-    foeBullets.forEach((elem, key) => {
-        if (dateNow > elem.date + 10 * 1000) {
-            scene.remove(elem);
-            foeBullets.delete(key);
-        }
-        else
-            elem.update();
-    })
+    turretBulletManager.update();
+    playerBulletManager.update();
+    foeBulletManager.update();
+    // let dateNow = new Date().valueOf();
+    // bullets.forEach((elem, key) => {
+    //     if (dateNow > elem.date + 10 * 1000) {
+    //         scene.remove(elem);
+    //         bullets.delete(key);
+    //     }
+    //     else
+    //         elem.update();
+    // })
+    // playerBullets.forEach((elem, key) => {
+    //     if (dateNow > elem.date + 10 * 1000) {
+    //         scene.remove(elem);
+    //         playerBullets.delete(key);
+    //     }
+    //     else
+    //         elem.update();
+    // })
+    // foeBullets.forEach((elem, key) => {
+    //     if (dateNow > elem.date + 10 * 1000) {
+    //         scene.remove(elem);
+    //         foeBullets.delete(key);
+    //     }
+    //     else
+    //         elem.update();
+    // })
 
     if (limit1 > 4) {
 		limit1 = 0;
@@ -144,12 +155,12 @@ var animate = (s) => {
         switch (musicSyncer.isBigBoom()) {
             case 1:
                 scale = 1.2;
-			    turret.fire(0xfc7703, bullets);
+			    turret.fire(0xfc7703);
 			    turret.update(s);
                 break;
             case 2:
                 scale = 1.2;
-			    turret.fire(0xff0000, bullets);
+			    turret.fire(0xff0000);
 			    turret.update(s);
                 break;
         }
@@ -170,28 +181,32 @@ var animate = (s) => {
 
     var vex = new THREE.Vector3();
 
-	let threshold = 4;
-	for(var [key, bullet] of bullets) {
-		vex.subVectors(player.position, bullet.position);
-		if (vex.length() < threshold) {
-			bullets.get(key).material.color.set(0x000000);
-			// flashRed = 10;
-			break;
-		}
-		if (bullets.get(key).material.color.getHex() === 0xff0000)
-			continue;
-		for(let [Pkey, PlayerBullet] of playerBullets) {
-			vex.subVectors(PlayerBullet.position, bullet.position);
-			if (vex.length() < threshold) {
-				scene.remove(bullet);
-				scene.remove(PlayerBullet);
-				playerBullets.delete(Pkey);
-				bullets.delete(key);
-				// flashRed = 10;
-				break;
-			}
-		}
-	}
+	// let threshold = 4;
+    turretBulletManager.checkCollision(player);
+    turretBulletManager.checkCollision(foe);
+    playerBulletManager.checkCollision(foe);
+    foeBulletManager.checkCollision(player);
+	// for(var [key, bullet] of bullets) {
+	// 	vex.subVectors(player.position, bullet.position);
+	// 	if (vex.length() < threshold) {
+	// 		bullets.get(key).material.color.set(0x000000);
+	// 		// flashRed = 10;
+	// 		break;
+	// 	}
+	// 	if (bullets.get(key).material.color.getHex() === 0xff0000)
+	// 		continue;
+	// 	for(let [Pkey, PlayerBullet] of playerBullets) {
+	// 		vex.subVectors(PlayerBullet.position, bullet.position);
+	// 		if (vex.length() < threshold) {
+	// 			scene.remove(bullet);
+	// 			scene.remove(PlayerBullet);
+	// 			playerBullets.delete(Pkey);
+	// 			bullets.delete(key);
+	// 			// flashRed = 10;
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 }
 

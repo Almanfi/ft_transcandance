@@ -34,29 +34,29 @@ export class Turret extends THREE.Mesh {
 		// this.boxHelper = new THREE.BoxHelper( this.mesh, 0xffff00 );
 		// this.boxHelper.visible = false;
 	};
+
+    addBulletManager(bulletManager) {
+        this.bulletManager = bulletManager;
+    }
 	
-	fire(color, bullets) {
+	fire(color) {
 		let ballSpeed = this.speed;
         // let ballSpeed = 0.5;
 		let vect0 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
 		applyPlaneRotation(vect0, this.fireAngle + 2 * Math.PI);
-        var bullet0 = new TurretBullet(this.position, vect0, color, this.scene);
-		bullets.set(bullet0.id, bullet0);
+        this.bulletManager.spawnBullet(color, this.position, vect0);
 
 		let vect1 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
 		applyPlaneRotation(vect1, this.fireAngle + Math.PI / 2);
-        var bullet1 = new TurretBullet(this.position, vect1, color, this.scene)
-		bullets.set(bullet1.id, bullet1);
+        this.bulletManager.spawnBullet(color, this.position, vect1);
 
 		let vect2 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
 		applyPlaneRotation(vect2, this.fireAngle + Math.PI);
-        var bullet2 = new TurretBullet(this.position, vect2, color, this.scene);
-		bullets.set(bullet2.id, bullet2);
+        this.bulletManager.spawnBullet(color, this.position, vect2);
 
 		let vect3 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
 		applyPlaneRotation(vect3, this.fireAngle + 3 * Math.PI / 2);
-        var bullet3 = new TurretBullet(this.position, vect3, color, this.scene);
-		bullets.set(bullet3.id, bullet3);
+        this.bulletManager.spawnBullet(color, this.position, vect3);
 	};
 
 	update(timeS) {
@@ -73,18 +73,31 @@ export class Turret extends THREE.Mesh {
 }
 
 export class TurretBullet extends THREE.Mesh {
-    constructor(position, speed, color, scene) {
-        let radius = 1.5;
-        if (color === undefined)
-            color = 0xfc7703;
-        const geometry = new THREE.SphereGeometry(radius);
-        const material = new THREE.MeshBasicMaterial( {color, side: THREE.DoubleSide} );
+    constructor() {
+        const geometry = new THREE.SphereGeometry(1.5);
+        const material = new THREE.MeshBasicMaterial();
         super(geometry, material);
-        this.speed = speed;
+    }
+
+    // constructor(position, speed, color, scene) {
+    //     let radius = 1.5;
+    //     if (color === undefined)
+    //         color = 0xfc7703;
+    //     const geometry = new THREE.SphereGeometry(radius);
+    //     const material = new THREE.MeshBasicMaterial( {color, side: THREE.DoubleSide} );
+    //     super(geometry, material);
+    //     this.speed = speed;
+    //     this.date = new Date().valueOf();
+    //     this.position.set(position.x, position.y, position.z);
+    //     scene.add(this);
+    // };
+
+    set(color, position, speed) {
         this.date = new Date().valueOf();
+        this.speed = speed;
         this.position.set(position.x, position.y, position.z);
-        scene.add(this);
-    };
+        this.material.color.set(color);
+    }
 
     update() {
 		this.position.addScaledVector(this.speed, 1);
@@ -92,26 +105,43 @@ export class TurretBullet extends THREE.Mesh {
 }
 
 export class Bullet extends THREE.Mesh {
-    constructor(position, speed, angle, scene) {
-        let width = 1.5;
-        let length = 4;
-        // if (color === undefined)
-        let color = 0xffffff;
+    constructor() {
         const geometry = new THREE.CapsuleGeometry( 1, 2, 2, 4);
-        // const material = new THREE.MeshPhongMaterial({ color: 0x000000});
         const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1} );
         super(geometry, material);
-        this.speed = speed;
+    }
+
+    // constructor(position, speed, angle, scene) {
+    //     let width = 1.5;
+    //     let length = 4;
+    //     // if (color === undefined)
+    //     let color = 0xffffff;
+    //     const geometry = new THREE.CapsuleGeometry( 1, 2, 2, 4);
+    //     // const material = new THREE.MeshPhongMaterial({ color: 0x000000});
+    //     const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1} );
+    //     super(geometry, material);
+    //     this.speed = speed;
+    //     this.date = new Date().valueOf();
+    //     this.position.set(position.x, position.y, position.z);
+    //     this.position.addScaledVector(this.speed, 2);
+    //     this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
+    //     this.rotateX(Math.PI / 2);
+    //     scene.add(this);
+    // };
+
+    set(position, speed, angle) {
         this.date = new Date().valueOf();
+        this.speed = speed;
+        this.material.color.set(0xffffff);
+        this.material.emissive.set(0xeeeeee);
         this.position.set(position.x, position.y, position.z);
         this.position.addScaledVector(this.speed, 2);
         this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
         this.rotateX(Math.PI / 2);
-        scene.add(this);
-    };
+    }
 
     update() {
-        this.position.addScaledVector(this.speed, 1);
+        this.position.addScaledVector(this.speed, 2);
     }
 }
 
@@ -188,6 +218,10 @@ export class Player extends THREE.Object3D {
         this.bulletSound = sound;
     }
 
+    addBulletManager(bulletManager) {
+        this.bulletManager = bulletManager;
+    }
+
     // findPlayerDirection(keyControls, projectionOnPlane) {
     //     const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
     //     let speedVect = new THREE.Vector3(0, 0, 0);
@@ -199,7 +233,7 @@ export class Player extends THREE.Object3D {
     // }
 
 
-    update(timeS, bullets, planeFacingVector) {
+    update(timeS, planeFacingVector) {
         let speed = 3 * timeS;
         const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
 
@@ -208,11 +242,9 @@ export class Player extends THREE.Object3D {
         this.cannon.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), this.controls.angle);
         
         this.position.addScaledVector(this.controls.speedVector(projectionOnPlane), 1);
-        if (!bullets)
-            return;
         if (this.fireRate > 4) {
             this.fireRate = 0;
-            this.fire(bullets)
+            this.fire()
         }
         this.fireRate++;
         
@@ -245,19 +277,20 @@ export class Player extends THREE.Object3D {
         this.position.z += posDiff.z;
     }
 
-    createBullet(angle, direction) {
-        let ballSpeed = 2;
-        let vect0 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
-        applyPlaneRotation(vect0, angle + Math.PI / 2);
-        return new Bullet(this.position, vect0, angle, this.scene);
-    }
+    // createBullet(angle, direction) {
+    //     let ballSpeed = 2;
+    //     let vect0 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
+    //     applyPlaneRotation(vect0, angle + Math.PI / 2);
+    //     return new Bullet(this.position, vect0, angle, this.scene);
+    // }
     
-    fire(bullets) {
+    fire() {
         if (this.controls.fire()) {
             if (this.cannon.head.position.z > -2.4)
                 this.cannon.head.position.z -= 0.1;
-            let bullet = this.createBullet(this.controls.angle, this.controls.direction);
-            bullets.set(bullet.id, bullet);
+            this.bulletManager.spawnBullet(this.position, this.controls.direction.clone(), this.controls.angle);
+            // let bullet = this.createBullet(this.controls.angle, this.controls.direction);
+            // bullets.set(bullet.id, bullet);
             // bulletIndex++;
             // Pbullets.set(bulletIndex, createBullet(spaceShip.position, direction, angle));
             this.bulletSound.stop();
@@ -273,3 +306,193 @@ export class Player extends THREE.Object3D {
         }
     }
 }
+
+export class PlayersBulletManager {
+    constructor(scene) {
+        this.bullets = new Map();
+        this.bulletsPool = new Map();
+        this.scene = scene;
+        this.createBulletsPool(120);
+    }
+
+    createBulletsPool(poolSize) {
+        console.log('createBulletsPool of size: ', poolSize, "now pool has : ", this.bulletsPool.size, "and used bullets are : ", this.bullets.size);
+        for (let i = 0; i < poolSize; i++) {
+            let bullet = new Bullet();
+            bullet.visible = false;
+            this.scene.add(bullet);
+            this.bulletsPool.set(bullet.id, bullet);
+        }
+    }
+
+    spawnBullet(color, position, speed, angle) {
+        let bullet = this.getBullet();
+        bullet.set(color, position, speed, angle);
+        bullet.visible = true;
+    }
+
+    despawnBullet(bullet) {
+        bullet.visible = false;
+        this.returnBullet(bullet);
+    }
+
+    getBullet() {
+        if (this.bulletsPool.size < 1) {
+            this.createBulletsPool(10);
+            return this.getBullet();
+        }
+        let bullet = this.bulletsPool.values().next().value;
+        this.bulletsPool.delete(bullet.id);
+        this.bullets.set(bullet.id, bullet);
+        return bullet;
+    }
+
+
+    returnBullet(bullet) {
+        this.bulletsPool.set(bullet.id, bullet);
+        this.bullets.delete(bullet.id);
+    }
+
+    update() {
+        let dateNow = new Date().valueOf();
+        this.bullets.forEach((elem) => {
+            if (dateNow > elem.date + 10 * 1000) {
+                this.despawnBullet(elem);
+            }
+            else
+                elem.update();
+        })
+    }
+
+    checkCollision(other) {
+        var vex = new THREE.Vector3();
+        var threshold = 4;
+        for(var [key, bullet] of this.bullets) {
+            vex.subVectors(other.position, bullet.position);
+            if (vex.length() < threshold) {
+                bullet.material.color.set(0x000000);
+                bullet.material.emissive.set(0x000000);
+                // this.bullets.get(key).material.color.set(0x000000);
+                return;
+            }
+            for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
+                vex.subVectors(otherBullet.position, bullet.position);
+                if (vex.length() < threshold) {
+                    this.despawnBullet(bullet);
+                    other.bulletManager.despawnBullet(otherBullet);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+export class TurretBulletManager {
+    constructor(scene) {
+        this.bullets = new Map();
+        this.bulletsPool = new Map();
+        this.scene = scene;
+        this.createBulletsPool(500);
+    }
+
+    createBulletsPool(poolSize) {
+        for (let i = 0; i < poolSize; i++) {
+            let bullet = new TurretBullet();
+            bullet.visible = false;
+            this.scene.add(bullet);
+            this.bulletsPool.set(bullet.id, bullet);
+        }
+    }
+
+    spawnBullet(color, position, speed) {
+        let bullet = this.getBullet();
+        bullet.set(color, position, speed);
+        bullet.visible = true;
+    }
+
+    despawnBullet(bullet) {
+        bullet.visible = false;
+        this.returnBullet(bullet);
+    }
+
+    getBullet() {
+        if (this.bulletsPool.size < 1) {
+            this.createBulletsPool(10);
+            return this.getBullet();
+        }
+        let bullet = this.bulletsPool.values().next().value;
+        this.bulletsPool.delete(bullet.id);
+        this.bullets.set(bullet.id, bullet);
+        return bullet;
+    }
+
+
+    returnBullet(bullet) {
+        this.bulletsPool.set(bullet.id, bullet);
+        this.bullets.delete(bullet.id);
+    }
+
+    update() {
+        let dateNow = new Date().valueOf();
+        this.bullets.forEach((elem) => {
+            if (dateNow > elem.date + 10 * 1000) {
+                this.despawnBullet(elem);
+            }
+            else
+                elem.update();
+        })
+    }
+
+    checkCollision(player) {
+        var vex = new THREE.Vector3();
+        var threshold = 2;
+        for(var [key, bullet] of this.bullets) {
+            vex.subVectors(player.position, bullet.position);
+            if (vex.length() < threshold) {
+                this.bullets.get(key).material.color.set(0x000000);
+                return;
+            }
+            if (this.bullets.get(key).material.color.getHex() === 0xff0000)
+                continue;
+            for(let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
+                vex.subVectors(PlayerBullet.position, bullet.position);
+                if (vex.length() < threshold) {
+                    this.despawnBullet(bullet);
+                    player.bulletManager.despawnBullet(PlayerBullet);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// export class BulletManager {
+//     constructor(scene) {
+//         this.turretBullets = new Map();
+//         this.playersBullets = new Map();
+//         this.turretBulletsPool = new Map();
+//         this.playersBulletsPool = new Map();
+//         this.scene = scene;
+//     }
+
+//     createTurretBulletPool(poolSize) {
+//         for (let i = 0; i < poolSize; i++) {
+//             let bullet = new TurretBullet(this.scene);
+//             bullet.visible = false;
+//             this.scene.add(bullet);
+//             this.turretBulletsPool.set(bullet.id, bullet);
+//         }
+//     }
+
+//     createPlayerBulletsPool(poolSize) {
+//         for (let i = 0; i < poolSize; i++) {
+//             let bullet = new Bullet();
+//             bullet.visible = false;
+//             this.scene.add(bullet);
+//             this.playerBulletsPool.set(bullet.id, bullet);
+//         }
+//     }
+
+
+        
+// }
