@@ -8,6 +8,13 @@ export class Connection {
         this.playerSyncData = playerSyncData;
         this.pingInterval = null;
         this.RtcConnected = false;
+        this.ping = new Array();
+        this.ping.size = 0;
+        // this.remoteTimestamp = new Array();
+        // this.localTimestamp = new Array();
+        this.pingAvrg = 0;
+        this.timeDiff = new Array();
+        this.timeDiffAvrg = 0;
     }
 
     sendAdapter(msg) {
@@ -150,6 +157,8 @@ export class Connection {
         console.log("sending message by RTC");
         this.startPing();
         this.RtcConnected = true;
+        if (this.webRTC.remoteConnection)
+            this.initSync();
     }
 
     onDataChannelClose(e) {
@@ -309,8 +318,10 @@ export class Connection {
         // else 
         //     this.playerSyncData.position = null;
     }
-    
+
     handlePlayerAction(data) {
+        if (data.type === "sync")
+            this.handleSyncWithPeer(data);
         if (data.move)
             this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
         if (data.position) {
@@ -331,8 +342,102 @@ export class Connection {
         //     this.sendRtcMsg(JSON.stringify({ type: "ping", timestamp: performance.now() }));
         // }, 1000);
     }
-    
+
     stopPing() {
         // clearInterval(this.pingInterval);
     }
+
+    initSync() {
+        this.send(JSON.stringify({ type: "sync", timestamp: performance.now(), ping: true}));
+    }
+
+    checkSync() {
+        this.send(JSON.stringify({ type: "sync", pingAvrg: this.pingAvrg, timestamp: performance.now()}));
+    }
+
+    handleSyncWithPeer(data) {
+        let samplesize = 100;
+        // if (data.pingAvrg) {
+        //     console.log("ping average is: ", data.pingAvrg);
+        //     this.pingAvrg = data.pingAvrg;
+        //     console.log("current time is ", performance.now());
+        //     console.log("peer time is : ", data.timestamp);
+        //     console.log("average time difference is: ", this.timeDiff);
+        //     console.log("estimated time is: ", data.timestamp - this.timeDiff - data.pingAvrg / 2);
+        //     return;
+        // }
+        // console.log("ping length: ", this.ping.length);
+        // if (this.ping.length === samplesize) {
+        //     console.log(this.ping);
+
+        //     let pingAvrg = 0;
+        //     for (let i = 0; i < samplesize; i++) {
+        //         pingAvrg += this.ping[i];
+        //     }
+        //     pingAvrg = pingAvrg / samplesize;
+
+        //     this.pingAvrg = pingAvrg;
+        //     this.ping = new Array();
+        //     this.send(JSON.stringify({ type: "sync", pingAvrg: this.pingAvrg, timestamp: performance.now()}));
+        //     console.log("ping average is: ", this.pingAvrg);
+        //     return;
+        // }
+        // console.log("not enough pings");
+        // if (this.localTimestamp.length === samplesize) {
+        //     let timediff = this.remoteTimestamp.map((a, i) => a - this.localTimestamp[i]);
+        //     let sum = 0;
+        //     timediff.forEach(a => sum += a);
+        //     this.timeDiff = sum / samplesize;
+        //     this.remoteTimestamp = new Array();
+        //     this.localTimestamp = new Array();
+        //     this.send(JSON.stringify({ type: "sync", timeDiff: this.timeDiff, timestamp: performance.now()}));
+        //     console.log("time diff: ", timediff);
+        //     return;
+        // }
+        // if (data.ping) {
+        //     console.log("ping recieved");
+        //     this.remoteTimestamp.push(data.timestamp);
+        //     this.localTimestamp.push(performance.now());
+        //     this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), pong: true}));
+        // }
+        if (data.showTime) {
+            console.log("my time is: ", performance.now());
+            console.log("peer time is: ", data.peerClock);
+            console.log("average time difference is: ", this.timeDiffAvrg);
+            console.log("ping average is: ", this.pingAvrg);
+            let currentPing = performance.now() - data.timestamp;
+            console.log("(avrg ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - this.pingAvrg / 2);
+            console.log("(curr ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - currentPing / 2);
+            return;
+        }
+        if (data.getTime) {
+            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), showTime: true}));
+            return;
+        }
+        if (this.ping.size === samplesize) {
+            this.pingAvrg = this.ping.reduce((a, b) => a + b) / samplesize;
+            this.timeDiffAvrg = this.timeDiff.reduce((a, b) => a + b) / samplesize;
+            this.ping = new Array();
+            this.ping.size = 0;
+            this.timeDiff = new Array();
+            this.send(JSON.stringify({ type: "sync", getTime: true, timestamp: performance.now()}));
+            return;
+        }
+
+        if (data.ping) {
+            console.log("ping recieved");
+            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), pong: true}));
+        }
+        if(data.pong) {
+            console.log("pong recieved");
+            let ping = performance.now() - data.timestamp;
+            this.ping.size++;
+            this.ping.push(ping);
+            let timeDiff = data.peerClock - performance.now() - ping / 2;
+            this.timeDiff.push(timeDiff);
+            this.send(JSON.stringify({ type: "sync", timestamp: performance.now(), ping: true}));
+        }
+
+    }
+
 }
