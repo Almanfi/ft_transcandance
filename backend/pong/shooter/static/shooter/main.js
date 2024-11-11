@@ -5,6 +5,7 @@ import { gameClock } from './gclock.js';
 import { Turret, Player, TurretBulletManager, PlayersBulletManager } from './assets.js';
 import { MusicSync } from './sound.js';
 import { Connection } from './connection.js';
+import { musicMap } from './reolMap.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -15,16 +16,60 @@ renderer.setPixelRatio( window.devicePixelRatio * 1);
 
 document.body.appendChild( renderer.domElement );
 
-var playerData = new PlayerData();
+// var playerData = new PlayerData();
 
 var friend = user.id === users[0].id ? users[1] : users[0];
 
 
 const musicSyncer = new MusicSync(camera);
-musicSyncer.loadMusic('/static/shooter/assets/8bit_Weight_World.mp3');
+musicSyncer.loadMusic('/static/shooter/assets/No_title.mp3');
+musicSyncer.addMusicMap(musicMap);
 musicSyncer.bullet = musicSyncer.loadNewSound('/static/shooter/assets/a6.mp3');
 
+// const musicMap = map;
 
+var mapIterator = musicMap.entries();
+var entry = mapIterator.next();
+
+let limit1 = 0;
+
+function startGame(timeStamp) {
+        musicSyncer.stopMusic();
+    setTimeout(() => {
+        while(timeStamp > performance.now());
+        musicSyncer.playMusic();
+        limit1 = 0;
+        turret.fireAngle = 0;
+    }, (timeStamp - performance.now()) - 30);
+}
+
+function startMusic(timeStamp) {
+        musicSyncer.playMusic();
+        console.log("game started with ", musicSyncer);
+}
+// var csvContent = "";
+// for (var [key, array] of temp0) {
+//     csvContent += key + ",";
+//     for (var elem of array) {
+//         csvContent += elem + ",";
+//     }
+//     csvContent += "\n";
+// }
+// const blob = new Blob([csvContent], { type: 'text/csv' });
+
+// // Create a temporary link element
+// const link = document.createElement('a');
+// link.href = URL.createObjectURL(blob);
+// link.download = 'data.csv';
+
+// // Append the link to the body
+// document.body.appendChild(link);
+
+// // Trigger the download by simulating a click
+// link.click();
+
+// // Remove the link from the document
+// document.body.removeChild(link);
 
 
 
@@ -47,12 +92,12 @@ plane.position.y = 0;
 plane.position.z = 0;
 plane.rotateX(Math.PI / 2);
 
-const player = new Player({x: 10, y: 0, z: -10});
+const player = new Player({x: 10, y: 3, z: -10});
 
 player.addToScene(scene);
 player.addBulletSound(musicSyncer.bullet);
 
-const foe = new Player({x: -10, y: 0, z: 10});
+const foe = new Player({x: -10, y: 3, z: 10});
 
 foe.addToScene(scene);
 foe.addBulletSound(musicSyncer.bullet);
@@ -101,73 +146,125 @@ light2.lookAt(0, 0, 0);
 scene.add( light2 );
 
 let limit = 0;
-let limit1 = 0;
+// let limit1 = 0;
 let limit2 = 0;
-var playerSyncData = new PlayerData();
+var playerSyncData = new PlayerData(foe);
 foe.attachControls(playerSyncData);
 
+var hit = false;
+var musicPlaying = true;
+var keepFioring = false;
+var scale = 1;
+
+
+// turretBulletManager.spawnBullet(0xfc7703, {x: 30, y: 3, z: 30}, {x: 0.2, y: 0, z: 0});
+
+function rollBack() {
+    const planeFacingVector = getCameraDir(camera);
+    // (in the makeBackUp method) if a new action arrives and its time stamp is old send a full description request;
+    let actions = [...playerSyncData.actions.entries()]. sort((a, b) => a[0] - b[0]);
+    let idx = 0;
+
+    let timeStampTransformed  = actions[0][0] - timeDiff;
+    while (timeStampTransformed < performance.now()) {
+        turretBulletManager.findPositionAtTime(timeStampTransformed);
+        player.findPositionAtTime(timeStampTransformed);
+
+        foe.position.copy(playerSyncData.backUpPosition);
+        while (idx < actions.length) {
+            ActionTime = actions[idx][0] - timeDiff;
+            if (ActionTime > timeStampTransformed) {
+                break;
+            }
+            playerSyncData.applyAction(actions[idx][1]);
+            playerSyncData.actions.delete(actions[idx][0]);
+            idx++;
+        }
+        foe.update(gClock.msPerFrame, planeFacingVector);
+
+
+        turretBulletManager.findPositionAtTime(timeStampTransformed);
+        // playerBulletManager.findPositionAtTime(timeStampTransformed);
+        // foeBulletManager.findPositionAtTime(timeStampTransformed);
+
+
+        // turretBulletManager.checkCollision(player, s);
+        // turretBulletManager.checkCollision(foe, s);
+        // playerBulletManager.checkCollision(foe, s);
+        // foeBulletManager.checkCollision(player, s);
+        
+        
+        timeStampTransformed += gClock.msPerFrame;
+    }
+    // save for next roll back
+    playerSyncData.backUpPosition.copy(foe.position);
+}
 
 var animate = (s) => {
     const planeFacingVector = getCameraDir(camera);
-    // findPlayerAngle();
+    if (playerSyncData.rollback) {
+        playerSyncData.rollback = false;
+        rollBack();
+    }
     player.update(s, planeFacingVector);
     foe.update(s, planeFacingVector);
 
-    // if (limit > 5) {
-    //     limit = 0;
-    //     player.fire(keyControls, playerBullets);
-    // }
+    turretBulletManager.update(s);
+    playerBulletManager.update(s);
+    foeBulletManager.update(s);
 
 
-    // let dateNow = Date.now();
-    turretBulletManager.update();
-    playerBulletManager.update();
-    foeBulletManager.update();
-    // let dateNow = new Date().valueOf();
-    // bullets.forEach((elem, key) => {
-    //     if (dateNow > elem.date + 10 * 1000) {
-    //         scene.remove(elem);
-    //         bullets.delete(key);
+//================================================================================================
+    // if (limit1 > 8) {
+	// 	limit1 = 0;
+	// 	let scale = 1;
+    //     switch (musicSyncer.isBigBoom()) {
+    //         case 1:
+    //             scale = 1.2;
+	// 		    turret.fire(0xfc7703);
+	// 		    turret.update(s);
+    //             break;
+    //         case 2:
+    //             scale = 1.2;
+	// 		    turret.fire(0xff0000);
+	// 		    turret.update(s);
+    //             break;
     //     }
-    //     else
-    //         elem.update();
-    // })
-    // playerBullets.forEach((elem, key) => {
-    //     if (dateNow > elem.date + 10 * 1000) {
-    //         scene.remove(elem);
-    //         playerBullets.delete(key);
-    //     }
-    //     else
-    //         elem.update();
-    // })
-    // foeBullets.forEach((elem, key) => {
-    //     if (dateNow > elem.date + 10 * 1000) {
-    //         scene.remove(elem);
-    //         foeBullets.delete(key);
-    //     }
-    //     else
-    //         elem.update();
-    // })
+	// 	turret.scale.set(scale, scale, scale)
 
-    if (limit1 > 4) {
-		limit1 = 0;
-		let scale = 1;
-        switch (musicSyncer.isBigBoom()) {
-            case 1:
-                scale = 1.2;
-			    turret.fire(0xfc7703);
-			    turret.update(s);
-                break;
-            case 2:
-                scale = 1.2;
-			    turret.fire(0xff0000);
-			    turret.update(s);
-                break;
-        }
-		turret.scale.set(scale, scale, scale)
+	// }
 
-	}
+    // if (musicSyncer.musicPlaying)
+    //     musicSyncer.isBigBoom();
+//================================================================================================
+    if (limit > 5) {
+        limit = 0;
+        scale = 1;
+    }
 
+    let beat = musicSyncer.nextBeat();
+    if (beat.value) {
+        limit = 0;
+        scale = 1.2;
+        turret.update(s);
+    }
+    if (beat.new && beat.value === 1) {
+        // console.log("beat: ", beat);
+        limit1 = 0;
+    }
+
+    switch (beat.value) {
+        case 1:
+            turret.fire(0xfc7703);
+            break;
+        case 2:
+            turret.fire(0xff0000);
+            turret.fireAtAngle(0xff0000, Math.PI / 8);
+            turret.fireAtAngle(0xff0000, 2 * Math.PI / 8);
+            turret.fireAtAngle(0xff0000, 3 * Math.PI / 8);
+            break;
+    }
+    turret.scale.set(scale, scale, scale)
     
     limit++;
     limit1++;
@@ -177,45 +274,22 @@ var animate = (s) => {
         foe.position.set(playerSyncData.position.x, playerSyncData.position.y, playerSyncData.position.z);
         playerSyncData.position = null;
     }
-    // foe.move(s, playerSyncData.move, planeFacingVector);
 
-    var vex = new THREE.Vector3();
-
-	// let threshold = 4;
-    turretBulletManager.checkCollision(player);
-    turretBulletManager.checkCollision(foe);
-    playerBulletManager.checkCollision(foe);
-    foeBulletManager.checkCollision(player);
-	// for(var [key, bullet] of bullets) {
-	// 	vex.subVectors(player.position, bullet.position);
-	// 	if (vex.length() < threshold) {
-	// 		bullets.get(key).material.color.set(0x000000);
-	// 		// flashRed = 10;
-	// 		break;
-	// 	}
-	// 	if (bullets.get(key).material.color.getHex() === 0xff0000)
-	// 		continue;
-	// 	for(let [Pkey, PlayerBullet] of playerBullets) {
-	// 		vex.subVectors(PlayerBullet.position, bullet.position);
-	// 		if (vex.length() < threshold) {
-	// 			scene.remove(bullet);
-	// 			scene.remove(PlayerBullet);
-	// 			playerBullets.delete(Pkey);
-	// 			bullets.delete(key);
-	// 			// flashRed = 10;
-	// 			break;
-	// 		}
-	// 	}
-	// }
-
+    turretBulletManager.checkCollision(player, s);
+    turretBulletManager.checkCollision(foe, s);
+    playerBulletManager.checkCollision(foe, s);
+    foeBulletManager.checkCollision(player, s);
 }
 
 gClock.loop(animate);
 
 const connection = new Connection(keyControls, playerSyncData);
 connection.connectToServer(friend.id);
+connection.attatchGameStart(startGame);
 
-document.getElementById('RTCconnect').addEventListener('click', connection.startRtcConnection.bind(connection));
+
+
+// document.getElementById('RTCconnect').addEventListener('click', connection.startRtcConnection.bind(connection));
 
 // var socket;
 // document.getElementById('msgSender').addEventListener('click', send);

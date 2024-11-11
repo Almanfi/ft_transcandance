@@ -20,7 +20,7 @@ export class Controls {
 }
 
 export class PlayerData extends Controls {
-    constructor() {
+    constructor(player) {
         super();
         this.move = {
             up: false,
@@ -28,9 +28,42 @@ export class PlayerData extends Controls {
             left: false,
             right: false,
         }
+        this.player = player;
         this.angle = 0;
         this.direction = new THREE.Vector3(0, 0, 0);
         this.Lclick = false;
+        this.newState = false;
+        this.oldTimeStamp = 0;
+        if (this.player)
+            this.backUpPosition = new THREE.Vector3().copy(this.player.position);
+        this.backUp = {
+            timestamp: 0,
+            position: new THREE.Vector3(0, 0, 0),
+            move: {...this.move},
+        }
+        this.actions = new Map();
+        this.rollback = false;
+    }
+
+    makeBackup(data) {
+        this.rollback = true;
+        this.actions.set(data.timeStamp, data);
+    }
+
+    applyAction(data) {
+        if (data.move)
+            this.move = Object.assign(this.move, data.move);
+        if (data.position) {
+            this.position = data.position;
+        }
+        else
+            this.position = null;
+        if (data.direction)
+            this.direction.copy(data.direction);
+        if (data.angle)
+            this.angle = data.angle;
+        if (data.mouse)
+            this.Lclick = data.mouse.Lclick;
     }
 
     speedVector(frontVector) {
@@ -128,9 +161,9 @@ export class KeyControls extends Controls {
         if (!this.connection)
             return;
         this.accurateAngleCounter++;
-        if (Math.abs(this.sentAngle - this.angle) > 0.1 || this.accurateAngleCounter % 10 === 0) {
+        if (Math.abs(this.sentAngle - this.angle) > 0.06 || this.accurateAngleCounter % 6 === 0) {
             this.sentAngle = this.angle;
-            this.connection.send(JSON.stringify({direction: this.direction, angle: this.angle}));
+            this.send(JSON.stringify({direction: this.direction, angle: this.angle}));
         }
     }
 
@@ -218,8 +251,10 @@ export class KeyControls extends Controls {
                     this.shift.hold = true;
                     break;
                 case 'KeyJ':
-                    if (!this.Jkey.hold)
+                    if (!this.Jkey.hold) {
+                        this.connection.signalStart()
                         this.Jkey.pressVal = true;
+                    }
                     this.Jkey.hold = true;
                     break;
                 default:
