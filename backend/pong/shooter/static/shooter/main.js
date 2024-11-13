@@ -159,43 +159,55 @@ var scale = 1;
 
 // turretBulletManager.spawnBullet(0xfc7703, {x: 30, y: 3, z: 30}, {x: 0.2, y: 0, z: 0});
 
+var foeActionOrder = 0;
+
 function rollBack() {
     const planeFacingVector = getCameraDir(camera);
     // (in the makeBackUp method) if a new action arrives and its time stamp is old send a full description request;
-    let actions = [...playerSyncData.actions.entries()]. sort((a, b) => a[0] - b[0]);
-    let idx = 0;
+    // let actions = [...playerSyncData.actions.entries()]. sort((a, b) => a[0] - b[0]);
+    // let idx = 0;
+    let timeDiff = 2;// get from connection
 
-    let timeStampTransformed  = actions[0][0] - timeDiff;
+    if (!playerSyncData.actions.has(foeActionOrder))
+        return;
+    console.log('rollback');
+    let timeStampTransformed  = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
+    foe.despawnUncertainBullets(timeStampTransformed);// later only despown bullet that 
+    foe.position.copy(playerSyncData.backUpPosition);
     while (timeStampTransformed < performance.now()) {
         turretBulletManager.findPositionAtTime(timeStampTransformed);
         player.findPositionAtTime(timeStampTransformed);
 
-        foe.position.copy(playerSyncData.backUpPosition);
-        while (idx < actions.length) {
-            ActionTime = actions[idx][0] - timeDiff;
+        while (playerSyncData.actions.has(foeActionOrder)) {
+            ActionTime = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
             if (ActionTime > timeStampTransformed) {
                 break;
             }
-            playerSyncData.applyAction(actions[idx][1]);
-            playerSyncData.actions.delete(actions[idx][0]);
-            idx++;
+            playerSyncData.applyAction(playerSyncData.actions.get(foeActionOrder));
+            playerSyncData.actions.delete(foeActionOrder);
+            foeActionOrder++;
         }
         foe.update(gClock.msPerFrame, planeFacingVector);
 
 
         turretBulletManager.findPositionAtTime(timeStampTransformed);
-        // playerBulletManager.findPositionAtTime(timeStampTransformed);
-        // foeBulletManager.findPositionAtTime(timeStampTransformed);
+        playerBulletManager.findPositionAtTime(timeStampTransformed);
+        foeBulletManager.findPositionAtTime(timeStampTransformed);
 
 
-        // turretBulletManager.checkCollision(player, s);
-        // turretBulletManager.checkCollision(foe, s);
-        // playerBulletManager.checkCollision(foe, s);
-        // foeBulletManager.checkCollision(player, s);
-        
-        
+        turretBulletManager.checkRollbackCollision(player, s);
+        turretBulletManager.checkRollbackCollision(foe, s);
+        playerBulletManager.checkRollbackCollision(foe, s);
+        foeBulletManager.checkRollbackCollision(player, s);
+
         timeStampTransformed += gClock.msPerFrame;
     }
+
+    turretBulletManager.batchUndestroyBullet();
+    turretBulletManager.batchUndestroyBullet();
+    playerBulletManager.batchUndestroyBullet();
+    foeBulletManager.batchUndestroyBullet();
+
     // save for next roll back
     playerSyncData.backUpPosition.copy(foe.position);
 }
@@ -203,8 +215,10 @@ function rollBack() {
 var animate = (s) => {
     const planeFacingVector = getCameraDir(camera);
     if (playerSyncData.rollback) {
+        // console.log('rollback starting');
         playerSyncData.rollback = false;
         rollBack();
+        console.log('rollback done');
     }
     player.update(s, planeFacingVector);
     foe.update(s, planeFacingVector);

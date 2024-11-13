@@ -47,7 +47,7 @@ export class PlayerData extends Controls {
 
     makeBackup(data) {
         this.rollback = true;
-        this.actions.set(data.timeStamp, data);
+        this.actions.set(data.actionOrder, data);
     }
 
     applyAction(data) {
@@ -126,6 +126,8 @@ export class KeyControls extends Controls {
         this.shift.release = release.bind(this.shift);
         this.Jkey.release = release.bind(this.Jkey);
 
+        this.actionOrder = 0;
+
         this.keydownListener();
         this.keyupListener();
     }
@@ -163,7 +165,7 @@ export class KeyControls extends Controls {
         this.accurateAngleCounter++;
         if (Math.abs(this.sentAngle - this.angle) > 0.06 || this.accurateAngleCounter % 6 === 0) {
             this.sentAngle = this.angle;
-            this.send(JSON.stringify({direction: this.direction, angle: this.angle}));
+            this.sendAngleToPeer(this.angle, this.direction);
         }
     }
 
@@ -198,11 +200,18 @@ export class KeyControls extends Controls {
 
     send(msg) {}
 
-    sendToSocket(move, position, mouse) {
+    sendAngleToPeer(angle, direction) {
+        this.send(JSON.stringify({angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: performance.now()}));
+        this.actionOrder++;
+    }
+
+    sendToPeer(move, position, mouse) {
         let data = {};
-        data.move = move;
+        data.move = move? move : undefined;
         data.position = position ? position : undefined;
-        
+        data.mouse = mouse ? mouse : undefined;
+        data.actionOrder = this.actionOrder++;
+        data.timeStamp = performance.now();
         this.send(JSON.stringify(data));
     }
 
@@ -212,34 +221,35 @@ export class KeyControls extends Controls {
             if (!this.Lclick.hold)
                 this.Lclick.pressVal = true;
             this.Lclick.hold = true;
-            this.send(JSON.stringify({mouse: {Lclick: true}}));
+            this.sendToPeer(null, null, {Lclick: true});
+            // this.send(JSON.stringify({mouse: {Lclick: true}}));
         });
         window.addEventListener('keydown', (e) => {
             switch (e.code) {
                 case 'KeyW':
                     if (!this.Wkey.hold) {
-                        this.sendToSocket({"up": true});
+                        this.sendToPeer({"up": true});
                         this.Wkey.pressVal = true;
                     }
                     this.Wkey.hold = true;
                     break;
                 case 'KeyA':
                     if (!this.Akey.hold) {
-                        this.sendToSocket({"left": true});
+                        this.sendToPeer({"left": true});
                         this.Akey.pressVal = true;
                     }
                     this.Akey.hold = true;
                     break;
                 case 'KeyS':
                     if (!this.Skey.hold) {
-                        this.sendToSocket({"down": true});
+                        this.sendToPeer({"down": true});
                         this.Skey.pressVal = true;
                     }
                     this.Skey.hold = true;
                     break;
                 case 'KeyD':
                     if (!this.Dkey.hold) {
-                        this.sendToSocket({"right": true});
+                        this.sendToPeer({"right": true});
                         this.Dkey.pressVal = true;
                     }
                     this.Dkey.hold = true;
@@ -267,27 +277,27 @@ export class KeyControls extends Controls {
             window.addEventListener('mouseup', (e) => {
                 this.Lclick.releaseVal = true;
                 this.Lclick.hold = false;
-                this.send(JSON.stringify({mouse: {Lclick: false}}));
+                this.sendToPeer(null, null, {Lclick: false});
             });
             window.addEventListener('keyup', (e) => {
             switch (e.code) {
                 case 'KeyW':
-                    this.sendToSocket({"up": false}, this.player.position);
+                    this.sendToPeer({"up": false}, this.player.position);
                     this.Wkey.releaseVal = true;
                     this.Wkey.hold = false;
                     break;
                 case 'KeyA':
-                    this.sendToSocket({"left": false}, this.player.position);
+                    this.sendToPeer({"left": false}, this.player.position);
                     this.Akey.releaseVal = true;
                     this.Akey.hold = false;
                     break;
                 case 'KeyS':
-                    this.sendToSocket({"down": false}, this.player.position);
+                    this.sendToPeer({"down": false}, this.player.position);
                     this.Skey.releaseVal = true;
                     this.Skey.hold = false;
                     break;
                 case 'KeyD':
-                    this.sendToSocket({"right": false}, this.player.position);
+                    this.sendToPeer({"right": false}, this.player.position);
                     this.Dkey.releaseVal = true;
                     this.Dkey.hold = false;
                     break;

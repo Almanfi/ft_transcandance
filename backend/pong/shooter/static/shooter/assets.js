@@ -110,6 +110,7 @@ export class TurretBullet extends THREE.Mesh {
         this.date = spawnTime
         this.speed = speed;
         this.position.set(position.x, position.y, position.z);
+        this.initPosition.copy(position);
         this.material.color.set(color);
         this.initPosition.copy(position);
     }
@@ -124,20 +125,16 @@ export class TurretBullet extends THREE.Mesh {
 
 
     getCurrentPosition(radius) {
-        let vect = new THREE.Vector3();
-        vect.copy(this.speed).normalize();
         let point = new THREE.Vector3();
         point.copy(this.position);
-        point.addScaledVector(vect, radius);
+        point.addScaledVector(this.speed, radius);
         return point;
     }
 
     getOldPosition(radius, s) {
-        let vect = new THREE.Vector3();
-        vect.copy(this.speed).normalize();
         let point = new THREE.Vector3();
-        point.copy(this.lastPosition(s));
-        point.addScaledVector(vect, - radius);
+        point.copy(this.position);
+        point.addScaledVector(this.speed, - radius - this.speedRate * s);
         return point;
     }
 
@@ -181,7 +178,6 @@ export class TurretBullet extends THREE.Mesh {
     isSlowerThan(other) {
          return this.speedRate < other.speedRate;
     }
-
 
     intersects(other, s, vex) {
         let radius = this.radius + other.radius;
@@ -271,34 +267,29 @@ export class Bullet extends THREE.Mesh {
         this.material.emissive.set(0xeeeeee);
         this.position.set(position.x, position.y, position.z);
         this.initPosition.copy(position);
-        this.position.addScaledVector(this.speed, 2);
         this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
         this.rotateX(Math.PI / 2);
     }
 
-    update(s) {
+    update(time) {
         // this.oldPosition.copy(this.position);
         // this.movementVector.copy(this.speed).multiplyScalar(this.speedRate * s);
 		// this.position.addScaledVector(this.movementVector, 1);
-        this.position.copy(this.initPosition).addScaledVector(this.speed, this.speedRate * ((performance.now() - this.date) / 1000));
+        this.position.copy(this.initPosition).addScaledVector(this.speed, this.speedRate * ((time - this.date) / 1000));
         // this.position.addScaledVector(this.speed, this.speedRate * s);
     }
 
     getCurrentPosition(radius) {
-        let vect = new THREE.Vector3();
-        vect.copy(this.speed).normalize();
         let point = new THREE.Vector3();
         point.copy(this.position);
-        point.addScaledVector(vect, radius);
+        point.addScaledVector(this.speed, radius);
         return point;
     }
 
     getOldPosition(radius, s) {
-        let vect = new THREE.Vector3();
-        vect.copy(this.speed).normalize();
         let point = new THREE.Vector3();
-        point.copy(this.lastPosition(s));
-        point.addScaledVector(vect, - radius);
+        point.copy(this.position);
+        point.addScaledVector(this.speed, - radius - this.speedRate * s);
         return point;
     }
 
@@ -632,6 +623,16 @@ export class Player extends THREE.Object3D {
     //     return speedVect;
     // }
 
+    despawnUncertainBullets(time) {
+        let iterator = this.bulletManager.bullets.entries();
+        let bullet = iterator.next().value;
+        while (bullet) {
+            if (bullet[1].date > time) {
+                this.bulletManager.despawnBullet(bullet[0]);
+            }
+            bullet = iterator.next().value;
+        }
+    }
 
     update(timeS, planeFacingVector) {
         let speed = 3 * timeS;
@@ -760,6 +761,7 @@ export class PlayersBulletManager {
     constructor(scene) {
         this.bullets = new Map();
         this.bulletsPool = new Map();
+        this.destroyedBullets = new Map();
         this.scene = scene;
         this.createBulletsPool(120);
     }
@@ -785,6 +787,30 @@ export class PlayersBulletManager {
         this.returnBullet(bullet);
     }
 
+    destroyBullet(bullet) {
+        bullet.visible = false;
+        bullet.destructionTime = performance.now();
+        this.destroyedBullets.set(bullet.id, bullet);
+        this.bullets.delete(bullet.id);
+    }
+
+    undestroyBullet(bullet) {
+        bullet.visible = true;
+        this.bullets.set(bullet.id, bullet);
+        this.destroyedBullets.delete(bullet.id);
+    }
+
+    batchUndestroyBullet() {
+        this.destroyedBullets.forEach((elem) => {
+            this.undestroyBullet(elem);
+        })
+    }
+
+    returnDestroyedBullet(bullet) {
+        this.bulletsPool.set(bullet.id, bullet);
+        this.destroyedBullets.delete(bullet.id);
+    }
+
     getBullet() {
         if (this.bulletsPool.size < 1) {
             this.createBulletsPool(10);
@@ -802,15 +828,92 @@ export class PlayersBulletManager {
         this.bullets.delete(bullet.id);
     }
 
-    update(s) {
+    update(time) {
         let dateNow = performance.now();
         this.bullets.forEach((elem) => {
             if (dateNow > elem.date + 10 * 1000) {
                 this.despawnBullet(elem);
             }
             else
-                elem.update(s);
+                elem.update(dateNow);
         })
+        this.destroyedBullets.forEach((elem) => {
+            if (dateNow > elem.date + 10 * 1000) {
+                this.returnDestroyedBullet(elem);
+            }
+        })
+    }
+
+    findPositionAtTime(time) {
+        this.bullets.forEach((elem) => {
+            if (time > elem.date)
+                elem.update(time);
+        })
+        this.destroyedBullets.forEach((elem) => {
+            if (time > elem.date)
+                elem.update(time);
+        })
+    }
+
+    checkRollbackCollision(other, s, time) {
+        var vex = new THREE.Vector3();
+        //normal bullets check
+        for(var [key, bullet] of this.bullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(other, s, vex)) {
+                bullet.material.color.set(0x00ff00);
+                bullet.material.emissive.set(0x000000);
+                return;
+            }
+            for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    other.bulletManager.despawnBullet(otherBullet);
+                    break;
+                }
+            }
+            for(let [Pkey, otherBullet] of other.bulletManager.destroyedBullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    other.bulletManager.returnDestroyedBullet(otherBullet);
+                    break;
+                }
+            }
+        }
+        //destroyed bullets check
+        for(var [key, bullet] of this.destroyedBullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(other, s, vex)) {
+                this.undestroyBullet(bullet);
+                bullet.material.color.set(0x00ff00);
+                bullet.material.emissive.set(0x000000);
+                return;
+            }
+            for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    other.bulletManager.despawnBullet(otherBullet);
+                    break;
+                }
+            }
+            for(let [Pkey, otherBullet] of other.bulletManager.destroyedBullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    other.bulletManager.returnDestroyedBullet(otherBullet);
+                    break;
+                }
+            }
+        }
     }
 
     checkCollision(other, s) {
@@ -830,6 +933,7 @@ export class PlayersBulletManager {
             }
         }
     }
+
 }
 
 export class TurretBulletManager {
@@ -874,6 +978,12 @@ export class TurretBulletManager {
         this.destroyedBullets.delete(bullet.id);
     }
 
+    batchUndestroyBullet() {
+        this.destroyedBullets.forEach((elem) => {
+            this.undestroyBullet(elem);
+        })
+    }
+
     returnDestroyedBullet(bullet) {
         this.bulletsPool.set(bullet.id, bullet);
         this.destroyedBullets.delete(bullet.id);
@@ -902,7 +1012,7 @@ export class TurretBulletManager {
                 this.despawnBullet(elem);
             }
             else
-                elem.update(performance.now());
+                elem.update(dateNow);
         })
         this.destroyedBullets.forEach((elem) => {
             if (dateNow > elem.date + 10 * 1000) {
@@ -913,12 +1023,77 @@ export class TurretBulletManager {
 
     findPositionAtTime(time) {
         this.bullets.forEach((elem) => {
+            if (elem.date < time)
                 elem.update(time);
         })
         this.destroyedBullets.forEach((elem) => {
-            if (time < elem.destructionTime)
+            if (elem.date < time)
                 elem.update(time);
         })
+    }
+
+    checkRollbackCollision(player, s) {
+        var vex = new THREE.Vector3();
+        //normal bullets check
+        for(var [key, bullet] of this.bullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(player, s, vex)) {
+                bullet.material.color.set(0x00ff00);
+                return;
+            }
+            if (bullet.material.color.getHex() === 0xff0000)
+                continue;
+            for(let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    player.bulletManager.despawnBullet(PlayerBullet);
+                    break;
+                }
+            }
+            for(let [Pkey, PlayerBullet] of player.bulletManager.destroyedBullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    player.bulletManager.returnDestroyedBullet(PlayerBullet);
+                    break;
+                }
+            }
+        }
+        //destroyed bullets check
+        for(var [key, bullet] of this.destroyedBullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(player, s, vex)) {
+                this.undestroyBullet(bullet);
+                bullet.material.color.set(0x00ff00);
+                return;
+            }
+            // no destroyed bullet is red
+            // if (this.bullets.get(key).material.color.getHex() === 0xff0000)
+            //     continue;
+            for(let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    player.bulletManager.despawnBullet(PlayerBullet);
+                    break;
+                }
+            }
+            for(let [Pkey, PlayerBullet] of player.bulletManager.destroyedBullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    player.bulletManager.returnDestroyedBullet(PlayerBullet);
+                    break;
+                }
+            }
+        }
     }
 
     checkCollision(player, s) {
@@ -932,8 +1107,8 @@ export class TurretBulletManager {
                 continue;
             for(let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
                 if (bullet.intersects(PlayerBullet, s, vex)) {
-                    this.despawnBullet(bullet);
-                    player.bulletManager.despawnBullet(PlayerBullet);
+                    this.destroyBullet(bullet);
+                    player.bulletManager.destroyBullet(PlayerBullet);
                     break;
                 }
             }

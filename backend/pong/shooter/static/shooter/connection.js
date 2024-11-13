@@ -332,23 +332,23 @@ export class Connection {
     handlePlayerAction(data) {
         if (data.type === "sync")
             this.handleSyncWithPeer(data);
-        if (data.timeStamp)
-            this.playerSyncData.makebackUp(data);
+        if (data.actionOrder)
+            this.playerSyncData.makeBackup(data);
         //remove bellow after applying the roolback
-        if (data.move)
-            this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
-        if (data.position) {
-            this.playerSyncData.position = data.position;
-        }
-        else
-            this.playerSyncData.position = null;
-        if (data.direction)
-            this.playerSyncData.direction.copy(data.direction);
-        if (data.angle)
-            this.playerSyncData.angle = data.angle;
-        if (data.mouse)
-            this.playerSyncData.Lclick = data.mouse.Lclick;
-        this.playerSyncData.newState = true;
+        // if (data.move)
+        //     this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
+        // if (data.position) {
+        //     this.playerSyncData.position = data.position;
+        // }
+        // else
+        //     this.playerSyncData.position = null;
+        // if (data.direction)
+        //     this.playerSyncData.direction.copy(data.direction);
+        // if (data.angle)
+        //     this.playerSyncData.angle = data.angle;
+        // if (data.mouse)
+        //     this.playerSyncData.Lclick = data.mouse.Lclick;
+        // this.playerSyncData.newState = true;
     }
 
     startPing() {
