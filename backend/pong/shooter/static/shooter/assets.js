@@ -595,6 +595,13 @@ export class Player extends THREE.Object3D {
         this.movementVector = new THREE.Vector3();
         this.actions = new Map();
         this.saveAction = false;
+        this.move = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+        }
+        this.currInput = {};
     };
 
     addToScene(scene) {
@@ -649,6 +656,18 @@ export class Player extends THREE.Object3D {
         this.position.addScaledVector(this.movementVector, 1);
         if (performance.now() - this.lastFire > 70)
             this.fired = this.fire();
+        if (this.controls.sendActionToPeer && this.saveAction) {
+            this.currInput = {};
+            if (this.controls.Wkey.hold !== this.move.up)
+                this.currInput.up = this.controls.Wkey.hold;
+            if (this.controls.Skey.hold !== this.move.down)
+                this.currInput.down = this.controls.Skey.hold;
+            if (this.controls.Akey.hold !== this.move.left)
+                this.currInput.left = this.controls.Akey.hold;
+            if (this.controls.Dkey.hold !== this.move.right)
+                this.currInput.right = this.controls.Dkey.hold;
+            Object.assign(this.move, this.currInput);
+        }
         this.addAction();
     }
 
@@ -667,7 +686,14 @@ export class Player extends THREE.Object3D {
         this.actions.set(time, action);
         if (this.controls.sendActionToPeer && this.saveAction) {
             this.saveAction = false;
-            this.controls.sendActionToPeer(action);
+            let data = {}
+            data.position = this.oldPosition;
+            data.move = this.currInput;
+            data.angle = this.controls.angle;
+            data.direction = this.controls.direction;
+            data.mouse = {Lclick: this.controls.Lclick.hold};
+            data.timeStamp = time;
+            this.controls.sendActionToPeer(data);
         }
     }
 
@@ -737,33 +763,33 @@ export class Player extends THREE.Object3D {
         return this.oldPosition;
     }
 
-    move(timeS, move, planeFacingVector) {
-        let speed = 3 * timeS;
-        const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
-        const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
+    // move(timeS, move, planeFacingVector) {
+    //     let speed = 3 * timeS;
+    //     const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
+    //     const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
     
-        let posDiff = new THREE.Vector3(0, 0, 0);
+    //     let posDiff = new THREE.Vector3(0, 0, 0);
 
-        if (move.up) {
-            posDiff.x += projectionOnPlane.x;
-            posDiff.z += projectionOnPlane.z;
-        }
-        if (move.down) {
-            posDiff.x += -projectionOnPlane.x;
-            posDiff.z += -projectionOnPlane.z;
-        }
-        if (move.left) {
-            posDiff.x += -sideOnPlane.x;
-            posDiff.z += -sideOnPlane.z;
-        }
-        if (move.right) {
-            posDiff.x += sideOnPlane.x;
-            posDiff.z += sideOnPlane.z;
-        }
-        posDiff.normalize();
-        this.position.x += posDiff.x;
-        this.position.z += posDiff.z;
-    }
+    //     if (move.up) {
+    //         posDiff.x += projectionOnPlane.x;
+    //         posDiff.z += projectionOnPlane.z;
+    //     }
+    //     if (move.down) {
+    //         posDiff.x += -projectionOnPlane.x;
+    //         posDiff.z += -projectionOnPlane.z;
+    //     }
+    //     if (move.left) {
+    //         posDiff.x += -sideOnPlane.x;
+    //         posDiff.z += -sideOnPlane.z;
+    //     }
+    //     if (move.right) {
+    //         posDiff.x += sideOnPlane.x;
+    //         posDiff.z += sideOnPlane.z;
+    //     }
+    //     posDiff.normalize();
+    //     this.position.x += posDiff.x;
+    //     this.position.z += posDiff.z;
+    // }
 
     // createBullet(angle, direction) {
     //     let ballSpeed = 2;

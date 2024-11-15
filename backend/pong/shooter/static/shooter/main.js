@@ -190,13 +190,14 @@ function rollBack() {
     let timeDiff = connection.timeDiffAvrg;// get from connection
     let foeActionOrder = playerSyncData.actionOrder;
 
-    // console.log('foeActionOrder: ', foeActionOrder);
     
     if (!playerSyncData.actions.has(foeActionOrder))
         return;
     let startTime = performance.now();
     let timeStampTransformed  = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
     
+    if (startTime - timeStampTransformed < 0)
+        return;
     console.log('roll back (ms): ', startTime - timeStampTransformed);
     
     
@@ -229,7 +230,7 @@ function rollBack() {
         
         while (playerSyncData.actions.has(foeActionOrder)) {
             let ActionTime = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
-            if (ActionTime > nextFrameTime) {
+            if (ActionTime >= nextFrameTime) {
                 break;
             }
             console.log('applying foeActionOrder : ', foeActionOrder);
@@ -273,9 +274,8 @@ function rollBack() {
     }
 
     // save for next roll back
-    playerSyncData.backUpPosition.copy(foe.position);
+    // playerSyncData.backUpPosition.copy(foe.position);
     playerSyncData.actionOrder = foeActionOrder;
-    console.log('roll back  done');
    console.log('roll back time: ', performance.now() - startTime); 
 }
 
@@ -283,7 +283,7 @@ var animate = (s) => {
     const planeFacingVector = getCameraDir(camera);
     // if (playerSyncData.rollback) {
         // playerSyncData.rollback = false;
-        rollBack();
+        // rollBack();
     // }
     player.update(s, planeFacingVector);
     foe.update(s, planeFacingVector);
@@ -360,7 +360,7 @@ var animate = (s) => {
     foeBulletManager.checkCollision(player, s);
 }
 
-gClock.loop(animate);
+gClock.loop(animate, rollBack);
 
 const connection = new Connection(keyControls, playerSyncData);
 connection.connectToServer(friend.id);
