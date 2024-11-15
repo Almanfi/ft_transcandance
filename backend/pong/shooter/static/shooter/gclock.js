@@ -10,6 +10,9 @@ export class gameClock {
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;
+		this.frameTimes = new Array(60).fill(0);
+		this.frame = 0;
+		this.full = false;
 	}
 
 	setFps(fps) {
@@ -17,18 +20,44 @@ export class gameClock {
 		this.msPerFrame = 1000 / fps;
 	}
 
+	setFrameTime() {
+		if (this.frame === 60) {
+			this.full = true;
+			this.frame = 0;
+		}
+		this.frameTimes[this.frame] = this.msPrev;
+		this.frame++;
+	}
+
+	getFrameTime(reverseIdx) {
+		if (reverseIdx > 60) {
+			console.log("invalid frame time index");// get rid of this
+			return ;
+		}
+		// if (this.full === false)
+		// 	return this.frameTimes[this.frame - reverseIdx - 1];
+		return this.frameTimes[(this.frame - reverseIdx + 59) % 60];
+		let frame = this.frame - reverseIdx - 1;
+		if (frame < 0)
+			frame += 60;
+		return this.frameTimes[frame];
+
+	}
+
 	loop(animate) {
 		window.requestAnimationFrame(() => this.loop(animate))
 		this.msNow = window.performance.now();
 		this.msPassed = this.msNow - this.msPrev;
-		animate((this.msNow - this.msPrevTrue) / 1000);
+		// animate((this.msNow - this.msPrevTrue) / 1000);
 		this.msPrevTrue = this.msNow;
 		if (this.msPassed < this.msPerFrame)
 			return ;
 		frames++
-
+		
+		animate((this.msPassed) / 1000);
 		this.excessTime = this.msPassed % this.msPerFrame;
 		this.msPrev = this.msNow - this.excessTime;
+		this.setFrameTime();
 	
 		// controls.update();
 		// if (player.currAnimation.nextSprite >= 0)

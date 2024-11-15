@@ -43,6 +43,7 @@ export class PlayerData extends Controls {
         }
         this.actions = new Map();
         this.rollback = false;
+        this.actionOrder = 0;
     }
 
     makeBackup(data) {
@@ -163,7 +164,7 @@ export class KeyControls extends Controls {
         if (!this.connection)
             return;
         this.accurateAngleCounter++;
-        if (Math.abs(this.sentAngle - this.angle) > 0.06 || this.accurateAngleCounter % 6 === 0) {
+        if (Math.abs(this.sentAngle - this.angle) > 0.006 || this.accurateAngleCounter % 6 === 0) {
             this.sentAngle = this.angle;
             this.sendAngleToPeer(this.angle, this.direction);
         }
@@ -201,18 +202,28 @@ export class KeyControls extends Controls {
     send(msg) {}
 
     sendAngleToPeer(angle, direction) {
-        this.send(JSON.stringify({angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: performance.now()}));
-        this.actionOrder++;
+        this.player.saveAction = true;
+        // let data = {angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: performance.now()};
+        // // this.send(JSON.stringify(data));
+        // this.actionOrder++;
+    }
+    
+    sendToPeer(move, position, mouse) {
+        this.player.saveAction = true;
+        // let data = {};
+        // data.move = move? move : undefined;
+        // data.position = position ? position : undefined;
+        // data.mouse = mouse ? mouse : undefined;
+        // data.actionOrder = this.actionOrder;
+        // data.timeStamp = performance.now();
+        // // this.send(JSON.stringify(data));
+        // this.actionOrder++;
     }
 
-    sendToPeer(move, position, mouse) {
-        let data = {};
-        data.move = move? move : undefined;
-        data.position = position ? position : undefined;
-        data.mouse = mouse ? mouse : undefined;
-        data.actionOrder = this.actionOrder++;
-        data.timeStamp = performance.now();
+    sendActionToPeer(action) {
+        let data = {...action, actionOrder: this.actionOrder};
         this.send(JSON.stringify(data));
+        this.actionOrder++;
     }
 
     keydownListener() {

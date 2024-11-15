@@ -20,6 +20,8 @@ document.body.appendChild( renderer.domElement );
 
 var friend = user.id === users[0].id ? users[1] : users[0];
 
+console.log(user.username);
+
 
 const musicSyncer = new MusicSync(camera);
 musicSyncer.loadMusic('/static/shooter/assets/No_title.mp3');
@@ -40,6 +42,11 @@ function startGame(timeStamp) {
         musicSyncer.playMusic();
         limit1 = 0;
         turret.fireAngle = 0;
+        keyControls.actionOrder = 0;
+        playerSyncData.actionOrder = 0;
+        player.actionOrder = 0;
+        player.actions.clear();
+        playerSyncData.actions.clear();
     }, (timeStamp - performance.now()) - 30);
 }
 
@@ -92,12 +99,21 @@ plane.position.y = 0;
 plane.position.z = 0;
 plane.rotateX(Math.PI / 2);
 
-const player = new Player({x: 10, y: 3, z: -10});
+const positions = [
+    {x: 10, y: 3, z: -10},
+    {x: -10, y: 3, z: 10}
+];
+
+
+if (user.username === 'ana')
+    positions.reverse();
+
+const player = new Player(positions[0]);
 
 player.addToScene(scene);
 player.addBulletSound(musicSyncer.bullet);
 
-const foe = new Player({x: -10, y: 3, z: 10});
+const foe = new Player(positions[1]);
 
 foe.addToScene(scene);
 foe.addBulletSound(musicSyncer.bullet);
@@ -107,7 +123,7 @@ const gClock = new gameClock(scene, camera, renderer);
 
 
 camera.position.x = 20;
-camera.position.y = 100;
+camera.position.y = 150;
 camera.position.z = -10;
 // camera.position.x = 50;
 // camera.position.y = 300;
@@ -115,7 +131,10 @@ camera.position.z = -10;
 
 camera.lookAt(0,0,0);
 
-player.add(camera);
+if (user.username == 'ana')
+    player.add(camera);
+else
+    foe.add(camera);
 
 var turret = new Turret({initPosition: {x: 10, y: 3, z: 10}, rotationSpeed: 0.1, speed: 1});
 turret.addToScene(scene);
@@ -166,28 +185,60 @@ function rollBack() {
     // (in the makeBackUp method) if a new action arrives and its time stamp is old send a full description request;
     // let actions = [...playerSyncData.actions.entries()]. sort((a, b) => a[0] - b[0]);
     // let idx = 0;
-    let timeDiff = 2;// get from connection
+    if (playerSyncData.actions.size === 0)
+        return;
+    let timeDiff = connection.timeDiffAvrg;// get from connection
+    let foeActionOrder = playerSyncData.actionOrder;
 
+    // console.log('foeActionOrder: ', foeActionOrder);
+    
     if (!playerSyncData.actions.has(foeActionOrder))
         return;
-    console.log('rollback');
+    let startTime = performance.now();
     let timeStampTransformed  = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
-    foe.despawnUncertainBullets(timeStampTransformed);// later only despown bullet that 
-    foe.position.copy(playerSyncData.backUpPosition);
-    while (timeStampTransformed < performance.now()) {
-        turretBulletManager.findPositionAtTime(timeStampTransformed);
-        player.findPositionAtTime(timeStampTransformed);
+    
+    console.log('roll back (ms): ', startTime - timeStampTransformed);
+    
+    
+    let lastFrameIdx = 0;
+    let lastFrameTime;
+    while (lastFrameIdx < 60) {
+        lastFrameTime = gClock.getFrameTime(lastFrameIdx);
+        if (lastFrameTime <= timeStampTransformed)
+            break;
+        lastFrameIdx++;
+    }
+    if (lastFrameIdx === 60 && lastFrameTime < timeStampTransformed) {
+        console.log('lastFrameIdx is too big: ', lastFrameIdx);
+        return false;// this is an error
+    }
+    // console.log('lastFrameIdx: ', lastFrameIdx);
+    // console.log('time: ', lastFrameTime, ' timeStampTransformed: ', timeStampTransformed);
+    timeStampTransformed = lastFrameTime;
 
+    foe.despawnUncertainBullets(timeStampTransformed);// later only despown bullet that 
+    foe.findStateAtTime(timeStampTransformed);
+
+    while (lastFrameIdx > 0) {
+        console.log('loop lastFrameIdx: ', lastFrameIdx);
+        lastFrameIdx--;
+        let nextFrameTime = gClock.getFrameTime(lastFrameIdx);
+        const frameSpan = nextFrameTime - timeStampTransformed;
+        
+        player.findPositionAtTime(timeStampTransformed);
+        
         while (playerSyncData.actions.has(foeActionOrder)) {
-            ActionTime = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
-            if (ActionTime > timeStampTransformed) {
+            let ActionTime = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
+            if (ActionTime > nextFrameTime) {
                 break;
             }
+            console.log('applying foeActionOrder : ', foeActionOrder);
+            console.log(' action : ', playerSyncData.actions.get(foeActionOrder));
             playerSyncData.applyAction(playerSyncData.actions.get(foeActionOrder));
             playerSyncData.actions.delete(foeActionOrder);
             foeActionOrder++;
         }
-        foe.update(gClock.msPerFrame, planeFacingVector);
+        foe.update(frameSpan, planeFacingVector);
 
 
         turretBulletManager.findPositionAtTime(timeStampTransformed);
@@ -195,12 +246,12 @@ function rollBack() {
         foeBulletManager.findPositionAtTime(timeStampTransformed);
 
 
-        turretBulletManager.checkRollbackCollision(player, s);
-        turretBulletManager.checkRollbackCollision(foe, s);
-        playerBulletManager.checkRollbackCollision(foe, s);
-        foeBulletManager.checkRollbackCollision(player, s);
+        turretBulletManager.checkRollbackCollision(player, frameSpan, timeStampTransformed);
+        turretBulletManager.checkRollbackCollision(foe, frameSpan, timeStampTransformed);
+        playerBulletManager.checkRollbackCollision(foe, frameSpan, timeStampTransformed);
+        foeBulletManager.checkRollbackCollision(player, frameSpan, timeStampTransformed);
 
-        timeStampTransformed += gClock.msPerFrame;
+        timeStampTransformed = nextFrameTime;
     }
 
     turretBulletManager.batchUndestroyBullet();
@@ -208,18 +259,32 @@ function rollBack() {
     playerBulletManager.batchUndestroyBullet();
     foeBulletManager.batchUndestroyBullet();
 
+
+
+    while (playerSyncData.actions.has(foeActionOrder)) {
+        let ActionTime = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
+        if (ActionTime > timeStampTransformed) {
+            break;
+        }
+        // console.log('applying foeActionOrder : ', foeActionOrder);
+        playerSyncData.applyAction(playerSyncData.actions.get(foeActionOrder));
+        playerSyncData.actions.delete(foeActionOrder);
+        foeActionOrder++;
+    }
+
     // save for next roll back
     playerSyncData.backUpPosition.copy(foe.position);
+    playerSyncData.actionOrder = foeActionOrder;
+    console.log('roll back  done');
+   console.log('roll back time: ', performance.now() - startTime); 
 }
 
 var animate = (s) => {
     const planeFacingVector = getCameraDir(camera);
-    if (playerSyncData.rollback) {
-        // console.log('rollback starting');
-        playerSyncData.rollback = false;
+    // if (playerSyncData.rollback) {
+        // playerSyncData.rollback = false;
         rollBack();
-        console.log('rollback done');
-    }
+    // }
     player.update(s, planeFacingVector);
     foe.update(s, planeFacingVector);
 

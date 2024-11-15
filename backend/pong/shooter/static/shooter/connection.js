@@ -15,6 +15,7 @@ export class Connection {
         this.pingAvrg = 0;
         this.timeDiff = new Array();
         this.timeDiffAvrg = 0;
+        this.peerTimeDiff = 0;
     }
 
     attatchGameStart(startGame) {
@@ -332,7 +333,7 @@ export class Connection {
     handlePlayerAction(data) {
         if (data.type === "sync")
             this.handleSyncWithPeer(data);
-        if (data.actionOrder)
+        if (data.timeStamp)
             this.playerSyncData.makeBackup(data);
         //remove bellow after applying the roolback
         // if (data.move)
@@ -383,6 +384,7 @@ export class Connection {
             console.log("start in: ", data.startAt);
             if (this.timeDiffAvrg === 0) {
                 console.log("time difference not calculated yet");
+                this.initSync();
                 return;
             }
             let mytime = performance.now() + 1000;
@@ -392,6 +394,12 @@ export class Connection {
             this.startGame(convertedTime);
             
         }
+        if (data.initSync) {
+        }
+        if (data.setTimeData) {
+            this.peerTimeDiff = - data.timeDiffAvrg;
+            this.initSync();
+        }
         if (data.showTime) {
             console.log("my time is: ", performance.now());
             console.log("peer time is: ", data.peerClock);
@@ -400,6 +408,12 @@ export class Connection {
             let currentPing = performance.now() - data.timestamp;
             console.log("(avrg ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - this.pingAvrg / 2);
             console.log("(curr ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - currentPing / 2);
+            
+            if (data.setTimeData || this.peerTimeDiff !== 0)
+                return;
+            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), showTime: true,
+                setTimeData: true, timeDiffAvrg: this.timeDiffAvrg, pingAvrg: this.pingAvrg
+            }));
             return;
         }
         if (data.getTime) {

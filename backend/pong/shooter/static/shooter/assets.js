@@ -594,6 +594,7 @@ export class Player extends THREE.Object3D {
         this.oldPosition =  this.position.clone();
         this.movementVector = new THREE.Vector3();
         this.actions = new Map();
+        this.saveAction = false;
     };
 
     addToScene(scene) {
@@ -628,7 +629,7 @@ export class Player extends THREE.Object3D {
         let bullet = iterator.next().value;
         while (bullet) {
             if (bullet[1].date > time) {
-                this.bulletManager.despawnBullet(bullet[0]);
+                this.bulletManager.despawnBullet(bullet[1]);
             }
             bullet = iterator.next().value;
         }
@@ -646,7 +647,7 @@ export class Player extends THREE.Object3D {
         this.movementVector.copy(this.controls.speedVector(projectionOnPlane));
 
         this.position.addScaledVector(this.movementVector, 1);
-        if (performance.now() - this.lastFire > 80)
+        if (performance.now() - this.lastFire > 70)
             this.fired = this.fire();
         this.addAction();
     }
@@ -657,8 +658,40 @@ export class Player extends THREE.Object3D {
             startPosition: this.oldPosition,
             movementVector: this.movementVector,
             fire: this.fired,
+            move: this.controls.move,
+            angle: this.controls.angle,
+            direction: this.controls.direction,
+            Lclick: this.controls.Lclick,
+            timeStamp: time,
         }
         this.actions.set(time, action);
+        if (this.controls.sendActionToPeer && this.saveAction) {
+            this.saveAction = false;
+            this.controls.sendActionToPeer(action);
+        }
+    }
+
+    findStateAtTime(time) {
+        let iterator = this.actions.entries();
+        let action = iterator.next().value;
+        let previousAction;
+        while (action) {
+            if (action[0] < time) {
+                if (previousAction)
+                    this.actions.delete(previousAction[0]);
+                previousAction = action;
+                action = iterator.next().value;
+            }
+            else
+                break;
+        }
+        if (!previousAction)
+            return;
+        this.position.copy(previousAction[1].startPosition).addScaledVector(previousAction[1].movementVector, 1);
+        this.controls.move = previousAction[1].move;
+        this.controls.angle = previousAction[1].angle;
+        this.controls.direction = previousAction[1].direction;
+        this.controls.Lclick = previousAction[1].Lclick;
     }
 
     findPositionAtTime(time) {
@@ -974,6 +1007,7 @@ export class TurretBulletManager {
 
     undestroyBullet(bullet) {
         bullet.visible = true;
+        bullet.material.color.set(0x0000ff);
         this.bullets.set(bullet.id, bullet);
         this.destroyedBullets.delete(bullet.id);
     }
@@ -1032,7 +1066,7 @@ export class TurretBulletManager {
         })
     }
 
-    checkRollbackCollision(player, s) {
+    checkRollbackCollision(player, s, time) {
         var vex = new THREE.Vector3();
         //normal bullets check
         for(var [key, bullet] of this.bullets) {
