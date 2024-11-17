@@ -31,7 +31,7 @@ class GameSerializer(serializers.Serializer):
     winner = serializers.ChoiceField(choices=WINNER_CHOICES, required=False)
     game_started = serializers.BooleanField(required=False)
     game_ended = serializers.BooleanField(required=False)
-    tournament_phase = serializers.CharField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0], required=False)
+    tournament_phase = serializers.ChoiceField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0], required=False)
     tournament = TournamentSerializer(required=False)
 
     def to_representation(self, instance):

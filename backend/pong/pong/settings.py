@@ -39,30 +39,36 @@ CHANNEL_LAYERS = {
     }
 }
 
+
 # Application definition
 
 INSTALLED_APPS = [
     'daphne',
     'channels',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
+    # 'django.contrib.sessions',
+    # 'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest.apps.RestConfig',
 ]
 
 MIDDLEWARE = [
+	'rest.helpers.GlobalExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+	'EXCEPTION_HANDLER' : "rest.helpers.rest_exception_handler"
+}
 
 ROOT_URLCONF = 'pong.urls'
 

@@ -4,3 +4,4 @@ from .cookie_auth import CookieAuth , WebSocketAuthStack
 from .matchmaking import GameMatchmaking
 from .tournament_making import TournamentMaking
 from .tournament_lobby import TournamentLobby
+from .exceptions_handler import GlobalExceptionMiddleware, rest_exception_handler
