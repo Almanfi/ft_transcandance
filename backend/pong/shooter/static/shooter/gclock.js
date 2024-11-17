@@ -13,6 +13,8 @@ export class gameClock {
 		this.frameTimes = new Array(60).fill(0);
 		this.frame = 0;
 		this.full = false;
+		this.frameCount = 0;
+		this.startTime = window.performance.now();
 	}
 
 	setFps(fps) {
@@ -25,7 +27,7 @@ export class gameClock {
 			this.full = true;
 			this.frame = 0;
 		}
-		this.frameTimes[this.frame] = this.msPrev;
+		this.frameTimes[this.frame] = this.msPrev - this.startTime;
 		this.frame++;
 	}
 
@@ -50,19 +52,20 @@ export class gameClock {
 		this.msPassed = this.msNow - this.msPrev;
 		// animate((this.msNow - this.msPrevTrue) / 1000);
 		this.msPrevTrue = this.msNow;
-		rollBack();
+		// rollBack(this.startTime);
 		if (this.msPassed < this.msPerFrame)
 			return ;
 		frames++
 		
-		animate((this.msPassed) / 1000);
 		this.excessTime = this.msPassed % this.msPerFrame;
 		this.msPrev = this.msNow - this.excessTime;
+		animate((this.msPassed) / 1000, this.msPrev, this.frameCount, this.startTime);
 		this.setFrameTime();
 	
 		// controls.update();
 		// if (player.currAnimation.nextSprite >= 0)
 		// 	console.log(player.currAnimation.hitBox[player.currAnimation.nextSprite][0].mesh.visible);
 		this.renderer.render( this.scene, this.camera );
+		this.frameCount++;
 	}
 }

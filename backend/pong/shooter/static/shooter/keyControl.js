@@ -41,6 +41,9 @@ export class PlayerData extends Controls {
             position: new THREE.Vector3(0, 0, 0),
             move: {...this.move},
         }
+        this.position = new THREE.Vector3(0, 0, 0);
+        this.movementVector = new THREE.Vector3(0, 0, 0);
+        this.fired = false;
         this.actions = new Map();
         this.rollback = false;
         this.actionOrder = 0;
@@ -51,20 +54,32 @@ export class PlayerData extends Controls {
         this.actions.set(data.actionOrder, data);
     }
 
+    wasFired() {
+        if (this.fired) {
+            this.fired = false;
+            return true;
+        }
+        return false;
+    }
+
     applyAction(data) {
+        console.log('applying action data', data);
         if (data.move)
             this.move = Object.assign(this.move, data.move);
-        if (data.position) {
-            this.position = data.position;
-        }
-        else
-            this.position = null;
+        // if (data.position) {
+        //     this.position.copy(data.position);
+        // }
+        // else
+        //     this.position = null;
+        // if (data.movementVector)
+        //     this.movementVector.copy(data.movementVector);
         if (data.direction)
             this.direction.copy(data.direction);
         if (data.angle)
             this.angle = data.angle;
         if (data.mouse)
             this.Lclick = data.mouse.Lclick;
+        // this.fired = data.fired;
     }
 
     speedVector(frontVector) {
@@ -223,6 +238,7 @@ export class KeyControls extends Controls {
     sendActionToPeer(action) {
         let data = {...action, actionOrder: this.actionOrder};
         this.send(JSON.stringify(data));
+        console.log('sending action to peer', data);    
         this.actionOrder++;
     }
 
@@ -330,6 +346,7 @@ export class KeyControls extends Controls {
 export function getCameraDir(camera) {
    const dir = new THREE.Vector3();
    camera.getWorldDirection(dir);
+   /// adjust for the plane passing by y = 3
    const projection = dir.projectOnPlane(new THREE.Vector3(0, 1, 0));
    return projection;
 }

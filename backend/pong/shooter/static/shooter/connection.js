@@ -37,7 +37,8 @@ export class Connection {
     
     
     connectToServer(reciever) {
-        let address = 'wss://' + window.location.host + '/ws/roll/';
+        let protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        let address = protocol + window.location.host + '/ws/roll/';
         this.initSocket(address, reciever);
     }
 

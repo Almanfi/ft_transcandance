@@ -29,15 +29,75 @@ export class MusicSync {
 
 
         this.musicMap = null;
+        this.simpleMusicMap = null;
         this.mapIterator = null;
         this.entry = null;
         this.keepFiring = false;
         this.lastBeatTime = 0;
+        this.currBeat = null;
+        this.nextBeat = null;
+        this.currBeatIdx = 0;
     }
     addMusicMap(map) {
         this.musicMap = map;
         this.mapIterator = this.musicMap.entries();
         this.entry = this.mapIterator.next();
+        this.simpleMusicMap = new Map();
+        let idx = 0;
+        let entry = {
+            time: 0,
+            type: 0,
+            handled: false,
+        }
+
+        this.simpleMusicMap.set(idx++, entry);
+        
+        map.forEach((value, key) => {
+            let type;
+            if (value === "0" || value === "2")
+                type = 1;
+            else if (value === "1" || value === "3")
+                type = 2;
+            else
+                type = 0;
+            
+            let entry = {
+                time: parseInt(key),
+                type: type,
+                handled: false,
+            }
+            this.simpleMusicMap.set(idx, entry);
+            idx++;
+        });
+        this.currBeatIdx = 0;
+        // this.currBeat = this.simpleMusicMap.get(this.currBeatIdx);
+        console.log("simple music map: ", this.simpleMusicMap);
+    }
+
+    findCurrentBeat() {// for safe measure an array of beats should be returned        
+        let time = performance.now() - this.startTime;
+        if (this.nextBeat && this.nextBeat.time > time || !this.nextBeat && this.currBeat) {
+            let cooldown = 400;
+            if (this.nextBeat && this.currBeat.type === 2 && this.currBeat.handled === true
+                && this.nextBeat.time < this.currBeat.time + cooldown * 2) {
+                    // this.currBeat.time = this.currBeat.time - cooldown;
+                    // this.currBeat.handled = false
+                }
+                return this.currBeat;
+            }
+        while (true) {
+            let entry = this.simpleMusicMap.get(this.currBeatIdx);
+            if (!entry)
+                return this.currBeat;
+            if (entry.time >= time)
+                break;
+            this.currBeatIdx++;
+        }
+        
+        this.nextBeat = this.simpleMusicMap.get(this.currBeatIdx);
+        this.currBeat = this.simpleMusicMap.get(this.currBeatIdx - 1);
+
+        return this.currBeat;
     }
 
     nextBeat() {
@@ -104,11 +164,19 @@ export class MusicSync {
     playMusic() {
         this.music.stop();
         this.music.play();
-        this.music.source.connect(this.analyser);
         this.startTime = performance.now();
+        this.music.source.connect(this.analyser);
         this.keepFiring = false;
         this.mapIterator = this.musicMap.entries();
         this.entry = this.mapIterator.next();
+        this.currBeatIdx = 0;
+        this.currBeat = null;
+        this.nextBeat = null;
+        this.simpleMusicMap.forEach((value, key) => {
+            value.handled = false;
+        });
+
+        return this.startTime;
     }
 
     stopMusic() {
