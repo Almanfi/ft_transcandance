@@ -16,5 +16,5 @@ class GlobalExceptionMiddleware:
 def rest_exception_handler(exc, context):
 	res = exception_handler(exc, context)
 	if res is None:
-		return Response({"error" : str(exc.message)}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)	
+		return Response({"error" : str(exc)}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)	
 	return res

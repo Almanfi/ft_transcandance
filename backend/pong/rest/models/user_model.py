@@ -52,5 +52,3 @@ class User(models.Model):
         deletion_info = users_queryset.delete()
         return (deletion_info, deleted_users_data)
 
-    def invite_friends(self, friends_ids):
-        pass
