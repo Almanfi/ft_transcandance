@@ -1,7 +1,7 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import IntegrityError
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import status
 from ..models.user_model import User, users_images_path, user_image_route
@@ -12,7 +12,7 @@ import argon2
 import binascii
 import jwt
 
-class UserInfo(GenericViewSet):
+class UserInfo(ViewSet):
 
 	def get_authenticators(self):
 		if self.request.method in ["GET", "PATCH", "DELETE"]:

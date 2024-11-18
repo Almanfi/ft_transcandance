@@ -145,6 +145,8 @@ STATICFILES_DIRS = [
     ('rest', f"{BASE_DIR}/rest/static/rest")
 ]
 
+OAUTH_42_PUBLIC=os.getenv("CLIENT_ID_42")
+OAUTH_42_SECRET=os.getenv("CLIENT_SECRET_42")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

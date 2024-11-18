@@ -10,3 +10,4 @@ pyjwt==2.8.0
 cryptography==42.0.7
 channels[daphne]==4.1.0
 channels-redis==4.2.0
+requests==2.32.3

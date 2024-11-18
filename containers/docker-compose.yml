@@ -1,67 +1,81 @@
-
 services:
-    postgres:
-      build:
-        context: ./postgres
-        dockerfile: Dockerfile
-        args:
-          PG_ROOT_PASSWORD : ${PG_ROOT_PASSWORD}
-          PG_USERNAME : ${PG_USERNAME}
-          PG_USER_PASSWORD : ${PG_USER_PASSWORD}
-          PG_DB_NAME : ${PG_DB_NAME}
-      image: postgres:pong
-      volumes:
-        - postgres_volume:/var/lib/postgresql/data
-      networks:
-        - pong
-      container_name: postgres
-      restart: always
-    pgadmin:
-      image: dpage/pgadmin4
-      environment:
-        PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-        PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      networks:
-        - pong
-      ports:
-        - "0.0.0.0:9000:80"
-      container_name: pgadmin
-      depends_on:
-        - postgres
-      restart: always
-    redis:
-      build:
-        context: ./redis
-        dockerfile: Dockerfile
-      image: redis:pong
-      volumes:
-        - redis_volume:/data
-      networks:
-        - pong
-      container_name: redis
-      restart: always
-    django:
-      build:
-        context: ../
-        dockerfile: ./containers/django/Dockerfile
-        args:
-          PG_USERNAME : ${PG_USERNAME}
-          PG_USER_PASSWORD : ${PG_USER_PASSWORD}
-          PG_DB_NAME : ${PG_DB_NAME}
-          JWT_SECRET : ${JWT_SECRET}
-          JWT_PUBLIC : ${JWT_PUBLIC}
-      image: django:pong
-      volumes:
-        - django_volume:/usr/backend
-      depends_on:
-        - postgres
-        - redis
-      networks:
-        - pong
-      ports:
-        - "8000:8000"
-      container_name: django
-      restart : always
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+      args:
+        PG_ROOT_PASSWORD: ${PG_ROOT_PASSWORD}
+        PG_USERNAME: ${PG_USERNAME}
+        PG_USER_PASSWORD: ${PG_USER_PASSWORD}
+        PG_DB_NAME: ${PG_DB_NAME}
+    image: postgres:pong
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    networks:
+      - pong
+    container_name: postgres
+    restart: always
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #   networks:
+  #     - pong
+  #   ports:
+  #     - "0.0.0.0:9000:80"
+  #   container_name: pgadmin
+  #   depends_on:
+  #     - postgres
+  #   restart: always
+  redis:
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    image: redis:pong
+    volumes:
+      - redis_volume:/data
+    networks:
+      - pong
+    container_name: redis
+    restart: always
+  django:
+    build:
+      context: ../
+      dockerfile: ./containers/django/Dockerfile
+      args:
+        PG_USERNAME: ${PG_USERNAME}
+        PG_USER_PASSWORD: ${PG_USER_PASSWORD}
+        PG_DB_NAME: ${PG_DB_NAME}
+        JWT_SECRET: ${JWT_SECRET}
+        JWT_PUBLIC: ${JWT_PUBLIC}
+        CLIENT_ID_42: ${CLIENT_ID_42}
+        CLIENT_SECRET_42: ${CLIENT_SECRET_42}
+    image: django:pong
+    volumes:
+      - django_volume:/usr/backend
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - pong
+    # ports:
+    #   - "8000"
+    container_name: django
+    restart: always
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: nginx:pong
+    networks:
+      - pong
+    ports:
+      - "8000:443"
+    depends_on:
+      - django
+    container_name: nginx
+    restart: always
 
 networks:
   pong:
