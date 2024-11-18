@@ -27,6 +27,7 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     profile_picture = models.FilePathField(path=users_images_path, recursive=True, default='profile.jpg')
     relationship = models.ManyToManyField('self', through='Relationship', symmetrical = True)
+    oauth_user = models.BooleanField(default=False)
     status = models.CharField(choices=USER_STATUS, default=USER_STATUS[0][0])
 
     @staticmethod
@@ -38,7 +39,7 @@ class User(models.Model):
     @staticmethod
     def fetch_user_by_username(username:str):
         try:
-            user = User.objects.filter(username__exact=username).values('id', 'username', 'password').get()
+            user = User.objects.filter(username__exact=username).values('id', 'username', 'password', 'oauth_user').get()
             user = {**user, "id" : str(user['id'])}
             return user
         except (User.DoesNotExist, User.MultipleObjectsReturned):
