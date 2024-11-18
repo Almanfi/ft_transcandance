@@ -8,5 +8,5 @@ def index(request):
     userData = None
     if user_id != None:
         userData = authenticate_user(user_id)
-    users = [{"username": "mee", "id": "5f8e541f-67e4-43c4-a291-8c76d12bb362"}, {"username": "ana", "id": "1294eb30-9a1e-4e4b-8fc3-b1fd6a41a474"}]
+    users = [{"username": "mee", "id": "e69e9c06-aa54-4e4a-bb18-f907404e31e0"}, {"username": "ana", "id": "86db8da4-5f50-4383-ad52-6c2fefba0fee"}]
     return render(request, "shooter/index.html", {"user": userData[0].data if userData  else 'null', "users": users})

@@ -201,7 +201,8 @@ export class Connection {
         remoteConnection.addEventListener('connectionstatechange', event => {
             // event.preventDefault();
             console.log('+++++++++++++++++++++++++++++++connection state: ', remoteConnection.connectionState);
-            if (remoteConnection.connectionState === 'disconnected') {
+            if (remoteConnection.connectionState === 'disconnected'
+                || remoteConnection.connectionState === 'failed') {
                 console.log('disconnected and closing');
                 this.iceCount = 0;
                 this.RtcConnected = false;
@@ -275,7 +276,8 @@ export class Connection {
         localConnection.addEventListener('connectionstatechange', event => {
             // event.preventDefault();
             console.log('+++++++++++++++++++++++++++++++connection state: ', localConnection.connectionState);
-            if (localConnection.connectionState === 'disconnected') {
+            if (localConnection.connectionState === 'disconnected'
+                || localConnection.connectionState === 'failed') {
                 console.log('disconnected and closing');
                 this.iceCount = 0;
                 this.RtcConnected = false;

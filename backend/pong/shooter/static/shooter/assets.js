@@ -68,12 +68,13 @@ export class Turret extends THREE.Mesh {
     }
 
 
-	update(timeS, timeStamp, startTime) {
+	update(timeStamp, startTime) {
+        // console.log(`beatTime: ${timeStamp}, now: ${performance.now() - startTime}`);
 		// this.fireAngle += this.rotationSpeed;
         // let ballSpeed = 0.3;
         // this.fireAngle += timeS / ballSpeed;
         this.timeStamp = timeStamp;
-        let time = timeStamp - startTime;
+        let time = timeStamp;
         this.fireAngle = time / 1000;
 	};
 
@@ -591,7 +592,7 @@ export class Player extends THREE.Object3D {
         this.position.set(position.x, position.y, position.z);
         let scale = 2;
         this.scale.set(scale, scale, scale);
-        this.fireRate = 0;
+        this.fireRate = 500;
         this.lastFire = 0;
         this.fired = false;
         this.controls = null;
@@ -610,7 +611,22 @@ export class Player extends THREE.Object3D {
             Lclick: false,
         }
         this.currMouseInput = {};
+        this.count = 0;
     };
+
+    reset() {
+        this.actions.clear();
+        this.lastFire = 0;
+        this.move = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+        }
+        this.mouse = {
+            Lclick: false,
+        }
+    }
 
     addToScene(scene) {
         this.scene = scene;
@@ -640,19 +656,35 @@ export class Player extends THREE.Object3D {
     // }
 
     despawnUncertainBullets(time) {
-        let iterator = this.bulletManager.bullets.entries();
-        let bullet = iterator.next().value;
-        while (bullet) {
-            if (bullet[1].date > time) {
-                this.bulletManager.despawnBullet(bullet[1]);
+        console.log('despawning bullets');
+        this.bulletManager.bullets.forEach(bullet => {
+            if (bullet.date > time) {
+                console.log('despawning bullet');
+                this.bulletManager.despawnBullet(bullet);
             }
-            bullet = iterator.next().value;
-        }
+        });
+        this.bulletManager.destroyedBullets.forEach(bullet => {
+            if (bullet.date > time) {
+                console.log('despawning bullet');
+                this.bulletManager.returnDestroyedBullet(bullet);
+            }
+        });
+        console.log('done despawning bullets');
+        // let iterator = this.bulletManager.bullets.entries();
+        // let bullet = iterator.next().value;
+        // while (bullet) {
+        //     if (bullet[1].date > time) {
+        //         console.log('despawning bullet');
+        //         this.bulletManager.despawnBullet(bullet[1]);
+        //     }
+        //     bullet = iterator.next().value;
+        // }
     }
 
-    rollbackActoin(action, lastActionTime, startTime, planeFacingVector) {
-        let timeS = (lastActionTime - action.timeStamp) / 1000;
-        this.update(timeS, planeFacingVector, lastActionTime, startTime)
+    rollbackActoin(action, lastActionTime, startTime, planeFacingVector, actionTime) {
+        let spanS = (action.timeStamp - lastActionTime) / 1000;
+        this.update(spanS, planeFacingVector, lastActionTime, startTime, actionTime)
+        console.log('rolling back action old actionat time: ', lastActionTime, " to: ", action.timeStamp);
         this.controls.applyAction(action);
     }
 
@@ -667,10 +699,9 @@ export class Player extends THREE.Object3D {
             this.fired = this.fire(timeStamp);
         }
         this.addRollBackAction(timeStamp);
-        
     }
     
-    update(timeS, planeFacingVector, timeStamp, startTime) {
+    update(timeS, planeFacingVector, timeStamp, startTime, actionTime) {
         let speed = 3 * timeS;
         const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
         
@@ -682,8 +713,9 @@ export class Player extends THREE.Object3D {
         this.movementVector.copy(this.controls.speedVector(projectionOnPlane));
 
         this.position.addScaledVector(this.movementVector, 1);
-        if (performance.now() - this.lastFire > 70)
-            this.fired = this.fire(timeStamp - startTime);
+
+        // if (performance.now() - this.lastFire > 70)
+            this.fired = this.fire(timeStamp - startTime, timeS);
         if (this.controls.sendActionToPeer && this.saveAction) {
             this.currInput = {};
             this.currmouse = {};
@@ -700,7 +732,7 @@ export class Player extends THREE.Object3D {
             Object.assign(this.mouse, this.currMouseInput);
             Object.assign(this.move, this.currInput);
         }
-        this.addAction(timeStamp - startTime);
+        this.addAction(actionTime);
     }
 
     addRollBackAction(timeStamp) {
@@ -720,13 +752,14 @@ export class Player extends THREE.Object3D {
 
     addAction(timeStamp) {
         let action = {
-            startPosition: this.oldPosition,
-            movementVector: this.movementVector,
+            startPosition: this.oldPosition.clone(),
+            movementVector: this.movementVector.clone(),
             fire: this.fired,
-            move: this.controls.move,
+            move: {...this.controls.move},
             angle: this.controls.angle,
-            direction: this.controls.direction,
+            direction: this.controls.direction.clone(),
             Lclick: this.controls.Lclick,
+            lastFire: this.lastFire,
             timeStamp: timeStamp,
         }
         this.actions.set(timeStamp, action);
@@ -748,24 +781,29 @@ export class Player extends THREE.Object3D {
     findStateAtTime(time) {
         let iterator = this.actions.entries();
         let action = iterator.next().value;
-        let previousAction;
+        let previousAction  = null;
         while (action) {
-            if (action[0] < time) {
-                if (previousAction)
-                    this.actions.delete(previousAction[0]);
+            if (action[0] <= time) {
+                // if (previousAction) {
+                //     this.actions.delete(previousAction[0]);
+                // }
                 previousAction = action;
                 action = iterator.next().value;
             }
             else
                 break;
         }
-        if (!previousAction)
+
+        if (!action)
             return;
-        this.position.copy(previousAction[1].startPosition).addScaledVector(previousAction[1].movementVector, 1);
-        this.controls.move = previousAction[1].move;
-        this.controls.angle = previousAction[1].angle;
-        this.controls.direction = previousAction[1].direction;
-        this.controls.Lclick = previousAction[1].Lclick;
+        this.position.copy(action[1].startPosition).addScaledVector(action[1].movementVector, 1);
+        console.log("old action at frame time: ", time, " action: ", JSON.stringify(action[1]));
+        this.controls.move = action[1].move;
+        this.controls.angle = action[1].angle;
+        this.controls.direction = action[1].direction;
+        this.controls.Lclick = action[1].Lclick;
+        this.lastFire = action[1].lastFire;
+        this.actions.clear();
     }
 
     findPositionAtTime(time) {
@@ -811,56 +849,33 @@ export class Player extends THREE.Object3D {
         return this.oldPosition;
     }
 
-    // move(timeS, move, planeFacingVector) {
-    //     let speed = 3 * timeS;
-    //     const projectionOnPlane = planeFacingVector.multiplyScalar(speed);
-    //     const sideOnPlane = projectionOnPlane.clone().cross(new THREE.Vector3(0, 1, 0));
-    
-    //     let posDiff = new THREE.Vector3(0, 0, 0);
+    fire(time, spanS) {
+        if (!this.controls.fire()) {
+            if (this.cannon.head.position.z < -2)
+                this.cannon.head.position.z += 0.2;
+            return false;
+        }
+        if (this.cannon.head.position.z > -2.4)
+            this.cannon.head.position.z -= 0.1;
 
-    //     if (move.up) {
-    //         posDiff.x += projectionOnPlane.x;
-    //         posDiff.z += projectionOnPlane.z;
-    //     }
-    //     if (move.down) {
-    //         posDiff.x += -projectionOnPlane.x;
-    //         posDiff.z += -projectionOnPlane.z;
-    //     }
-    //     if (move.left) {
-    //         posDiff.x += -sideOnPlane.x;
-    //         posDiff.z += -sideOnPlane.z;
-    //     }
-    //     if (move.right) {
-    //         posDiff.x += sideOnPlane.x;
-    //         posDiff.z += sideOnPlane.z;
-    //     }
-    //     posDiff.normalize();
-    //     this.position.x += posDiff.x;
-    //     this.position.z += posDiff.z;
-    // }
-
-    // createBullet(angle, direction) {
-    //     let ballSpeed = 2;
-    //     let vect0 = new THREE.Vector3(1,0,0).multiplyScalar(ballSpeed);
-    //     applyPlaneRotation(vect0, angle + Math.PI / 2);
-    //     return new Bullet(this.position, vect0, angle, this.scene);
-    // }
-    
-    fire(time) {
-        if (this.controls.fire()) {
-            if (this.cannon.head.position.z > -2.4)
-                this.cannon.head.position.z -= 0.1;
-            this.lastFire = time;
+        let start = this.lastFire + this.fireRate;
+        if (start < time)
+            start = time;
+        // console.log(`start: ${start}, time: ${time}`)
+        let end = time + spanS * 1000;
+        while (start < end) {
+            this.lastFire = start;
             let spawnTime = this.lastFire - 50;
             this.bulletManager.spawnBullet(0xffffff, this.position, this.controls.direction.clone(), this.controls.angle, spawnTime);
             this.bulletSound.stop();
             this.bulletSound.setDetune((0.5 - Math.random()) * 50)
             this.bulletSound.play();
-            return true;
+            // console.log('fire rate: ', this.fireRate, `start: ${start}, end: ${end}, timeS: ${spanS}`);
+            // console.log("bullet nbr ", this.bulletManager.bullets.size);
+            start += this.fireRate;
         }
-        if (this.cannon.head.position.z < -2)
-            this.cannon.head.position.z += 0.2;
-        return false;
+        return true;
+
     }
 }
 

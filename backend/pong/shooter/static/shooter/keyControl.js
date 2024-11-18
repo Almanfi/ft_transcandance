@@ -63,7 +63,6 @@ export class PlayerData extends Controls {
     }
 
     applyAction(data) {
-        console.log('applying action data', data);
         if (data.move)
             this.move = Object.assign(this.move, data.move);
         // if (data.position) {
@@ -178,8 +177,8 @@ export class KeyControls extends Controls {
         this.findPlayerAngle();
         if (!this.connection)
             return;
-        this.accurateAngleCounter++;
-        if (Math.abs(this.sentAngle - this.angle) > 0.006 || this.accurateAngleCounter % 6 === 0) {
+        this.accurateAngleCounter++; // sending all angle changes
+        if (true || Math.abs(this.sentAngle - this.angle) > 0.006 || this.accurateAngleCounter % 6 === 0) {
             this.sentAngle = this.angle;
             this.sendAngleToPeer(this.angle, this.direction);
         }
@@ -217,7 +216,7 @@ export class KeyControls extends Controls {
     send(msg) {}
 
     sendAngleToPeer(angle, direction) {
-        this.player.saveAction = true;
+        // this.player.saveAction = true;
         // let data = {angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: performance.now()};
         // // this.send(JSON.stringify(data));
         // this.actionOrder++;
