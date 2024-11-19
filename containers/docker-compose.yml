@@ -15,19 +15,19 @@ services:
       - pong
     container_name: postgres
     restart: always
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-  #   networks:
-  #     - pong
-  #   ports:
-  #     - "0.0.0.0:9000:80"
-  #   container_name: pgadmin
-  #   depends_on:
-  #     - postgres
-  #   restart: always
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    networks:
+      - pong
+    ports:
+      - "0.0.0.0:9000:80"
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    restart: always
   redis:
     build:
       context: ./redis

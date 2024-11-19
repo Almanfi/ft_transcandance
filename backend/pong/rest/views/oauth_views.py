@@ -31,14 +31,18 @@ class OauthViews(GenericViewSet):
 		return HttpResponseRedirect(uri)
 	
 	def create_42_user(self, data:dict):
-		user_serializer = UserSerializer(data)
+		user_serializer = UserSerializer(data=data)
+		print("Before validation")
 		if user_serializer.is_valid():
 			user_serializer.save()
-		user_serializer.validated_data['id'] = user_serializer.instance.id
+		print("After Validation")
+		user_serializer.validated_data['id'] = str(user_serializer.instance.id)
 		return user_serializer.validated_data
  
 	def login_42_user(self, user_data):
+		print("Before Signing")
 		signed_jwt = jwt.encode({'id': user_data['id']}, os.getenv("JWT_SECRET"), algorithm="EdDSA")
+		print("After signing")
 		res = Response(status=status.HTTP_200_OK)
 		cookie = {
 			"max_age" : 3600,
@@ -69,7 +73,7 @@ class OauthViews(GenericViewSet):
 				user_data = self.create_42_user(creation_data)
 			return self.login_42_user(user_data)
 		except Exception as e:
-			return Response({"message": "Couldn't request user data", "error_code": 103})
+			return Response({"message": "Couldn't request user data", "details": str(e), "error_code": 103})
 
 	@action("GET", True)
 	def callback_42(self, request):
