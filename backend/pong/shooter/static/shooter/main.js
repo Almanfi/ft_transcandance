@@ -36,15 +36,16 @@ var entry = mapIterator.next();
 let limit1 = 0;
 
 function startGame(timeStamp) {
+    console.log('starting game in: ', timeStamp - performance.now());
     plane.material.color.setHex(0x000000);
         musicSyncer.stopMusic();
         turretBulletManager.reset();
         playerBulletManager.reset();
         foeBulletManager.reset();
     setTimeout(() => {
-        while(timeStamp > performance.now());
+        // while(timeStamp > performance.now());
         plane.material.color.setHex(0xcccccd);
-        gClock.startTime = musicSyncer.playMusic();
+        gClock.setStartTime(musicSyncer.playMusic());
         limit1 = 0;
         turret.fireAngle = 0;
         keyControls.actionOrder = 0;
@@ -53,12 +54,12 @@ function startGame(timeStamp) {
         player.actions.clear();
         playerSyncData.actions.clear();
         gClock.frameCount = 0;
-        turretBulletManager.reset();
-        playerBulletManager.reset();
-        foeBulletManager.reset();
+        turretBulletManager.reset(gClock.startTime);
+        playerBulletManager.reset(gClock.startTime);
+        foeBulletManager.reset(gClock.startTime);
         player.reset();
         foe.reset();
-    }, (timeStamp - performance.now()) - 30);
+    }, (timeStamp - performance.now()));
 }
 
 function startMusic(timeStamp) {
@@ -219,13 +220,13 @@ function rollBack(startTime) {
     
     let lastFrameIdx = 0;
     let lastFrameTime;
-    for (let i = 4; i > 0; i--) {
-        let FrameTime = gClock.getFrameTime(i);
-        console.log(`FrameIdx : ${i} FrameTime: ${FrameTime}`);
-    }
+    // for (let i = 4; i > 0; i--) {
+    //     let FrameTime = gClock.getFrameTime(i);
+    //     console.log(`FrameIdx : ${i} FrameTime: ${FrameTime}`);
+    // }
     while (lastFrameIdx < 60) {
         lastFrameTime = gClock.getFrameTime(lastFrameIdx);
-        console.log(`lastFrameIdx : ${lastFrameIdx} lastFrameTime: ${lastFrameTime} actionTime: ${actionTime}`);
+        // console.log(`lastFrameIdx : ${lastFrameIdx} lastFrameTime: ${lastFrameTime} actionTime: ${actionTime}`);
         lastFrameIdx++;
         if (lastFrameTime <= actionTime)
             break;
@@ -244,7 +245,7 @@ function rollBack(startTime) {
 
     while (lastFrameIdx > 0) {
         lastFrameIdx--;
-        console.log('loop lastFrameIdx: ', lastFrameIdx);
+        // console.log('loop lastFrameIdx: ', lastFrameIdx);
         let nextFrameTime = gClock.getFrameTime(lastFrameIdx);
         const frameSpan = nextFrameTime - lastFrameTime;
         
@@ -260,7 +261,7 @@ function rollBack(startTime) {
             }
             // console.log('applying foeActionOrder : ', foeActionOrder);
             console.log(' action : ', JSON.stringify(playerSyncData.actions.get(foeActionOrder)));
-            foe.rollbackActoin(playerSyncData.actions.get(foeActionOrder), lastActionTime, startTime, planeFacingVector, lastFrameTime);
+            foe.rollbackActoin(playerSyncData.actions.get(foeActionOrder), lastActionTime, planeFacingVector, lastFrameTime);
             // playerSyncData.applyAction(playerSyncData.actions.get(foeActionOrder));
             playerSyncData.actions.delete(foeActionOrder);
             lastActionTime = ActionTime;
@@ -269,7 +270,7 @@ function rollBack(startTime) {
         if (lastActionTime < nextFrameTime) {
             console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
             let timeS = nextFrameTime - lastActionTime;
-            foe.update(timeS, planeFacingVector, lastActionTime, startTime, lastFrameTime);
+            foe.update(timeS, planeFacingVector, lastActionTime, lastFrameTime);
         }
 
         // foe.update(frameSpan, planeFacingVector, lastFrameTime, startTime);
@@ -313,20 +314,17 @@ function rollBack(startTime) {
    console.log('roll back time: ', performance.now() - startTime - currentTime); 
 }
 
-var animate = (s, timeStamp, startTime) => {
+var animate = (s, timeStamp) => {
+    let startTime = gClock.startTime;
     const planeFacingVector = getCameraDir(camera);
-    // if (playerSyncData.rollback) {
-        // playerSyncData.rollback = false;
-        // rollBack();
-    // }
-    let actionTime = timeStamp - startTime;
-    player.update(s, planeFacingVector, timeStamp, startTime, actionTime);
-    foe.update(s, planeFacingVector, timeStamp, startTime, actionTime);
-    let time = timeStamp - startTime; // use  performance.now() in case of desync
 
-    turretBulletManager.update(time);
-    playerBulletManager.update(time);
-    foeBulletManager.update(time);
+    let actionTime = timeStamp;
+    player.update(s, planeFacingVector, timeStamp, timeStamp);
+    foe.update(s, planeFacingVector, timeStamp, timeStamp);
+
+    turretBulletManager.update(timeStamp);
+    playerBulletManager.update(timeStamp);
+    foeBulletManager.update(timeStamp);
 
     if (limit > 5) {
         limit = 0;
@@ -335,7 +333,8 @@ var animate = (s, timeStamp, startTime) => {
 
     let beat = musicSyncer.findCurrentBeat();
 
-    if (beat.type && !beat.handled) {
+    let listen = true;
+    if (listen && beat && beat.type && !beat.handled) {
         beat.handled = true;
         // console.log('beat: ', beat);
         // console.log(performance.now() - startTime);

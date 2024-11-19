@@ -1,9 +1,8 @@
 export class gameClock {
 	constructor(scene, camera, renderer) {
-		this.fps = 60;
-		this.msPerFrame = 1000 / this.fps;
-		this.msPrev = window.performance.now();
-		this.msNow = window.performance.now();
+		this.setFps(60);
+		this.msPrev = 0;
+		this.msNow = performance.now();
 		this.excessTime = 0;
 		this.loop = this.loop.bind(this);
 		this.msPrevTrue = this.msNow;
@@ -14,13 +13,13 @@ export class gameClock {
 		this.frame = 0;
 		this.full = false;
 		this.frameCount = 0;
-		this.startTime = window.performance.now();
+		this.startTime = performance.now();
 		this.saveTime = this.startTime;
 	}
 
 	setFps(fps) {
 		this.fps = fps;
-		this.msPerFrame = 1000 / fps;
+		this.msPerFrame = Math.floor(1000 / fps);
 	}
 
 	setFrameTime() {
@@ -28,7 +27,7 @@ export class gameClock {
 			this.full = true;
 			this.frame = 0;
 		}
-		this.frameTimes[this.frame] = this.msPrev - this.startTime;
+		this.frameTimes[this.frame] = this.msPrev;
 		this.frame++;
 	}
 
@@ -37,30 +36,31 @@ export class gameClock {
 			console.log("invalid frame time index");// get rid of this
 			return ;
 		}
-		// if (this.full === false)
-		// 	return this.frameTimes[this.frame - reverseIdx - 1];
 		return this.frameTimes[(this.frame - reverseIdx + 59) % 60];
-		let frame = this.frame - reverseIdx - 1;
-		if (frame < 0)
-			frame += 60;
-		return this.frameTimes[frame];
+	}
 
+	setStartTime(startTime) {
+		this.msPrev = 0;
+		this.excessTime = 0;
+		this.frame = 0;
+		this.full = false;
+		this.frameCount = 0;
+		this.startTime = startTime;
 	}
 
 	loop(animate, rollBack) {
 		window.requestAnimationFrame(() => this.loop(animate, rollBack));
-		this.msNow = window.performance.now();
+		this.msNow = performance.now() - this.startTime;
 		this.msPassed = this.msNow - this.msPrev;
 		// animate((this.msNow - this.msPrevTrue) / 1000);
 		this.msPrevTrue = this.msNow;
 		rollBack(this.startTime);
-		if (this.msPassed < this.msPerFrame * 0.9)
+		if (this.msPassed < this.msPerFrame)
 			return ;
-		frames++
 		
-		// this.excessTime = this.msPassed % this.msPerFrame;
+		this.excessTime = this.msPassed % this.msPerFrame;
 		this.msPrev = this.msNow - this.excessTime;
-		animate((this.msPassed) / 1000, this.msPrev, this.startTime);
+		animate(this.msPassed, this.msPrev);
 		this.setFrameTime();
 		// let time = performance.now() - this.startTime;
 		// // console.log(this.msPerFrame)

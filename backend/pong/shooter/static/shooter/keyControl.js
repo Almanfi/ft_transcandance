@@ -216,7 +216,7 @@ export class KeyControls extends Controls {
     send(msg) {}
 
     sendAngleToPeer(angle, direction) {
-        // this.player.saveAction = true;
+        this.player.saveAction = true;
         // let data = {angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: performance.now()};
         // // this.send(JSON.stringify(data));
         // this.actionOrder++;
