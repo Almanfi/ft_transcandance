@@ -121,11 +121,13 @@ if (user.username === 'ana')
     positions.reverse();
 
 const player = new Player(positions[0]);
+player.name = "player";
 
 player.addToScene(scene);
 player.addBulletSound(musicSyncer.bullet);
 
 const foe = new Player(positions[1]);
+foe.name = "foe";
 
 foe.addToScene(scene);
 foe.addBulletSound(musicSyncer.bullet);
@@ -134,12 +136,12 @@ const keyControls = new KeyControls(player, camera);
 const gClock = new gameClock(scene, camera, renderer);
 
 
-camera.position.x = 20;
+// camera.position.x = 20;
+// camera.position.y = 150;
+// camera.position.z = -10;
+camera.position.x = 0;
 camera.position.y = 150;
-camera.position.z = -10;
-// camera.position.x = 50;
-// camera.position.y = 300;
-// camera.position.z = -30;
+camera.position.z = 0;
 
 camera.lookAt(0,0,0);
 
@@ -192,6 +194,8 @@ var scale = 1;
 
 var foeActionOrder = 0;
 
+var justRolledBack = false;
+
 function rollBack(startTime) {
     const planeFacingVector = getCameraDir(camera);
     // (in the makeBackUp method) if a new action arrives and its time stamp is old send a full description request;
@@ -239,8 +243,11 @@ function rollBack(startTime) {
     // console.log('time: ', lastFrameTime, ' timeStampTransformed: ', timeStampTransformed);
     // actionTime = lastFrameTime;
 
-    foe.despawnUncertainBullets(lastFrameTime);// later only despown bullet that 
+    foe.despawnUncertainBullets(lastFrameTime);// later only despown bullet that
+    // console.log("-----------------finding player at time: ", lastFrameTime); 
     foe.findStateAtTime(lastFrameTime);
+    // console.log('found player at time: ', lastFrameTime, ' with position: ', foe.position);
+    console.log("+++++++++++++++++finding player at time: ", lastFrameTime);
     // foe.actions.clear();
 
     while (lastFrameIdx > 0) {
@@ -271,6 +278,7 @@ function rollBack(startTime) {
             console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
             let timeS = nextFrameTime - lastActionTime;
             foe.update(timeS, planeFacingVector, lastActionTime, lastFrameTime);
+            console.log(`after finishing action at time : ${nextFrameTime} position: ${JSON.stringify(foe.position)}`);
         }
 
         // foe.update(frameSpan, planeFacingVector, lastFrameTime, startTime);
@@ -311,16 +319,30 @@ function rollBack(startTime) {
     // save for next roll back
     // playerSyncData.backUpPosition.copy(foe.position);
     playerSyncData.actionOrder = foeActionOrder;
-   console.log('roll back time: ', performance.now() - startTime - currentTime); 
+   console.log('roll back time: ', performance.now() - startTime - currentTime);
+   justRolledBack = true;
 }
 
 var animate = (s, timeStamp) => {
     let startTime = gClock.startTime;
     const planeFacingVector = getCameraDir(camera);
+    if (justRolledBack) {
+        let lastFrame = gClock.getFrameTime(0);
+        let span = timeStamp - lastFrame;
+        // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
+        // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
+        foe.update(span, planeFacingVector, lastFrame, lastFrame);
+        // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
+    }
 
     let actionTime = timeStamp;
     player.update(s, planeFacingVector, timeStamp, timeStamp);
     foe.update(s, planeFacingVector, timeStamp, timeStamp);
+
+    if (justRolledBack) {
+        // console.log('(just rolled back) after animete at time', timeStamp + s, ' postion: ', foe.position);
+        justRolledBack = false;
+    }
 
     turretBulletManager.update(timeStamp);
     playerBulletManager.update(timeStamp);

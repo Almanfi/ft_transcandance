@@ -615,6 +615,7 @@ export class Player extends THREE.Object3D {
         }
         this.currMouseInput = {};
         this.count = 0;
+        this.oldMovementVector = new THREE.Vector3();
     };
 
     reset() {
@@ -687,8 +688,10 @@ export class Player extends THREE.Object3D {
 
     rollbackActoin(action, lastActionTime, planeFacingVector, actionTime) {
         let spanS = (action.timeStamp - lastActionTime);
-        this.update(spanS, planeFacingVector, action.timeStamp, actionTime)
         console.log('rolling back action old actionat time: ', lastActionTime, " to: ", action.timeStamp);
+        console.log(`at time of old action: ${lastActionTime}: position: ${JSON.stringify(this.position)}`);
+        this.update(spanS, planeFacingVector, action.timeStamp, actionTime)
+        console.log(`at time of new action: ${action.timeStamp}: position: ${JSON.stringify(this.position)}`);
         this.controls.applyAction(action);
     }
 
@@ -706,18 +709,23 @@ export class Player extends THREE.Object3D {
     }
     
     update(timeS, planeFacingVector, timeStamp, actionTime) {
-        let speed = 30 * (timeS / 1000);
+        let speed = (30 * timeS) / 1000;
         const projectionOnPlane = planeFacingVector;
+        if (this.saveAction) {
+            console.log(`at time: ${timeStamp}: position: ${JSON.stringify(this.position)}`);
+        }
         
         this.core.rotateY(0.1);
         // this.cannon.head.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
         this.cannon.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), this.controls.angle);
         
         this.oldPosition.copy(this.position);
+        this.oldMovementVector.copy(this.movementVector);
         this.movementVector.copy(this.controls.speedVector(projectionOnPlane));
-        this.movementVector.multiplyScalar(speed);
+        // console.log(`movement vector: of ${this.name}`, this.movementVector);
+        // this.movementVector.multiplyScalar(speed);
 
-        this.position.addScaledVector(this.movementVector, 1);
+        this.position.addScaledVector(this.movementVector, speed);
 
         if (this.controls.sendActionToPeer && this.saveAction) {
             this.currInput = {};
@@ -738,7 +746,7 @@ export class Player extends THREE.Object3D {
         this.addAction(actionTime);
 
         // if (performance.now() - this.lastFire > 70)
-        this.fired = this.fire(timeStamp, timeS / 1000);
+        this.fired = this.fire(timeStamp, timeS);
         // if (this.fired) {
         //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
         // }
@@ -762,7 +770,7 @@ export class Player extends THREE.Object3D {
     addAction(timeStamp) {
         let action = {
             startPosition: this.oldPosition.clone(),
-            movementVector: this.movementVector.clone(),
+            movementVector: this.oldMovementVector.clone(),
             move: {...this.controls.move},
             angle: this.controls.angle,
             direction: this.controls.direction.clone(),
@@ -791,7 +799,9 @@ export class Player extends THREE.Object3D {
         let action = iterator.next().value;
         let previousAction  = null;
         while (action) {
-            if (action[0] <= time) {
+            if (action[0] < time) {
+                // if (action[0] + 500 > time)
+                //     console.log('previous state at time: ', action[0], " pos: ", action[1].startPosition, " vect: ", action[1].movementVector);
                 // if (previousAction) {
                 //     this.actions.delete(previousAction[0]);
                 // }
@@ -801,17 +811,23 @@ export class Player extends THREE.Object3D {
             else
                 break;
         }
+        // if (previousAction)// later
+        //     action = previousAction;
 
         if (!action)
             return;
-        this.position.copy(action[1].startPosition).addScaledVector(action[1].movementVector, 1);
-        console.log("old action at frame time: ", time, " action: ", JSON.stringify(action[1]));
+        // this.position.copy(action[1].startPosition).addScaledVector(action[1].movementVector, 1);
+        this.position.copy(action[1].startPosition);
+        // console.log("old action at frame time: ", time, " action: ", JSON.stringify(action[1]));
         this.controls.move = action[1].move;
         this.controls.angle = action[1].angle;
         this.controls.direction = action[1].direction;
         this.controls.Lclick = action[1].Lclick;
         this.lastFire = action[1].lastFire;
-        console.log("last fired of action: ", action[1].lastFire, " and of prev action: ", previousAction[1].lastFire);
+        console.log('last state position: ', action[1].startPosition,
+        'movement vector: ', action[1].movementVector,
+        ' at action time: ', action[0], "at time: ", time);
+        // console.log("last fired of action: ", action[1].lastFire, " and of prev action: ", previousAction[1].lastFire);
         this.actions.clear();
     }
 
@@ -858,7 +874,7 @@ export class Player extends THREE.Object3D {
         return this.oldPosition;
     }
 
-    fire(time, spanS) {
+    fire(time, span) {
         if (!this.controls.fire()) {
             if (this.cannon.head.position.z < -2)
                 this.cannon.head.position.z += 0.2;
@@ -873,7 +889,7 @@ export class Player extends THREE.Object3D {
             start = time;
         }
         // console.log(`start: ${start}, time: ${time}`)
-        let end = time + spanS * 1000;
+        let end = time + span;
         // if (end <= start) {
         //     console.log(`warning: end: ${end} >= start: ${start}`);
         // }

@@ -50,18 +50,19 @@ export class gameClock {
 
 	loop(animate, rollBack) {
 		window.requestAnimationFrame(() => this.loop(animate, rollBack));
+		rollBack(this.startTime);
 		this.msNow = performance.now() - this.startTime;
 		this.msPassed = this.msNow - this.msPrev;
 		// animate((this.msNow - this.msPrevTrue) / 1000);
 		this.msPrevTrue = this.msNow;
-		rollBack(this.startTime);
 		if (this.msPassed < this.msPerFrame)
 			return ;
 		
-		this.excessTime = this.msPassed % this.msPerFrame;
-		this.msPrev = this.msNow - this.excessTime;
+		// this.excessTime = this.msPassed % this.msPerFrame;
 		animate(this.msPassed, this.msPrev);
 		this.setFrameTime();
+		this.excessTime = 0;
+		this.msPrev = this.msNow - this.excessTime;
 		// let time = performance.now() - this.startTime;
 		// // console.log(this.msPerFrame)
 		// console.log(time - this.saveTime);
