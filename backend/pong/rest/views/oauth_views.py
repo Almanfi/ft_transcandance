@@ -11,6 +11,7 @@ from ..serializers.user_serializers import UserSerializer
 import os
 import requests
 import jwt
+from uuid import uuid4
 
 def bearer_header(token:str):
     return f"Bearer {token}"
@@ -32,17 +33,13 @@ class OauthViews(GenericViewSet):
 	
 	def create_42_user(self, data:dict):
 		user_serializer = UserSerializer(data=data)
-		print("Before validation")
 		if user_serializer.is_valid():
 			user_serializer.save()
-		print("After Validation")
 		user_serializer.validated_data['id'] = str(user_serializer.instance.id)
 		return user_serializer.validated_data
  
 	def login_42_user(self, user_data):
-		print("Before Signing")
 		signed_jwt = jwt.encode({'id': user_data['id']}, os.getenv("JWT_SECRET"), algorithm="EdDSA")
-		print("After signing")
 		res = Response(status=status.HTTP_200_OK)
 		cookie = {
 			"max_age" : 3600,
@@ -63,12 +60,13 @@ class OauthViews(GenericViewSet):
 			creation_data = {
 				"firstname": payload['first_name'],
 				"lastname": payload['last_name'],
-				"username": payload['login'],
+				"username": str(uuid4()),
 				"password": "Placeholder!1234",
 				"oauth_user": True,
+				"oauth_username": payload['login'],
 				"display_name": payload["displayname"],
 			}
-			user_data = User.fetch_user_by_username(creation_data['username'])
+			user_data = User.fetch_oauth_user(creation_data['oauth_username'])
 			if user_data == None:
 				user_data = self.create_42_user(creation_data)
 			return self.login_42_user(user_data)

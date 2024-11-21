@@ -50,6 +50,7 @@ class UserSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only = True)
     profile_picture = serializers.FilePathField(path=users_images_path(), recursive=True, required=False)
     oauth_user = serializers.BooleanField(required=False)
+    oauth_username = serializers.CharField(max_length=50, required = False)
     status = serializers.ChoiceField(choices=USER_STATUS, required=False)
 
 

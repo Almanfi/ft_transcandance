@@ -100,7 +100,7 @@ class UserInfo(ViewSet):
 		if not 'username' in login_data or not 'password' in login_data:
 			return Response({"message": "No username or password in request body", "error_code": 98}, status=status.HTTP_400_BAD_REQUEST)
 		user = User.fetch_user_by_username(login_data['username'])
-		if (user == None or user.oauth_user == True):
+		if (user == None):
 			return Response({"message":"wrong username", "error_code": 10}, status=status.HTTP_404_NOT_FOUND)
 		if not self.verify_password(user['password'], login_data['password']):
 			return Response({"message":"wrong password", "error_code": 11},status=status.HTTP_401_UNAUTHORIZED)
@@ -115,7 +115,7 @@ class UserInfo(ViewSet):
 		return res
 	
 	def validate_user_update(self, old_user: UserSerializer, update_data, picture=None):
-		banned_updates = any(key in update_data for key in ['id', 'salt', 'created_at', 'username' ,'status'])
+		banned_updates = any(key in update_data for key in ['id', 'salt', 'created_at', 'username', 'oauth_user' ,'status'])
 		if banned_updates:
 			return Response({"message": "Not allowed update fields", "error_code": 99}, status=status.HTTP_400_BAD_REQUEST)
 		updated_user = UserSerializer(old_user.instance, data = update_data)
