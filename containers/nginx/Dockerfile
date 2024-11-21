@@ -5,6 +5,7 @@ RUN apk update && apk upgrade \
 
 WORKDIR /etc/nginx/ssl/
 
+# COPY ./cert/ /etc/nginx/ssl/
 COPY ./clashers.conf ../http.d/
 COPY --chmod=755 ./start_script.sh ../start_script.sh
 

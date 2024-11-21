@@ -72,6 +72,7 @@ services:
       - pong
     ports:
       - "8000:443"
+      - "8001:80"
     depends_on:
       - django
     container_name: nginx

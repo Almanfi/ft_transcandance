@@ -12,7 +12,7 @@ class MessagingSocket(WebsocketConsumer):
     def connect(self):
         if not self.scope['user']:
             return self.close(79, "No User Given in Cookie")
-        self.room_group_name = self.scope['user'].data['username']
+        self.room_group_name = self.scope['user'].data['id']
         self.groups.append(self.room_group_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
         self.scope['user'] = self.scope['user'].connect()
@@ -39,7 +39,7 @@ class MessagingSocket(WebsocketConsumer):
         if len(friendship) != 1 or friendship[0].type != RELATIONSHIP_STATUS[1][0]:
             return {"error_code": 37, "message": "No Friendship With the given user"}
         new_message:Message = Message.create_new_message(self.scope['user'].instance, data['message'], friendship[0], None)
-        async_to_sync(self.channel_layer.group_send)(friend.data['username'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
+        async_to_sync(self.channel_layer.group_send)(friend.data['id'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
         return {"status": MESSAGE_STATUS[0][0], "message": new_message.content}
 
     def retrieve_messages(self, data):
@@ -74,4 +74,10 @@ class MessagingSocket(WebsocketConsumer):
             return self.send(text_data=json.dumps({"error_code":38, "message": "Wrong Socket Event"}))
     
     def chat_message(self, event):
+        return self.send(text_data=json.dumps(event))
+    
+    def friendship_received(self, event):
+        return self.send(text_data=json.dumps(event))
+    
+    def friendship_accepted(self, event):
         return self.send(text_data=json.dumps(event))
