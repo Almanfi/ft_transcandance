@@ -115,7 +115,6 @@ class GameSocket(WebsocketConsumer):
         messages = MessageSerializer(messages, many=True)
         return messages.data
 
-
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
         response = None
