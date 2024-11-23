@@ -6,9 +6,17 @@ from ..helpers import CookieAuth, parse_uuid
 from ..serializers.game_seralizers import GameSerializer, Game, GAME_TYPES
 from ..serializers.user_serializers import UserSerializer
 from ..serializers.invite_seralizers import InviteSerializer
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class GameView(ViewSet):
 	authentication_classes = [CookieAuth]
+
+	@action(methods=['get'], detail=False)
+	def get_invites(self, request):
+		auth_user: UserSerializer = request.user
+		invites = InviteSerializer.fetch_game_invites(auth_user)
+		return Response(invites.data, status=status.HTTP_200_OK)
 
 	@action(methods=['post'], detail=False)
 	def create_game(self, request):
@@ -26,6 +34,8 @@ class GameView(ViewSet):
 		if len(invited_id) != 1 or len(game_id) != 1:
 			return Response({"message": "Wrong invited_id or game_id", "error_code": 46}, status=status.HTTP_400_BAD_REQUEST)
 		game_invitation = InviteSerializer.invite_in_game(auth_user, invited_id, game_id)
+		channel_layer = get_channel_layer()
+		async_to_sync(channel_layer.group_send)(request.data['invited_id'], {"type": "game_invite", "invite": game_invitation.data['id']})
 		return Response(game_invitation.data, status=status.HTTP_200_OK)
 	
 	@action(methods=['delete'], detail=False)

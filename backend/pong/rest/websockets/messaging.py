@@ -81,3 +81,6 @@ class MessagingSocket(WebsocketConsumer):
     
     def friendship_accepted(self, event):
         return self.send(text_data=json.dumps(event))
+    
+    def game_invite(self, event):
+        return self.send(text_data=json.dumps(event))

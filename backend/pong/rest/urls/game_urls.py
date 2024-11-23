@@ -3,7 +3,8 @@ from ..views.game_views import GameView
 
 urlpatterns = [
     path('', GameView.as_view({
-        'post': "create_game"
+        'post': "create_game",
+        'get': "get_invites"
         })
     ),
     path('invite/', GameView.as_view({

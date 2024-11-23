@@ -55,3 +55,7 @@ class Invite(models.Model):
         invites = Invite.objects.filter(game__in=games)
         return list(invites)
     
+    @staticmethod
+    def fetch_active_invites(user):
+        invites = Invite.objects.filter(invited = user, seen=False, type = INVITE_TYPE[0][0])
+        return list(invites)
