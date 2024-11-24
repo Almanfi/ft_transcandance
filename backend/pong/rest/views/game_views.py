@@ -24,6 +24,20 @@ class GameView(ViewSet):
 		created_game = GameSerializer.create_new_game(auth_user,  GAME_TYPES[0][0])
 		return Response(created_game.data, status=status.HTTP_200_OK)
 
+	@action(methods=['patch'], detail=False)
+	def end_game(self, request):
+		if "game_id" not in request.data or "team_a_score" not in request.data or "team_b_score" not in request.data:
+			return Response({"message": "The data should contain `game_id` , `team_a_score`, `team_b_score`", "error_code": 106}, status=status.HTTP_400_BAD_REQUEST)
+		game_uuid = parse_uuid([request.data['game_id']])
+		game = Game.fetch_games_by_id(game_uuid)
+		if len(game) != 1:
+			return Response({"message": "No such game id", "error_code": 109}, status= status.HTTP_400_BAD_REQUEST)
+		print(f"The game {game}")
+		game = GameSerializer(game[0])
+		auth_user: UserSerializer = request.user
+		ended_game = game.end_game(auth_user, request.data['team_a_score'], request.data['team_b_score'])
+		return Response(ended_game.data, status=status.HTTP_200_OK)
+
 	@action(methods=['post'], detail=False)
 	def invite_player(self, request):
 		auth_user:UserSerializer = request.user

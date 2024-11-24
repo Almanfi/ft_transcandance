@@ -12,6 +12,9 @@ class TournamentMaking:
         return self._data
     
     def add_player(self, player_id):
+        for (user_id, chanel) in self._data:
+            if user_id == player_id[0]:
+                return None
         self._data.append(player_id)
         return self._data
     
