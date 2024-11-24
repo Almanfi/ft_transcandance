@@ -154,6 +154,14 @@ class GameSerializer(serializers.Serializer):
 		except Exception as e:
 			raise GameException("Error saving the game score", 108, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+	def get_winning_users(self):
+		winning_users = []
+		for game in self.data:
+			if game['winner'] == WINNER_CHOICES[2][0]:
+				winning_users.append(game['team_a'][0]['id'])
+			else:
+				winning_users.append(game['team_b'][0]['id'])
+		return winning_users
 
 	@staticmethod
 	def create_new_game(user:UserSerializer, type = GAME_TYPES[0][0]):

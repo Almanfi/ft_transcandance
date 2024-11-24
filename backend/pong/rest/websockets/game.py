@@ -3,7 +3,7 @@ from asgiref.sync import async_to_sync
 from ..serializers.invite_seralizers import InviteSerializer, InviteException
 from ..serializers.game_seralizers import GameSerializer, GameException, Game
 from ..serializers.user_serializers import UserExceptions
-from ..serializers.message_serializers import MessageSerializer, Message,MessagingException
+from ..serializers.message_serializers import MessageSerializer, Message
 import json
 
 class GameSocket(WebsocketConsumer):

@@ -70,6 +70,12 @@ class Game(models.Model):
 		self.team_a_score = team_a_score
 		self.team_b_score = team_b_score
 		self.game_ended = True
+		if team_a_score > team_b_score:
+			self.winner = WINNER_CHOICES[2][0]
+		elif team_b_score > team_a_score:
+			self.winner = WINNER_CHOICES[3][0]
+		else:
+			self.winner = WINNER_CHOICES[1][0]
 		self.save()
 
 	@staticmethod
@@ -84,7 +90,7 @@ class Game(models.Model):
 			matches = 1
 		while len(games) < matches:
 			idx = 0 if len(games) == 0 else (len(games) * 2)
-			game = Game.objects.create(owner = users[idx], tournament_phase = phase ,tournament = tournament)
+			game = Game.objects.create(owner = users[idx], type = GAME_TYPES[2][0], tournament_phase = phase, tournament = tournament)
 			Invite.create_tournament_invite(game, users[idx],  users[idx + 1])
 			games.append(game)
 		return games
@@ -102,5 +108,7 @@ class Game(models.Model):
 		return games
 
 	@staticmethod
-	def fetch_tournament_games(tournament_id):
+	def fetch_tournament_games(tournament_id, phase = None):
+		if phase != None:
+			return list(Game.objects.filter(tournament=tournament_id, tournament_phase=phase))
 		return list(Game.objects.filter(tournament=tournament_id))
