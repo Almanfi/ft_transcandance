@@ -32,7 +32,6 @@ class GameView(ViewSet):
 		game = Game.fetch_games_by_id(game_uuid)
 		if len(game) != 1:
 			return Response({"message": "No such game id", "error_code": 109}, status= status.HTTP_400_BAD_REQUEST)
-		print(f"The game {game}")
 		game = GameSerializer(game[0])
 		auth_user: UserSerializer = request.user
 		ended_game = game.end_game(auth_user, request.data['team_a_score'], request.data['team_b_score'])

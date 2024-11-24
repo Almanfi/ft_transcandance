@@ -17,7 +17,6 @@ class TournamentMakingSocket(WebsocketConsumer):
 			self.join_tournament_making()
 		except UserExceptions as e:
 			return self.close(94, "Couldn't connect to Tournament making")
-		return super().connect()
 
 	def join_tournament_making(self):
 		tournament_node = (self.scope['user'].data['id'], self.channel_name)
@@ -30,11 +29,10 @@ class TournamentMakingSocket(WebsocketConsumer):
 		if queue_len >= 4:
 			participants = [tournament_node[0]]
 			channels = [tournament_node[1]]
-			TournamentMaking().remove_player(tournament_node)
+			tournament_queue = TournamentMaking().remove_player(tournament_node)
+			queue_len = len(tournament_queue)
 			while len(participants) < 4:
 				participant_idx = random.randrange(0, queue_len)
-				if tournament_queue[participant_idx][0] == tournament_node[0]:
-					participant_idx = (participant_idx + 1) % queue_len
 				participants.append(tournament_queue[participant_idx][0])
 				channels.append(tournament_queue[participant_idx][1])
 				tournament_queue = TournamentMaking().remove_player(tournament_queue[participant_idx])

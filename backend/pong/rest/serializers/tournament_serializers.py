@@ -44,7 +44,8 @@ class TournamentSerializer(serializers.Serializer):
     def create_tournament(users):
         tourney = Tournament.objects.create()
         users = parse_uuid(users)
-        Game.create_tournament_games(users, tourney, TOURNAMENT_PHASE[1][0])
+        users = User.fetch_users_by_id(users)
+        Game.create_tournament_games(users, tourney, TOURNAMENT_PHASE[2][0])
         return TournamentSerializer(tourney)
 
     
