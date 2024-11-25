@@ -1,5 +1,6 @@
-from django.urls import path, include
+from django.urls import path
 from ..views.user_views import UserInfo
+from ..views.oauth_views import OauthViews
 
 urlpatterns = [
     path('', UserInfo.as_view({
@@ -12,5 +13,5 @@ urlpatterns = [
     ),
     path('login/', UserInfo.as_view({
         'post': 'login_user',
-    }))
+    })),
 ]

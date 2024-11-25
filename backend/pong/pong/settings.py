@@ -29,36 +29,46 @@ SECRET_KEY = 'django-insecure-a1ql_(_3z4t6x*xszrn5kga*o*x^o_ry(=$b1e_xhvsgm5k1=3
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("REDIS_HOST", "redis"), os.getenv("REDIS_PORT", 6379))]
+        }
     }
 }
+
 
 # Application definition
 
 INSTALLED_APPS = [
     'daphne',
     'channels',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
+    # 'django.contrib.sessions',
+    # 'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest.apps.RestConfig',
 ]
 
 MIDDLEWARE = [
+	'rest.helpers.GlobalExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+	'EXCEPTION_HANDLER' : "rest.helpers.rest_exception_handler"
+}
 
 ROOT_URLCONF = 'pong.urls'
 
@@ -135,6 +145,8 @@ STATICFILES_DIRS = [
     ('rest', f"{BASE_DIR}/rest/static/rest")
 ]
 
+OAUTH_42_PUBLIC=os.getenv("CLIENT_ID_42")
+OAUTH_42_SECRET=os.getenv("CLIENT_SECRET_42")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

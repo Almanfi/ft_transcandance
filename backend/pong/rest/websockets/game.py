@@ -3,7 +3,7 @@ from asgiref.sync import async_to_sync
 from ..serializers.invite_seralizers import InviteSerializer, InviteException
 from ..serializers.game_seralizers import GameSerializer, GameException, Game
 from ..serializers.user_serializers import UserExceptions
-from ..serializers.message_serializers import MessageSerializer, Message,MessagingException
+from ..serializers.message_serializers import MessageSerializer, Message
 import json
 
 class GameSocket(WebsocketConsumer):
@@ -102,7 +102,7 @@ class GameSocket(WebsocketConsumer):
         game = self.get_game()
         response = None
         if not "message" in payload:
-            return {"message":"No message given" , "error_code": 88}
+            return {"message":"No message given" , "error_code": 89}
         new_message = Message.create_new_message(self.scope['user'].instance, payload['message'],game = game.instance)
         new_message = MessageSerializer(new_message)
         response = {"type": "game.message", "broadcaster_id": self.scope['user'].data['id'], "message": new_message.data}
@@ -114,7 +114,6 @@ class GameSocket(WebsocketConsumer):
         messages = Message.retrieve_messages(game = game.instance)
         messages = MessageSerializer(messages, many=True)
         return messages.data
-
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)

@@ -1,17 +1,13 @@
 from channels.middleware import BaseMiddleware
 from channels.sessions import CookieMiddleware, SessionMiddleware
 from channels.db import database_sync_to_async
-from channels.exceptions import DenyConnection
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.authentication import BaseAuthentication
 from ..serializers.user_serializers import UserSerializer
 from ..models.user_model import User
 from .parse_uuid import parse_uuid
 from jwt import decode
-from typing import Any
 import os
-
-
 
 def authenticate_user(token):
     token = decode(token, os.getenv("JWT_SECRET"), algorithms=["EdDSA"])
@@ -67,7 +63,7 @@ class ExceptionCatcher(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         try:
             return await super().__call__(scope, receive, send)
-        except ValueError as e:
+        except Exception as e:
             print(f"the error is {e}")
             return await send({
                 'type': "websocket.close",
@@ -77,4 +73,4 @@ class ExceptionCatcher(BaseMiddleware):
 
 
 def WebSocketAuthStack(app):
-    return CookieMiddleware(SessionMiddleware(WebSocketAuth(ExceptionCatcher(app))))
+    return CookieMiddleware(SessionMiddleware(ExceptionCatcher(WebSocketAuth(app))))

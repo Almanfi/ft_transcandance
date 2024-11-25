@@ -5,6 +5,8 @@ from rest_framework import status
 from ..helpers import CookieAuth, parse_uuid
 from ..serializers.relationship_serializers import RelationshipSerializer
 from ..serializers.user_serializers import UserSerializer
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class RelationshipView(ViewSet):
     authentication_classes = [CookieAuth]
@@ -24,6 +26,8 @@ class RelationshipView(ViewSet):
             return Response({"message": "The id is wrong", "error_code": 4}, status=status.HTTP_400_BAD_REQUEST)
         auth_user: UserSerializer = request.user
         invite_data = auth_user.invite_friend(friend_id)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(invite_data['to_user'], {"type": "friendship_received", "user_id": invite_data['from_user']})
         return Response(invite_data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=False)
@@ -36,6 +40,8 @@ class RelationshipView(ViewSet):
         invitation = RelationshipSerializer.get_relation_by_id(invitation_id[0])
         auth_user:UserSerializer = request.user
         friendship = auth_user.accept_friendship(invitation)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(friendship['from_user'], {"type": "friendship_accepted", "user_id": friendship['to_user']})
         return Response(friendship, status= status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=False)
