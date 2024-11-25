@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 from ..helpers import CookieAuth, parse_uuid
-from ..serializers.game_seralizers import GameSerializer, Game, GAME_TYPES, WINNER_CHOICES
+from ..serializers.game_seralizers import GameSerializer, Game, GAME_TYPES, WINNER_CHOICES, TOURNAMENT_PHASE
 from ..serializers.user_serializers import UserSerializer
 from ..serializers.invite_seralizers import InviteSerializer
 from ..serializers.tournament_serializers import TournamentSerializer
@@ -35,8 +35,10 @@ class GameView(ViewSet):
 				phase_not_done = True
 				break
 		if not phase_not_done:
+			if tournament.data['tournament_phase'] == TOURNAMENT_PHASE[3][0]:
+				return tournament.end_tournament()
 			winning_users = []
-			for game in self.data:
+			for game in tournament_games.data:
 				if game['winner'] == WINNER_CHOICES[2][0]:
 					winning_users.append(game['team_a'][0]['id'])
 				else:

@@ -110,6 +110,8 @@ class GameSerializer(serializers.Serializer):
 		return GameSerializer(moved_game)
 	
 	def quite_game(self, user:UserSerializer):
+		if self.data['game_started'] == True:
+			return;
 		player_in_game = self.find_player_in_game(user)
 		if player_in_game[0] == False:
 			raise GameException("User is not a player in this game", 80, status.HTTP_401_UNAUTHORIZED)

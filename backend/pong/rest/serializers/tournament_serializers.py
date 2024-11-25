@@ -43,6 +43,11 @@ class TournamentSerializer(serializers.Serializer):
 		users = parse_uuid(users)
 		users = User.fetch_users_by_id(users)
 		Game.create_tournament_games(users, self.instance, TOURNAMENT_PHASE[3][0])
+		tournament :Tournament = self.instance
+		tournament.switch_phase(TOURNAMENT_PHASE[3][0])
+
+	def end_tournament(self):
+		self.instance.save_end_time()
 
 	@staticmethod
 	def join_tournament_lobby(tournament_id, user):        
