@@ -22,6 +22,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     networks:
       - pong
+    volumes:
+      - pgadmin_volume:/var/lib/pgadmin
     ports:
       - "0.0.0.0:9000:80"
     container_name: pgadmin
@@ -59,24 +61,24 @@ services:
       - redis
     networks:
       - pong
-    # ports:
-    #   - "8000"
+    ports:
+      - "8000:8000"
     container_name: django
     restart: always
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    image: nginx:pong
-    networks:
-      - pong
-    ports:
-      - "8000:443"
-      - "8001:80"
-    depends_on:
-      - django
-    container_name: nginx
-    restart: always
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   image: nginx:pong
+  #   networks:
+  #     - pong
+  #   ports:
+  #     - "8000:443"
+  #     - "8001:80"
+  #   depends_on:
+  #     - django
+  #   container_name: nginx
+  #   restart: always
 
 networks:
   pong:
@@ -86,6 +88,7 @@ networks:
 volumes:
   redis_volume:
   postgres_volume:
+  pgadmin_volume:
   django_volume:
     name: django_volume
     driver: local

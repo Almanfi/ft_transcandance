@@ -29,6 +29,7 @@ SECRET_KEY = 'django-insecure-a1ql_(_3z4t6x*xszrn5kga*o*x^o_ry(=$b1e_xhvsgm5k1=3
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CHANNEL_LAYERS = {
     "default": {
@@ -53,12 +54,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest.apps.RestConfig',
+	"corsheaders"
 ]
 
 MIDDLEWARE = [
 	'rest.helpers.GlobalExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
+	'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
