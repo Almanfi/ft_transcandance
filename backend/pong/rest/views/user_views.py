@@ -108,7 +108,7 @@ class UserInfo(ViewSet):
 		res = Response(status=status.HTTP_200_OK)
 		cookie = {
 			"max_age" : 3600,
-			"httponly" : True,
+			"httponly" : False,
 			"path" : "/"
 		}
 		res.set_cookie("id_key", signed_jwt, **cookie)

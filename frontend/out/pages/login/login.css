@@ -14,6 +14,17 @@
   --black2: #4d4d4d;
   --black3: #333333;
   --black4: #1a1a1a;
+  --error: red;
+}
+
+.is-error {
+  color: red !important;
+  border-color: red !important;
+}
+
+.is-error::placeholder {
+  color: red;
+  opacity: 0.5;
 }
 
 .login {

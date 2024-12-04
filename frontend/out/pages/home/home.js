@@ -3,6 +3,11 @@ import Navbar from "../utils/Navbar/Navbar.jsx";
 function Home() {
     const [render, State] = Ura.init();
     const [getter, setter] = State(0);
+    // if (!Ura.store.get("user")) {
+    //   Ura.navigate("/login")
+    //   window.location.reload();
+    // }
+    // else
     return render(() => (Ura.element("div", { className: "home" },
         Ura.element(Navbar, null),
         Ura.element("div", { id: "center" },

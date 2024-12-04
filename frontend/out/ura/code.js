@@ -28,6 +28,12 @@ function element(tag, props = {}, ...children) {
         let functag = null;
         try {
             functag = tag(props || {}, children);
+            if (!functag) {
+                return {
+                    type: FRAGMENT,
+                    children: [],
+                };
+            }
             if (!functag)
                 throw `function must return render(()=>(JSX)): ${tag}`;
         }
@@ -206,7 +212,8 @@ function execute(mode, prev, next = null) {
             // console.log("prev", prev);
             prev.children?.map((child) => {
                 child = execute(mode, child);
-                prev.dom.appendChild(child.dom);
+                if (child.dom)
+                    prev.dom.appendChild(child.dom);
             });
             break;
         }
@@ -398,8 +405,9 @@ function refresh(params = {}) {
     // console.log("call refresh", path);
     path = normalizePath(path);
     const RouteConfig = getRoute(path);
-    // console.log("go to", RouteConfig);
-    display(Ura.element("root", null, 
+    console.log("go to", path);
+    // let res = 
+    return display(Ura.element("root", null, 
     //@ts-ignore
     Ura.element(RouteConfig, { props: params.props })));
 }
@@ -408,7 +416,7 @@ function navigate(route, params = {}) {
     route = normalizePath(route);
     console.log("navigate to", route, "with", params);
     window.history.pushState({}, "", `${route}`);
-    refresh({ props: params });
+    refresh();
 }
 // loadfiles
 async function loadRoutes() {
@@ -449,6 +457,12 @@ function setEventListeners() {
     window.addEventListener("hashchange", Ura.refresh);
     window.addEventListener("DOMContentLoaded", Ura.refresh);
     window.addEventListener("popstate", Ura.refresh);
+    // window.addEventListener("storage", (event) => {
+    //   if (event.key === 'ura-store') {
+    //     // refresh();
+    //     // window.location.reload();
+    //   }
+    // });
 }
 function handleCSSUpdate(filename) {
     const path = normalizePath("/" + filename);
@@ -567,7 +581,37 @@ async function HTTP_Request(method, url, headers = {}, body) {
         throw error;
     }
 }
+// API
+if (!localStorage.getItem('ura-store'))
+    localStorage.setItem('ura-store', JSON.stringify({}));
+function setGlobal(name, value) {
+    let store = JSON.parse(localStorage.getItem('ura-store'));
+    if (!deepEqual(store[name], value)) {
+        store[name] = value;
+        localStorage.setItem('ura-store', JSON.stringify(store));
+    }
+}
+function getGlobal(name) {
+    let store = JSON.parse(localStorage.getItem('ura-store'));
+    return store[name];
+}
+function rmGlobal(name) {
+    let store = JSON.parse(localStorage.getItem('ura-store'));
+    if (store[name]) {
+        delete store[name];
+        localStorage.setItem('ura-store', JSON.stringify(store));
+    }
+}
+function clearGlobal() {
+    localStorage.setItem('ura-store', JSON.stringify({}));
+}
 const Ura = {
+    store: {
+        set: setGlobal,
+        get: getGlobal,
+        remove: rmGlobal,
+        clear: clearGlobal
+    },
     element,
     fragment,
     setRoute,

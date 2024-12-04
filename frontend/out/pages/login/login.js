@@ -1,12 +1,28 @@
 import Ura from "ura";
 import Navbar from "../utils/Navbar/Navbar.jsx";
 import Arrow from "../utils/Arrow/Arrow.jsx";
+async function logUser(data) {
+    try {
+        const response = await fetch("http://localhost:8000/users/login/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        const cookieHeader = document.cookie.split("; ");
+        console.log("Cookies from response headers:", cookieHeader);
+    }
+    catch (error) {
+        console.error(error.message);
+    }
+}
 function Login() {
     const [render, State] = Ura.init();
-    const [getCheck, setCheck] = State(true);
-    const checkbox = (e) => {
-        e.preventDefault();
-        setCheck(e.target.checked);
+    const setUser = () => {
+        Ura.store.set("user", { name: "mohammed" });
+        Ura.navigate("/user");
     };
     return render(() => (Ura.element("div", { className: "login" },
         Ura.element(Navbar, null),
@@ -15,16 +31,13 @@ function Login() {
                 Ura.element("h3", { id: "title" }, "Login"),
                 Ura.element("div", { id: "input-section" },
                     Ura.element("input", { type: "text", placeholder: "Username" }),
-                    Ura.element("input", { type: "password", placeholder: "Password" }),
-                    Ura.element("div", { id: "checkbox" },
-                        Ura.element("label", null,
-                            Ura.element("input", { type: "checkbox", onChange: checkbox }),
-                            " Remember me"))),
+                    Ura.element("input", { type: "password", placeholder: "Password" })),
                 Ura.element("div", { id: "button-section" },
                     Ura.element("button", { id: "btn" },
                         Ura.element(Arrow, null))),
                 Ura.element("h4", { id: "signin", onclick: () => {
                         Ura.navigate("/signup");
-                    } }, "Don't have an account ?"))))));
+                    } }, "Don't have an account ?")),
+            Ura.element("button", { onclick: setUser }, "set user")))));
 }
 export default Login;

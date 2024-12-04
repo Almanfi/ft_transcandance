@@ -32,7 +32,13 @@ function element(tag: Tag, props: Props = {}, ...children: any) {
     let functag = null;
     try {
       functag = tag(props || {}, children);
-      if(!functag) throw `function must return render(()=>(JSX)): ${tag}`
+      if (!functag) {
+        return {
+          type: FRAGMENT,
+          children: [],
+        };
+      }
+      if (!functag) throw `function must return render(()=>(JSX)): ${tag}`
     } catch (error) {
       console.error(error);
       return {
@@ -206,7 +212,7 @@ function execute(mode: number, prev: VDOM, next: VDOM = null) {
       // console.log("prev", prev);
       prev.children?.map((child) => {
         child = execute(mode, child as VDOM);
-        prev.dom.appendChild((child as VDOM).dom);
+        if (child.dom) prev.dom.appendChild((child as VDOM).dom);
       });
       break;
     }
@@ -409,8 +415,9 @@ function refresh(params = {}) {
   // console.log("call refresh", path);
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
-  // console.log("go to", RouteConfig);
-  display(
+  console.log("go to", path);
+  // let res = 
+  return display(
     <root >
       {
         //@ts-ignore
@@ -426,7 +433,7 @@ function navigate(route, params = {}) {
   console.log("navigate to", route, "with", params);
 
   window.history.pushState({}, "", `${route}`);
-  refresh({ props: params });
+  refresh();
 }
 
 // loadfiles
@@ -435,7 +442,7 @@ async function loadRoutes() {
     const response = await fetch("/pages/routes.json");
     const data = await response.json();
     // console.log("data", data);
-    
+
     return data;
   } catch (error) {
     console.error("Error loading routes.json:", error);
@@ -470,6 +477,12 @@ function setEventListeners() {
   window.addEventListener("hashchange", Ura.refresh);
   window.addEventListener("DOMContentLoaded", Ura.refresh);
   window.addEventListener("popstate", Ura.refresh);
+  // window.addEventListener("storage", (event) => {
+  //   if (event.key === 'ura-store') {
+  //     // refresh();
+  //     // window.location.reload();
+  //   }
+  // });
 }
 
 function handleCSSUpdate(filename) {
@@ -554,8 +567,8 @@ async function activate() {
     Ura.refresh();
     console.log(data);
     console.log(Ura.Routes);
-    if(!type) console.error("type error");
-    
+    if (!type) console.error("type error");
+
     if (type === "dev") sync();
   } catch (error) {
     console.error("Error loading resources:", error);
@@ -577,7 +590,7 @@ async function HTTP_Request(method, url, headers = {}, body) {
     let responseData = null;
     const contentType = response.headers.get("Content-Type");
     if (contentType && contentType.includes("application/json")) responseData = await response.json();
-    else if (contentType && contentType.includes("text/"))  responseData = await response.text();
+    else if (contentType && contentType.includes("text/")) responseData = await response.text();
     else if (contentType) responseData = await response.blob();
     return {
       data: responseData,
@@ -590,7 +603,41 @@ async function HTTP_Request(method, url, headers = {}, body) {
   }
 }
 
+// API
+if (!localStorage.getItem('ura-store')) localStorage.setItem('ura-store', JSON.stringify({}));
+
+function setGlobal(name, value) {
+  let store = JSON.parse(localStorage.getItem('ura-store'));
+  if (!deepEqual(store[name], value)) {
+    store[name] = value;
+    localStorage.setItem('ura-store', JSON.stringify(store));
+  }
+}
+
+function getGlobal(name) {
+  let store = JSON.parse(localStorage.getItem('ura-store'));
+  return store[name];
+}
+
+function rmGlobal(name) {
+  let store = JSON.parse(localStorage.getItem('ura-store'));
+  if (store[name]) {
+    delete store[name];
+    localStorage.setItem('ura-store', JSON.stringify(store));
+  }
+}
+
+function clearGlobal() {
+  localStorage.setItem('ura-store', JSON.stringify({}));
+}
+
 const Ura = {
+  store: {
+    set: setGlobal,
+    get: getGlobal,
+    remove: rmGlobal,
+    clear: clearGlobal
+  },
   element,
   fragment,
   setRoute,

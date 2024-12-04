@@ -14,6 +14,17 @@
   --black2: #4d4d4d;
   --black3: #333333;
   --black4: #1a1a1a;
+  --error: red;
+}
+
+.is-error {
+  color: red !important;
+  border-color: red !important;
+}
+
+.is-error::placeholder {
+  color: red;
+  opacity: 0.5;
 }
 
 .navbar {
@@ -33,37 +44,37 @@
   align-items: center;
   cursor: pointer;
 }
-.navbar fr {
+.navbar if {
   display: flex;
   gap: 10%;
   padding: 10px 0;
 }
-.navbar fr button {
+.navbar if button {
   flex: 1;
   width: 80px;
   border-radius: 8px;
 }
-.navbar fr #login-btn {
+.navbar if #login-btn {
   color: var(--blue3);
   background-color: var(--blue0);
   border: 1px solid var(--blue3);
 }
-.navbar fr #login-btn:hover {
+.navbar if #login-btn:hover {
   color: var(--blue0);
   background-color: var(--blue3);
   border: 1px solid var(--blue3);
 }
-.navbar fr #signup-btn {
+.navbar if #signup-btn {
   color: var(--blue0);
   background-color: var(--blue3);
   border: 1px solid var(--blue0);
   border: 1px solid var(--blue3);
 }
-.navbar fr #signup-btn:hover {
+.navbar if #signup-btn:hover {
   color: var(--blue3);
   background-color: var(--blue0);
   border: 1px solid var(--blue0);
 }
-.navbar fr #signup-btn:hover {
+.navbar if #signup-btn:hover {
   border: 1px solid var(--blue3);
 }

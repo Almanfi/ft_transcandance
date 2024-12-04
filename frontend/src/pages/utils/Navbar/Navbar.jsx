@@ -15,24 +15,25 @@ function Navbar() {
         <img src="/assets/tr.png" />
         Clashers
       </div>
-      <>
-        <button
-          id="login-btn"
-          onclick={() => {
-            Ura.navigate("/login");
-          }}
-        >
-          <h4>Login</h4>
-        </button>
-        <button
-          id="signup-btn"
-          onclick={() => {
-            Ura.navigate("/signup");
-          }}
-        >
-          <h4>Sign up</h4>
-        </button>
-      </>
+      <if cond={!Ura.store.get("user") || Ura.store.get("user")}>
+          <button
+            id="login-btn"
+            onclick={() => {
+              Ura.navigate("/login");
+            }}
+          >
+            <h4>Login</h4>
+          </button>
+          <button
+            id="signup-btn"
+            onclick={() => {
+              Ura.navigate("/signup");
+            }}
+            >
+            <h4>Sign up</h4>
+          </button>
+      </if>
+
     </div>
   ));
 }

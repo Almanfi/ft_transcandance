@@ -7,7 +7,7 @@ function Navbar() {
             } },
             Ura.element("img", { src: "/assets/tr.png" }),
             "Clashers"),
-        Ura.element(Ura.fragment, null,
+        Ura.element("if", { cond: !Ura.store.get("user") || Ura.store.get("user") },
             Ura.element("button", { id: "login-btn", onclick: () => {
                     Ura.navigate("/login");
                 } },

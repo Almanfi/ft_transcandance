@@ -16,6 +16,7 @@
     "/pages/user/user.css",
     "/pages/utils/Award/Award.css",
     "/pages/utils/Navbar/Navbar.css",
+    "/pages/utils/Toast/Toast.css",
     "/pages/utils/tmp2/tmp.css"
   ],
   "base": "/home",
