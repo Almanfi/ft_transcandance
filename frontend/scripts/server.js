@@ -103,7 +103,8 @@ async function createServer() {
     if (event) {
       let message = null;
       handleCopy(pathname);
-      if (![join(source, "/pages/tailwind.css"), join(source, "/pages/global.scss")].includes(pathname) && [".scss", ".css"].includes(extension(pathname))) message = { action: "update", filename: relative(source, pathname), type: "css" }
+      if (![join(source, "/pages/tailwind.css"), join(source, "/pages/global.scss")].includes(pathname) && [".scss", ".css"].includes(extension(pathname)))
+        message = { action: "update", filename: relative(source, pathname.replace(/\.scss$/, ".css")), type: "css" }
       else message = { action: "reload" };
       // console.log("> ", event);
       if (([".js", ".jsx", ".ts", ".tsx"].includes(extension(pathname)))) {

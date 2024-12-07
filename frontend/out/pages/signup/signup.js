@@ -25,6 +25,13 @@ function Input({ name, value, isError }) {
     return render(() => (Ura.element("input", { name: name.replace(" ", ""), type: value.split(" ").includes("Password") ? "password" : "text", placeholder: placeholder, className: isError ? "is-error" : "" })));
 }
 function Signup() {
+    // if (Ura.store.get("user")) {
+    //   Ura.navigate("/home")
+    //   window.location.reload();
+    // }
+    //else
+    // {
+    // }
     const [render, State] = Ura.init();
     const [getError, setError] = State([]);
     // if (form.confirmPassword.value !== form.password.value) {
@@ -44,6 +51,8 @@ function Signup() {
     //   // }
     // }
     const create = async (e) => {
+        Ura.navigate("home");
+        return;
         e.preventDefault();
         // CreateUser({
         //   firstname: "user1", lastname: "user1",
@@ -82,11 +91,6 @@ function Signup() {
             }
         }
     };
-    // if (Ura.store.get("user")) {
-    //   Ura.navigate("/home")
-    //   window.location.reload();
-    // }
-    // else
     return render(() => (Ura.element("form", { className: "signup", onsubmit: create },
         Ura.element(Navbar, null),
         Ura.element("div", { id: "center" },
@@ -104,8 +108,6 @@ function Signup() {
                 Ura.element("div", { id: "button-section" },
                     Ura.element("button", { id: "btn", type: "submit" },
                         Ura.element(Arrow, null))),
-                Ura.element("h4", { id: "signin", onclick: () => {
-                        Ura.navigate("/login");
-                    } }, "Already have an account ?"))))));
+                Ura.element("h4", { id: "signin", onclick: () => Ura.navigate("/login") }, "Already have an account ?"))))));
 }
 export default Signup;

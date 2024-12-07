@@ -63,6 +63,8 @@ function Signup() {
   //   // }
   // }
   const create = async (e) => {
+    Ura.navigate("home");
+    return;
     e.preventDefault();
     // CreateUser({
     //   firstname: "user1", lastname: "user1",
@@ -126,12 +128,7 @@ function Signup() {
           <div id={"button-section"}>
             <button id="btn" type="submit" ><Arrow /></button>
           </div>
-          <h4
-            id="signin"
-            onclick={() => {
-              Ura.navigate("/login");
-            }}
-          >
+          <h4 id="signin" onclick={() => Ura.navigate("/login")}>
             Already have an account ?
           </h4>
         </div>

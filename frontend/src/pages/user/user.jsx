@@ -20,6 +20,9 @@ function Carousel({ images }) {
 
   return render(() => (
     <div className="carousel">
+      {/* <async loding={}> 
+        <Comp/>
+      </async> */}
       <button className="carousel__button carousel__button--prev" onClick={prevSlide}>
         &#8592;
       </button>
@@ -60,8 +63,43 @@ function User() {
     "https://via.placeholder.com/600x300?text=Slide+2",
     "https://via.placeholder.com/600x300?text=Slide+3",
   ];
+  const [getList, setList] = State([
+    {
+      src: "https://colorlib.com/preview/theme/seogo/img/case_study/1.png",
+      title: "Product Design 0", subtitle: "UI/UX, Design",
+    },
+    {
+      src: "https://colorlib.com/preview/theme/seogo/img/case_study/1.png",
+      title: "Product Design 1", subtitle: "UI/UX, Design",
+    },
+    {
+      src: "https://colorlib.com/preview/theme/seogo/img/case_study/2.png",
+      title: "Product Design 2", subtitle: "UI/UX, Design",
+    },
+    {
+      src: "https://colorlib.com/preview/theme/seogo/img/case_study/3.png",
+      title: "Product Design 3", subtitle: "UI/UX, Design",
+    },
+    {
+      src: "https://colorlib.com/preview/theme/seogo/img/case_study/1.png",
+      title: "Product Design 4", subtitle: "UI/UX, Design",
+    }
+  ]);
+  const [getValue, setValue] = State(0);
 
-
+  const handle = (direction) => {
+    const totalSlides = getList().length;
+    let currentValue = getValue();
+    if (direction === "left") {
+      currentValue = currentValue - 1;
+      if (currentValue < 0) currentValue = totalSlides - 1;
+    } else if (direction === "right") {
+      currentValue = (currentValue + 1) % totalSlides;
+    }
+    console.log("set value to", currentValue);
+    setValue(currentValue);
+  };
+  
   return render(() => (
     <div className="user">
       <Navbar />
@@ -101,35 +139,30 @@ function User() {
         </div>
 
         <div id="friends">
-          <Carousel images={images} />
-
-          {/* <loop on={[1, 2, 3]}>
-            {(elem) => (
-              <input
-                type="radio"
-                name="slider"
-                id={`item-${elem}`}
-                checked={getItem() === `item-${elem}`}
-                onchange={() => setItem(`item-${elem}`)}
+          <div className="center">
+            <h1>{getValue()}</h1>
+            <div className="wrapper">
+              <dloop
+                className="inner"
+                on={getList()}
+                style={{
+                  transform: `translateX(-${getValue() * 10}%)`,
+                  transition: "2s",
+                }}
               >
-                {elem}
-              </input>
-            )}
-          </loop> */}
-
-          {/* <div className="cards">
-            <loop on={[1, 2, 3]}>
-              {(elem) => (
-                <label
-                  className="card"
-                  htmlFor={`item-${elem}`}
-                  id={`song-${elem}`}
-                >
-                  <img src={`/assets/img${elem}.avif`} alt="song" />
-                </label>
-              )}
-            </loop>
-          </div> */}
+                {(e, i) => (
+                  <div className="card" key={i}>
+                    <div className="content">
+                      <h1>{e.title}</h1>
+                      <h3>{e.subtitle}</h3>
+                    </div>
+                  </div>
+                )}
+              </dloop>
+            </div>
+            <button onclick={() => handle("left")}>left {" <"}</button>
+            <button onclick={() => handle("right")}>right {" >"}</button>
+          </div>
 
         </div>
 

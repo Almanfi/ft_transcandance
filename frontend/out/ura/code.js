@@ -1,5 +1,5 @@
 import * as UTILS from "./utils.js";
-const { IF, ELSE, LOOP, CREATE, REPLACE, REMOVE } = UTILS;
+const { IF, ELSE, LOOP, EXEC, CREATE, REPLACE, REMOVE } = UTILS;
 const { ELEMENT, FRAGMENT, TEXT } = UTILS;
 const { deepEqual, loadCSS, svgElements } = UTILS;
 let ifTag = null;
@@ -10,7 +10,9 @@ function check(children) {
         if (child === null || typeof child === "string" || typeof child === "number") {
             return {
                 type: TEXT,
-                value: child,
+                props: {
+                    value: child,
+                }
             };
         }
         return child;
@@ -22,6 +24,21 @@ function fragment(props, ...children) {
         children: children || [],
     };
     throw "Fragments (<></>) are not supported please use <fr></fr> tag instead";
+}
+function deepcopy(value) {
+    if (value === null || value === undefined)
+        return value;
+    if (Array.isArray(value))
+        return value.map(deepcopy);
+    if (typeof value === "object") {
+        const copy = {};
+        for (const key in value) {
+            if (value.hasOwnProperty(key))
+                copy[key] = deepcopy(value[key]);
+        }
+        return copy;
+    }
+    return value;
 }
 function element(tag, props = {}, ...children) {
     if (typeof tag === "function") {
@@ -69,7 +86,15 @@ function element(tag, props = {}, ...children) {
         };
         return res;
     }
-    else if (tag === "loop") {
+    else if (tag === "exec") {
+        return {
+            type: EXEC,
+            tag: "exec",
+            call: props.call,
+            children: []
+        };
+    }
+    else if (tag === "loop" || tag === "dloop") {
         let loopChildren = (props.on || []).flatMap((elem, id) => (children || []).map((child) => {
             const evaluatedChild = 
             //@ts-ignore
@@ -78,8 +103,11 @@ function element(tag, props = {}, ...children) {
             // in slider when copying input that has function onchange
             // return structuredClone ? structuredClone(evaluatedChild)
             //   : JSON.parse(JSON.stringify(evaluatedChild));
-            return JSON.parse(JSON.stringify(evaluatedChild));
+            // return JSON.parse(JSON.stringify(evaluatedChild));
+            return deepcopy(evaluatedChild);
         }));
+        if (tag === "dloop")
+            loopChildren = loopChildren.concat(loopChildren.map(deepcopy));
         let res = {
             type: LOOP,
             tag: "loop",
@@ -131,6 +159,7 @@ function setProps(vdom) {
             .join(";");
     }
 }
+let ExecStack = [];
 function createDOM(vdom) {
     switch (vdom.type) {
         case ELEMENT: {
@@ -149,7 +178,6 @@ function createDOM(vdom) {
                     }
                     break;
             }
-            setProps(vdom);
             break;
         }
         case FRAGMENT: {
@@ -161,7 +189,7 @@ function createDOM(vdom) {
             break;
         }
         case TEXT: {
-            vdom.dom = document.createTextNode(vdom.value);
+            vdom.dom = document.createTextNode(vdom.props.value);
             break;
         }
         case IF:
@@ -172,9 +200,17 @@ function createDOM(vdom) {
             // vdom.dom = document.createDocumentFragment();
             break;
         }
+        case EXEC: {
+            ExecStack.push(vdom.call);
+            // console.log("found exec", vdom);
+            // vdom.call();
+            vdom.dom = document.createElement("exec");
+            break;
+        }
         default:
             break;
     }
+    setProps(vdom);
     return vdom;
 }
 function removeProps(vdom) {
@@ -292,16 +328,12 @@ function reconciliateProps(oldProps = {}, newProps = {}, vdom) {
     return diff;
 }
 function reconciliate(prev, next) {
-    if (prev.type != next.type ||
-        prev.tag != next.tag ||
-        (prev.type === TEXT && !deepEqual(prev.value, next.value)))
+    if (prev.type != next.type || prev.tag != next.tag)
         return execute(REPLACE, prev, next);
-    if (prev.tag === next.tag) {
-        if (reconciliateProps(prev.props, next.props, prev))
-            return execute(REPLACE, prev, next);
+    if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
+        return execute(REPLACE, prev, next);
     }
-    else
-        return execute(REPLACE, prev, next);
+    //  else return execute(REPLACE, prev, next);
     const prevs = prev.children || [];
     const nexts = next.children || [];
     for (let i = 0; i < Math.max(prevs.length, nexts.length); i++) {
@@ -331,6 +363,8 @@ function display(vdom) {
         execute(CREATE, vdom);
         GlobalVDOM = vdom;
     }
+    ExecStack.forEach(event => event());
+    ExecStack = [];
 }
 function init() {
     let index = 1;
@@ -344,6 +378,7 @@ function init() {
         const setter = (newValue) => {
             // console.log("call setter", deepEqual(states[stateIndex], newValue));
             if (!deepEqual(states[stateIndex], newValue)) {
+                // console.log("call update for", newValue);
                 states[stateIndex] = newValue;
                 updateState();
             }
@@ -553,13 +588,10 @@ async function activate() {
 }
 // HTTP
 async function HTTP_Request(method, url, headers = {}, body) {
-    const defaultHeaders = {
-        "Content-Type": "application/json",
-    };
     try {
         const response = await fetch(url, {
             method,
-            headers: { ...defaultHeaders, ...headers },
+            headers: { "Content-Type": "application/json", ...headers },
             body: body ? JSON.stringify(body) : undefined,
         });
         let responseData = null;
