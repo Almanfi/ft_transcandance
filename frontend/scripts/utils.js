@@ -203,17 +203,17 @@ function generateRoutes(dir, parent, adding) {
 }
 
 export function updateRoutes() {
-  if (!data["DIR_ROUTING"]) return;
-  routes = {};
-  styles = [];
-  generateRoutes(join(source, "/pages"), "", true);
-  let output = {
-    routes,
-    styles,
-    base: GET("DEFAULT_ROUTE"),
-    type: GET("TYPE") === "dev" ? "dev" : "build"
-  }
-  writeFileSync(join(source, "/pages/routes.json"), JSON.stringify(output, null, 2), "utf8");
+  // if (!data["DIR_ROUTING"]) return;
+  // routes = {};
+  // styles = [];
+  // generateRoutes(join(source, "/pages"), "", true);
+  // let output = {
+  //   routes,
+  //   styles,
+  //   base: GET("DEFAULT_ROUTE"),
+  //   type: GET("TYPE") === "dev" ? "dev" : "build"
+  // }
+  // writeFileSync(join(source, "/pages/routes.json"), JSON.stringify(output, null, 2), "utf8");
   loginfo("Routes updated");
 }
 

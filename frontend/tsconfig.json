@@ -19,5 +19,5 @@
       "@/module/*": ["src/module/*"]
     }
   },
-  "exclude": ["node_modules", "scripts", ".git", ".gitignore"] // Exclude 'node_modules' and 'scripts'
+  "exclude": ["node_modules", "scripts", ".git", ".gitignore", "./migrate.js"] // Exclude 'node_modules' and 'scripts'
 }
