@@ -5,20 +5,21 @@
  * {
  *   path: "/pathname",           // The URL path for the route
  *   default: true/false,         // (Optional) Default route
- *   utils: ["utility1", ...]     // (Optional) List of utilities for this route
+ *   components: ["utility1", ...]     // (Optional) List of utilities for this route
  * }
  *
  * Example:
  * const Routes = [
- *   { path: "/home", utils: ["navbar", "footer"], default: true }
- *   { path: "/home/user", utils: ["navbar", "footer"], default: true }
+ *   { path: "/home", components: ["navbar", "footer"], default: true }
+ *   { path: "/home/user", components: ["navbar", "footer"], default: true }
  * ];
  */
 
 const Routes = [
-  { path: "/home", utils: ["navbar"], default: true },
-  { path: "/home/user", utils: ["button"] },
-  { path: "/about", utils: ["header"] }
+  { path: "*", components: ["navbar", "button"]},
+  { path: "/home", components: ["navbar"], default: true },
+  { path: "/home/user", components: ["button"] },
+  { path: "/about", components: ["header", "button"] }
 ];
 
 export default Routes;
