@@ -2,50 +2,53 @@ import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, basename, dirname } from "path";
 import { fileURLToPath } from "url";
 import Routes from "./routes.js";
-import { execSync } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const currDir = join(__dirname, "/pages");
 
-const createFile = (name, content) => { if (!execSync(name)) writeFileSync(name, content) }
+const createFile = (filePath, content) => {
+  if (!existsSync(filePath)) {
+    writeFileSync(filePath, content);
+  }
+};
 
-function createRoute(type, route, parentDir = "") {
+function processRoute(route, parentDir = "") {
   const isRootRoute = route.path === "*";
   const routeDir = isRootRoute ? currDir : join(currDir, parentDir, route.path);
 
-  if (type === "route") {
-    if (!isRootRoute) {
-      mkdirSync(routeDir, { recursive: true });
-      const routeFile = join(routeDir, `${basename(routeDir)}.jsx`);
-      createFile(routeFile,
-        `// Route component for ${route.path}\nexport default function ${basename(route.path).replace(/\W/g, "_")}() {\n  return <div>${route.path}</div>;\n}`
-      );
-      const styleFile = join(routeDir, `${basename(route.path)}.css`);
-      createFile(styleFile, `/* Styles for ${route.path} */`);
-    }
+  if (!isRootRoute) {
+    mkdirSync(routeDir, { recursive: true });
 
-    if (route.components) {
-      const utilsDir = isRootRoute ? join(currDir, "_utils") : join(routeDir, "_utils");
-      mkdirSync(utilsDir, { recursive: true });
-      route.components.forEach((util) => {
-        const utilFile = join(utilsDir, `${util}.jsx`);
-        const utilStyleFile = join(utilsDir, `${util}.css`);
-        createFile(utilFile, `// Utility component ${util}`);
-        createFile(utilStyleFile, `/* Styles for ${util} */`);
-      });
-    }
+    const routeFile = join(routeDir, `${basename(routeDir)}.jsx`);
+    createFile(
+      routeFile,
+      `// Route component for ${route.path}\nexport default function ${basename(route.path).replace(
+        /\W/g,
+        "_"
+      )}() {\n  return <div>${route.path}</div>;\n}`
+    );
 
-    // Process children routes recursively
-    if (route.children) {
-      route.children.forEach((child) =>
-        createRoute("route", child, join(parentDir, route.path))
-      );
-    }
+    const styleFile = join(routeDir, `${basename(route.path)}.css`);
+    createFile(styleFile, `/* Styles for ${route.path} */`);
   }
+
+  // Create utility components
+  if (route.components) {
+    const utilsDir = join(routeDir, "_utils");
+    mkdirSync(utilsDir, { recursive: true });
+
+    route.components.forEach((util) => {
+      createFile(join(utilsDir, `${util}.jsx`), `// Utility component ${util}`);
+      createFile(join(utilsDir, `${util}.css`), `/* Styles for ${util} */`);
+    });
+  }
+
+  // Process children routes recursively
+  route.children?.forEach((child) =>
+    processRoute(child, join(parentDir, route.path))
+  );
 }
 
 // Process all routes
-Routes.forEach((route) => {
-  createRoute("route", route);
-});
+Routes.forEach((route) => processRoute(route));

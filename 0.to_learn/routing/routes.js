@@ -16,7 +16,7 @@
  */
 
 const Routes = [
-  { path: "*", components: ["navbar", "button"]},
+  { path: "*", call: ["navbar", "button"] },
   { path: "/home", components: ["navbar"], default: true },
   { path: "/home/user", components: ["button"] },
   { path: "/about", components: ["header", "button"] }

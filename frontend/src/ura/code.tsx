@@ -166,8 +166,10 @@ function createDOM(vdom): VDOM {
     case ELEMENT: {
       switch (vdom.tag) {
         case "root":
-          vdom.dom = document.getElementById("root");
-          break;
+          {
+            vdom.dom = document.getElementById("root");
+            break;
+          }
         default:
           if (vdom.dom)
             console.error("element already has dom"); // TODO: to be removed
@@ -434,6 +436,14 @@ function getRoute(path) {
   return Routes[path] || Routes["*"];
 }
 
+function setRoutes(currRoutes) {
+  currRoutes.forEach(route => {
+    //@ts-ignore
+    setRoute(route.path, route.call);
+    if (route.default) setRoute("*", route.call);
+  });
+}
+
 function normalizePath(path) {
   if (!path || path == "") return "/";
   path = path.replace(/^\s+|\s+$/gm, "");
@@ -608,6 +618,12 @@ async function activate() {
   }
 }
 
+async function start() {
+  setEventListeners();
+  Ura.refresh();
+  console.log(Ura.Routes);
+}
+
 // HTTP
 async function HTTP_Request(method, url, headers = {}, body) {
   try {
@@ -681,8 +697,10 @@ const Ura = {
   normalizePath,
   refresh,
   navigate,
-  send: HTTP_Request,
-  activate
+  setRoutes,
+  // send: HTTP_Request,
+  activate,
+  start,
 };
 
 export default Ura;

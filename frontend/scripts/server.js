@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { join, relative, extname as extension, } from "path";
 import { statSync, rmSync, existsSync, readdirSync, stat, createReadStream } from "fs";
 import net from "net"
@@ -60,7 +61,7 @@ async function createServer() {
           uri,
           "Not found!\n",
           "If it's a js|jsx|ts|tsx file\n",
-          "make sure to import it like this 'file/path.(js|jsx|ts|tsx)'"
+          "make sure to import it like this 'file/path.js'"
         );
         uri = join(root, "index.html");
         res.writeHead(200, { "Content-Type": MimeType(extension(uri)) });

@@ -7,8 +7,12 @@
     "start": "rm -rf ./out/* && node ./scripts/server.js",
     "gen": "node ./scripts/new-route.js",
     "clear": "rm -rf ./out/*",
-    "build": "node ./scripts/build.js",
-    "install-pages": "npm install --prefix ./pages"
+    "build": "node ./scripts/build.js"
+  },
+  "bin": {
+    "uragen": "./scripts/gen.js",
+    "urastart": "./scripts/server.js",
+    "urabuild": "./scripts/build.js"
   },
   "author": "Hrima Mohammed",
   "license": "MIT",

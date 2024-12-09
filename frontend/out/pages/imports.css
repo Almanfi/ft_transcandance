@@ -1,0 +1,13 @@
+@import "./car/car.css";
+@import "./global.css";
+@import "./home/home.css";
+@import "./home/settings/login.css";
+@import "./login/login.css";
+@import "./main.css";
+@import "./signup/signup.css";
+@import "./test/test.css";
+@import "./user/user.css";
+@import "./utils/Award/Award.css";
+@import "./utils/Navbar/Navbar.css";
+@import "./utils/Toast/Toast.css";
+@import "./utils/tmp2/tmp.css";

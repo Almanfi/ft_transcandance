@@ -32,3 +32,10 @@
 -60%: 4 1 2 3
 -80%: 1 2 3 4
 
+
+- npm link
+- ura-start: start server
+- ura-clear: clear outfile
+- ura-create: create route in current directory
+- ura-build: build docker
+

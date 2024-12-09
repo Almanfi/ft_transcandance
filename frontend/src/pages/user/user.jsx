@@ -99,7 +99,7 @@ function User() {
     console.log("set value to", currentValue);
     setValue(currentValue);
   };
-  
+
   return render(() => (
     <div className="user">
       <Navbar />

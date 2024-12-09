@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { root, SET, GET, parse_config_file } from "./utils.js";
 import { mkdirSync, writeFileSync, existsSync, readdirSync, copyFileSync } from "fs";
 import { join ,relative} from "path";

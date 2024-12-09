@@ -1,5 +1,8 @@
 import Ura from "ura";
 import Navbar from "../utils/Navbar/Navbar.jsx";
+// Ura.loadCSS("./home.css")
+// import style from "./home.css"
+// console.log(style);
 function Home() {
     const [render, State] = Ura.init();
     const [getter, setter] = State(0);
