@@ -1,9 +1,9 @@
 @import "./car/car.css";
 @import "./global.css";
 @import "./home/home.css";
-@import "./home/settings/login.css";
 @import "./login/login.css";
 @import "./main.css";
+@import "./settings/settings.css";
 @import "./signup/signup.css";
 @import "./test/test.css";
 @import "./user/user.css";

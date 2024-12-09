@@ -5,7 +5,7 @@ import * as UTILS from "./utils.js"
 const { GET, source } = UTILS;
 const directoryPath = join(source, "/pages");
 
-function updateStyle() {
+export default function updateStyle() {
   let buff = "";
   function traverseDirectory(currentPath) {
     const files = readdirSync(currentPath);
@@ -31,4 +31,4 @@ function updateStyle() {
   console.log('Finished scanning directories and adding imports.');
 }
 
-updateStyle();
+// updateStyle();

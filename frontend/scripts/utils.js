@@ -17,7 +17,7 @@ const tsConfigPath = join(__dirname, "../tsconfig.json");
 const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile).config;
 const parsedConfig = ts.parseJsonConfigFileContent(tsConfig, ts.sys, dirname(tsConfigPath));
 
-export function handleTypeScript(srcFile) {
+export async function handleTypeScript(srcFile) {
   loginfo("transpile:", relative(source, srcFile))
   const program = ts.createProgram([srcFile], parsedConfig.options);
   const emitResult = program.emit();

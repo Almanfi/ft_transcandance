@@ -428,20 +428,26 @@ function Error(props: Props | null) {
 const Routes: { [path: string]: Function } = {};
 Routes["*"] = () => Error({ message: window.location.pathname });
 
+function cleanPath(path) {
+  if(path === "*") return path;
+  if (!path.startsWith("/")) path = "/" + path;
+  path = path.replace(/\/+/g, "/");
+  if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
+  return path;
+}
+
 function setRoute(path: string, call: Function) {
   Routes[path] = call;
 }
 
 function getRoute(path) {
-  return Routes[path] || Routes["*"];
+  return Routes[cleanPath(path)] || Routes["*"];
 }
 
 function setRoutes(currRoutes) {
-  currRoutes.forEach(route => {
-    //@ts-ignore
-    setRoute(route.path, route.call);
-    if (route.default) setRoute("*", route.call);
-  });
+  Object.keys(currRoutes).forEach(key => {
+    setRoute(cleanPath(key), currRoutes[key]);
+  })
 }
 
 function normalizePath(path) {
@@ -566,7 +572,18 @@ async function sync() {
       if (event.type === "css") {
         handleCSSUpdate(event.filename);
       } else if (event.type === "js") {
-        // Handle JS update (if necessary)
+        //  try {
+        //     const scriptPath = `/${event.filename}`;
+        //     const module = await import(scriptPath + `?t=${Date.now()}`); // Cache-busting with a timestamp
+        //     console.log(`Updated JavaScript module: ${scriptPath}`, module);
+
+        //     // If the module exports a function or object, initialize or reapply it
+        //     if (module.default && typeof module.default === "function") {
+        //       module.default(); // Call the default export if it's a function
+        //     }
+        //   } catch (error) {
+        //     console.error(`Error updating JavaScript file (${event.filename}):`, error);
+        //   }
       } else if (event.type === "json") {
         try {
           const data = await loadRoutes();
@@ -622,6 +639,8 @@ async function start() {
   setEventListeners();
   Ura.refresh();
   console.log(Ura.Routes);
+  //@ts-ignore
+  if(window.mode === "dev") sync();
 }
 
 // HTTP
@@ -660,12 +679,12 @@ function setGlobal(name, value) {
 }
 
 function getGlobal(name) {
-  let store = JSON.parse(localStorage.getItem('ura-store'));
+  let store = JSON.parse(localStorage.getItem('ura-store')) || {};
   return store[name];
 }
 
 function rmGlobal(name) {
-  let store = JSON.parse(localStorage.getItem('ura-store'));
+  let store = JSON.parse(localStorage.getItem('ura-store')) || {};
   if (store[name]) {
     delete store[name];
     localStorage.setItem('ura-store', JSON.stringify(store));

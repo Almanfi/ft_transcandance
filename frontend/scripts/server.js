@@ -7,6 +7,7 @@ import chokidar from "chokidar"
 import { parse_config_file, source, output, root, handleDelete, updateRoutes, handleCopy, GET, SET, logServerMsg, MimeType } from "./utils.js";
 import { logerror, loginfo, logmsg } from "./debug.js";
 import { WebSocketServer, WebSocket } from "ws";
+import updateStyle from "./style.js";
 
 // CLEAR out Directory
 if (existsSync(output)) readdirSync(output).forEach(sub => {
@@ -105,11 +106,20 @@ async function createServer() {
       let message = null;
       handleCopy(pathname);
       if (![join(source, "/pages/tailwind.css"), join(source, "/pages/global.scss")].includes(pathname) && [".scss", ".css"].includes(extension(pathname)))
+      {
         message = { action: "update", filename: relative(source, pathname.replace(/\.scss$/, ".css")), type: "css" }
+      }
       else message = { action: "reload" };
       // console.log("> ", event);
       if (([".js", ".jsx", ".ts", ".tsx"].includes(extension(pathname)))) {
         updateRoutes();
+        /* 
+        message = {
+          action: "update",
+          filename: relative(source, pathname.replace(/\.(ts|tsx|jsx)$/, ".js")),
+          type: "js",
+        };
+        */
         message = { action: "reload" };
       }
       notifyClient(message)

@@ -145,148 +145,99 @@ $blue4: var(--blue4);
     }
     #friends {
       flex: 1;
-      background-color: blue;
-      width: 100%;
-      height: 100%;
-      // position: fixed;
-      transform-style: preserve-3d;
       display: flex;
-      // justify-content: center;
-      flex-direction: column;
-      // align-items: center;
+      // position: relative; /* Make this element the positioning context */
+      // background-color: blue;
+      flex-direction: row;
+      .container{
+        display: flex;
+        max-height: 200px;
 
-      input[type="radio"] {
-        display: none;
-      }
-
-      .card {
-        position: absolute;
-        // width: 60%;
-        height: 100%;
-        left: 0;
-        right: 0;
-        margin: auto;
-        transition: transform 0.4s ease;
-        cursor: pointer;
-      }
-
-      .cards {
-        position: relative;
-        width: 100%;
-        // height: 100%;
-        margin-bottom: 20px;
-        label {
+        .carousel-btn {
+          width: 40px;
+          height: 200px;
+          position: absolute;
+          background-color: transparent;
+          color: transparent;
+          border: none;
           cursor: pointer;
+          z-index: 10;
+          font-size: 1.5rem;
+          font-weight: bold;
+          user-select: none;
+          transition: background-color 1s ease;
+          &:hover {
+            background-color: rgba(255, 255, 255, 1);
+            color: black;
+            transition: color 1s ease;
+          }
+        }
+  
+        .left {
+        }
+  
+        .right {
+          right: 0px; /* Adjust position from the right edge */
+        }
+  
+        .center {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+  
+          .wrapper {
+            display: flex;
+            overflow: hidden;
+            height: 100%;
+  
+            .inner {
+              display: flex;
+              .card {
+                display: flex;
+                justify-content: center;
+                // margin: 25px;
+                // background-color: green;
+                border: 1px solid white;
+                width: 20vw;
+                .content {
+                  flex: 1;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  .up
+                  {
+                    width: 100%;
+                    flex: 3;
+                    img {
+                      width: 100px; /* Set a fixed width */
+                      height: 100px; /* Ensure height matches the width */
+                      border-radius: 50%; /* Makes the image a circle */
+                      object-fit: cover; /* Ensures the image is cropped without distortion */
+                      border: 2px solid #ccc; /* Optional: Add a border around the image */
+                      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for better aesthetics */
+                    }
+                  }
+                  .bottom{
+                    width: 100%;
+                    flex: 1;
+                    display: flex;
+                    span{
+                      flex: 1;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      border: 1px solid;
+                    }
+                  }
+  
+                }
+              }
+            }
+          }
         }
       }
 
-    
-      img {
-        width: 50vw;
-        height: 400px;
-        border-radius: 10px;
-        object-fit: cover;
-      }
-
-      #item-1:checked~ .cards #song-3,
-      #item-2:checked~ .cards #song-1,
-      #item-3:checked~ .cards #song-2 {
-        transform: translatex(-30vw) scale(0.8);
-        opacity: 0.4;
-        z-index: 0;
-      }
-
-      #item-1:checked ~ .cards #song-2,
-      #item-2:checked ~ .cards #song-3,
-      #item-3:checked ~ .cards #song-1 {
-        transform: translatex(30vw) scale(0.8);
-        opacity: 0.4;
-        z-index: 0;
-      }
-
-      #item-1:checked ~ .cards #song-1,
-      #item-2:checked ~ .cards #song-2,
-      #item-3:checked ~ .cards #song-3 {
-        transform: translatex(0) scale(0.8);
-        opacity: 1;
-        z-index: 1;
-
-        img {
-          box-shadow: 0px 0px 5px 0px rgba(81, 81, 81, 0.47);
-        }
-      }
+      
     }
   }
 }
-
-.carousel {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  margin: auto;
-  overflow: hidden;
-
-  &__track {
-    display: flex;
-    transition: transform 0.3s ease-in-out;
-    transform: translateX(calc(-100% * var(--current-slide, 0)));
-  }
-
-  &__slide {
-    min-width: 100%;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-
-    &--active {
-      display: block;
-      opacity: 1;
-    }
-
-    img {
-      width: 100%;
-      height: auto;
-    }
-  }
-
-  &__button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    z-index: 10;
-
-    &--prev {
-      left: 10px;
-    }
-
-    &--next {
-      right: 10px;
-    }
-  }
-
-  &__indicators {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-
-    .carousel__indicator {
-      width: 10px;
-      height: 10px;
-      background: lightgray;
-      border: none;
-      border-radius: 50%;
-      margin: 0 5px;
-      cursor: pointer;
-
-      &--active {
-        background: gray;
-      }
-    }
-  }
-}
-

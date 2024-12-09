@@ -2,6 +2,7 @@
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname, basename } from "path";
 import { GET } from "./utils.js";
+import updateStyle from "./style.js";
 
 if (process.argv.length < 3) {
   console.error("Usage: ura-gen <route1> <route2> ...");
@@ -105,5 +106,6 @@ process.argv.slice(2).forEach((route) => {
   createFile(join(process.cwd(), dir, `${name}.${ext}`), generateComponent(name));
   if (["css", "scss"].includes(styleExt)) {
     createFile(join(process.cwd(), dir, `${name}.${styleExt}`), generateStyle(name));
+    updateStyle();
   }
 });

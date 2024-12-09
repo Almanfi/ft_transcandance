@@ -4,57 +4,6 @@ import Swords from '../utils/Swords/Swords.jsx';
 import WinCup from '../utils/WinCup/WinCup.jsx';
 import Award from '../utils/Award/Award.jsx';
 
-function Carousel({ images }) {
-  const [render, State] = Ura.init();
-  const [getIndex, setIndex] = State(0);
-
-  const nextSlide = () => {
-    setIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
-
-  const prevSlide = () => {
-    setIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
-
-  return render(() => (
-    <div className="carousel">
-      {/* <async loding={}> 
-        <Comp/>
-      </async> */}
-      <button className="carousel__button carousel__button--prev" onClick={prevSlide}>
-        &#8592;
-      </button>
-      <div className="carousel__track">
-        <loop on={images}>
-          {(image, index) => (
-            <div key={index} className={`carousel__slide ${index === getIndex() ? "carousel__slide--active" : ""}`} >
-              <img src={image} alt={`Slide ${index + 1}`} />
-            </div>
-          )}
-        </loop>
-      </div>
-      <button className="carousel__button carousel__button--next" onClick={nextSlide}>
-        &#8594;
-      </button>
-      <div className="carousel__indicators">
-        <loop on={images}>
-          {(image, index) => (
-            <button
-              key={index}
-              className={`carousel__indicator ${index === getIndex() ? "carousel__indicator--active" : ""}`}
-              onClick={() => setCurrentIndex(index)} >
-
-            </button>
-          )}
-        </loop>
-      </div>
-    </div>
-  ))
-
-}
-
 function User() {
   const [render, State] = Ura.init();
   const [getItem, setItem] = State("item-1");
@@ -65,23 +14,23 @@ function User() {
   ];
   const [getList, setList] = State([
     {
-      src: "https://colorlib.com/preview/theme/seogo/img/case_study/1.png",
+      src: "/assets/003.png",
       title: "Product Design 0", subtitle: "UI/UX, Design",
     },
     {
-      src: "https://colorlib.com/preview/theme/seogo/img/case_study/1.png",
+      src: "/assets/003.png",
       title: "Product Design 1", subtitle: "UI/UX, Design",
     },
     {
-      src: "https://colorlib.com/preview/theme/seogo/img/case_study/2.png",
+      src: "/assets/003.png",
       title: "Product Design 2", subtitle: "UI/UX, Design",
     },
     {
-      src: "https://colorlib.com/preview/theme/seogo/img/case_study/3.png",
+      src: "/assets/003.png",
       title: "Product Design 3", subtitle: "UI/UX, Design",
     },
     {
-      src: "https://colorlib.com/preview/theme/seogo/img/case_study/1.png",
+      src: "/assets/003.png",
       title: "Product Design 4", subtitle: "UI/UX, Design",
     }
   ]);
@@ -105,8 +54,7 @@ function User() {
       <Navbar />
       <div id="center" >
         <div className="user-card">
-          <img src="/assets/profile.png" alt="" >
-          </img>
+          <img src="/assets/profile.png" alt="" onclick={()=> Ura.navigate("/settings")}/>
           <h3>
             Hrima mohammed
           </h3>
@@ -116,7 +64,7 @@ function User() {
 
         <div id="games">
           <div id="history">
-            <h4 id="title"><Swords /> Games</h4>
+            <h4 id="title"><Swords />Games</h4>
             <div className="children">
               <div className="child"><o>42%</o><h4>Pongers</h4></div>
               <div className="child"><o>42%</o><h4>Pongers</h4></div>
@@ -139,31 +87,32 @@ function User() {
         </div>
 
         <div id="friends">
-          <div className="center">
-            <h1>{getValue()}</h1>
-            <div className="wrapper">
-              <dloop
-                className="inner"
-                on={getList()}
-                style={{
-                  transform: `translateX(-${getValue() * 10}%)`,
-                  transition: "2s",
-                }}
-              >
-                {(e, i) => (
-                  <div className="card" key={i}>
-                    <div className="content">
-                      <h1>{e.title}</h1>
-                      <h3>{e.subtitle}</h3>
+          <div className="container">
+            {/* on hover move with 1 on click move with 2 */}
+            <button className="carousel-btn left" onclick={() => handle("left")}>{"<"}</button>
+            <div className="center">
+              <div className="wrapper">
+                <dloop className="inner" on={getList()}
+                  style={{ transform: `translateX(-${getValue() * 10}%)`, transition: "2s", gap:"10px" }}>
+                  {(e, i) => (
+                    <div className="card" key={i}>
+                      <div className="content">
+                        <div className="up">
+                          <img src={e.src}/>
+                          <h4>{e.title}</h4>
+                        </div>
+                        <div className="bottom">
+                          <span>chat</span>
+                          <span>play</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </dloop>
+                  )}
+                </dloop>
+              </div>
             </div>
-            <button onclick={() => handle("left")}>left {" <"}</button>
-            <button onclick={() => handle("right")}>right {" >"}</button>
+            <button className="carousel-btn right" onclick={() => handle("right")}>{">"}</button>
           </div>
-
         </div>
 
       </div>

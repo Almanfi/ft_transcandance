@@ -26,12 +26,11 @@
     + add exec tag
     + remove http request shit
 
--00%: 1 2 3 4
--20%: 2 3 4 1
--40%: 3 4 1 2
--60%: 4 1 2 3
--80%: 1 2 3 4
-
+- 00%: 1 2 3 4
+- 20%: 2 3 4 1
+- 40%: 3 4 1 2
+- 60%: 4 1 2 3
+- 80%: 1 2 3 4
 
 - npm link
 - ura-start: start server
