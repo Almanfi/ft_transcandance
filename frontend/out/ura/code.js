@@ -518,7 +518,7 @@ function setEventListeners() {
 }
 function handleCSSUpdate(filename) {
     const path = normalizePath("/" + filename);
-    // console.log(path);
+    console.log("css:", path);
     let found = false;
     document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
         //@ts-ignore
@@ -613,6 +613,12 @@ async function activate() {
         console.error("Error loading resources:", error);
     }
 }
+async function setStyles(list) {
+    console.log("set styles");
+    list.forEach(elem => {
+        handleCSSUpdate(elem);
+    });
+}
 async function start() {
     setEventListeners();
     Ura.refresh();
@@ -694,6 +700,7 @@ const Ura = {
     refresh,
     navigate,
     setRoutes,
+    setStyles,
     // send: HTTP_Request,
     activate,
     start,

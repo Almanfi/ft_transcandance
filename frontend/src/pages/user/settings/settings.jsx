@@ -5,14 +5,10 @@ function Settings(props = {}) {
   const [getter, setter] = State(0);
 
   return render(() => (
-    <div className="settings" style-src="./settings.css">
-      <h1 className="">
+    <div className="settings">
+      <h1 className="">hhff
         Hello from Settings component!
       </h1>
-      <button className="" 
-        onclick={() => setter(getter() + 1)}>
-        Click me [{getter()}]
-      </button>
     </div>
   ));
 }

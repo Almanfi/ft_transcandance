@@ -1,12 +1,13 @@
 import { join, relative } from "path";
 import { statSync, readdirSync, writeFileSync } from "fs";
-import * as UTILS from "./utils.js"
+import * as UTILS from "./utils.js";
 
 const { GET, source } = UTILS;
 const directoryPath = join(source, "/pages");
 
-export default function updateStyle() {
-  let buff = "";
+export default function updateStyles() {
+  const styles = [];
+
   function traverseDirectory(currentPath) {
     const files = readdirSync(currentPath);
 
@@ -17,18 +18,29 @@ export default function updateStyle() {
       if (stat.isDirectory()) {
         traverseDirectory(fullPath);
       } else if (stat.isFile() && (file.endsWith('.css') || file.endsWith('.scss'))) {
-        let relativePath = relative(directoryPath, fullPath).replace(/\\/g, '/');
+        let relativePath = relative(source, fullPath).replace(/\\/g, '/');
         if (relativePath.endsWith('.scss')) relativePath = relativePath.replace(/\.scss$/, '.css');
-        if (relativePath != "imports.css") {
-          buff += `@import "./${relativePath}";\n`;
-          console.log(`Added import for: ${relativePath}`);
+        if (!relativePath.includes("styles.js")) { // Exclude styles.js itself
+          styles.push(`"./${relativePath}"`);
+          console.log(`Added style path: ${relativePath}`);
         }
       }
     });
   }
+
   traverseDirectory(directoryPath);
-  writeFileSync(join(source, './pages/imports.css'), buff, 'utf8');
-  console.log('Finished scanning directories and adding imports.');
+
+  const content = `
+import Ura from 'ura'
+const styles = [
+  ${styles.join(",\n  ")}
+];
+
+Ura.setStyles(styles);
+`;
+
+  writeFileSync(join(source, './pages/styles.js'), content.trim(), 'utf8');
+  console.log('Finished scanning directories and generating styles.js.');
 }
 
-// updateStyle();
+// updateStyles();

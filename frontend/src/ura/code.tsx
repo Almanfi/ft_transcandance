@@ -429,7 +429,7 @@ const Routes: { [path: string]: Function } = {};
 Routes["*"] = () => Error({ message: window.location.pathname });
 
 function cleanPath(path) {
-  if(path === "*") return path;
+  if (path === "*") return path;
   if (!path.startsWith("/")) path = "/" + path;
   path = path.replace(/\/+/g, "/");
   if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
@@ -536,7 +536,7 @@ function setEventListeners() {
 
 function handleCSSUpdate(filename) {
   const path = normalizePath("/" + filename);
-  // console.log(path);
+  console.log("css:", path);
   let found = false;
 
   document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
@@ -635,12 +635,19 @@ async function activate() {
   }
 }
 
+async function setStyles(list) {
+  console.log("set styles");
+  list.forEach(elem => {
+    handleCSSUpdate(elem);
+  });
+}
+
 async function start() {
   setEventListeners();
   Ura.refresh();
   console.log(Ura.Routes);
   //@ts-ignore
-  if(window.mode === "dev") sync();
+  if (window.mode === "dev") sync();
 }
 
 // HTTP
@@ -717,6 +724,7 @@ const Ura = {
   refresh,
   navigate,
   setRoutes,
+  setStyles,
   // send: HTTP_Request,
   activate,
   start,

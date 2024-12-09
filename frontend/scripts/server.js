@@ -21,6 +21,7 @@ if (GET("STYLE_EXTENTION") !== "tailwind" && existsSync(join(source, "./pages/ta
   rmSync(join(source, "./pages/tailwind.css"))
 SET("TYPE", "dev");
 updateRoutes()
+updateStyle();
 
 async function getAvailablePort(port) {
   const isAvailable = (port) =>

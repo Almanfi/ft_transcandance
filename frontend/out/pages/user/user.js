@@ -3,6 +3,7 @@ import Navbar from '../utils/Navbar/Navbar.jsx';
 import Swords from '../utils/Swords/Swords.jsx';
 import WinCup from '../utils/WinCup/WinCup.jsx';
 import Award from '../utils/Award/Award.jsx';
+import Settings from './settings/settings.jsx';
 function User() {
     const [render, State] = Ura.init();
     const [getItem, setItem] = State("item-1");
@@ -50,6 +51,7 @@ function User() {
     };
     return render(() => (Ura.element("div", { className: "user" },
         Ura.element(Navbar, null),
+        Ura.element(Settings, null),
         Ura.element("div", { id: "center" },
             Ura.element("div", { className: "user-card" },
                 Ura.element("img", { src: "/assets/profile.png", alt: "", onclick: () => Ura.navigate("/settings") }),

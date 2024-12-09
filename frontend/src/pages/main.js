@@ -17,12 +17,12 @@
  */
 
 import Ura from "ura";
+import "./styles.js"
 import Home from "./home/home.js";
 import Login from "./login/login.js";
 import User from "./user/user.js";
-import Car from "./car/car.jsx";
 import Signup from "./signup/signup.jsx";
-import Settings from "./settings/settings.jsx";
+import Settings from "./user/settings/settings.jsx";
 
 const Routes = {
   "*": Home,
@@ -30,9 +30,8 @@ const Routes = {
   "/user": User,
   "/login": Login,
   "/signup": Signup,
-  "/car": Car,
-  "/settings": Settings
 }
+
 
 Ura.setRoutes(Routes);
 Ura.start();

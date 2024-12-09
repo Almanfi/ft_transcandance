@@ -3,6 +3,7 @@ import Navbar from '../utils/Navbar/Navbar.jsx';
 import Swords from '../utils/Swords/Swords.jsx';
 import WinCup from '../utils/WinCup/WinCup.jsx';
 import Award from '../utils/Award/Award.jsx';
+import Settings from './settings/settings.jsx';
 
 function User() {
   const [render, State] = Ura.init();
@@ -52,6 +53,7 @@ function User() {
   return render(() => (
     <div className="user">
       <Navbar />
+      <Settings/>
       <div id="center" >
         <div className="user-card">
           <img src="/assets/profile.png" alt="" onclick={()=> Ura.navigate("/settings")}/>

@@ -40,7 +40,7 @@ function ${capitalize(name)}(props${isTS ? ": Props" : ""} = {})${isTS ? ": VDOM
   const [getter, setter] = State${isTS ? "<number>" : ""}(0);
 
   return render(() => (
-    <div className="${isTailwind ? "flex flex-col items-center justify-center text-center h-full w-full bg-[#282c34] text-white" : name.toLowerCase()}" ${!isTailwind && `style-src="./${name}.css"`}>
+    <div className="${isTailwind ? "flex flex-col items-center justify-center text-center h-full w-full bg-[#282c34] text-white" : name.toLowerCase()}">
       <h1 className="${isTailwind ? "text-4xl mb-4" : ""}">
         Hello from ${capitalize(name)} component!
       </h1>
