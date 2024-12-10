@@ -91,10 +91,13 @@ input:focus {
   max-height: 500px;
 }
 .settings .content .img {
+  display: flex;
   flex: 1;
   background-color: red;
   height: 20px;
-  width: 50px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 .settings .content button {
   flex: 1;

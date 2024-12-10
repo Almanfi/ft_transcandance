@@ -32,10 +32,13 @@ $black4: var(--black4);
     // width: 100%;
 
     .img {
+      display: flex;
       flex: 1;
       background-color: red;
       height: 20px;
-      width: 50px;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
     }
 
     button {
