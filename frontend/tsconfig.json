@@ -8,8 +8,8 @@
     "baseUrl": ".", // Set baseUrl to project root
 
     "jsx": "react",
-    "jsxFactory": "Ura.element",
-    "jsxFragmentFactory": "Ura.fragment",
+    "jsxFactory": "Ura.e",
+    "jsxFragmentFactory": "Ura.f",
     "moduleResolution": "node",
     "skipLibCheck": false,
     "allowJs": true,

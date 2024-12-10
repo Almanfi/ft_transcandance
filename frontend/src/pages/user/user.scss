@@ -7,29 +7,6 @@ $blue1: var(--blue1);
 $blue3: var(--blue3);
 $blue4: var(--blue4);
 
-// #div1 {
-//   position: relative;
-//   width: 50%;
-//   height: 200px;
-//   background: red;
-//   z-index: 2;
-// }
-// #div2 {
-//   position: relative;
-//   width: 50%;
-//   height: 200px;
-//   background: yellow;
-//   z-index: 1;
-// }
-// #image {
-//   position: absolute;
-//   bottom: -20%;
-//   left: 35%;
-//   z-index: 4;
-//   width: 30%;
-//   height: 30%;
-//   background: green;
-// }
 
 .user {
   display: flex;
@@ -39,7 +16,7 @@ $blue4: var(--blue4);
   height: 100%;
   background-color: $red0;
   .navbar {
-    z-index: 4;
+    z-index: 1;
   }
 
   #center {
@@ -54,7 +31,6 @@ $blue4: var(--blue4);
     justify-content: center;
 
     position: relative;
-    z-index: 2;
     .user-card {
       // background-color: green;
       width: 30%;

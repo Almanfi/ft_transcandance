@@ -18,7 +18,7 @@ function check(children) {
         return child;
     });
 }
-function fragment(props, ...children) {
+function fr(props, ...children) {
     return {
         type: FRAGMENT,
         children: children || [],
@@ -40,7 +40,7 @@ function deepcopy(value) {
     }
     return value;
 }
-function element(tag, props = {}, ...children) {
+function e(tag, props = {}, ...children) {
     if (typeof tag === "function") {
         let functag = null;
         try {
@@ -62,7 +62,7 @@ function element(tag, props = {}, ...children) {
             };
         }
         if (functag.type === FRAGMENT)
-            functag = element("fr", functag.props, ...check(children || []));
+            functag = e("fr", functag.props, ...check(children || []));
         return functag;
     }
     if (tag === "if") {
@@ -171,7 +171,7 @@ function createDOM(vdom) {
                     }
                 default:
                     if (vdom.dom)
-                        console.error("element already has dom"); // TODO: to be removed
+                        console.error("e already has dom"); // TODO: to be removed
                     else {
                         if (svgElements.has(vdom.tag))
                             vdom.dom = document.createElementNS("http://www.w3.org/2000/svg", vdom.tag);
@@ -183,9 +183,9 @@ function createDOM(vdom) {
             break;
         }
         case FRAGMENT: {
-            // console.log("createDOM: found fragment", vdom);
+            // console.log("createDOM: found fr", vdom);
             if (vdom.dom)
-                console.error("fragment already has dom"); // TODO: to be removed
+                console.error("fr already has dom"); // TODO: to be removed
             vdom.dom = document.createElement("container");
             // vdom.dom = document.createDocumentFragment()
             break;
@@ -372,7 +372,7 @@ function init() {
     let index = 1;
     let vdom = null;
     let states = {};
-    let View = () => Ura.element("empty", null);
+    let View = () => Ura.e("empty", null);
     const State = (initValue) => {
         const stateIndex = index++;
         states[stateIndex] = initValue;
@@ -388,7 +388,7 @@ function init() {
         return [getter, setter];
     };
     const updateState = () => {
-        const newVDOM = Ura.element(View, null);
+        const newVDOM = Ura.e(View, null);
         if (vdom)
             reconciliate(vdom, newVDOM);
         else
@@ -405,7 +405,7 @@ function init() {
 function Error(props) {
     const [render, State] = init();
     return render(() => {
-        return element("h4", {
+        return e("h4", {
             style: {
                 fontFamily: "sans-serif",
                 fontSize: "6vw",
@@ -459,9 +459,9 @@ function refresh(params = {}) {
     const RouteConfig = getRoute(path);
     console.log("go to", path);
     // let res = 
-    return display(Ura.element("root", null, 
+    return display(Ura.e("root", null, 
     //@ts-ignore
-    Ura.element(RouteConfig, { props: params.props })));
+    Ura.e(RouteConfig, { props: params.props })));
 }
 function navigate(route, params = {}) {
     route = route.split("?")[0];
@@ -614,7 +614,6 @@ async function activate() {
     }
 }
 async function setStyles(list) {
-    console.log("set styles");
     list.forEach(elem => {
         handleCSSUpdate(elem);
     });
@@ -685,8 +684,8 @@ const Ura = {
         remove: rmGlobal,
         clear: clearGlobal
     },
-    element,
-    fragment,
+    e,
+    fr,
     setRoute,
     getRoute,
     display,

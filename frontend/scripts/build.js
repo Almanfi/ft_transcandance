@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-import { root, SET, GET, parse_config_file } from "./utils.js";
+import { root, SET, GET, parse_config_file, updateRoutes } from "./utils.js";
 import { mkdirSync, writeFileSync, existsSync, readdirSync, copyFileSync } from "fs";
 import { join ,relative} from "path";
 import net from "net";
 import { logerror, loginfo } from "./debug.js";
+import updateStyles from "./load-css.js";
 
 const nginx = (port) => `# nginx/nginx.conf
 events {
@@ -142,11 +143,14 @@ try {
     });
   });
 
+  updateRoutes();
+  updateStyles();
   createFile(join(root, "./docker/nginx/nginx.conf"), nginx(port));
   createFile(join(root, "./docker/Dockerfile"), dockerfile(port));
   createFile(join(root, "./docker/docker-compose.yml"), dockerCompose(port));
   createFile(join(root, "./docker/Makefile"), makefile(port));
   copyFileSync(join(root, "./index.html"), join(root, "./docker/app/index.html"));
+
   copyDir(join(root, "./out"), join(root, "./docker/app"))
 
   SET("TYPE", "dev");

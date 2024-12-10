@@ -7,7 +7,7 @@ import chokidar from "chokidar"
 import { parse_config_file, source, output, root, handleDelete, updateRoutes, handleCopy, GET, SET, logServerMsg, MimeType } from "./utils.js";
 import { logerror, loginfo, logmsg } from "./debug.js";
 import { WebSocketServer, WebSocket } from "ws";
-import updateStyle from "./style.js";
+import updateStyles from "./load-css.js";
 
 // CLEAR out Directory
 if (existsSync(output)) readdirSync(output).forEach(sub => {
@@ -21,7 +21,6 @@ if (GET("STYLE_EXTENTION") !== "tailwind" && existsSync(join(source, "./pages/ta
   rmSync(join(source, "./pages/tailwind.css"))
 SET("TYPE", "dev");
 updateRoutes()
-updateStyle();
 
 async function getAvailablePort(port) {
   const isAvailable = (port) =>
@@ -96,6 +95,14 @@ async function createServer() {
     }, GET("SERVER_TIMING") || 1);
   }
 
+  let styleTimeout = null;
+  function updateStylesDebounced() {
+    if (styleTimeout) clearTimeout(styleTimeout);
+    styleTimeout = setTimeout(() => {
+      updateStyles();
+    }, 100);
+  }
+
   function watch_path(watchPath, events, callback) {
     const watch = chokidar.watch(watchPath, {});
     events.forEach((event) => watch.on(event, callback));
@@ -106,26 +113,25 @@ async function createServer() {
     if (event) {
       let message = null;
       handleCopy(pathname);
-      if (![join(source, "/pages/tailwind.css"), join(source, "/pages/global.scss")].includes(pathname) && [".scss", ".css"].includes(extension(pathname)))
-      {
-        message = { action: "update", filename: relative(source, pathname.replace(/\.scss$/, ".css")), type: "css" }
-      }
-      else message = { action: "reload" };
-      // console.log("> ", event);
-      if (([".js", ".jsx", ".ts", ".tsx"].includes(extension(pathname)))) {
+      if (![join(source, "/pages/tailwind.css"), join(source, "/pages/global.scss")].includes(pathname) && [".scss", ".css"].includes(extension(pathname))) {
+        if (event === "add") updateStylesDebounced();  // Use the debounced version
+        else message = { action: "update", filename: relative(source, pathname.replace(/\.scss$/, ".css")), type: "css" };
+      } else message = { action: "reload" };
+  
+      if (([".js", ".jsx", ".ts", ".tsx"].includes(extension(pathname))) && pathname !== join(source, "/pages/styles.js")) {
         updateRoutes();
-        /* 
-        message = {
-          action: "update",
-          filename: relative(source, pathname.replace(/\.(ts|tsx|jsx)$/, ".js")),
-          type: "js",
-        };
-        */
+        updateStylesDebounced();  // Use the debounced version
         message = { action: "reload" };
       }
-      notifyClient(message)
+      notifyClient(message);
     }
-  })
+  });
+  
+  watch_path(source, ["unlink", "unlinkDir"], (pathname, event) => {
+    handleDelete(pathname);
+    updateRoutes();
+    notifyClient();
+  });
   watch_path(source, ["unlink", "unlinkDir"], (pathname, event) => {
     // if (event) {
     handleDelete(pathname);

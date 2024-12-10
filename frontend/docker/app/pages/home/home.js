@@ -1,22 +1,28 @@
 import Ura from "ura";
+import Navbar from "../utils/Navbar/Navbar.jsx";
+// Ura.loadCSS("./home.css")
+// import style from "./home.css"
+// console.log(style);
 function Home() {
     const [render, State] = Ura.init();
-    const [getTheme, setTheme] = State("dark");
-    const handle = () => {
-        setTheme(getTheme() === "light" ? "dark" : "light");
-    };
-    return render(() => (Ura.element("div", { className: `home ${getTheme()}` },
-        Ura.element("header", { className: "home-header" },
-            Ura.element("h1", null, "Welcome to UraJS"),
-            Ura.element("p", null,
-                "Get started by editing ",
-                Ura.element("code", null, "src/pages/Home.[js|ts|jsx|tsx]")),
-            Ura.element("a", { className: "home-link", href: "https://github.com/mohammedhrima/UraJS", target: "_blank", rel: "noopener noreferrer" }, "Learn UraJS"),
-            Ura.element("button", { onClick: handle, className: "toggle-theme" },
-                Ura.element("span", null,
-                    "Switch to ",
-                    getTheme() === "light" ? "Dark" : "Light",
-                    " Mode"),
-                Ura.element("img", { src: "/assets/logo.png", alt: "logo" }))))));
+    const [getter, setter] = State(0);
+    // if (!Ura.store.get("user")) {
+    //   Ura.navigate("/login")
+    //   window.location.reload();
+    // }
+    // else
+    return render(() => (Ura.e("div", { className: "home" },
+        Ura.e(Navbar, null),
+        Ura.e("div", { id: "center" },
+            Ura.e("h1", null,
+                "Join Your ",
+                Ura.e("b", null, "Friends")),
+            Ura.e("h1", null, "and"),
+            Ura.e("h1", null,
+                Ura.e("o", null, "Beat"),
+                " them")),
+        Ura.e("div", { id: "bottom" },
+            Ura.e("button", { onclick: () => Ura.navigate("/user") },
+                Ura.e("h3", null, "Enter the Arena"))))));
 }
 export default Home;

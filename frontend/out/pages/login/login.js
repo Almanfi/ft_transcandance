@@ -24,20 +24,20 @@ function Login() {
         Ura.store.set("user", { name: "mohammed" });
         Ura.navigate("/user");
     };
-    return render(() => (Ura.element("div", { className: "login" },
-        Ura.element(Navbar, null),
-        Ura.element("div", { id: "center" },
-            Ura.element("div", { id: "card" },
-                Ura.element("h3", { id: "title" }, "Login"),
-                Ura.element("div", { id: "input-section" },
-                    Ura.element("input", { type: "text", placeholder: "Username" }),
-                    Ura.element("input", { type: "password", placeholder: "Password" })),
-                Ura.element("div", { id: "button-section" },
-                    Ura.element("button", { id: "btn" },
-                        Ura.element(Arrow, null))),
-                Ura.element("h4", { id: "signin", onclick: () => {
+    return render(() => (Ura.e("div", { className: "login" },
+        Ura.e(Navbar, null),
+        Ura.e("div", { id: "center" },
+            Ura.e("div", { id: "card" },
+                Ura.e("h3", { id: "title" }, "Login"),
+                Ura.e("div", { id: "input-section" },
+                    Ura.e("input", { type: "text", placeholder: "Username" }),
+                    Ura.e("input", { type: "password", placeholder: "Password" })),
+                Ura.e("div", { id: "button-section" },
+                    Ura.e("button", { id: "btn" },
+                        Ura.e(Arrow, null))),
+                Ura.e("h4", { id: "signin", onclick: () => {
                         Ura.navigate("/signup");
                     } }, "Don't have an account ?")),
-            Ura.element("button", { onclick: setUser }, "set user")))));
+            Ura.e("button", { onclick: setUser }, "set user")))));
 }
 export default Login;

@@ -21,7 +21,7 @@ function check(children: any): any {
   });
 }
 
-function fragment(props: Props, ...children: any) {
+function fr(props: Props, ...children: any) {
   return {
     type: FRAGMENT,
     children: children || [],
@@ -42,7 +42,7 @@ function deepcopy(value) {
   return value;
 }
 
-function element(tag: Tag, props: Props = {}, ...children: any) {
+function e(tag: Tag, props: Props = {}, ...children: any) {
   if (typeof tag === "function") {
     let functag = null;
     try {
@@ -61,7 +61,7 @@ function element(tag: Tag, props: Props = {}, ...children: any) {
         children: [],
       };
     }
-    if (functag.type === FRAGMENT) functag = element("fr", functag.props, ...check(children || []));
+    if (functag.type === FRAGMENT) functag = e("fr", functag.props, ...check(children || []));
     return functag;
   }
   if (tag === "if") {
@@ -172,7 +172,7 @@ function createDOM(vdom): VDOM {
           }
         default:
           if (vdom.dom)
-            console.error("element already has dom"); // TODO: to be removed
+            console.error("e already has dom"); // TODO: to be removed
           else {
             if (svgElements.has(vdom.tag))
               vdom.dom = document.createElementNS("http://www.w3.org/2000/svg", vdom.tag);
@@ -183,8 +183,8 @@ function createDOM(vdom): VDOM {
       break;
     }
     case FRAGMENT: {
-      // console.log("createDOM: found fragment", vdom);
-      if (vdom.dom) console.error("fragment already has dom"); // TODO: to be removed
+      // console.log("createDOM: found fr", vdom);
+      if (vdom.dom) console.error("fr already has dom"); // TODO: to be removed
       vdom.dom = document.createElement("container");
       // vdom.dom = document.createDocumentFragment()
       break;
@@ -405,7 +405,7 @@ function init() {
 function Error(props: Props | null) {
   const [render, State] = init();
   return render(() => {
-    return element(
+    return e(
       "h4",
       {
         style: {
@@ -636,7 +636,6 @@ async function activate() {
 }
 
 async function setStyles(list) {
-  console.log("set styles");
   list.forEach(elem => {
     handleCSSUpdate(elem);
   });
@@ -709,8 +708,8 @@ const Ura = {
     remove: rmGlobal,
     clear: clearGlobal
   },
-  element,
-  fragment,
+  e,
+  fr,
   setRoute,
   getRoute,
   display,

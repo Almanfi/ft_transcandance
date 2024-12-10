@@ -1,15 +1,78 @@
+@use "../../main.scss" as global;
+
+$red0: var(--red0);
+$red2: var(--red2);
+$red4: var(--red4);
+
+$blue1: var(--blue1);
+$blue3: var(--blue3);
+$blue4: var(--blue4);
+$black4: var(--black4);
+
 .settings {
   position: absolute;
-  display: flex;
   // background-color: red;
+  backdrop-filter: blur(10px);
+
   z-index: 10;
   height: 100%;
   width: 100%;
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    max-height: 500px;
+    // height: 100%;
+    // width: 100%;
+
+    .img {
+      flex: 1;
+      background-color: red;
+      height: 20px;
+      width: 50px;
+    }
+
+    button {
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: blue;
+    }
+
+    .card {
+      flex: 3;
+      background-color: green;
+      border: 1px solid $blue1;
+      // background-color: red;
+
+      .infos {
+        display: flex;
+        flex-direction: column;
+        // justify-content:  center;
+        align-items: center;
+
+        gap: 10px;
+        // background-color: blue;
+        padding: 0px 10px;
+        input {
+          max-width: 400px;
+          border: none;
+          font-size: 14px;
+          padding: 0px 0px 3px 2px;
+          margin: 5px;
+          border: 0;
+          border-bottom: 1.5px solid $red2;
+          background-color: transparent;
+          color: $black4;
+        }
+      }
+    }
+  }
 }
-  
-.settings h1 {
-  font-size: 2.5rem;
-  margin-bottom: 15px;
-  color: #ffffff;
-}
-  

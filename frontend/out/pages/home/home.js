@@ -11,18 +11,18 @@ function Home() {
     //   window.location.reload();
     // }
     // else
-    return render(() => (Ura.element("div", { className: "home" },
-        Ura.element(Navbar, null),
-        Ura.element("div", { id: "center" },
-            Ura.element("h1", null,
+    return render(() => (Ura.e("div", { className: "home" },
+        Ura.e(Navbar, null),
+        Ura.e("div", { id: "center" },
+            Ura.e("h1", null,
                 "Join Your ",
-                Ura.element("b", null, "Friends")),
-            Ura.element("h1", null, "and"),
-            Ura.element("h1", null,
-                Ura.element("o", null, "Beat"),
+                Ura.e("b", null, "Friends")),
+            Ura.e("h1", null, "and"),
+            Ura.e("h1", null,
+                Ura.e("o", null, "Beat"),
                 " them")),
-        Ura.element("div", { id: "bottom" },
-            Ura.element("button", { onclick: () => Ura.navigate("/user") },
-                Ura.element("h3", null, "Enter the Arena"))))));
+        Ura.e("div", { id: "bottom" },
+            Ura.e("button", { onclick: () => Ura.navigate("/user") },
+                Ura.e("h3", null, "Enter the Arena"))))));
 }
 export default Home;

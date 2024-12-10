@@ -1,5 +1,5 @@
 import * as UTILS from "./utils.js";
-const { IF, ELSE, LOOP, CREATE, REPLACE, REMOVE } = UTILS;
+const { IF, ELSE, LOOP, EXEC, CREATE, REPLACE, REMOVE } = UTILS;
 const { ELEMENT, FRAGMENT, TEXT } = UTILS;
 const { deepEqual, loadCSS, svgElements } = UTILS;
 let ifTag = null;
@@ -10,24 +10,47 @@ function check(children) {
         if (child === null || typeof child === "string" || typeof child === "number") {
             return {
                 type: TEXT,
-                value: child,
+                props: {
+                    value: child,
+                }
             };
         }
         return child;
     });
 }
-function fragment(props, ...children) {
+function fr(props, ...children) {
     return {
         type: FRAGMENT,
         children: children || [],
     };
     throw "Fragments (<></>) are not supported please use <fr></fr> tag instead";
 }
-function element(tag, props = {}, ...children) {
+function deepcopy(value) {
+    if (value === null || value === undefined)
+        return value;
+    if (Array.isArray(value))
+        return value.map(deepcopy);
+    if (typeof value === "object") {
+        const copy = {};
+        for (const key in value) {
+            if (value.hasOwnProperty(key))
+                copy[key] = deepcopy(value[key]);
+        }
+        return copy;
+    }
+    return value;
+}
+function e(tag, props = {}, ...children) {
     if (typeof tag === "function") {
         let functag = null;
         try {
             functag = tag(props || {}, children);
+            if (!functag) {
+                return {
+                    type: FRAGMENT,
+                    children: [],
+                };
+            }
             if (!functag)
                 throw `function must return render(()=>(JSX)): ${tag}`;
         }
@@ -39,7 +62,7 @@ function element(tag, props = {}, ...children) {
             };
         }
         if (functag.type === FRAGMENT)
-            functag = element("fr", functag.props, ...check(children || []));
+            functag = e("fr", functag.props, ...check(children || []));
         return functag;
     }
     if (tag === "if") {
@@ -63,7 +86,15 @@ function element(tag, props = {}, ...children) {
         };
         return res;
     }
-    else if (tag === "loop") {
+    else if (tag === "exec") {
+        return {
+            type: EXEC,
+            tag: "exec",
+            call: props.call,
+            children: []
+        };
+    }
+    else if (tag === "loop" || tag === "dloop") {
         let loopChildren = (props.on || []).flatMap((elem, id) => (children || []).map((child) => {
             const evaluatedChild = 
             //@ts-ignore
@@ -72,8 +103,11 @@ function element(tag, props = {}, ...children) {
             // in slider when copying input that has function onchange
             // return structuredClone ? structuredClone(evaluatedChild)
             //   : JSON.parse(JSON.stringify(evaluatedChild));
-            return JSON.parse(JSON.stringify(evaluatedChild));
+            // return JSON.parse(JSON.stringify(evaluatedChild));
+            return deepcopy(evaluatedChild);
         }));
+        if (tag === "dloop")
+            loopChildren = loopChildren.concat(loopChildren.map(deepcopy));
         let res = {
             type: LOOP,
             tag: "loop",
@@ -125,16 +159,19 @@ function setProps(vdom) {
             .join(";");
     }
 }
+let ExecStack = [];
 function createDOM(vdom) {
     switch (vdom.type) {
         case ELEMENT: {
             switch (vdom.tag) {
                 case "root":
-                    vdom.dom = document.getElementById("root");
-                    break;
+                    {
+                        vdom.dom = document.getElementById("root");
+                        break;
+                    }
                 default:
                     if (vdom.dom)
-                        console.error("element already has dom"); // TODO: to be removed
+                        console.error("e already has dom"); // TODO: to be removed
                     else {
                         if (svgElements.has(vdom.tag))
                             vdom.dom = document.createElementNS("http://www.w3.org/2000/svg", vdom.tag);
@@ -143,19 +180,18 @@ function createDOM(vdom) {
                     }
                     break;
             }
-            setProps(vdom);
             break;
         }
         case FRAGMENT: {
-            // console.log("createDOM: found fragment", vdom);
+            // console.log("createDOM: found fr", vdom);
             if (vdom.dom)
-                console.error("fragment already has dom"); // TODO: to be removed
+                console.error("fr already has dom"); // TODO: to be removed
             vdom.dom = document.createElement("container");
             // vdom.dom = document.createDocumentFragment()
             break;
         }
         case TEXT: {
-            vdom.dom = document.createTextNode(vdom.value);
+            vdom.dom = document.createTextNode(vdom.props.value);
             break;
         }
         case IF:
@@ -166,9 +202,17 @@ function createDOM(vdom) {
             // vdom.dom = document.createDocumentFragment();
             break;
         }
+        case EXEC: {
+            ExecStack.push(vdom.call);
+            // console.log("found exec", vdom);
+            // vdom.call();
+            vdom.dom = document.createElement("exec");
+            break;
+        }
         default:
             break;
     }
+    setProps(vdom);
     return vdom;
 }
 function removeProps(vdom) {
@@ -206,7 +250,8 @@ function execute(mode, prev, next = null) {
             // console.log("prev", prev);
             prev.children?.map((child) => {
                 child = execute(mode, child);
-                prev.dom.appendChild(child.dom);
+                if (child.dom)
+                    prev.dom.appendChild(child.dom);
             });
             break;
         }
@@ -285,16 +330,12 @@ function reconciliateProps(oldProps = {}, newProps = {}, vdom) {
     return diff;
 }
 function reconciliate(prev, next) {
-    if (prev.type != next.type ||
-        prev.tag != next.tag ||
-        (prev.type === TEXT && !deepEqual(prev.value, next.value)))
+    if (prev.type != next.type || prev.tag != next.tag)
         return execute(REPLACE, prev, next);
-    if (prev.tag === next.tag) {
-        if (reconciliateProps(prev.props, next.props, prev))
-            return execute(REPLACE, prev, next);
+    if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
+        return execute(REPLACE, prev, next);
     }
-    else
-        return execute(REPLACE, prev, next);
+    //  else return execute(REPLACE, prev, next);
     const prevs = prev.children || [];
     const nexts = next.children || [];
     for (let i = 0; i < Math.max(prevs.length, nexts.length); i++) {
@@ -324,12 +365,14 @@ function display(vdom) {
         execute(CREATE, vdom);
         GlobalVDOM = vdom;
     }
+    ExecStack.forEach(event => event());
+    ExecStack = [];
 }
 function init() {
     let index = 1;
     let vdom = null;
     let states = {};
-    let View = () => Ura.element("empty", null);
+    let View = () => Ura.e("empty", null);
     const State = (initValue) => {
         const stateIndex = index++;
         states[stateIndex] = initValue;
@@ -337,6 +380,7 @@ function init() {
         const setter = (newValue) => {
             // console.log("call setter", deepEqual(states[stateIndex], newValue));
             if (!deepEqual(states[stateIndex], newValue)) {
+                // console.log("call update for", newValue);
                 states[stateIndex] = newValue;
                 updateState();
             }
@@ -344,7 +388,7 @@ function init() {
         return [getter, setter];
     };
     const updateState = () => {
-        const newVDOM = Ura.element(View, null);
+        const newVDOM = Ura.e(View, null);
         if (vdom)
             reconciliate(vdom, newVDOM);
         else
@@ -361,7 +405,7 @@ function init() {
 function Error(props) {
     const [render, State] = init();
     return render(() => {
-        return element("h4", {
+        return e("h4", {
             style: {
                 fontFamily: "sans-serif",
                 fontSize: "6vw",
@@ -376,11 +420,26 @@ function Error(props) {
 }
 const Routes = {};
 Routes["*"] = () => Error({ message: window.location.pathname });
+function cleanPath(path) {
+    if (path === "*")
+        return path;
+    if (!path.startsWith("/"))
+        path = "/" + path;
+    path = path.replace(/\/+/g, "/");
+    if (path.length > 1 && path.endsWith("/"))
+        path = path.slice(0, -1);
+    return path;
+}
 function setRoute(path, call) {
     Routes[path] = call;
 }
 function getRoute(path) {
-    return Routes[path] || Routes["*"];
+    return Routes[cleanPath(path)] || Routes["*"];
+}
+function setRoutes(currRoutes) {
+    Object.keys(currRoutes).forEach(key => {
+        setRoute(cleanPath(key), currRoutes[key]);
+    });
 }
 function normalizePath(path) {
     if (!path || path == "")
@@ -398,17 +457,18 @@ function refresh(params = {}) {
     // console.log("call refresh", path);
     path = normalizePath(path);
     const RouteConfig = getRoute(path);
-    // console.log("go to", RouteConfig);
-    display(Ura.element("root", null, 
+    console.log("go to", path);
+    // let res = 
+    return display(Ura.e("root", null, 
     //@ts-ignore
-    Ura.element(RouteConfig, { props: params.props })));
+    Ura.e(RouteConfig, { props: params.props })));
 }
 function navigate(route, params = {}) {
     route = route.split("?")[0];
     route = normalizePath(route);
     console.log("navigate to", route, "with", params);
     window.history.pushState({}, "", `${route}`);
-    refresh({ props: params });
+    refresh();
 }
 // loadfiles
 async function loadRoutes() {
@@ -449,10 +509,16 @@ function setEventListeners() {
     window.addEventListener("hashchange", Ura.refresh);
     window.addEventListener("DOMContentLoaded", Ura.refresh);
     window.addEventListener("popstate", Ura.refresh);
+    // window.addEventListener("storage", (event) => {
+    //   if (event.key === 'ura-store') {
+    //     // refresh();
+    //     // window.location.reload();
+    //   }
+    // });
 }
 function handleCSSUpdate(filename) {
     const path = normalizePath("/" + filename);
-    // console.log(path);
+    console.log("css:", path);
     let found = false;
     document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
         //@ts-ignore
@@ -483,7 +549,17 @@ async function sync() {
                 handleCSSUpdate(event.filename);
             }
             else if (event.type === "js") {
-                // Handle JS update (if necessary)
+                //  try {
+                //     const scriptPath = `/${event.filename}`;
+                //     const module = await import(scriptPath + `?t=${Date.now()}`); // Cache-busting with a timestamp
+                //     console.log(`Updated JavaScript module: ${scriptPath}`, module);
+                //     // If the module exports a function or object, initialize or reapply it
+                //     if (module.default && typeof module.default === "function") {
+                //       module.default(); // Call the default export if it's a function
+                //     }
+                //   } catch (error) {
+                //     console.error(`Error updating JavaScript file (${event.filename}):`, error);
+                //   }
             }
             else if (event.type === "json") {
                 try {
@@ -537,18 +613,35 @@ async function activate() {
         console.error("Error loading resources:", error);
     }
 }
+async function setStyles(list) {
+    list.forEach(elem => {
+        handleCSSUpdate(elem);
+    });
+}
+async function start() {
+    setEventListeners();
+    Ura.refresh();
+    console.log(Ura.Routes);
+    //@ts-ignore
+    if (window.mode === "dev")
+        sync();
+}
 // HTTP
-const defaultHeaders = {
-    "Content-Type": "application/json",
-};
 async function HTTP_Request(method, url, headers = {}, body) {
     try {
         const response = await fetch(url, {
             method,
-            headers: { ...defaultHeaders, ...headers },
+            headers: { "Content-Type": "application/json", ...headers },
             body: body ? JSON.stringify(body) : undefined,
         });
-        const responseData = await response.json();
+        let responseData = null;
+        const contentType = response.headers.get("Content-Type");
+        if (contentType && contentType.includes("application/json"))
+            responseData = await response.json();
+        else if (contentType && contentType.includes("text/"))
+            responseData = await response.text();
+        else if (contentType)
+            responseData = await response.blob();
         return {
             data: responseData,
             status: response.status,
@@ -560,9 +653,39 @@ async function HTTP_Request(method, url, headers = {}, body) {
         throw error;
     }
 }
+// API
+if (!localStorage.getItem('ura-store'))
+    localStorage.setItem('ura-store', JSON.stringify({}));
+function setGlobal(name, value) {
+    let store = JSON.parse(localStorage.getItem('ura-store'));
+    if (!deepEqual(store[name], value)) {
+        store[name] = value;
+        localStorage.setItem('ura-store', JSON.stringify(store));
+    }
+}
+function getGlobal(name) {
+    let store = JSON.parse(localStorage.getItem('ura-store')) || {};
+    return store[name];
+}
+function rmGlobal(name) {
+    let store = JSON.parse(localStorage.getItem('ura-store')) || {};
+    if (store[name]) {
+        delete store[name];
+        localStorage.setItem('ura-store', JSON.stringify(store));
+    }
+}
+function clearGlobal() {
+    localStorage.setItem('ura-store', JSON.stringify({}));
+}
 const Ura = {
-    element,
-    fragment,
+    store: {
+        set: setGlobal,
+        get: getGlobal,
+        remove: rmGlobal,
+        clear: clearGlobal
+    },
+    e,
+    fr,
     setRoute,
     getRoute,
     display,
@@ -575,7 +698,10 @@ const Ura = {
     normalizePath,
     refresh,
     navigate,
-    send: HTTP_Request,
-    activate
+    setRoutes,
+    setStyles,
+    // send: HTTP_Request,
+    activate,
+    start,
 };
 export default Ura;

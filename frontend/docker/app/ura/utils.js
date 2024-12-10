@@ -4,6 +4,7 @@ export const FRAGMENT = "fragment";
 export const TEXT = "text";
 export const IF = "if";
 export const ELSE = "else";
+export const EXEC = "exec";
 // export const ELIF = "elif";
 export const LOOP = "loop";
 export const CREATE = 1;
@@ -18,6 +19,7 @@ export function loadCSS(filename) {
 }
 // UTILS
 export function deepEqual(a, b) {
+    // console.log("deep exual between", a, "and", b);
     if (a === b)
         return true;
     if (typeof a !== typeof b)

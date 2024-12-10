@@ -82,7 +82,7 @@ input:focus {
   background-color: var(--red0);
 }
 .user .navbar {
-  z-index: 4;
+  z-index: 1;
 }
 .user #center {
   background-image: url("/assets/background.svg");
@@ -94,7 +94,6 @@ input:focus {
   display: flex;
   justify-content: center;
   position: relative;
-  z-index: 2;
 }
 .user #center .user-card {
   width: 30%;

@@ -1,5 +1,6 @@
 import Ura from 'ura'
 const styles = [
+  "./pages/abc/abc.css",
   "./pages/home/home.css",
   "./pages/login/login.css",
   "./pages/main.css",
@@ -9,8 +10,7 @@ const styles = [
   "./pages/user/user.css",
   "./pages/utils/Award/Award.css",
   "./pages/utils/Navbar/Navbar.css",
-  "./pages/utils/Toast/Toast.css",
-  "./pages/utils/tmp2/tmp.css"
+  "./pages/utils/Toast/Toast.css"
 ];
 
 Ura.setStyles(styles);

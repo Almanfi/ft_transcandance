@@ -22,7 +22,6 @@ import Home from "./home/home.js";
 import Login from "./login/login.js";
 import User from "./user/user.js";
 import Signup from "./signup/signup.jsx";
-import Settings from "./user/settings/settings.jsx";
 
 const Routes = {
   "*": Home,

@@ -6,9 +6,20 @@ function Settings(props = {}) {
 
   return render(() => (
     <div className="settings">
-      <h1 className="">hhff
-        Hello from Settings component!
-      </h1>
+      <div className="content">
+        <div className="img">ffff</div>
+        <div className="card">
+          <div className="infos">
+            <input type="text" placeholder="First name" />
+            <input type="text" placeholder="Last name" />
+            <input type="email" placeholder="Email" />
+            <input type="email" placeholder="Confirm Email" />
+            <input type="password" placeholder="Password" />
+            <input type="password" placeholder="Confirm Password" />
+          </div>
+        </div>
+        <button><b>Save</b></button>
+      </div>
     </div>
   ));
 }
