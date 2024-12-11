@@ -1,9 +1,5 @@
 import Ura from "ura";
 import Navbar from "../utils/Navbar/Navbar.jsx";
-// Ura.loadCSS("./home.css")
-// import style from "./home.css"
-
-// console.log(style);
 
 function Home() {
   const [render, State] = Ura.init();
@@ -16,7 +12,6 @@ function Home() {
   // else
   return render(() => (
     <div className="home" >
-      {/* <style rel="stylesheet" href="pages/home/home.css" /> */}
       <Navbar />
       <div id="center">
         <h1>

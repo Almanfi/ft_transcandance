@@ -1,3 +1,14 @@
+/* Small screens (e.g., smartphones) */
+@media (max-width: 600px) {
+}
+
+/* Medium screens (e.g., tablets) */
+@media (min-width: 601px) and (max-width: 1024px) {
+}
+
+/* Large screens (e.g., desktops) */
+@media (min-width: 1025px) {
+}
 
 * {
   padding: 0;
@@ -83,7 +94,7 @@ input:focus {
   }
 }
 
-.is-error{
+.is-error {
   color: red !important;
   border-color: red !important;
 }

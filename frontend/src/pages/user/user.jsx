@@ -8,7 +8,7 @@ import Settings from './settings/settings.jsx';
 function User() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
-  
+
   const [getList, setList] = State([
     {
       src: "/assets/003.png",
@@ -33,29 +33,18 @@ function User() {
   ]);
   const [getValue, setValue] = State(0);
 
-  const handle = (direction) => {
-    const totalSlides = getList().length;
-    let currentValue = getValue();
-    if (direction === "left") {
-      currentValue = currentValue - 1;
-      if (currentValue < 0) currentValue = totalSlides - 1;
-    } else if (direction === "right") {
-      currentValue = (currentValue + 1) % totalSlides;
-    }
-    console.log("set value to", currentValue);
-    setValue(currentValue);
-  };
-
   return render(() => (
     <div className="user">
       <Navbar />
-      <Settings getShow={getShow} setShow={setShow}/>
+      <Settings getShow={getShow} setShow={setShow} />
       <div id="center" >
         <div className="user-card">
-          <img src="/assets/profile.png" alt="" onclick={()=> setShow(true)}/>
-          <h3>
-            Hrima mohammed
-          </h3>
+          <div className="img-container">
+            <img src="/assets/profile.png" alt="" onclick={() => setShow(true)} />
+          </div>
+          <div className="name">
+            <h3>Hrima mohammed</h3>
+          </div>
         </div>
       </div>
       <div id="bottom">
@@ -85,34 +74,23 @@ function User() {
         </div>
 
         <div id="friends">
-          <div className="container">
-            {/* on hover move with 1 on click move with 2 */}
-            <button className="carousel-btn left" onclick={() => handle("left")}>{"<"}</button>
-            <div className="center">
-              <div className="wrapper">
-                <dloop className="inner" on={getList()}
-                  style={{ transform: `translateX(-${getValue() * 10}%)`, transition: "2s", gap:"10px" }}>
-                  {(e, i) => (
-                    <div className="card" key={i}>
-                      <div className="content">
-                        <div className="up">
-                          <img src={e.src}/>
-                          <h4>{e.title}</h4>
-                        </div>
-                        <div className="bottom">
-                          <span>chat</span>
-                          <span>play</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </dloop>
+          <loop className="inner" on={getList()}>
+            {(e, i) => (
+              <div className="card" key={i}>
+                <div className="content">
+                  <div className="up">
+                    {/* <img src={e.src} /> */}
+                    <h4>{e.title}</h4>
+                  </div>
+                  <div className="bottom">
+                    <span>chat</span>
+                    <span>play</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <button className="carousel-btn right" onclick={() => handle("right")}>{">"}</button>
-          </div>
+            )}
+          </loop>
         </div>
-
       </div>
     </div>
   ));

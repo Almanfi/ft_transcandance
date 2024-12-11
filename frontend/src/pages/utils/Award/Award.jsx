@@ -5,7 +5,7 @@ function Award() {
   const [getter, setter] = State(0);
 
   return render(() => (
-    <svg class="w-6 h-6 text-gray-800 dark:text-white"
+    <svg className="w-6 h-6 text-gray-800 dark:text-white"
       aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
       width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
       <path d="M11 9a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" />
