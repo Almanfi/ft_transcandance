@@ -72,3 +72,7 @@ input:focus {
   color: red;
   opacity: 0.5;
 }
+
+.hidden {
+  visibility: hidden;
+}

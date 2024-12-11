@@ -444,6 +444,7 @@ function getRoute(path) {
   return Routes[cleanPath(path)] || Routes["*"];
 }
 
+
 function setRoutes(currRoutes) {
   Object.keys(currRoutes).forEach(key => {
     setRoute(cleanPath(key), currRoutes[key]);
@@ -475,6 +476,8 @@ function refresh(params = {}) {
     </root>
   );
 }
+
+
 
 function navigate(route, params = {}) {
   route = route.split("?")[0];

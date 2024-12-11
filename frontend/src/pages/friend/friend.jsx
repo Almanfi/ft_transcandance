@@ -5,7 +5,7 @@ import WinCup from '../utils/WinCup/WinCup.jsx';
 import Award from '../utils/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
 
-function User() {
+function Friend() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
   
@@ -47,14 +47,14 @@ function User() {
   };
 
   return render(() => (
-    <div className="user">
+    <div className="friend">
       <Navbar />
       <Settings getShow={getShow} setShow={setShow}/>
       <div id="center" >
         <div className="user-card">
           <img src="/assets/profile.png" alt="" onclick={()=> setShow(true)}/>
           <h3>
-            Hrima mohammed
+            Friend
           </h3>
         </div>
       </div>
@@ -118,4 +118,4 @@ function User() {
   ));
 }
 
-export default User
+export default Friend

@@ -6,12 +6,7 @@ import Award from '../utils/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
 function User() {
     const [render, State] = Ura.init();
-    const [getItem, setItem] = State("item-1");
-    const images = [
-        "https://via.placeholder.com/600x300?text=Slide+1",
-        "https://via.placeholder.com/600x300?text=Slide+2",
-        "https://via.placeholder.com/600x300?text=Slide+3",
-    ];
+    const [getShow, setShow] = State(false);
     const [getList, setList] = State([
         {
             src: "/assets/003.png",
@@ -51,10 +46,10 @@ function User() {
     };
     return render(() => (Ura.e("div", { className: "user" },
         Ura.e(Navbar, null),
-        Ura.e(Settings, null),
+        Ura.e(Settings, { getShow: getShow, setShow: setShow }),
         Ura.e("div", { id: "center" },
             Ura.e("div", { className: "user-card" },
-                Ura.e("img", { src: "/assets/profile.png", alt: "", onclick: () => Ura.navigate("/settings") }),
+                Ura.e("img", { src: "/assets/profile.png", alt: "", onclick: () => setShow(true) }),
                 Ura.e("h3", null, "Hrima mohammed"))),
         Ura.e("div", { id: "bottom" },
             Ura.e("div", { id: "games" },

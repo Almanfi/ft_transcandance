@@ -13,12 +13,32 @@ export const source = join(__dirname, "../src");
 export const output = join(__dirname, "../out");
 export const root = join(__dirname, "../");
 
-const tsConfigPath = join(__dirname, "../tsconfig.json");
-const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile).config;
-const parsedConfig = ts.parseJsonConfigFileContent(tsConfig, ts.sys, dirname(tsConfigPath));
+const tsConfig = {
+  compilerOptions: {
+    module: "ESNext",
+    target: "ES2020",
+    rootDir: source,
+    outDir: output,
+    baseUrl: "/",
+    jsx: "react",
+    jsxFactory: "Ura.e",
+    jsxFragmentFactory: "Ura.f",
+    moduleResolution: "node",
+    skipLibCheck: false,
+    allowJs: true,
+    resolveJsonModule: true,
+    esModuleInterop: true,
+    paths: {
+      "@/module/*": ["src/module/*"]
+    }
+  },
+  exclude: ["node_modules", "scripts", ".git", ".gitignore"]
+};
 
-export async function handleTypeScript(srcFile) {
-  loginfo("transpile:", relative(source, srcFile))
+const parsedConfig = ts.parseJsonConfigFileContent(tsConfig, ts.sys, source);
+
+export function handleTypeScript(srcFile) {
+  loginfo("transpile:", relative(source, srcFile));
   const program = ts.createProgram([srcFile], parsedConfig.options);
   const emitResult = program.emit();
   const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
@@ -28,12 +48,13 @@ export async function handleTypeScript(srcFile) {
         const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
         const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
         logerror(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
-      } else
+      } else {
         logerror(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
+      }
     });
   }
   handleTailwind();
-};
+}
 
 export function handleSass(pathname) {
   loginfo("transpile:", relative(source, pathname))
@@ -124,7 +145,7 @@ export function handleDelete(srcname) {
 }
 
 export function handleTailwind() {
-  if (GET("STYLE_EXTENTION") !== "tailwind") return;
+  if (config.style !== "tailwind") return;
   const inputCSS = `
 @tailwind base;
 @tailwind components;
@@ -167,55 +188,100 @@ export function parse_config_file() {
   catch (error) { logerror("Error: opening config.json", error); process.exit(1); }
 }
 
-export const GET = (name) => {
-  if (data == null) parse_config_file();
-  return data[name];
-}
-export const SET = (name, value) => data[name] = value;
+// export function GET(name) {
+//   if (data == null) parse_config_file();
+//   return data[name];
+// }
+// export function SET(name, value) { data[name] = value; }
 
-let routes = [];
+export let config = {};
+export function setConfig(obj = {}) {
+  config = obj;
+}
+
+let routes = {};
 let styles = [];
+
+function cleanPath(path) {
+  return path.replace(/\\/g, '/').replace("//", "/");
+}
+
 function generateRoutes(dir, parent, adding) {
   readdirSync(dir, { withFileTypes: true }).forEach(sub => {
     let tmp = adding;
+
     if (sub.isDirectory()) {
       const currRoute = `${parent}/${sub.name}`;
+      let file = null;
+
       if (adding) {
-        let file = null;
-        [".js", ".jsx", ".ts", ".tsx"].forEach((ext) => {
+        [".js", ".jsx", ".ts", ".tsx"].forEach(ext => {
           const curr = join(dir, sub.name, `${sub.name}${ext}`);
           if (existsSync(curr)) {
             file = curr;
             return;
           }
-        })
-        if (file !== null)
-          routes[currRoute] = `/pages${parent}/${sub.name}/${sub.name}.js`;
-        else
+        });
+
+        if (file !== null) {
+          routes[currRoute] = cleanPath(`./${parent.slice(1)}/${sub.name}/${sub.name}.js`);
+        } else {
           adding = false;
+        }
       }
+
       generateRoutes(join(dir, sub.name), currRoute, adding);
+    } else if (sub.isFile() && /\.(css|scss)$/i.test(sub.name)) {
+      styles.push(`./pages${cleanPath(`/${parent.slice(1)}/${basename(sub.name).replace(/\.(scss)$/i, ".css")}`)}`);
     }
-    else if (sub.isFile() && /\.(css|scss)$/.test(sub.name))
-      styles.push(`/pages${parent}/${basename(sub.name).replace(/\.(scss)$/i, ".css")}`)
+
     adding = tmp;
-  })
+  });
 }
 
 export function updateRoutes() {
-  // if (!data["DIR_ROUTING"]) return;
-  // routes = {};
-  // styles = [];
-  // generateRoutes(join(source, "/pages"), "", true);
-  // let output = {
-  //   routes,
-  //   styles,
-  //   base: GET("DEFAULT_ROUTE"),
-  //   type: GET("TYPE") === "dev" ? "dev" : "build"
-  // }
-  // writeFileSync(join(source, "/pages/routes.json"), JSON.stringify(output, null, 2), "utf8");
-  loginfo("Routes updated");
+  if(!config.dirRouting) return;
+  routes = {};
+  styles = [];
+  const pagesDir = join(source, 'pages');
+
+  generateRoutes(pagesDir, '', true);
+
+  const output = `/*
+ * Routing Schema
+ * Each route is an object with the following structure:
+ * {
+ *   "/pathname": Component,      
+ *    // key is The URL path for the route
+ *    // '*' is for default route, will be redirected to if navigate
+ *    // Component: the component that will be displayed
+ * }
+ *
+ * Example:
+ * const Routes = {
+ *    "/home": Home,
+ *    "/user": User,
+ *    "/user/setting": Setting
+ * }
+ */
+
+import Ura from "ura";
+
+${Object.entries(routes).map(([key, path]) => `import ${basename(path, '.js')} from "${path}";`).join('\n')}
+
+Ura.setRoutes({
+  "*": ${basename(routes[config.default] || Object.values(routes)[0], '.js')},
+  ${Object.entries(routes).map(([key, path]) => `"${key}": ${basename(path, '.js')}`).join(',\n  ')}
+});
+
+Ura.setStyles(${JSON.stringify(styles, null, 2)});
+
+Ura.start();`;
+
+  writeFileSync(join(pagesDir, 'main.js'), output, 'utf8');
+  console.log("Routes and styles updated.");
 }
+
 
 export function MimeType(ext) {
   return {

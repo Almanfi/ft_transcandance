@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname, basename } from "path";
-import { GET } from "./utils.js";
+import { config, parse_config_file } from "./utils.js";
+import "../ura.config.js";
 
 if (process.argv.length < 3) {
-  console.error("Usage: ura-gen <route1> <route2> ...");
+  console.error("Usage: uragen <route1> <route2> ...");
   process.exit(1);
 }
 
@@ -29,8 +30,8 @@ const createFile = (filePath, content) => {
 };
 
 const generateComponent = (name) => {
-  const isTailwind = GET("STYLE_EXTENTION") === "tailwind";
-  const isTS = ["ts", "tsx"].includes(GET("EXTENSION"));
+  const isTailwind = config.style === "tailwind";
+  const isTS = ["ts", "tsx"].includes(config.ext);
 
   return `${isTS ? '//@ts-ignore\n' : ""}import Ura${isTS ? ", { VDOM, Props }" : ""} from 'ura';
 
@@ -93,14 +94,14 @@ const generateStyle = (name) => {
   color: #3178c6;
 }`;
 
-  return GET("STYLE_EXTENTION") === "scss" ? styleTemplate.replace(/(?<=\}\n)/g, "  ") : styleTemplate;
+  return config.style === "scss" ? styleTemplate.replace(/(?<=\}\n)/g, "  ") : styleTemplate;
 };
 
 process.argv.slice(2).forEach((route) => {
   const dir = dirname(route);
   const name = basename(route);
-  const ext = GET("EXTENSION");
-  const styleExt = GET("STYLE_EXTENTION");
+  const ext = config.ext
+  const styleExt = config.style;
 
   createFile(join(process.cwd(), join(dir, `/${name}/`), `${name}.${ext}`), generateComponent(name));
   if (["css", "scss"].includes(styleExt)) {

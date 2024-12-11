@@ -73,6 +73,10 @@ input:focus {
   opacity: 0.5;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 .user {
   display: flex;
   flex-direction: column;
@@ -96,6 +100,7 @@ input:focus {
   position: relative;
 }
 .user #center .user-card {
+  cursor: pointer;
   width: 30%;
   z-index: 4;
   display: flex;

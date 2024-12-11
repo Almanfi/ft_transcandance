@@ -4,13 +4,11 @@ export type Props = { [key: string]: any };
 export type VDOM = {
   type: any;
   tag?: Tag;
-  props?: Props;
-  funcProps?: Props;
+  props?: Props | any;
   value?: string | number;
   dom?: HTMLElement;
   key?: number;
   render?: Function;
-  index: number;
   children?: any;
-  isfunc?: Boolean;
+  call?: Function;
 };

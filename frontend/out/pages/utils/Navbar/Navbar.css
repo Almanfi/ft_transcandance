@@ -73,6 +73,10 @@ input:focus {
   opacity: 0.5;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 .navbar {
   display: flex;
   width: 100%;
@@ -80,6 +84,7 @@ input:focus {
   padding: 0 2%;
   position: fixed;
   top: 0;
+  gap: 40px;
 }
 .navbar img {
   height: 100%;
@@ -89,6 +94,17 @@ input:focus {
   display: flex;
   align-items: center;
   cursor: pointer;
+}
+.navbar #logo span {
+  display: flex;
+  align-items: center;
+}
+.navbar input {
+  flex: 1;
+  border: none;
+  padding: 10px 10px;
+  background-color: transparent;
+  font-size: 18px;
 }
 .navbar if {
   display: flex;

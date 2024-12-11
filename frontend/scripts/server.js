@@ -4,22 +4,25 @@ import { statSync, rmSync, existsSync, readdirSync, stat, createReadStream } fro
 import net from "net"
 import http from "http";
 import chokidar from "chokidar"
-import { parse_config_file, source, output, root, handleDelete, updateRoutes, handleCopy, GET, SET, logServerMsg, MimeType } from "./utils.js";
+import {
+  parse_config_file, source, output, root, config, handleDelete,
+  updateRoutes, handleCopy, logServerMsg, MimeType
+} from "./utils.js";
 import { logerror, loginfo, logmsg } from "./debug.js";
 import { WebSocketServer, WebSocket } from "ws";
 import updateStyles from "./load-css.js";
 
-// CLEAR out Directory
-if (existsSync(output)) readdirSync(output).forEach(sub => {
-  let _path = join(output, sub);
-  if (statSync(_path).isDirectory()) rmSync(_path, { recursive: true, force: true })
-  else rmSync(_path)
-});
+await import("../ura.config.js");
 
-parse_config_file();
-if (GET("STYLE_EXTENTION") !== "tailwind" && existsSync(join(source, "./pages/tailwind.css")))
+// CLEAR out Directory
+// if (existsSync(output)) readdirSync(output).forEach(sub => {
+//   let _path = join(output, sub);
+//   if (statSync(_path).isDirectory()) rmSync(_path, { recursive: true, force: true })
+//   else rmSync(_path)
+// });
+
+if (config.style !== "tailwind" && existsSync(join(source, "./pages/tailwind.css")))
   rmSync(join(source, "./pages/tailwind.css"))
-SET("TYPE", "dev");
 updateRoutes()
 
 async function getAvailablePort(port) {
@@ -38,7 +41,7 @@ async function getAvailablePort(port) {
 }
 
 async function createServer() {
-  let port = await getAvailablePort(GET("PORT"));
+  let port = await getAvailablePort(config.port);
 
   let server = http.createServer((req, res) => {
     let uri = req.url.split("?")[0];
@@ -92,7 +95,7 @@ async function createServer() {
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify(message));
       });
-    }, GET("SERVER_TIMING") || 1);
+    }, config.serverTiming || 1);
   }
 
   let styleTimeout = null;
@@ -100,7 +103,7 @@ async function createServer() {
     if (styleTimeout) clearTimeout(styleTimeout);
     styleTimeout = setTimeout(() => {
       updateStyles();
-    }, 100);
+    }, 5);
   }
 
   function watch_path(watchPath, events, callback) {
@@ -114,19 +117,25 @@ async function createServer() {
       let message = null;
       handleCopy(pathname);
       if (![join(source, "/pages/tailwind.css"), join(source, "/pages/global.scss")].includes(pathname) && [".scss", ".css"].includes(extension(pathname))) {
-        if (event === "add") updateStylesDebounced();  // Use the debounced version
+        if (event === "add") updateStylesDebounced();
         else message = { action: "update", filename: relative(source, pathname.replace(/\.scss$/, ".css")), type: "css" };
       } else message = { action: "reload" };
-  
-      if (([".js", ".jsx", ".ts", ".tsx"].includes(extension(pathname))) && pathname !== join(source, "/pages/styles.js")) {
+
+      if (
+        ([".js", ".jsx", ".ts", ".tsx"].includes(extension(pathname)))
+        &&
+        ((config.dirRouting && pathname !== join(source, "./pages/main.js")) || !config.dirRouting)
+      ) {
         updateRoutes();
-        updateStylesDebounced();  // Use the debounced version
+        // updateStylesDebounced();  // Use the debounced version
         message = { action: "reload" };
       }
       notifyClient(message);
     }
   });
-  
+// /home/mhrima/Desktop/ft_transcandance/frontend/src/pages/main.js
+// /home/mhrima/Desktop/ft_transcandance/frontend/src/pages/main.js
+
   watch_path(source, ["unlink", "unlinkDir"], (pathname, event) => {
     handleDelete(pathname);
     updateRoutes();

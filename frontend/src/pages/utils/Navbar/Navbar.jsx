@@ -3,35 +3,19 @@ import Ura from "ura";
 function Navbar() {
   const [render, State] = Ura.init();
 
-
   return render(() => (
     <div className="navbar">
-      <div
-        id="logo"
-        onclick={() => {
-          Ura.navigate("/home");
-        }}
-      >
-        <img src="/assets/tr.png" />
-        Clashers
+      <div id="logo" onclick={() => { Ura.navigate("/home") }}>
+        <img src="/assets/tr.png" />Clashers
       </div>
+      <input type="text" placeholder="Search.." />
       <if cond={!Ura.store.get("user") || Ura.store.get("user")}>
-          <button
-            id="login-btn"
-            onclick={() => {
-              Ura.navigate("/login");
-            }}
-          >
-            <h4>Login</h4>
-          </button>
-          <button
-            id="signup-btn"
-            onclick={() => {
-              Ura.navigate("/signup");
-            }}
-            >
-            <h4>Sign up</h4>
-          </button>
+        <button id="login-btn" onclick={() => { Ura.navigate("/login") }} >
+          <h4>Login</h4>
+        </button>
+        <button id="signup-btn" onclick={() => { Ura.navigate("/signup") }} >
+          <h4>Sign up</h4>
+        </button>
       </if>
 
     </div>

@@ -5,9 +5,12 @@ function Settings(props = {}) {
   const [getter, setter] = State(0);
 
   return render(() => (
-    <div className="settings">
+    <div className={`settings ${props.getShow() ? "" : "hidden"}`}>
+      <span className="close" onclick={() => props.setShow(!props.getShow())}>X</span>
       <div className="content">
-        <div className="img">ffff</div>
+        <div className="img">
+          <img src="/assets/profile.png" alt="" className="img" />
+        </div>
         <div className="card">
           <div className="infos">
             <input type="text" placeholder="First name" />

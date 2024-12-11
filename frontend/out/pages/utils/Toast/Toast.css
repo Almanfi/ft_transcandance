@@ -73,6 +73,10 @@ input:focus {
   opacity: 0.5;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 .utils-toast {
   position: absolute;
   left: 50%;

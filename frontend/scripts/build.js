@@ -7,6 +7,7 @@ import net from "net";
 import { logerror, loginfo } from "./debug.js";
 import updateStyles from "./load-css.js";
 
+
 const nginx = (port) => `# nginx/nginx.conf
 events {
   worker_connections 1024;
@@ -130,7 +131,7 @@ try {
   parse_config_file();
   SET("TYPE", "build");
 
-  let port = getAvailablePort(GET("PORT"));
+  let port = getAvailablePort(config.port);
   console.log("available port", port);
 
   ["./docker/app", "./docker/nginx"].map((subDir) => {

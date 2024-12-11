@@ -1,5 +1,6 @@
 @use "../../main.scss" as global;
 
+$red0: var(--red0);
 $white: var(--blue0);
 $blue: var(--blue3);
 
@@ -11,6 +12,7 @@ $blue: var(--blue3);
 
   position: fixed;
   top: 0;
+  gap: 40px;
 
   img{
     height: 100%;
@@ -21,7 +23,22 @@ $blue: var(--blue3);
     display: flex;
     align-items: center;
     cursor: pointer;
+    
+    span{
+      display: flex;
+      // justify-content: center;
+      align-items: center;
+    }
   }
+  input {
+    flex: 1;
+    border: none;
+    padding: 10px 10px;
+    background-color: transparent;
+    // font-weight: bold;
+    font-size: 18px;
+  }
+
   if {
     // background-color: red;
     display: flex;

@@ -26,6 +26,7 @@ button {
   outline: none;
   border: none;
   -webkit-transition: all 0.4s ease;
+  // transition: color 0.8s ease-in-out, box-shadow 0.6s ease-in-out;
 }
 
 h1 {
@@ -90,4 +91,8 @@ input:focus {
 .is-error::placeholder {
   color: red;
   opacity: 0.5;
+}
+
+.hidden {
+  visibility: hidden;
 }

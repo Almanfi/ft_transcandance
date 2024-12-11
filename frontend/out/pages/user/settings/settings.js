@@ -2,9 +2,11 @@ import Ura from 'ura';
 function Settings(props = {}) {
     const [render, State] = Ura.init();
     const [getter, setter] = State(0);
-    return render(() => (Ura.e("div", { className: "settings" },
+    return render(() => (Ura.e("div", { className: `settings ${props.getShow() ? "" : "hidden"}` },
+        Ura.e("span", { className: "close", onclick: () => props.setShow(!props.getShow()) }, "X"),
         Ura.e("div", { className: "content" },
-            Ura.e("div", { className: "img" }, "ffff"),
+            Ura.e("div", { className: "img" },
+                Ura.e("img", { src: "/assets/profile.png", alt: "", className: "img" })),
             Ura.e("div", { className: "card" },
                 Ura.e("div", { className: "infos" },
                     Ura.e("input", { type: "text", placeholder: "First name" }),
