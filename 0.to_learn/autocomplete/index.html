@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autocomplete</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h2>Autocomplete</h2>
+    <p>Start typing:</p>
+    <form autocomplete="off" action="/action_page.php">
+      <div class="autocomplete" style="width: 300px;">
+        <input id="myInput" type="text" name="myCountry" placeholder="Country" />
+      </div>
+      <input type="submit" />
+      <div id="div"></div>
+    </form>
+    <script src="index.js"></script>
+  </body>
+</html>

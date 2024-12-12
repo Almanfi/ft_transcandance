@@ -82,8 +82,8 @@ function User() {
                     {/* <img src={e.src} /> */}
                     <h4>{e.title}</h4>
                   </div>
-                  <div className="bottom">
-                    <span>chat</span>
+                  <div className="down">
+                    <span onclick={() => Ura.navigate("/chat")} >chat</span>
                     <span>play</span>
                   </div>
                 </div>

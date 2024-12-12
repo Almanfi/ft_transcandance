@@ -79,8 +79,8 @@ function User() {
                     Ura.e("div", { className: "content" },
                         Ura.e("div", { className: "up" },
                             Ura.e("h4", null, e.title)),
-                        Ura.e("div", { className: "bottom" },
-                            Ura.e("span", null, "chat"),
+                        Ura.e("div", { className: "down" },
+                            Ura.e("span", { onclick: () => Ura.navigate("/chat") }, "chat"),
                             Ura.e("span", null, "play")))))))))));
 }
 export default User;

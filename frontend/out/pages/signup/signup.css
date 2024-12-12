@@ -86,6 +86,7 @@ input:focus {
   display: flex;
   background-color: var(--red0);
   color: var(--black4);
+  margin-top: 50px;
 }
 .signup #center {
   flex: 2;
