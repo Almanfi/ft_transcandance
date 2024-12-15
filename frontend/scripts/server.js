@@ -133,14 +133,13 @@ async function createServer() {
       notifyClient(message);
     }
   });
-// /home/mhrima/Desktop/ft_transcandance/frontend/src/pages/main.js
-// /home/mhrima/Desktop/ft_transcandance/frontend/src/pages/main.js
 
   watch_path(source, ["unlink", "unlinkDir"], (pathname, event) => {
     handleDelete(pathname);
     updateRoutes();
     notifyClient();
   });
+  
   watch_path(source, ["unlink", "unlinkDir"], (pathname, event) => {
     // if (event) {
     handleDelete(pathname);

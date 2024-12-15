@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { root, SET, GET, parse_config_file, updateRoutes } from "./utils.js";
+import { root, config, parse_config_file, updateRoutes } from "./utils.js";
 import { mkdirSync, writeFileSync, existsSync, readdirSync, copyFileSync } from "fs";
 import { join ,relative} from "path";
 import net from "net";
@@ -128,8 +128,8 @@ function copyDir(src, dest) {
 }
 
 try {
-  parse_config_file();
-  SET("TYPE", "build");
+  // parse_config_file();
+  // SET("TYPE", "build");
 
   let port = getAvailablePort(config.port);
   console.log("available port", port);
@@ -154,7 +154,7 @@ try {
 
   copyDir(join(root, "./out"), join(root, "./docker/app"))
 
-  SET("TYPE", "dev");
+  // SET("TYPE", "dev");
 } catch (error) {
   logerror("Error", error)
 }

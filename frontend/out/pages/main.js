@@ -42,6 +42,7 @@ Ura.setStyles([
     "./pages/utils/Award/Award.css",
     "./pages/utils/Navbar/Navbar.css",
     "./pages/utils/Toast/Toast.css",
-    "./pages/chat/chat.css"
+    "./pages/chat/chat.css",
+    "./pages/chat/new/new.css",
 ]);
 Ura.start();

@@ -1,0 +1,254 @@
+/* Small screens (e.g., smartphones) */
+/* Medium screens (e.g., tablets) */
+/* Large screens (e.g., desktops) */
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+button {
+  cursor: pointer;
+  outline: none;
+  border: none;
+  -webkit-transition: all 0.4s ease;
+}
+
+h1 {
+  font-size: 60px;
+}
+
+h2 {
+  font-size: 40px;
+}
+
+h3 {
+  font-size: 30px;
+}
+
+h4 {
+  font-size: 14px;
+  font-weight: 100;
+}
+
+input:focus {
+  outline: none;
+}
+
+:root {
+  --red0: #fcf6f3;
+  --red1: #febc9a;
+  --red2: #fe7934;
+  --red3: #fe5701;
+  --red4: #cb4601;
+  --blue0: #fafcfe;
+  --blue1: #a3d0f5;
+  --blue2: #46a0ec;
+  --blue3: #1888e7;
+  --blue4: #136db9;
+  --black0: #999999;
+  --black1: #666666;
+  --black2: #4d4d4d;
+  --black3: #333333;
+  --black4: #1a1a1a;
+  --error: red;
+}
+
+.is-error {
+  color: red !important;
+  border-color: red !important;
+}
+
+.is-error::placeholder {
+  color: red;
+  opacity: 0.5;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.friend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--red0);
+}
+.friend .navbar {
+  z-index: 1;
+}
+.friend #center {
+  background-image: url("/assets/background.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.friend #center .user-card {
+  cursor: pointer;
+  width: 30%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.friend #center .user-card img {
+  position: absolute;
+  bottom: -30%;
+  width: 100%;
+  max-width: 250px;
+  border-radius: 15px;
+  border: 2px solid var(--blue4);
+}
+.friend #center .user-card h3 {
+  position: absolute;
+  bottom: -40%;
+}
+.friend #bottom {
+  flex: 2;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  text-align: center;
+}
+.friend #bottom #games {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.friend #bottom #games h4 {
+  font-weight: bold;
+}
+.friend #bottom #games #history {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-left: 1px solid var(--blue4);
+  border-right: 1px solid var(--blue4);
+}
+.friend #bottom #games #history #title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-size: 20px;
+}
+.friend #bottom #games #history #title svg {
+  width: 20px;
+  height: auto;
+}
+.friend #bottom #games #history .children {
+  display: flex;
+  flex-direction: row;
+}
+.friend #bottom #games #history .children .child {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-weight: bold;
+}
+.friend #bottom #games #history .children .child o {
+  color: var(--red2);
+}
+.friend #bottom #friends {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+.friend #bottom #friends .container {
+  display: flex;
+  max-height: 200px;
+}
+.friend #bottom #friends .container .carousel-btn {
+  width: 40px;
+  height: 200px;
+  position: absolute;
+  background-color: transparent;
+  color: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 1.5rem;
+  font-weight: bold;
+  user-select: none;
+  transition: background-color 1s ease;
+}
+.friend #bottom #friends .container .carousel-btn:hover {
+  background-color: rgb(255, 255, 255);
+  color: black;
+  transition: color 1s ease;
+}
+.friend #bottom #friends .container .right {
+  right: 0px; /* Adjust position from the right edge */
+}
+.friend #bottom #friends .container .center {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+.friend #bottom #friends .container .center .wrapper {
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+}
+.friend #bottom #friends .container .center .wrapper .inner {
+  display: flex;
+}
+.friend #bottom #friends .container .center .wrapper .inner .card {
+  display: flex;
+  justify-content: center;
+  border: 1px solid white;
+  width: 20vw;
+}
+.friend #bottom #friends .container .center .wrapper .inner .card .content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.friend #bottom #friends .container .center .wrapper .inner .card .content .up {
+  width: 100%;
+  flex: 3;
+}
+.friend #bottom #friends .container .center .wrapper .inner .card .content .up img {
+  width: 100px; /* Set a fixed width */
+  height: 100px; /* Ensure height matches the width */
+  border-radius: 50%; /* Makes the image a circle */
+  object-fit: cover; /* Ensures the image is cropped without distortion */
+  border: 2px solid #ccc; /* Optional: Add a border around the image */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for better aesthetics */
+}
+.friend #bottom #friends .container .center .wrapper .inner .card .content .bottom {
+  width: 100%;
+  flex: 1;
+  display: flex;
+}
+.friend #bottom #friends .container .center .wrapper .inner .card .content .bottom span {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid;
+}

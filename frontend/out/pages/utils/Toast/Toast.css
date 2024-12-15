@@ -26,6 +26,10 @@ button {
   -webkit-transition: all 0.4s ease;
 }
 
+textarea {
+  outline: none;
+}
+
 h1 {
   font-size: 60px;
 }

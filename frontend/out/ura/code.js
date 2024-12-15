@@ -358,7 +358,7 @@ function reconciliate(prev, next) {
 }
 let GlobalVDOM = null;
 function display(vdom) {
-    console.log("display ", vdom);
+    // console.log("display ", vdom);
     if (GlobalVDOM)
         reconciliate(GlobalVDOM, vdom);
     else {
@@ -454,11 +454,9 @@ function normalizePath(path) {
 }
 function refresh(params = {}) {
     let path = window.location.pathname || "/";
-    // console.log("call refresh", path);
     path = normalizePath(path);
     const RouteConfig = getRoute(path);
-    console.log("go to", path);
-    // let res = 
+    // console.log("go to", path);
     return display(Ura.e("root", null, 
     //@ts-ignore
     Ura.e(RouteConfig, { props: params.props })));
@@ -518,7 +516,7 @@ function setEventListeners() {
 }
 function handleCSSUpdate(filename) {
     const path = normalizePath("/" + filename);
-    console.log("css:", path);
+    // console.log("css:", path);
     let found = false;
     document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
         //@ts-ignore
@@ -535,7 +533,7 @@ function handleCSSUpdate(filename) {
         }
     });
     if (!found) {
-        console.log("CSS file not found in <link> tags. Adding it.");
+        // console.log("CSS file not found in <link> tags. Adding it.");
         loadCSS(path);
     }
 }
@@ -560,22 +558,6 @@ async function sync() {
                 //   } catch (error) {
                 //     console.error(`Error updating JavaScript file (${event.filename}):`, error);
                 //   }
-            }
-            else if (event.type === "json") {
-                try {
-                    const data = await loadRoutes();
-                    const { routes, styles, base, type } = data;
-                    if (routes)
-                        await loadJSFiles(routes, base);
-                    loadCSSFiles(styles);
-                    setEventListeners();
-                    Ura.refresh();
-                    // console.log("data2 :", data);
-                    console.log(Ura.Routes);
-                }
-                catch (error) {
-                    console.error("Error during JSON update:", error);
-                }
             }
         }
         else if (event.action === "reload") {

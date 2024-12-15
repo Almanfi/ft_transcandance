@@ -1,0 +1,224 @@
+@use "../../main.css" as global;
+
+/* Small screens (e.g., smartphones) */
+
+.navbar {
+  button{
+    background-color: transparent;
+  }
+}
+
+@media (max-width: 650px) {
+  .navbar {
+    /* background-color: red; */
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    z-index: 10;
+
+    /* position: fixed; */
+    position: absolute;
+    top: 0;
+    /* gap: 40px; */
+
+    & img {
+      height: 100%;
+    }
+
+    & #logo {
+      height: 50px;
+      display: flex;
+      margin:  0px 10px;
+      align-items: center;
+      cursor: pointer;
+
+      & span {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    & input {
+      flex: 4;
+      border: none;
+      /* padding: 10px 10px; */
+      background-color: transparent;
+      /* font-size: 18px; */
+    }
+
+    & .show-navbar{
+      /* visibility: collapse ; */
+      width: 30px;
+      flex: 1;
+    }
+
+    & if {
+      width: 100%;
+      flex: 1;
+      width: 50%;
+      position: absolute;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      top: 50px;
+
+      & button {
+        width: 100%;
+        padding: 20px;
+        border: 1px solid var(--red0);
+      }
+
+      & #login-btn,
+      & #signup-btn {
+        background-color: var(--blue3);
+        color: var(--blue0);
+      }
+    }
+    .toogle-bar-show{
+      display: block
+    };
+    .toogle-bar-hidden{
+      display: none
+    };
+  }
+}
+
+/* Medium screens (e.g., tablets) */
+@media (min-width: 651px) and (max-width: 1024px) {
+  .navbar {
+    /* background-color: blue; */
+    display: flex;
+    width: 100vw;
+
+    /* width: 100%; */
+    padding: 0px 10px;
+    /* position: fixed; */
+    position: absolute;
+    top: 0;
+    gap: 40px;
+
+    & img {
+      height: 100%;
+    }
+
+    & #logo {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+
+      & span {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    & input {
+      flex: 1;
+      border: none;
+      padding: 5px 5px;
+      background-color: transparent;
+      font-size: 18px;
+    }
+
+    & .show-navbar{
+      display: none;
+    }
+
+    & if {
+      display: flex;
+      gap: 10%;
+      padding: 10px 0;
+
+      & button {
+        flex: 1;
+        width: 80px;
+        border-radius: 8px;
+      }
+
+      & #login-btn {
+        background-color: var(--blue3);
+        color: var(--blue0);
+      }
+
+      & #signup-btn {
+        background-color: var(--blue0);
+        color: var(--blue3);
+        border: 1px solid var(--blue3);
+
+        &:hover {
+          border: 1px solid var(--blue3);
+        }
+      }
+    }
+  }
+}
+
+/* Large screens (e.g., desktops) */
+@media (min-width: 1025px) {
+  .navbar {
+    /* background-color: green; */
+    display: flex;
+    width: 100vw;
+    /* width: 100%; */
+    padding: 0px 10px;
+    position: absolute;
+    top: 0;
+    gap: 40px;
+
+    & img {
+      height: 100%;
+    }
+
+    & #logo {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+
+      & span {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    & input {
+      flex: 1;
+      border: none;
+      padding: 10px 10px;
+      background-color: transparent;
+      font-size: 18px;
+    }
+
+    & .show-navbar{
+      display: none;
+    }
+
+    & if {
+      display: flex;
+      gap: 10%;
+      padding: 10px 0;
+
+      & button {
+        flex: 1;
+        width: 80px;
+        border-radius: 8px;
+      }
+
+      & #login-btn {
+        background-color: var(--blue3);
+        color: var(--blue0);
+      }
+
+      & #signup-btn {
+        background-color: var(--blue0);
+        color: var(--blue3);
+        border: 1px solid var(--blue3);
+
+        &:hover {
+          border: 1px solid var(--blue3);
+        }
+      }
+    }
+  }
+}
