@@ -2,10 +2,9 @@ import Ura from 'ura';
 
 function Settings(props = {}) {
   const [render, State] = Ura.init();
-  const [getter, setter] = State(0);
 
   return render(() => (
-    <div className={`settings ${props.getShow() ? "" : "hidden"}`}>
+    <if cond={props.getShow()} className={`settings ${props.getShow() ? "" : "hidden"}`}>
       <span className="close" onclick={() => props.setShow(!props.getShow())}>X</span>
       <div className="content">
         <div className="img">
@@ -23,7 +22,7 @@ function Settings(props = {}) {
         </div>
         <button><b>Save</b></button>
       </div>
-    </div>
+    </if>
   ));
 }
 

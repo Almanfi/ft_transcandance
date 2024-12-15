@@ -1,33 +1,38 @@
-@use "../../main.scss" as global;
 
 $red0: var(--red0);
 
 .utils-toast {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);  /* Center horizontally */
-  top: -50px;  /* Initially above the viewport */
-  background-color: red;  /* Red background */
-  color: white;  /* White text color */
+  transform: translateX(-50%); /* Center horizontally */
+  top: -50px; /* Initially above the viewport */
+  background-color: red; /* Red background */
+  color: white; /* White text color */
   padding: 10px;
   border-radius: 5px;
-  opacity: 0;  /* Initially hidden */
-  animation: showToast 3s ease-in-out forwards;
-  display:  flex;
-  
+  opacity: 0; /* Initially hidden */
+  animation: showToast 5s ease-in-out forwards; /* Total 5s animation cycle */
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  min-width: 300px;
 }
 
 @keyframes showToast {
   0% {
-    top: -50px;
-    opacity: 0;
+    top: -50px; /* Start above the viewport */
+    opacity: 0; /* Hidden */
   }
-  50% {
-    top: 20px; 
-    opacity: 1; 
+  20% {
+    top: 60px; /* Move into view */
+    opacity: 1; /* Fully visible */
+  }
+  70% {
+    top: 60px; /* Stay in view */
+    opacity: 1; /* Fully visible (waits here for half of the cycle) */
   }
   100% {
-    top: -50px; 
-    opacity: 0;
+    top: -50px; /* Move back above the viewport */
+    opacity: 0; /* Hidden */
   }
 }

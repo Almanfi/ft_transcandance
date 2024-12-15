@@ -4,34 +4,21 @@ import Swords from '../utils/Swords/Swords.jsx';
 import WinCup from '../utils/WinCup/WinCup.jsx';
 import Award from '../utils/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
+import Play from '../utils/Play/Play.jsx';
+import Chat from '../utils/Chat/Chat.jsx';
+
 
 function User() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
 
   const [getList, setList] = State([
-    {
-      src: "/assets/003.png",
-      title: "Product Design 0", subtitle: "UI/UX, Design",
-    },
-    {
-      src: "/assets/003.png",
-      title: "Product Design 1", subtitle: "UI/UX, Design",
-    },
-    {
-      src: "/assets/003.png",
-      title: "Product Design 2", subtitle: "UI/UX, Design",
-    },
-    {
-      src: "/assets/003.png",
-      title: "Product Design 3", subtitle: "UI/UX, Design",
-    },
-    {
-      src: "/assets/003.png",
-      title: "Product Design 4", subtitle: "UI/UX, Design",
-    }
+    { src: "/assets/003.png", title: "user 0" },
+    { src: "/assets/003.png", title: "user 1" },
+    { src: "/assets/003.png", title: "user 2" },
+    { src: "/assets/003.png", title: "user 3" },
+    { src: "/assets/003.png", title: "user 4" }
   ]);
-  const [getValue, setValue] = State(0);
 
   return render(() => (
     <div className="user">
@@ -83,8 +70,8 @@ function User() {
                     <h4>{e.title}</h4>
                   </div>
                   <div className="down">
-                    <span onclick={() => Ura.navigate("/chat")} >chat</span>
-                    <span>play</span>
+                    <span onclick={() => Ura.navigate("/chat")} ><Chat/></span>
+                    <span><Play/></span>
                   </div>
                 </div>
               </div>

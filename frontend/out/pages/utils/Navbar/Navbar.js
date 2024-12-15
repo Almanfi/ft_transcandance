@@ -11,7 +11,7 @@ function Navbar() {
         Ura.e("input", { type: "text", placeholder: "Search.." }),
         Ura.e("button", { className: "show-navbar", onclick: handleClique },
             Ura.e(Menu, null)),
-        Ura.e("if", { cond: !Ura.store.get("user") || Ura.store.get("user"), className: `toogle-bar-${getShow() ? "show" : "hidden"}` },
+        Ura.e("div", { className: `toogle-bar-${getShow() ? "show" : "hidden"}` },
             Ura.e("button", { id: "login-btn", onclick: () => { Ura.navigate("/login"); } },
                 Ura.e("h4", null, "Login")),
             Ura.e("button", { id: "signup-btn", onclick: () => { Ura.navigate("/signup"); } },

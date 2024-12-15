@@ -1,14 +1,14 @@
 import Ura from 'ura';
 import Navbar from '../utils/Navbar/Navbar.js';
 import { conversationGroups } from './convs.js';
-import New from './new/new.js';
+import New from './create/create.jsx';
 
 function Chat(props = {}) {
   const [render, State] = Ura.init();
 
   const [getIndex, setIndex] = State(-1);
   const [getGroup, setGroup] = State(conversationGroups)
-  const [getConv, setConv] = State(getGroup()[5].conversation);
+  const [getConv, setConv] = State([]);
 
   const handle = (e, i)=>{
     setConv(e.conversation);

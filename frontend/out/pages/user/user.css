@@ -5,13 +5,8 @@
   width: 100%;
   height: 100%;
   background-color: var(--red0);
-  margin-top: 50px;
 
-  & .navbar {
-    /* Placeholder for navbar styles */
-  }
-
-  & #center {
+  #center {
     background: no-repeat center/cover;
     width: 100%;
     flex: 1;
@@ -20,7 +15,7 @@
     position: relative;
     margin-top: 60px;
 
-    & .user-card {
+    .user-card {
       cursor: pointer;
       /* width: 30%; */
       display: flex;
@@ -29,7 +24,7 @@
       align-items: center;
       width: 100%;
 
-      .img-container{
+      .img-container {
         flex: 1;
         display: flex;
         justify-content: center;
@@ -43,7 +38,7 @@
       }
       /* For screens 620px and up */
       @media (min-width: 620px) {
-        & img {
+        img {
           bottom: -30%;
           width: 100%;
           max-width: 250px;
@@ -54,7 +49,7 @@
 
       /* For screens smaller than 620px */
       @media (max-width: 620px) {
-        & img {
+        img {
           /* position: absolute; */
           /* width: 30vw; */
           max-width: 30vw;
@@ -67,14 +62,14 @@
 
     /* For screens 620px and up */
     @media (min-width: 620px) {
-      & .user-card{
+      .user-card {
         flex-direction: column;
       }
     }
 
     /* For screens smaller than 620px */
     @media (max-width: 620px) {
-      & .user-card {
+      .user-card {
         flex-direction: row;
       }
     }
@@ -82,71 +77,71 @@
 
   /* For screens 620px and up */
   @media (min-width: 620px) {
-    & #bottom {
+    #bottom {
       flex: 2;
     }
   }
 
   /* For screens smaller than 620px */
   @media (max-width: 620px) {
-    & #bottom {
+    #bottom {
       flex: 4;
     }
   }
 
-  & #bottom {
+  #bottom {
     display: flex;
     width: 100%;
     flex-direction: column;
     text-align: center;
 
     @media (max-width: 620px) {
-      & #games {
+      #games {
         flex-direction: column;
       }
     }
 
-    & #games {
+    #games {
       flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
 
-      & h4 {
+      h4 {
         font-weight: bold;
       }
 
-      & #history {
+      #history {
         flex: 1;
         display: flex;
         flex-direction: column;
         gap: 10px;
         /* border-inline: 1px solid var(--blue4); */
 
-        & #title {
+        #title {
           display: flex;
           justify-content: center;
           align-items: center;
           gap: 5px;
           font-size: 20px;
 
-          & svg {
+          svg {
             width: 20px;
             height: auto;
           }
         }
 
-        & .children {
+        .children {
           display: flex;
 
-          & .child {
+          .child {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 10px;
             font-weight: bold;
 
-            & o {
+            o {
               color: var(--red2);
             }
           }
@@ -154,93 +149,100 @@
       }
     }
 
-    & #friends {
+    #friends {
       flex: 1;
       display: flex;
 
       @media (min-width: 500px) and (max-width: 1024px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(2, 1fr);
         }
       }
 
       @media (min-width: 750px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(3, 1fr);
         }
       }
 
       @media (min-width: 1000px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(4, 1fr);
         }
       }
 
       @media (min-width: 1250px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(5, 1fr);
         }
       }
 
       @media (min-width: 1500px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(6, 1fr);
         }
       }
 
       @media (min-width: 1750px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(7, 1fr);
         }
       }
 
       @media (min-width: 2000px) {
-        & .inner {
+        .inner {
           grid-template-columns: repeat(8, 1fr);
         }
       }
 
-      & .inner {
+      .inner {
         flex: 1;
-        background-color: red;
+        /* background-color: red; */
         display: grid;
 
-        & .card {
+        .card {
           display: flex;
           justify-content: center;
           border: 1px solid white;
           max-height: 150px;
-          & .content {
+          .content {
             display: flex;
             flex-direction: column;
             align-items: center;
+            border: 1px solid black;
 
-            & .up {
+            .up {
               width: 100%;
               flex: 3;
+              display: flex;
+              justify-content: center;
+              align-items: center;
 
-              & img {
+              img {
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
                 object-fit: cover;
-                border: 2px solid #ccc;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                /* border: 1px solid #ccc; */
+                /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
               }
             }
 
-            & .down {
+            .down {
               width: 100%;
               flex: 1;
               display: flex;
 
-              & span {
+              span {
                 flex: 1;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 border: 1px solid;
                 cursor: pointer;
+                svg {
+                  width: 20%;
+                }
               }
             }
           }

@@ -1,6 +1,6 @@
 import Ura from 'ura';
 
-function New(props = {}) {
+function Create(props = {}) {
   const [render, State] = Ura.init();
 
   return render(() => (
@@ -13,4 +13,4 @@ function New(props = {}) {
   ));
 }
 
-export default New;
+export default Create;

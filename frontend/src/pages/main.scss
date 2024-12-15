@@ -1,13 +1,63 @@
 /* Small screens (e.g., smartphones) */
 @media (max-width: 600px) {
+  h1 {
+    font-size: 32px;
+  }
+  
+  h2 {
+    font-size: 40px;
+  }
+  
+  h3 {
+    font-size: 20px;
+  }
+  
+  h4 {
+    font-size: 14px;
+    font-weight: 100;
+  }
 }
 
 /* Medium screens (e.g., tablets) */
 @media (min-width: 601px) and (max-width: 1024px) {
+  h1 {
+    font-size: 60px;
+  }
+  
+  h2 {
+    font-size: 40px;
+  }
+  
+  h3 {
+    font-size: 30px;
+  }
+  
+  h4 {
+    font-size: 14px;
+    font-weight: 100;
+  }
+  
 }
 
 /* Large screens (e.g., desktops) */
 @media (min-width: 1025px) {
+  h1 {
+    font-size: 60px;
+  }
+  
+  h2 {
+    font-size: 40px;
+  }
+  
+  h3 {
+    font-size: 30px;
+  }
+  
+  h4 {
+    font-size: 14px;
+    font-weight: 100;
+  }
+  
 }
 
 * {
@@ -44,22 +94,6 @@ textarea{
   outline: none;
 }
 
-h1 {
-  font-size: 60px;
-}
-
-h2 {
-  font-size: 40px;
-}
-
-h3 {
-  font-size: 30px;
-}
-
-h4 {
-  font-size: 14px;
-  font-weight: 100;
-}
 
 input:focus {
   outline: none;

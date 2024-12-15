@@ -13,14 +13,14 @@ function Navbar() {
       </div>
       <input type="text" placeholder="Search.." />
       <button className="show-navbar" onclick={handleClique}><Menu/></button>
-      <if cond={!Ura.store.get("user") || Ura.store.get("user")} className={`toogle-bar-${getShow() ? "show" : "hidden"}`}>
+      <div className={`toogle-bar-${getShow() ? "show" : "hidden"}`}>
         <button id="login-btn" onclick={() => { Ura.navigate("/login") }} >
           <h4>Login</h4>
         </button>
         <button id="signup-btn" onclick={() => { Ura.navigate("/signup") }} >
           <h4>Sign up</h4>
         </button>
-      </if>
+      </div>
 
     </div>
   ));

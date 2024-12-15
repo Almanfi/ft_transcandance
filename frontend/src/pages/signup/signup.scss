@@ -1,4 +1,14 @@
-@use "../main.scss" as global;
+
+@mixin button-styles($color0, $color1) {
+  color: $color0;
+  background-color: $color1;
+  border: 1px solid $color0;
+  &:hover {
+    color: $color1;
+    background-color: $color0;
+    border: 1px solid $color0;
+  }
+}
 
 $red0: var(--red0);
 $red2: var(--red2);
@@ -15,7 +25,6 @@ $black4: var(--black4);
   display: flex;
   background-color: $red0;
   color: var(--black4);
-  margin-top: 50px;
 
   #center {
     flex: 2;
@@ -80,7 +89,7 @@ $black4: var(--black4);
         justify-content: center;
         align-items: center;
         button {
-          @include global.button-styles($red4, transparent);
+          @include button-styles($red4, transparent);
           padding: 15px;
           border-radius: 10px;
           svg path {

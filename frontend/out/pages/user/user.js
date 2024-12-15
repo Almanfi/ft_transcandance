@@ -4,32 +4,18 @@ import Swords from '../utils/Swords/Swords.jsx';
 import WinCup from '../utils/WinCup/WinCup.jsx';
 import Award from '../utils/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
+import Play from '../utils/Play/Play.jsx';
+import Chat from '../utils/Chat/Chat.jsx';
 function User() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);
     const [getList, setList] = State([
-        {
-            src: "/assets/003.png",
-            title: "Product Design 0", subtitle: "UI/UX, Design",
-        },
-        {
-            src: "/assets/003.png",
-            title: "Product Design 1", subtitle: "UI/UX, Design",
-        },
-        {
-            src: "/assets/003.png",
-            title: "Product Design 2", subtitle: "UI/UX, Design",
-        },
-        {
-            src: "/assets/003.png",
-            title: "Product Design 3", subtitle: "UI/UX, Design",
-        },
-        {
-            src: "/assets/003.png",
-            title: "Product Design 4", subtitle: "UI/UX, Design",
-        }
+        { src: "/assets/003.png", title: "user 0" },
+        { src: "/assets/003.png", title: "user 1" },
+        { src: "/assets/003.png", title: "user 2" },
+        { src: "/assets/003.png", title: "user 3" },
+        { src: "/assets/003.png", title: "user 4" }
     ]);
-    const [getValue, setValue] = State(0);
     return render(() => (Ura.e("div", { className: "user" },
         Ura.e(Navbar, null),
         Ura.e(Settings, { getShow: getShow, setShow: setShow }),
@@ -80,7 +66,9 @@ function User() {
                         Ura.e("div", { className: "up" },
                             Ura.e("h4", null, e.title)),
                         Ura.e("div", { className: "down" },
-                            Ura.e("span", { onclick: () => Ura.navigate("/chat") }, "chat"),
-                            Ura.e("span", null, "play")))))))))));
+                            Ura.e("span", { onclick: () => Ura.navigate("/chat") },
+                                Ura.e(Chat, null)),
+                            Ura.e("span", null,
+                                Ura.e(Play, null))))))))))));
 }
 export default User;

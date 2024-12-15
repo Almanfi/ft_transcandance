@@ -1,8 +1,7 @@
 import Ura from 'ura';
 function Settings(props = {}) {
     const [render, State] = Ura.init();
-    const [getter, setter] = State(0);
-    return render(() => (Ura.e("div", { className: `settings ${props.getShow() ? "" : "hidden"}` },
+    return render(() => (Ura.e("if", { cond: props.getShow(), className: `settings ${props.getShow() ? "" : "hidden"}` },
         Ura.e("span", { className: "close", onclick: () => props.setShow(!props.getShow()) }, "X"),
         Ura.e("div", { className: "content" },
             Ura.e("div", { className: "img" },

@@ -1,63 +1,99 @@
 import Ura from "ura";
-import Navbar from "../utils/Navbar/Navbar.jsx";
-import Arrow from "../utils/Arrow/Arrow.jsx";
-
-
-async function logUser(data) {
-  try {
-    const response = await fetch(`${API_URL}:8000/users/login/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-      credentials: "include"
-    });
-    const cookieHeader = document.cookie.split("; ");
-    console.log("Cookies from response headers:", cookieHeader);
-  } catch (error) {
-    console.error(error.message)
-  }
-}
+import Navbar from "../utils/Navbar/Navbar.js";
+import Arrow from "../utils/Arrow/Arrow.js";
+import Input from "../utils/Input/Input.js";
+import Toast from "../utils/Toast/Toast.js";
 
 function Login() {
   const [render, State] = Ura.init();
+  const [getError, setError] = State([]);
 
-  const setUser = () => {
-    Ura.store.set("user", { name: "mohammed" })
-    Ura.navigate("/user")
-  }
-    return render(() => (
-      <div className="login">
-        <Navbar />
+  const logUser = async (e) => {
+    e.preventDefault();
+    const inputSection = document.querySelector(".login #center #input-section");
+    const inputs = inputSection.querySelectorAll("input");
+    const data = {};
+
+    inputs.forEach((input) => {
+      data[input.name] = input.value;
+    });
+
+    if (!data.username || !data.password) {
+      setError(["username", "password"]);
+      console.error("Username and password are required");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/users/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+  
+      if (response.ok) {
+        console.log("Login successful", response);
+        setError([]);
+        Ura.navigate("/home");
+      } else {
+        const res = await response.json();
+        if (res.message) {
+          setError([res.message]);
+        } else {
+          let arr = [];
+          Object.keys(res).forEach((key) => {
+            if (typeof res[key] === "string") arr.push(res[key]);
+            else arr.push(key);
+          });
+          setError([]);
+          setError(arr);
+        }
+      }
+    } catch (error) {
+      console.error("Error logging in:", error.message);
+      setError([error.message]);
+    }
+  };
+
+  return render(() => (
+    <>
+      <Navbar />
+      <form className="login" onsubmit={logUser}>
         <div id="center">
+          <div style={{ position: "absolute", top: "20px" }}>
+            <loop on={getError()}>
+              {(e, index) => <Toast message={`Invalid ${e}`} delay={index * 1} />}
+            </loop>
+          </div>
+
           <div id="card">
             <h3 id="title">Login</h3>
             <div id="input-section">
-              <input type="text" placeholder={"Username"} />
-              <input type="password" placeholder={"Password"} />
-
+              <Input
+                name="username"
+                value="Username"
+                isError={getError().includes("username")}
+              />
+              <Input
+                name="password"
+                value="Password"
+                isError={getError().includes("password")}
+              />
             </div>
             <div id={"button-section"}>
-              <button id={"btn"}>
+              <button id="btn" type="submit">
                 <Arrow />
               </button>
             </div>
-            <h4
-              id="signin"
-              onclick={() => {
-                Ura.navigate("/signup");
-              }}
-            >
-              Don't have an account ?
-            </h4>
+            <h4 id="signin" onclick={() => Ura.navigate("/signup")}>Don't have an account?</h4>
           </div>
-          <button onclick={setUser}>
-            set user
-          </button>
         </div>
-      </div>
-    ));
+      </form>
+    </>
+  ));
 }
 
 export default Login;
