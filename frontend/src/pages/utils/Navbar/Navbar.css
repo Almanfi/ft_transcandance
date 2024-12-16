@@ -24,10 +24,10 @@
     }
 
     #logo {
-     display: none;
+      display: none;
     }
 
-    & input {
+    input {
       flex: 4;
       border: none;
       padding: 10px 10px;
@@ -35,13 +35,13 @@
       /* font-size: 18px; */
     }
 
-    & .show-navbar {
+    .show-navbar {
       /* visibility: collapse ; */
       width: 30px;
       flex: 1;
     }
 
-    & div {
+    div {
       width: 100%;
       flex: 1;
       max-width: 280px;
@@ -52,14 +52,14 @@
       flex-direction: column;
       /* top: 50px; */
 
-      & button {
+      button {
         width: 100%;
         padding: 20px;
         border: 1px solid var(--red0);
       }
 
-      & #login-btn,
-      & #signup-btn {
+      #login-btn,
+      #signup-btn {
         background-color: var(--blue3);
         color: var(--blue0);
       }
@@ -71,7 +71,7 @@
       position: absolute;
       transition: right 1.2s ease-out;
     }
-    
+
     .toogle-bar-hidden {
       top: 50px;
       right: -300px;
@@ -96,23 +96,23 @@
     top: 0;
     gap: 40px;
 
-    & img {
+    img {
       height: 100%;
     }
 
-    & #logo {
+    #logo {
       height: 50px;
       display: flex;
       align-items: center;
       cursor: pointer;
 
-      & span {
+      span {
         display: flex;
         align-items: center;
       }
     }
 
-    & input {
+    input {
       flex: 1;
       border: none;
       padding: 5px 5px;
@@ -120,32 +120,51 @@
       font-size: 18px;
     }
 
-    & .show-navbar {
+    .show-navbar {
       display: none;
     }
 
-    & div {
+    .search-loop{
+      left: 150px;
+      top: 50px;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+
+      div{
+        flex: 1;
+        width: 400px;
+        background-color: antiquewhite;
+        display: flex;
+        align-items: center;
+        padding: 5px 10px;
+        border: 1px solid burlywood;
+      }
+    }
+
+
+    div {
       display: flex;
       gap: 10%;
       padding: 10px 0;
 
-      & button {
+      button {
         flex: 1;
         width: 80px;
         border-radius: 8px;
       }
 
-      & #login-btn {
+      #login-btn {
         background-color: var(--blue3);
         color: var(--blue0);
       }
 
-      & #signup-btn {
+      #signup-btn {
         background-color: var(--blue0);
         color: var(--blue3);
         border: 1px solid var(--blue3);
 
-        &:hover {
+        :hover {
           border: 1px solid var(--blue3);
         }
       }
@@ -165,23 +184,23 @@
     top: 0;
     gap: 40px;
 
-    & img {
+    img {
       height: 100%;
     }
 
-    & #logo {
+    #logo {
       height: 50px;
       display: flex;
       align-items: center;
       cursor: pointer;
 
-      & span {
+      span {
         display: flex;
         align-items: center;
       }
     }
 
-    & input {
+    input {
       flex: 1;
       border: none;
       padding: 10px 10px;
@@ -189,32 +208,32 @@
       font-size: 18px;
     }
 
-    & .show-navbar {
+    .show-navbar {
       display: none;
     }
 
-    & div {
+    div {
       display: flex;
       gap: 10%;
       padding: 10px 0;
 
-      & button {
+      button {
         flex: 1;
         width: 80px;
         border-radius: 8px;
       }
 
-      & #login-btn {
+      #login-btn {
         background-color: var(--blue3);
         color: var(--blue0);
       }
 
-      & #signup-btn {
+      #signup-btn {
         background-color: var(--blue0);
         color: var(--blue3);
         border: 1px solid var(--blue3);
 
-        &:hover {
+        :hover {
           border: 1px solid var(--blue3);
         }
       }

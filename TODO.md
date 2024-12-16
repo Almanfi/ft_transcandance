@@ -10,6 +10,7 @@
         [ ] use intra
         [ ] Google auth
     [ ] user page
+    [ ] friend page
     [ ] game page
     [ ] matches page
     [ ] user setting page

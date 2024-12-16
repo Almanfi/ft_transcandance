@@ -7,7 +7,6 @@ import Settings from './settings/settings.jsx';
 import Play from '../utils/Play/Play.jsx';
 import Chat from '../utils/Chat/Chat.jsx';
 
-
 function User() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
@@ -35,38 +34,24 @@ function User() {
         </div>
       </div>
       <div id="bottom">
-
-        <div id="games">
-          <div id="history">
-            <h4 id="title"><Swords />Games</h4>
-            <div className="children">
-              <div className="child"><o>42%</o><h4>Pongers</h4></div>
-              <div className="child"><o>42%</o><h4>Pongers</h4></div>
-            </div>
-          </div>
-          <div id="history">
-            <h4 id="title"><Award /> Winrate</h4>
-            <div className="children">
-              <div className="child"><o>42%</o><h4>Pongers</h4></div>
-              <div className="child"><o>42%</o><h4>Pongers</h4></div>
-            </div>
-          </div>
-          <div id="history">
-            <h4 id="title"><WinCup /> Tournaments</h4>
-            <div className="children">
-              <div className="child"><o>42%</o><h4>Pongers</h4></div>
-              <div className="child"><o>42%</o><h4>Pongers</h4></div>
-            </div>
-          </div>
-        </div>
-
+          <loop on={[Swords, Award, WinCup]} id="games">
+            {(Elem)=>(
+              <div id="history">
+              <h4 id="title"><Elem />Games</h4>
+              <div className="children">
+                <div className="child"><o>42%</o><h4>Pongers</h4></div>
+                <div className="child"><o>42%</o><h4>Pongers</h4></div>
+              </div>
+            </div>              
+            )}
+          </loop>
         <div id="friends">
           <loop className="inner" on={getList()}>
             {(e, i) => (
               <div className="card" key={i}>
                 <div className="content">
                   <div className="up">
-                    {/* <img src={e.src} /> */}
+                    <img src={e.src} />
                     <h4>{e.title}</h4>
                   </div>
                   <div className="down">

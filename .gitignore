@@ -4,3 +4,4 @@ __pycache__/
 devenv/
 .env
 */out/
+/frontend/out/
