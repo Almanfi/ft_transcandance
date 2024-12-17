@@ -469,7 +469,7 @@ function refresh(params = {}) {
     <root >
       {
         //@ts-ignore
-        <RouteConfig props={params.props} />
+        <RouteConfig props={params} />
       }
     </root>
   );
@@ -483,7 +483,7 @@ function navigate(route, params = {}) {
   console.log("navigate to", route, "with", params);
 
   window.history.pushState({}, "", `${route}`);
-  refresh();
+  refresh(params);
 }
 
 // loadfiles

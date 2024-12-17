@@ -24,6 +24,7 @@ import signup from "./signup/signup.js";
 import test from "./test/test.js";
 import user from "./user/user.js";
 import Chat from "./chat/chat.jsx";
+import Live from "./live/live.jsx";
 
 Ura.setRoutes({
   "*": home,
@@ -32,7 +33,8 @@ Ura.setRoutes({
   "/signup": signup,
   "/test": test,
   "/user": user,
-  "/chat": Chat
+  "/chat": Chat,
+  "/live": Live
 });
 
 Ura.setStyles([
@@ -48,6 +50,7 @@ Ura.setStyles([
   "./pages/utils/Toast/Toast.css",
   "./pages/chat/chat.css",
   "./pages/chat/new/new.css",
+  "./pages/live/live.css"
 ]);
 
 Ura.start();
