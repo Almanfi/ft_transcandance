@@ -61,24 +61,26 @@ services:
       - redis
     networks:
       - pong
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
     container_name: django
     restart: always
-  # nginx:
-  #   build:
-  #     context: ./nginx
-  #     dockerfile: Dockerfile
-  #   image: nginx:pong
-  #   networks:
-  #     - pong
-  #   ports:
-  #     - "8000:443"
-  #     - "8001:80"
-  #   depends_on:
-  #     - django
-  #   container_name: nginx
-  #   restart: always
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    volumes:
+      - nginx_volume:/src
+    image: nginx:pong
+    networks:
+      - pong
+    ports:
+      - "8000:443"
+      - "8001:80"
+    depends_on:
+      - django
+    container_name: nginx
+    restart: always
 
 networks:
   pong:
@@ -89,6 +91,13 @@ volumes:
   redis_volume:
   postgres_volume:
   pgadmin_volume:
+  nginx_volume:
+    name: nginx_volume
+    driver: local
+    driver_opts:
+      type: none
+      device: ./nginx/src
+      o: bind
   django_volume:
     name: django_volume
     driver: local

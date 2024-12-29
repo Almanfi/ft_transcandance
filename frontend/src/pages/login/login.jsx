@@ -3,6 +3,45 @@ import Navbar from "../utils/Navbar/Navbar.js";
 import Arrow from "../utils/Arrow/Arrow.js";
 import Input from "../utils/Input/Input.js";
 import Toast from "../utils/Toast/Toast.js";
+import { send } from "../api.js";
+import { users } from "../tests.js";
+
+console.log(document.cookie);
+
+const logUser0 = async () => {
+  // e.preventDefault();
+  try {
+    const response = await send("users/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(users[0]),
+      credentials: "include", // Include credentials for cookies
+    });
+
+    console.log("Response Headers:");
+    for (let [key, value] of response.headers.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Response Body:");
+      console.log(data);
+      console.log("Cookies:", document.cookie); // Note: Only non-HttpOnly cookies appear
+    } else {
+      console.log("User failed to log in");
+      const errorText = await response.text();
+      console.log("Response Body (Error):");
+      console.log(errorText);
+    }
+  } catch (error) {
+    console.error("Error during request:", error);
+  }
+};
+
+// logUser0();
 
 function Login() {
   const [render, State] = Ura.init();
@@ -25,15 +64,15 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/users/login/", {
+      const response = await send("users/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-        credentials: "include",
+        // credentials: "include",
       });
-  
+
       if (response.ok) {
         console.log("Login successful", response);
         setError([]);
@@ -57,11 +96,46 @@ function Login() {
       setError([error.message]);
     }
   };
+  const logUser0 = async (e) => {
+    e.preventDefault();
+    console.log("hello");
+    
+    document.cookie = "username=John-Doe";
+    try {
+      const response = await send("users/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(users[0]),
+        credentials: "include", // Include credentials for cookies
+      });
+  
+      console.log("Response Headers:");
+      for (let [key, value] of response.headers.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Response Body:");
+        console.log(data);
+        console.log("Cookies:", document.cookie); // Note: Only non-HttpOnly cookies appear
+      } else {
+        console.log("User failed to log in");
+        const errorText = await response.text();
+        console.log("Response Body (Error):");
+        console.log(errorText);
+      }
+    } catch (error) {
+      console.error("Error during request:", error);
+    }
+  };
 
   return render(() => (
     <>
       <Navbar />
-      <form className="login" onsubmit={logUser}>
+      <form className="login" onsubmit={logUser0}>
         <div id="center">
           <div style={{ position: "absolute", top: "20px" }}>
             <loop on={getError()}>

@@ -11,6 +11,8 @@ import {
 import { logerror, loginfo, logmsg } from "./debug.js";
 import { WebSocketServer, WebSocket } from "ws";
 import updateStyles from "./load-css.js";
+import https from "https";
+import fs from "fs"; // To read SSL certificates
 
 await import("../ura.config.js");
 
@@ -43,7 +45,12 @@ async function getAvailablePort(port) {
 async function createServer() {
   let port = await getAvailablePort(config.port);
 
-  let server = http.createServer((req, res) => {
+  const options = {
+    key: fs.readFileSync(join(root, "./clashers.key")), // Replace with the correct path to your private key
+    cert: fs.readFileSync(join(root, "./clashers.crt")), // Replace with the correct path to your certificate
+  };
+
+  let server = https.createServer(options, (req, res) => {
     let uri = req.url.split("?")[0];
 
     if (uri === "/") uri = join(root, "index.html");
@@ -139,7 +146,7 @@ async function createServer() {
     updateRoutes();
     notifyClient();
   });
-  
+
   watch_path(source, ["unlink", "unlinkDir"], (pathname, event) => {
     // if (event) {
     handleDelete(pathname);
