@@ -43,7 +43,7 @@ class UserInfo(ViewSet):
 			user["profile_picture"] = user_image_route(user["profile_picture"])
 		return Response(serialized_users.data, status=status.HTTP_200_OK)
 
-	@action(['get'], True)
+	@action(['post'], True)
 	def search_users(self, request):
 		if not 'search_term' in request.data or request.data['search_term'] == "":
 			return Response({"message": "No search term given", "error_code": 110}, status= status.HTTP_400_BAD_REQUEST)

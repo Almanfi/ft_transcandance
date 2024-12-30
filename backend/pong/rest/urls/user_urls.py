@@ -12,7 +12,7 @@ urlpatterns = [
         name='user_crud'
     ),
 	path('search/', UserInfo.as_view({
-		'get': 'search_users'
+		'post': 'search_users'
 	})),
     path('login/', UserInfo.as_view({
         'post': 'login_user',

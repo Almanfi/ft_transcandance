@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-
 import { root, config, parse_config_file, updateRoutes } from "./utils.js";
+// parse_config_file()
 import { mkdirSync, writeFileSync, existsSync, readdirSync, copyFileSync } from "fs";
 import { join ,relative} from "path";
 import net from "net";

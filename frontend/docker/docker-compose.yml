@@ -1,0 +1,10 @@
+
+services:
+  debian_nginx:
+    build: .
+    ports:
+      - "undefined:undefined"
+    volumes:
+      - ./app:/app
+    restart: always
+

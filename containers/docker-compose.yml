@@ -71,12 +71,14 @@ services:
       dockerfile: Dockerfile
     volumes:
       - nginx_volume:/src
+      - front_volume:/app
     image: nginx:pong
     networks:
       - pong
     ports:
       - "8000:443"
       - "8001:80"
+      - "17000:17000"
     depends_on:
       - django
     container_name: nginx
@@ -97,6 +99,13 @@ volumes:
     driver_opts:
       type: none
       device: ./nginx/src
+      o: bind
+  front_volume:
+    name: front_volume
+    driver: local
+    driver_opts:
+      type: none
+      device: ./nginx/app
       o: bind
   django_volume:
     name: django_volume
