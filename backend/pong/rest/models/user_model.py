@@ -62,3 +62,7 @@ class User(models.Model):
 		deletion_info = users_queryset.delete()
 		return (deletion_info, deleted_users_data)
 
+	@staticmethod
+	def search_users(search_term):
+		matchin_users = User.objects.filter(models.Q(display_name__icontains=search_term) | models.Q(firstname__icontains=search_term) | models.Q(lastname__icontains=search_term) | models.Q(oauth_username__icontains = search_term)).order_by('-created_at')[:5]
+		return list(matchin_users)

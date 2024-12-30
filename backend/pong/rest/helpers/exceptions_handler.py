@@ -11,6 +11,7 @@ class GlobalExceptionMiddleware:
 		try:
 			return self.get_response(request)
 		except Exception as exc:
+			print(exc)
 			return JsonResponse({'error': "An unexpected error occured", 'details': str(exc)}, status=500)
 		
 def rest_exception_handler(exc, context):
