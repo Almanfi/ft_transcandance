@@ -82,25 +82,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-/*
-   @media (min-width: 1025px) {
-        & .inner {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      @media (min-width: 1025px) {
-        & .inner {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      @media (min-width: 1025px) {
-        & .inner {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-
-*/
