@@ -51,7 +51,7 @@ function User() {
               <div className="card" key={i}>
                 <div className="content">
                   <div className="up">
-                    <img src={e.src} />
+                    <img src={e.src} onclick={()=> Ura.navigate("/friend")}/>
                     <h4>{e.title}</h4>
                   </div>
                   <div className="down">
