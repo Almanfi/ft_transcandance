@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { initPlane, Player } from './assets';
+import { initPlane } from './assets';
+import { Player } from './player';
 import { KeyControls, getCameraDir } from './keyControls';
 import { gameClock } from './gclock';
 
