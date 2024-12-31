@@ -1,10 +1,9 @@
 import Ura from "ura";
 import Navbar from "../../components/Navbar/Navbar.jsx";
 
-function Home(props) {
+function Home() {
   const [render, State] = Ura.init();
   const [getter, setter] = State(0);
-  console.log(props);
   
 
   // if (!Ura.store.get("user")) {

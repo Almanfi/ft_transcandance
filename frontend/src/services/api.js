@@ -96,12 +96,12 @@ export async function searchUser(searchTerm) {
   }
 }
 
-export async function getPicture() {
+export async function getPicture(pathname) {
   try {
-    if (!userData) throw "user data is null"
-    console.log("fetch", userData.profile_picture);
+    // if (!userData) throw "user data is null"
+    // console.log("fetch", userData.profile_picture);
 
-    const response = await fetch(`${endpoint}/${userData.profile_picture}`)
+    const response = await fetch(`${endpoint}/${pathname}`)
     if (response.ok) {
       const body = await response.blob();
       console.log("hello", body);
@@ -350,7 +350,8 @@ export async function unblockUser(id) {
 }
 
 const api = {
-  Signup
+  Signup,
+  getPicture
 }
 
 export default api

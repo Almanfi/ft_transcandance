@@ -18,6 +18,8 @@
     [ ] search bar
     [ ] add friends
     [ ] 2 players in same keyboard
+    [ ] access token / refresh token
+    [ ] remove search bar if user not logged in
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

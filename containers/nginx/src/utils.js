@@ -79,16 +79,14 @@ username: "mhrima"
   */
 }
 
-export async function searchUser(searchTerm)
-{
-  try{
+export async function searchUser(searchTerm) {
+  try {
     const response = await fetch(`${endpoint}/users/search/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json"},
-      body : JSON.stringify({"search_term": searchTerm})
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ "search_term": searchTerm })
     })
-    if (response.ok)
-    {
+    if (response.ok) {
       const body = await response.json();
       console.log("searched user succesfully", body);
       return body;

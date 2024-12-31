@@ -10,6 +10,7 @@ function Signup() {
     const [getInvalid, setInvalid] = State([]);
     const createUser = async (e) => {
         e.preventDefault();
+        setError([]);
         const section = document.querySelector(".signup #center #input-section");
         const inputs = section.querySelectorAll("input");
         const data = {};
@@ -25,7 +26,17 @@ function Signup() {
                 try {
                     delete data["confirmpassword"];
                     const res = await api.Signup(data);
-                    console.log("signup response", res);
+                    console.log("signup response");
+                    console.table(res);
+                    /*
+                    display_name
+                    firstname
+                    id
+                    lastname
+                    profile_picture
+                    username
+                    */
+                    Ura.store.set("user", JSON.stringify(res));
                 }
                 catch (err) {
                     console.log("err", err);
@@ -53,6 +64,7 @@ function Signup() {
         Ura.e(Navbar, null),
         Ura.e("form", { className: "signup", onsubmit: createUser },
             Ura.e("div", { id: "center" },
+                Ura.e("h1", null, "add upload image"),
                 Ura.e("div", { style: { position: "absolute", top: "20px" } },
                     Ura.e("loop", { on: getError() }, (e, index) => (Ura.e(Toast, { message: `${e}`, delay: index * 1 })))),
                 Ura.e("div", { id: "card" },

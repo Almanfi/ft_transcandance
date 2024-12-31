@@ -4,7 +4,7 @@ import Arrow from "../../components/Arrow/Arrow.jsx";
 import Input from "../../components/input/Input.jsx";
 import Toast from "../../components/Toast/Toast.jsx";
 
-console.log(document.cookie);
+// console.log(document.cookie);
 
 // logUser0();
 

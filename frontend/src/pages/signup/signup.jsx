@@ -12,6 +12,7 @@ function Signup() {
 
   const createUser = async (e) => {
     e.preventDefault();
+    setError([]);
     const section = document.querySelector(".signup #center #input-section");
     const inputs = section.querySelectorAll("input");
     const data = {};
@@ -26,8 +27,17 @@ function Signup() {
         try {
           delete data["confirmpassword"];
           const res = await api.Signup(data);
-          console.log("signup response", res);
-
+          console.log("signup response");
+          console.table(res)
+          /*
+          display_name
+          firstname
+          id
+          lastname
+          profile_picture
+          username
+          */
+         Ura.store.set("user", JSON.stringify(res));
         } catch (err) {
           console.log("err", err);
           if (err.message) setError([err.message]);
@@ -53,6 +63,9 @@ function Signup() {
       <Navbar />
       <form className="signup" onsubmit={createUser}>
         <div id="center">
+          <h1>
+            add upload image
+          </h1>
           <div style={{ position: "absolute", top: "20px" }}>
             <loop on={getError()}>
               {(e, index) => (

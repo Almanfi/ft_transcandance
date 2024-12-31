@@ -7,7 +7,7 @@ let ifTag = null;
 function check(children) {
     //@ts-ignore
     return children.map((child) => {
-        if (child === null || typeof child === "string" || typeof child === "number") {
+        if (child === null || child === undefined || typeof child === "string" || typeof child === "number") {
             return {
                 type: TEXT,
                 props: {
@@ -161,6 +161,7 @@ function setProps(vdom) {
 }
 let ExecStack = [];
 function createDOM(vdom) {
+    // console.log(vdom);
     switch (vdom.type) {
         case ELEMENT: {
             switch (vdom.tag) {
@@ -358,7 +359,7 @@ function reconciliate(prev, next) {
 }
 let GlobalVDOM = null;
 function display(vdom) {
-    // console.log("display ", vdom);
+    console.log("display ", vdom);
     if (GlobalVDOM)
         reconciliate(GlobalVDOM, vdom);
     else {
