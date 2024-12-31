@@ -6,7 +6,7 @@ import {
   blockUser,
   unblockUser,
   searchUser
-} from "./src/utils.js";
+} from "./api.js";
 
 const users = [
   {

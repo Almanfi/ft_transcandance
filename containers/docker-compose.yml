@@ -78,7 +78,7 @@ services:
     ports:
       - "8000:443"
       - "8001:80"
-      - "17000:17000"
+      # - "17000:17000"
     depends_on:
       - django
     container_name: nginx

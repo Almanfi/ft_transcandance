@@ -10,7 +10,7 @@ import { logerror, loginfo, logmsg } from "./debug.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export const source = join(__dirname, "../src");
-export const output = join(__dirname, "../out");
+export const output = "/home/mhrima/Desktop/ft_transcandance/containers/nginx/app"// join(__dirname, "../out");
 export const root = join(__dirname, "../");
 
 const tsConfig = {
@@ -22,7 +22,7 @@ const tsConfig = {
     baseUrl: "/",
     jsx: "react",
     jsxFactory: "Ura.e",
-    jsxFragmentFactory: "Ura.f",
+    jsxFragmentFactory: "Ura.fr",
     moduleResolution: "node",
     skipLibCheck: false,
     allowJs: true,
@@ -240,7 +240,7 @@ function generateRoutes(dir, parent, adding) {
 }
 
 export function updateRoutes() {
-  if(!config.dirRouting) return;
+  if (!config.dirRouting) return;
   routes = {};
   styles = [];
   const pagesDir = join(source, 'pages');

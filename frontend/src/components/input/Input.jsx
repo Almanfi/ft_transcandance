@@ -1,13 +1,13 @@
 import Ura from 'ura';
 
-function Input({ name, value, isError }) {
+function Input({ value, isError }) {
   const [render, State] = Ura.init();
   const placeholder = value.charAt(0).toUpperCase() + value.slice(1);
-
+  
   return render(() => (
     <input
-      name={name.replace(" ", "")}
-      type={value === "Password" ? "password" : "text"}
+      name={value.replace(" ", "_")}
+      type={value.split(" ").includes("password") ? "password" : "text"}
       placeholder={placeholder}
       className={isError ? "is-error" : ""}
     />

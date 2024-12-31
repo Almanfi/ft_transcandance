@@ -32,6 +32,11 @@
     background-color: var(--red0);
     color: var(--black4);
     border: 1px solid burlywood;
+
+    &:hover{
+      background-color: burlywood;
+      color: white;
+    }
   }
 }
 
@@ -104,10 +109,10 @@
     }
 
     .toogle-bar-hidden {
-      top: 50px;
-      right: -300px;
-      display: block;
-      position: absolute;
+      /* top: 50px; */
+      /* right: -300px; */
+      display: none;
+      /* position: absolute; */
       transition: right 1.2s ease-out;
     }
   }

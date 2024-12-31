@@ -1,4 +1,4 @@
-.test {
+.Chat {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,17 +9,27 @@
   background: #282c34;
   color: #ffffff;
 }
-.test button {
-  height: 40px;
+
+.Chat h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #ffffff;
+}
+
+.Chat button {
+  height: 120px;
   width: 120px;
+  font-size: 20px;
   font-weight: bold;
   background-color: #3178c6;
   color: #ffffff;
   border: none;
+  border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-.test button:hover {
+
+.Chat button:hover {
   background-color: #ffffff;
   color: #3178c6;
 }

@@ -1,7 +1,7 @@
 import Ura from 'ura';
-import Navbar from '../utils/Navbar/Navbar.js';
+import Navbar from '../../components/Navbar/Navbar.jsx';
 import { conversationGroups } from './convs.js';
-import New from './create/create.jsx';
+import New from '../../components/create/create.jsx';
 
 function Chat(props = {}) {
   const [render, State] = Ura.init();

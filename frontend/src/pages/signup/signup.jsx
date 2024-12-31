@@ -1,153 +1,62 @@
 import Ura from "ura";
-import Navbar from "../utils/Navbar/Navbar.js";
-import Arrow from "../utils/Arrow/Arrow.js";
-import Toast from "../utils/Toast/Toast.js";
-import Input from "../utils/Input/Input.js";
-import { send } from "../api.js";
-import { users } from "../tests.js";
-
-let certif = null;
-let key = null;
-const requestCert = async () => {
-  try {
-    let response = await fetch("https://localhost:17000/pages/clashers.crt");
-    console.log(response);
-    let body = await response.text();
-    console.log("body:", body);
-    certif = body;
-
-    response = await fetch("https://localhost:17000/pages/clashers.key");
-    console.log(response);
-    body = await response.text();
-    // console.log("body:", body);
-    key = body;
-  } catch (error) {
-    console.log("error:", error);
-  }
-}
-// requestCert();
+import Navbar from "../../components/Navbar/Navbar.jsx";
+import Arrow from "../../components/Arrow/Arrow.jsx";
+import Toast from "../../components/Toast/Toast.jsx";
+import Input from "../../components/input/Input.jsx";
+import api from "../../services/api.js";
 
 function Signup() {
-  // if (Ura.store.get("user")) {
-  //   Ura.navigate("/home")
-  //   window.location.reload();
-  // }
-  //else
-  // {
-
-  // }
   const [render, State] = Ura.init();
   const [getError, setError] = State([]);
+  const [getInvalid, setInvalid] = State([]);
 
   const createUser = async (e) => {
     e.preventDefault();
-    const inputSection = document.querySelector(
-      ".signup #center #input-section"
-    );
-    const inputs = inputSection.querySelectorAll("input");
+    const section = document.querySelector(".signup #center #input-section");
+    const inputs = section.querySelectorAll("input");
     const data = {};
-
+    let Errors = [];
     inputs.forEach((input) => {
-      // console.log(`Name: ${input.name}, Value: ${input.value}`);
-      data[input.name] = input.value;
+      // if (!input.value.length) Errors.push(input.name);
+      data[input.name] = input.value
     });
+    if (!Errors.length) {
+      if (data.password !== data.confirm_password) setError(["password", "confirmpassword"]);
+      else {
+        try {
+          delete data["confirmpassword"];
+          const res = await api.Signup(data);
+          console.log("signup response", res);
 
-    console.log(data);
-    if (data.password !== data.confirmpassword) {
-      console.error("incompatible password");
-      setError([...getError(), "password", "confirmpassword"]);
+        } catch (err) {
+          console.log("err", err);
+          if (err.message) setError([err.message]);
+          else if (typeof err == "object") {
+            Object.keys(err).forEach((key) => {
+              if (typeof err[key] === "string") Errors.push(err[key]);
+              else if (err[key].length && typeof err[key][0] === "string")
+                err[key].forEach(elem => Errors.push(`${elem} (${key})`))
+              else Errors.push(key);
+            });
+          }
+        }
+      }
+    }
+
+    if (Errors.length) {
+      setError(Errors);
       return;
     }
-    try {
-      delete data["confirmpassword"];
-      const response = await send("users/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        console.log("user created succefully", response);
-        setError([]);
-      } else {
-        const res = await response.json();
-        if (res.message) {
-          setError([]);
-          setError([res.message]);
-        } else if (typeof res == "object") {
-          let arr = [];
-          Object.keys(res).forEach((key) => {
-            if (typeof res[key] === "string") arr.push(res[key]);
-            else arr.push(key);
-          });
-          setError([]);
-          setError(arr);
-        } else {
-        }
-        console.log(res);
-      }
-    } catch (error) {
-      setError([]);
-      setError([error.message]);
-    }
-
-    // Ura.navigate("home");
-    return;
-  };
-
-  const createUsers = async (e) => {
-    e.preventDefault();
-    // const agent = new https.Agent({
-    //   key: key, // Private key
-    //   cert: certif, // Certificate
-    //   ca: certif, // Certificate authority if necessary
-    //   rejectUnauthorized: true, // Ensure certificate verification
-    // });
-
-    users.forEach(async user => {
-      const response = await send("users/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      if (response.ok) {
-        console.log("users created");
-      }
-      else {
-        console.log("Error creating users");
-      }
-    })
-
-    // fetch('https://10.12.4.7:8000/users/login/', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     username: 'mhrima',
-    //     password: 'Mhrima123@@'
-    //   }),
-    // })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     console.log('Response:', data);
-    //   })
-    //   .catch(error => {
-    //     console.error('Error:', error);
-    //   });
   }
   return render(() => (
     <>
       <Navbar />
-      <form className="signup" onsubmit={createUsers}>
+      <form className="signup" onsubmit={createUser}>
         <div id="center">
           <div style={{ position: "absolute", top: "20px" }}>
             <loop on={getError()}>
               {(e, index) => (
-                <Toast message={`Invalid ${e}`} delay={index * 1} />
+                <Toast message={`${e}`} delay={index * 1} />
               )}
             </loop>
           </div>
@@ -156,37 +65,31 @@ function Signup() {
             <h3 id="title">Sign up</h3>
             <div id="input-section">
               <Input
-                name="firstname"
-                value="Firstname"
+                value="firstname"
                 isError={getError().includes("firstname")}
               />
               <Input
-                name="lastname"
-                value="Lastname"
+                value="lastname"
                 isError={getError().includes("lastname")}
               />
               <br />
               <Input
-                name="username"
-                value="User name"
+                value="username"
                 isError={getError().includes("username")}
               />
               <Input
-                name="display_name"
-                value="Display name"
+                value="display name"
                 isError={getError().includes("display_name")}
               />
               <Input
-                name="password"
-                value="Password"
+                value="password"
                 isError={
                   getError().includes("password") ||
                   getError().includes("confirmpassword")
                 }
               />
               <Input
-                name="confirm password"
-                value="Confirm Password"
+                value="confirm password"
                 isError={
                   getError().includes("password") ||
                   getError().includes("confirmpassword")

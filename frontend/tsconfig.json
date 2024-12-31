@@ -4,7 +4,7 @@
     "target": "ES2020",
     "jsx": "react",
     "jsxFactory": "Ura.e",
-    "jsxFragmentFactory": "Ura.f",
+    "jsxFragmentFactory": "Ura.fr",
     "skipLibCheck": false,
     "allowJs": true,
   },

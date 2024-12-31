@@ -25,6 +25,7 @@ import test from "./test/test.js";
 import user from "./user/user.js";
 import Chat from "./chat/chat.jsx";
 import Friend from "./friend/friend.jsx";
+import Test from "./test/test.js";
 
 Ura.setRoutes({
   "*": home,
@@ -35,6 +36,7 @@ Ura.setRoutes({
   "/user": user,
   "/chat": Chat,
   "/friend": Friend,
+  "/test": Test
 });
 
 Ura.setStyles([
@@ -45,13 +47,14 @@ Ura.setStyles([
   "./pages/test/test.css",
   "./pages/user/settings/settings.css",
   "./pages/user/user.css",
-  "./pages/utils/Award/Award.css",
-  "./pages/utils/Navbar/Navbar.css",
-  "./pages/utils/Toast/Toast.css",
   "./pages/chat/chat.css",
   "./pages/chat/create/create.css",
   "./pages/friend/friend.css",
   "./pages/friend/settings/settings.css",
+  /* components */
+  "./components/Award/Award.css",
+  "./components/Toast/Toast.css",
+  "./components/Navbar/Navbar.css",
 ]);
 
 Ura.start();

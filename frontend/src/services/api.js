@@ -2,40 +2,35 @@
 const endpoint = "https://localhost:8000/api";
 
 export async function Signup(user) {
-  try {
-    const response = await fetch(`${endpoint}/users/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    });
-    if (response.ok) {
-      console.log("user created succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error creating users", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
+  // try {
+  const response = await fetch(`${endpoint}/users/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", },
+    body: JSON.stringify(user),
+  });
+  if (response.ok) {
+    console.log("user created succefully");
+    const body = await response.json();
+    return body;
   }
+  else {
+    const body = await response.json();
+    console.log("Error creating users", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 }
 
 export async function Login(user) {
   try {
     const response = await fetch(`${endpoint}/users/login/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user),
     });
-    if (response.ok) {
-      console.log("user login succefully");
-    }
+    if (response.ok) { console.log("user login succefully"); }
     else {
       const body = await response.json();
       console.log("Error login users", body.message);
@@ -79,16 +74,14 @@ username: "mhrima"
   */
 }
 
-export async function searchUser(searchTerm)
-{
-  try{
+export async function searchUser(searchTerm) {
+  try {
     const response = await fetch(`${endpoint}/users/search/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json"},
-      body : JSON.stringify({"search_term": searchTerm})
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ "search_term": searchTerm })
     })
-    if (response.ok)
-    {
+    if (response.ok) {
       const body = await response.json();
       console.log("searched user succesfully", body);
       return body;
@@ -133,9 +126,7 @@ export async function updateUser(data) {
     */
     const response = await fetch(`${endpoint}/users/`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json", },
       body: JSON.stringify(data)
     })
     if (response.ok) {
@@ -157,9 +148,7 @@ export async function deleteUser() {
     data than can be changed:
     display_name, firstname, lastname, profile_picture, username
     */
-    const response = await fetch(`${endpoint}/users/`, {
-      method: "DELETE",
-    })
+    const response = await fetch(`${endpoint}/users/`, { method: "DELETE", })
     if (response.ok) {
       console.log("user deleted succefully");
     }
@@ -178,9 +167,7 @@ export async function InviteFriend(friendId) {
 
     const response = await fetch(`${endpoint}/relationships/invite/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json", },
       body: JSON.stringify({ "friend_id": friendId })
     })
     if (response.ok) {
@@ -361,3 +348,9 @@ export async function unblockUser(id) {
     console.log("error", error);
   }
 }
+
+const api = {
+  Signup
+}
+
+export default api

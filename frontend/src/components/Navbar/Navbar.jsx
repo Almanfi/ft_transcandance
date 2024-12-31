@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Menu from "../Menu/Menu.js";
+import Menu from "../Menu/Menu.jsx";
 
 const countries = ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Anguilla",
   "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan",

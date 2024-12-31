@@ -1,11 +1,11 @@
 import Ura from 'ura';
-import Navbar from '../utils/Navbar/Navbar.jsx';
-import Swords from '../utils/Swords/Swords.jsx';
-import WinCup from '../utils/WinCup/WinCup.jsx';
-import Award from '../utils/Award/Award.jsx';
+import Navbar from '../../components/Navbar/Navbar.jsx';
+import Swords from '../../components/Swords/Swords.jsx';
+import WinCup from '../../components/WinCup/WinCup.jsx';
+import Award from '../../components/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
-import Play from '../utils/Play/Play.jsx';
-import Chat from '../utils/Chat/Chat.jsx';
+import Play from '../../components/Play/Play.jsx';
+import Chat from '../../components/Chat/Chat.jsx';
 function Friend() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);

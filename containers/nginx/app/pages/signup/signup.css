@@ -15,7 +15,7 @@
 }
 .signup #center #card {
   height: 40%;
-  min-height: 350px;
+  min-height: 430px;
   min-width: 300px;
   display: flex;
   flex-direction: column;
