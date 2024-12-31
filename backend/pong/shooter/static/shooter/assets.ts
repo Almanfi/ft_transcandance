@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Player } from './player';
 
 
 export function initPlane(): THREE.Mesh {
@@ -25,7 +26,7 @@ export class Turret extends THREE.Mesh {
     speed: number;
     rotationSpeed: number;
     fireAngle: number;
-    bulletManager: any;
+    bulletManager: TurretBulletManager;
     timeStamp: number;
 
     constructor(props = {radius: 3, color: 0x000000}) {
@@ -98,39 +99,40 @@ abstract class ABullet extends THREE.Mesh {
     initPosition: THREE.Vector3;
     date: number;
     speed: THREE.Vector3;
+    destructionTime: number;
 
     constructor(geometry: MyGeometry, material: THREE.Material) {
         super(geometry, material);
         // this.oldPosition = new THREE.Vector3();
     }
 
-    setOriginal(position, speed, spawnTime) {
+    setOriginal(position: THREE.Vector3, speed: THREE.Vector3, spawnTime: number) {
         this.date = spawnTime;
         this.speed = speed;
         this.position.set(position.x, position.y, position.z);
         this.initPosition.copy(position);
     }
 
-    update(time) {
+    update(time: number) {
         this.position.copy(this.initPosition)
         .addScaledVector(this.speed, this.speedRate * ((time - this.date) / 1000));
     }
 
-    getCurrentPosition(radius) {
+    getCurrentPosition(radius: number) {
         let point = new THREE.Vector3();
         point.copy(this.position);
         point.addScaledVector(this.speed, radius);
         return point;
     }
 
-    getOldPosition(radius, s) {
+    getOldPosition(radius: number, s: number) {
         let point = new THREE.Vector3();
         point.copy(this.position);
         point.addScaledVector(this.speed, - radius - this.speedRate * s);
         return point;
     }
 
-    lastPosition(s) {
+    lastPosition(s: number) {
         // return this.oldPosition;
         let lastPosition = new THREE.Vector3();
         lastPosition.copy(this.position);
@@ -151,16 +153,16 @@ export class TurretBullet extends ABullet {
         this.initPosition = new THREE.Vector3();
     }
 
-    set(color, position, speed, spawnTime) {
+    set(color: number, position: THREE.Vector3, speed: THREE.Vector3, spawnTime: number) {
         this.setOriginal(position, speed, spawnTime);
-        this.material.color.set(color);
+        (<THREE.MeshBasicMaterial>this.material).color.set(color);
     }
 
-    isSlowerThan(other) {
-         return this.speedRate < other.speedRate;
+    isSlowerThan(other: ABullet | Player) {
+        return this.speedRate < other.speedRate;
     }
 
-    intersects(other, s, vex) {
+    intersects(other: ABullet | Player, s: number, vex: THREE.Vector3) {
         s = s / 1000;
         let radius = this.radius + other.radius;
         vex.subVectors(this.position, other.position);
@@ -204,22 +206,23 @@ export class PlayerBullet extends ABullet {
         this.initPosition = new THREE.Vector3();
     }
 
-    set(color, position, speed, angle, spawnTime) {
+    set(color: number, position: THREE.Vector3, speed: THREE.Vector3,
+        angle: number, spawnTime: number) {
         this.setOriginal(position, speed, spawnTime);
-        this.material.color.set(color);
-        this.material.emissive.set(0xeeeeee);
+        (<THREE.MeshStandardMaterial>this.material).color.set(color);
+        (<THREE.MeshStandardMaterial>this.material).emissive.set(0xeeeeee);
         this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
         this.rotateX(Math.PI / 2);
     }
 
-    getOldPosition(radius, s) {
+    getOldPosition(radius: number, s: number) {
         let point = new THREE.Vector3();
         point.copy(this.position);
         point.addScaledVector(this.speed, - radius - this.speedRate * s);
         return point;
     }
 
-    lastPosition(s) {
+    lastPosition(s: number) {
         // return this.oldPosition;
         let lastPosition = new THREE.Vector3();
         lastPosition.copy(this.position);
@@ -227,7 +230,7 @@ export class PlayerBullet extends ABullet {
         return lastPosition;
     }
 
-    intersects(other, s, vex) {
+    intersects(other: ABullet, s: number, vex: THREE.Vector3) {
         s = s / 1000;
         let radius = this.radius + other.radius;
         vex.subVectors(this.position, other.position);
@@ -266,18 +269,18 @@ export class PlayerBullet extends ABullet {
     }
 }
 
-function doIntersect(p1, q1, p2, q2) {
-    function orientation(p, q, r) {
+function doIntersect(p1: THREE.Vector3, q1: THREE.Vector3,
+    p2: THREE.Vector3, q2: THREE.Vector3) {
+    function orientation(p: THREE.Vector3, q: THREE.Vector3, r: THREE.Vector3) {
         let val = (q.z - p.z) * (r.x - q.x) - (q.x - p.x) * (r.z - q.z);
         if (val === 0) return 0;
         return (val > 0) ? 1 : 2;
     }
 
-    function onSegment(p, q, r) {
+    function onSegment(p: THREE.Vector3, q: THREE.Vector3, r: THREE.Vector3) {
         return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
                q.z <= Math.max(p.z, r.z) && q.z >= Math.min(p.z, r.z);
     }
-
 
     let o1 = orientation(p1, q1, p2);
     let o2 = orientation(p1, q1, q2);
@@ -286,7 +289,6 @@ function doIntersect(p1, q1, p2, q2) {
 
     if (o1 !== o2 && o3 !== o4) return true;
     
-
     if (o1 === 0 && onSegment(p1, p2, q1)) return true;
     if (o2 === 0 && onSegment(p1, q2, q1)) return true;
     if (o3 === 0 && onSegment(p2, p1, q2)) return true;
@@ -295,7 +297,8 @@ function doIntersect(p1, q1, p2, q2) {
     return false;
 }
 
-function lineIntersectsCircle(lineStart, lineEnd, circleCenter, radius) {
+function lineIntersectsCircle(lineStart: THREE.Vector3, lineEnd: THREE.Vector3,
+    circleCenter: THREE.Vector3, radius: number) {
     const dx = lineEnd.x - lineStart.x;
     const dy = lineEnd.z - lineStart.z;
     const fx = lineStart.x - circleCenter.x;
@@ -331,14 +334,14 @@ class ABulletManager {
     destroyedBullets: Map<number, any>;
     startTime: number;
 
-    constructor(scene) {
+    constructor(scene: THREE.Scene) {
         this.scene = scene;
         this.bullets = new Map();
         this.bulletsPool = new Map();
         this.destroyedBullets = new Map();
     }
 
-    reset(startTime) {
+    reset(startTime: number) {
         this.startTime = startTime;
         this.bullets.forEach((elem) => {
             this.despawnBullet(elem);
@@ -352,7 +355,7 @@ class ABulletManager {
         return new PlayerBullet();
     }
 
-    createBulletsPool(poolSize) {
+    createBulletsPool(poolSize: number) {
         console.log('createBulletsPool of size: ', poolSize, "now pool has : ", this.bulletsPool.size, "and used bullets are : ", this.bullets.size);
         for (let i = 0; i < poolSize; i++) {
             let bullet = this.createBullet();
@@ -362,25 +365,25 @@ class ABulletManager {
         }
     }
 
-    despawnBullet(bullet) {
+    despawnBullet(bullet: ABullet) {
         bullet.visible = false;
         this.returnBullet(bullet);
     }
 
-    destroyBullet(bullet) {
+    destroyBullet(bullet: ABullet) {
         bullet.visible = false;
         bullet.destructionTime = performance.now();
         this.destroyedBullets.set(bullet.id, bullet);
         this.bullets.delete(bullet.id);
     }
 
-    undestroyBullet(bullet) {
+    undestroyBullet(bullet: ABullet) {
         bullet.visible = true;
         this.bullets.set(bullet.id, bullet);
         this.destroyedBullets.delete(bullet.id);
     }
 
-    getBullet() {
+    getBullet(): ABullet {
         if (this.bulletsPool.size < 1) {
             this.createBulletsPool(10);
             return this.getBullet();
@@ -391,18 +394,17 @@ class ABulletManager {
         return bullet;
     }
 
-
-    returnBullet(bullet) {
+    returnBullet(bullet: ABullet) {
         this.bulletsPool.set(bullet.id, bullet);
         this.bullets.delete(bullet.id);
     }
 
-    returnDestroyedBullet(bullet) {
+    returnDestroyedBullet(bullet: ABullet) {
         this.bulletsPool.set(bullet.id, bullet);
         this.destroyedBullets.delete(bullet.id);
     }
 
-    update(timeNow) {
+    update(timeNow: number) {
         let dateNow = timeNow;
         this.bullets.forEach((elem) => {
             if (dateNow > elem.date + 10 * 1000) {
@@ -418,7 +420,7 @@ class ABulletManager {
         })
     }
 
-    findPositionAtTime(time) {
+    findPositionAtTime(time: number) {
         this.bullets.forEach((elem) => {
             if (time > elem.date)
                 elem.update(time);
@@ -434,7 +436,7 @@ class ABulletManager {
 
 
 export class PlayersBulletManager extends ABulletManager {
-    constructor(scene) {
+    constructor(scene: THREE.Scene) {
         super (scene);
         this.createBulletsPool(120);
     }
@@ -443,8 +445,9 @@ export class PlayersBulletManager extends ABulletManager {
         return new PlayerBullet();
     }
 
-    spawnBullet(color, position, speed, angle, spawnTime) {
-        let bullet = this.getBullet();
+    spawnBullet(color: number, position: THREE.Vector3,
+        speed: THREE.Vector3, angle: number, spawnTime: number) {
+        let bullet = this.getBullet() as PlayerBullet;
         bullet.set(color, position, speed, angle, spawnTime);
         bullet.visible = true;
     }
@@ -457,7 +460,7 @@ export class PlayersBulletManager extends ABulletManager {
         // })
     }
 
-    checkRollbackCollision(other, s, time) {
+    checkRollbackCollision(other: Player | Turret, s: number, time: number) {
         var vex = new THREE.Vector3();
         //normal bullets check
         for(var [key, bullet] of this.bullets) {
@@ -549,7 +552,7 @@ export class TurretBulletManager extends ABulletManager {
     }
 
     spawnBullet(color, position, speed, spawnTime) {
-        let bullet = this.getBullet();
+        let bullet = this.getBullet() as TurretBullet;
         bullet.set(color, position, speed, spawnTime);
         bullet.visible = true;
     }
@@ -561,7 +564,7 @@ export class TurretBulletManager extends ABulletManager {
     }
 
 
-    checkRollbackCollision(player, s, time) {
+    checkRollbackCollision(player: Player, s: number, time: number) {
         var vex = new THREE.Vector3();
         //normal bullets check
         for(var [key, bullet] of this.bullets) {
@@ -625,7 +628,7 @@ export class TurretBulletManager extends ABulletManager {
         }
     }
 
-    checkCollision(player, s) {
+    checkCollision(player: Player, s: number) {
         var vex = new THREE.Vector3();
         for(var [key, bullet] of this.bullets) {
             if (bullet.intersects(player, s, vex)) {

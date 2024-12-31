@@ -50,6 +50,8 @@ export class Player extends THREE.Object3D {
     core: THREE.Mesh;
     cannon: CannonObject;
 
+    speedRate: number;
+
     fireRate: number;
     bulletDelay: number;
     lastFire: number;
@@ -83,6 +85,7 @@ export class Player extends THREE.Object3D {
         this.position.set(position.x, position.y, position.z);
         let scale = 2;
         this.scale.set(scale, scale, scale);
+        this.speedRate = 30;
 
         this.fireRate = 100;
         this.bulletDelay = 50;
@@ -162,7 +165,7 @@ export class Player extends THREE.Object3D {
     }
     
     update(timeS, timeStamp, actionTime) {
-        let speed = (30 * timeS) / 1000;
+        let speed = (this.speedRate * timeS) / 1000;
         const projectionOnPlane = this.planeFacingVector;
         
         this.core.rotateY(0.1);
