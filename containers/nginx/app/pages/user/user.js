@@ -6,11 +6,17 @@ import Award from '../../components/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
 import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
-// import api from '../../services/api.js';
-async function User() {
+import api from '../../services/api.js';
+function User() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);
+    const [getUserData, setUserData] = State({});
     let user = JSON.parse(Ura.store.get("user") || "{}");
+    (async () => {
+        user = await api.getUser();
+        Ura.store.set("user", JSON.stringify(user));
+        setUserData(user);
+    })();
     const [getList, setList] = State([
         { src: "/assets/003.png", title: "user 0" },
         { src: "/assets/003.png", title: "user 1" },
@@ -19,9 +25,37 @@ async function User() {
         { src: "/assets/003.png", title: "user 4" }
     ]);
     console.log("hello this is user:", user);
-    const src = ""; // api.getPicture(user.profile_picture)
-    console.log("src:", src);
     return render(() => (Ura.e("div", { className: "user" },
-        Ura.e("div", { id: "bottom" }))));
+        Ura.e(Navbar, null),
+        Ura.e(Settings, { getShow: getShow, setShow: setShow, setUserData: setUserData }),
+        Ura.e("div", { id: "center" },
+            Ura.e("div", { className: "user-card" },
+                Ura.e("div", { className: "img-container" },
+                    Ura.e("img", { src: `/api/${getUserData().profile_picture}`, alt: "", onclick: () => setShow(true) })),
+                Ura.e("div", { className: "name" },
+                    Ura.e("h3", null, `${getUserData().firstname} ${getUserData().lastname} (${getUserData().display_name})`)))),
+        Ura.e("div", { id: "bottom" },
+            Ura.e("loop", { on: [Swords, Award, WinCup], id: "games" }, (Elem) => (Ura.e("div", { id: "history" },
+                Ura.e("h4", { id: "title" },
+                    Ura.e(Elem, null),
+                    "Games"),
+                Ura.e("div", { className: "children" },
+                    Ura.e("div", { className: "child" },
+                        Ura.e("o", null, "42%"),
+                        Ura.e("h4", null, "Pongers")),
+                    Ura.e("div", { className: "child" },
+                        Ura.e("o", null, "42%"),
+                        Ura.e("h4", null, "Pongers")))))),
+            Ura.e("div", { id: "friends" },
+                Ura.e("loop", { className: "inner", on: getList() }, (e, i) => (Ura.e("div", { className: "card", key: i },
+                    Ura.e("div", { className: "content" },
+                        Ura.e("div", { className: "up" },
+                            Ura.e("img", { src: e.src, onclick: () => Ura.navigate("/friend") }),
+                            Ura.e("h4", null, e.title)),
+                        Ura.e("div", { className: "down" },
+                            Ura.e("span", { onclick: () => Ura.navigate("/chat") },
+                                Ura.e(Chat, null)),
+                            Ura.e("span", null,
+                                Ura.e(Play, null))))))))))));
 }
 export default User;

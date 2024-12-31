@@ -21,45 +21,45 @@ export async function Signup(user) {
     // }
 }
 export async function Login(user) {
-    try {
-        const response = await fetch(`${endpoint}/users/login/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user),
-        });
-        if (response.ok) {
-            console.log("user login succefully");
-        }
-        else {
-            const body = await response.json();
-            console.log("Error login users", body.message);
-        }
+    // try {
+    const response = await fetch(`${endpoint}/users/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user),
+    });
+    if (response.ok) {
+        console.log("user login succefully");
     }
-    catch (error) {
-        console.log("error", error);
+    else {
+        const body = await response.json();
+        console.log("Error login users", body.message);
+        throw body;
     }
+    // } catch (error) {
+    //   console.log("error", error);
+    // }
 }
-let userData = localStorage.getItem("user");
-if (userData)
-    userData = JSON.parse(userData);
+// let userData = localStorage.getItem("user");
+// if (userData) userData = JSON.parse(userData);
 export async function getUser() {
     // get user data
-    try {
-        const response = await fetch(`${endpoint}/users`);
-        if (response.ok) {
-            const body = await response.json();
-            console.log("get user succefully", body);
-            userData = body;
-            localStorage.setItem("user", JSON.stringify(userData));
-        }
-        else {
-            const body = await response.json();
-            console.log("Error get user", body.message);
-        }
+    // try {
+    const response = await fetch(`${endpoint}/users/`);
+    if (response.ok) {
+        const body = await response.json();
+        console.log("get user succefully", body);
+        // userData = body;
+        // localStorage.setItem("user", JSON.stringify(userData))
+        return body;
     }
-    catch (error) {
-        console.log("error", error);
+    else {
+        const body = await response.json();
+        console.log("Error get user", body.message);
+        throw body;
     }
+    // } catch (error) {
+    //   console.log("error", error);
+    // }
     /*
   created_at: "2024-12-30T14:05:15.080852Z"
   display_name: "yuliy"
@@ -115,29 +115,27 @@ export async function getPicture(pathname) {
     }
 }
 export async function updateUser(data) {
-    try {
-        if (!userData)
-            throw "user data is null";
-        /*
-        data than can be changed:
-        display_name, firstname, lastname, profile_picture, username
-        */
-        const response = await fetch(`${endpoint}/users/`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json", },
-            body: JSON.stringify(data)
-        });
-        if (response.ok) {
-            console.log("user updated succefully");
-        }
-        else {
-            const body = await response.json();
-            console.log("Error update user", body.message);
-        }
+    // try {
+    /*
+    data than can be changed:
+    display_name, firstname, lastname, profile_picture, username
+    */
+    const response = await fetch(`${endpoint}/users/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", },
+        body: JSON.stringify(data)
+    });
+    if (response.ok) {
+        console.log("user updated succefully");
     }
-    catch (error) {
-        console.log("error", error);
+    else {
+        const body = await response.json();
+        console.log("Error update user", body.message);
+        throw body;
     }
+    // } catch (error) {
+    //   console.log("error", error);
+    // }
 }
 export async function deleteUser() {
     try {
@@ -349,6 +347,9 @@ export async function unblockUser(id) {
 }
 const api = {
     Signup,
-    getPicture
+    Login,
+    getUser,
+    getPicture,
+    updateUser
 };
 export default api;

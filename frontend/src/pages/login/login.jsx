@@ -3,11 +3,11 @@ import Navbar from "../../components/Navbar/Navbar.jsx";
 import Arrow from "../../components/Arrow/Arrow.jsx";
 import Input from "../../components/input/Input.jsx";
 import Toast from "../../components/Toast/Toast.jsx";
+import api from "../../services/api.js";
 
 // console.log(document.cookie);
 
 // logUser0();
-
 function Login() {
   const [render, State] = Ura.init();
   const [getError, setError] = State([]);
@@ -17,49 +17,41 @@ function Login() {
     const inputSection = document.querySelector(".login #center #input-section");
     const inputs = inputSection.querySelectorAll("input");
     const data = {};
-
+    let Errors = [];
     inputs.forEach((input) => {
-      data[input.name] = input.value;
+      data[input.name] = input.value
     });
+    if (!Errors.length) {
+      console.log("log with ", data);
 
-    if (!data.username || !data.password) {
-      setError(["username", "password"]);
-      console.error("Username and password are required");
-      return;
+      try {
+        let res = await api.Login(data);
+        console.log("login response");
+        res = await api.getUser();
+        console.table(res)
+        /*
+        display_name, firstname, id
+        lastname, profile_picture, username
+        */
+        Ura.store.set("user", JSON.stringify(res));
+      } catch (err) {
+        console.log("err", err);
+        if (err.message) setError([err.message]);
+        else if (typeof err == "object") {
+          Object.keys(err).forEach((key) => {
+            if (typeof err[key] === "string") Errors.push(err[key]);
+            else if (err[key].length && typeof err[key][0] === "string")
+              err[key].forEach(elem => Errors.push(`${elem} (${key})`))
+            else Errors.push(key);
+          });
+        }
+      }
     }
 
-    // try {
-    //   const response = await send("users/login/", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(data),
-    //     // credentials: "include",
-    //   });
-
-    //   if (response.ok) {
-    //     console.log("Login successful", response);
-    //     setError([]);
-    //     Ura.navigate("/home");
-    //   } else {
-    //     const res = await response.json();
-    //     if (res.message) {
-    //       setError([res.message]);
-    //     } else {
-    //       let arr = [];
-    //       Object.keys(res).forEach((key) => {
-    //         if (typeof res[key] === "string") arr.push(res[key]);
-    //         else arr.push(key);
-    //       });
-    //       setError([]);
-    //       setError(arr);
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error("Error logging in:", error.message);
-    //   setError([error.message]);
-    // }
+    if (Errors.length) {
+      setError(Errors);
+      return;
+    }
   };
 
 
@@ -78,14 +70,15 @@ function Login() {
             <h3 id="title">Login</h3>
             <div id="input-section">
               <Input
-                name="username"
-                value="Username"
+                value="username"
                 isError={getError().includes("username")}
               />
               <Input
-                name="password"
-                value="Password"
-                isError={getError().includes("password")}
+                value="password"
+                isError={
+                  getError().includes("password") ||
+                  getError().includes("confirmpassword")
+                }
               />
             </div>
             <div id={"button-section"}>

@@ -13,15 +13,15 @@ const users = [
     firstname: "mohammed",
     lastname: "hrima",
     username: "mhrima",
-    password: "Mhrima123@@",
-    display_name: "yuliy"
+    display_name: "yuliy",
+    password: "Mhrima123@@"
   },
   {
     firstname: "sara",
     lastname: "smith",
     username: "ssmith",
+    display_name: "sara_s",
     password: "SaraSmith456##",
-    display_name: "sara_s"
   },
   {
     firstname: "john",

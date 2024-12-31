@@ -6,12 +6,19 @@ import Award from '../../components/Award/Award.jsx';
 import Settings from './settings/settings.jsx';
 import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
-// import api from '../../services/api.js';
+import api from '../../services/api.js';
 
-async function User() {
+function User() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
+  const [getUserData, setUserData] = State({});
   let user = JSON.parse(Ura.store.get("user") || "{}");
+  
+  (async () => {
+    user = await api.getUser();
+    Ura.store.set("user", JSON.stringify(user));
+    setUserData(user);
+  })()
 
   const [getList, setList] = State([
     { src: "/assets/003.png", title: "user 0" },
@@ -22,28 +29,24 @@ async function User() {
   ]);
   console.log("hello this is user:", user);
 
-  const src = ""// api.getPicture(user.profile_picture)
-  console.log("src:", src);
-  
-
   return render(() => (
     <div className="user">
-      {/* <Navbar /> */}
-      {/* <Settings getShow={getShow} setShow={setShow} /> */}
-      {/* <div id="center" >
+      <Navbar />
+      <Settings getShow={getShow} setShow={setShow} setUserData={setUserData}/>
+      <div id="center" >
         <div className="user-card">
           <div className="img-container">
-            <img src={src} alt="" onclick={() => setShow(true)} />
+            <img src={`/api/${getUserData().profile_picture}`} alt="" onclick={() => setShow(true)} />
           </div>
           <div className="name">
             <h3>
-              //  {`${user.firstname} ${user.lastname} (${user.display_name})`} 
+              {`${getUserData().firstname} ${getUserData().lastname} (${getUserData().display_name})`}
             </h3>
           </div>
         </div>
-      </div> */}
+      </div>
       <div id="bottom">
-        {/* <loop on={[Swords, Award, WinCup]} id="games">
+        <loop on={[Swords, Award, WinCup]} id="games">
           {(Elem) => (
             <div id="history">
               <h4 id="title"><Elem />Games</h4>
@@ -53,8 +56,8 @@ async function User() {
               </div>
             </div>
           )}
-        </loop> */}
-        {/* <div id="friends">
+        </loop>
+        <div id="friends">
           <loop className="inner" on={getList()}>
             {(e, i) => (
               <div className="card" key={i}>
@@ -71,7 +74,7 @@ async function User() {
               </div>
             )}
           </loop>
-        </div> */}
+        </div>
       </div>
     </div>
   ));
