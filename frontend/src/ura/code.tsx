@@ -9,7 +9,7 @@ let ifTag = null;
 function check(children: any): any {
   //@ts-ignore
   return children.map((child) => {
-    
+
     if (child === null || child === undefined || typeof child === "string" || typeof child === "number") {
       return {
         type: TEXT,
@@ -164,13 +164,19 @@ let ExecStack = [];
 
 function createDOM(vdom): VDOM {
   // console.log(vdom);
-  
+
   switch (vdom.type) {
     case ELEMENT: {
       switch (vdom.tag) {
         case "root":
           {
             vdom.dom = document.getElementById("root");
+            break;
+          }
+        case "get":
+          {
+            console.log("get by ", vdom.props.by);
+            vdom.dom = document.querySelector(vdom.props.by);
             break;
           }
         default:
@@ -334,8 +340,7 @@ function reconciliate(prev: VDOM, next: VDOM) {
   if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
     return execute(REPLACE, prev, next);
   }
-  if(next.type === EXEC)
-  {
+  if (next.type === EXEC) {
     console.log("replace exec");
     prev.call();
     next.call();
@@ -374,6 +379,10 @@ function display(vdom: VDOM) {
   // ExecStack = [];
 }
 
+function create(vdom: VDOM) {
+  return execute(CREATE, vdom);
+}
+
 function init() {
   let index = 1;
   let vdom = null;
@@ -405,7 +414,7 @@ function init() {
       states[stateIndex] = newValue;
       // updateState();
       const newVDOM = <View />;
-      if(vdom) execute(REPLACE, vdom, newVDOM);
+      if (vdom) execute(REPLACE, vdom, newVDOM);
       else vdom = newVDOM;
     };
     return [getter, setter];
@@ -491,10 +500,7 @@ function refresh(params = {}) {
   // console.log("go to", path);
   return display(
     <root >
-      {
-        //@ts-ignore
-        <RouteConfig props={params} />
-      }
+      <RouteConfig props={params} />
     </root>
   );
 }
@@ -725,6 +731,7 @@ const Ura = {
   setRoute,
   getRoute,
   display,
+  create,
   sync,
   loadCSS,
   init,

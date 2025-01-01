@@ -5,35 +5,35 @@ import Input from "../../components/input/Input.jsx";
 import Toast from "../../components/Toast/Toast.jsx";
 import api from "../../services/api.js";
 
-// console.log(document.cookie);
 
-// logUser0();
 function Login() {
-  const [render, State, ForcedState] = Ura.init();
-  const [getError, setError] = ForcedState([]);
+  const [render] = Ura.init();
 
   const logUser = async (e) => {
     e.preventDefault();
+    const Errors = [];
+
     const inputSection = document.querySelector(".login #center #input-section");
     const inputs = inputSection.querySelectorAll("input");
     const data = {};
-    let Errors = [];
     inputs.forEach((input) => {
-      data[input.name] = input.value
+      if (input.value.length) data[input.name] = input.value
+      else Errors.push(`empty ${input.name} field`);
     });
+
     if (!Errors.length) {
       console.log("log with ", data);
 
       try {
-        let res = await api.Login(data);
+        const res = await api.Login(data);
         console.log("login response");
-        res = await api.getUser();
         console.table(res)
+        // res = await api.getUser();
         /*
         display_name, firstname, id
         lastname, profile_picture, username
         */
-        Ura.store.set("user", JSON.stringify(res));
+        // Ura.store.set("user", JSON.stringify(res));
       } catch (err) {
         console.log("err", err);
         if (err.message) Errors.push(err.message);
@@ -48,9 +48,9 @@ function Login() {
       }
     }
     console.log("errors:", Errors);
-    
+
     if (Errors.length) {
-      setError(Errors);
+      Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
       return;
     }
   };
@@ -61,26 +61,11 @@ function Login() {
       <Navbar />
       <form className="login" onsubmit={logUser}>
         <div id="center">
-          <div style={{ position: "absolute", top: "20px" }}>
-            <loop on={getError()}>
-              {(e, index) => <Toast message={`${e}`} delay={index * 1} />}
-            </loop>
-          </div>
-
           <div id="card">
             <h3 id="title">Login</h3>
             <div id="input-section">
-              <Input
-                value="username"
-                isError={getError().includes("username")}
-              />
-              <Input
-                value="password"
-                isError={
-                  getError().includes("password") ||
-                  getError().includes("confirmpassword")
-                }
-              />
+              <Input value="username" />
+              <Input value="password" />
             </div>
             <div id={"button-section"}>
               <button id="btn" type="submit">
