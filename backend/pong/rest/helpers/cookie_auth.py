@@ -34,10 +34,10 @@ class CookieAuth(BaseAuthentication):
     def authenticate(self, request):
         token = request.COOKIES.get("id_key")
         if not token:
-            raise AuthenticationFailed("No Cookie Was Given")
+            raise AuthenticationFailed({"message": "No Cookie Was Given", "error_code": 113})
         authentication_data = authenticate_user(token)
         if authentication_data == None:
-            raise AuthenticationFailed("Bad Authentication Cookie")
+            raise AuthenticationFailed({"message": "Bad Authentication Cookie", "error_code": 114})
         return authentication_data
 
 class WebSocketAuth(BaseMiddleware):

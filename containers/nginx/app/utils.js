@@ -62,7 +62,7 @@ export async function getUser() {
     }
     else {
       const body = await response.json();
-      console.log("Error get user", body.message);
+      console.log("Error get user", body);
     }
   } catch (error) {
     console.log("error", error);
@@ -86,7 +86,8 @@ export async function searchUser(searchTerm) {
     const response = await fetch(`${endpoint}/users/search/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "search_term": searchTerm })
+      body: JSON.stringify({ "search_term": searchTerm }),
+	  credentials: "include"
     })
     if (response.ok) {
       const body = await response.json();
@@ -136,7 +137,8 @@ export async function updateUser(data) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("user updated succefully");
@@ -152,13 +154,13 @@ export async function updateUser(data) {
 
 export async function deleteUser() {
   try {
-    if (!userData) throw "user data is null"
     /* 
     data than can be changed:
     display_name, firstname, lastname, profile_picture, username
     */
     const response = await fetch(`${endpoint}/users/`, {
       method: "DELETE",
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("user deleted succefully");
@@ -181,7 +183,8 @@ export async function InviteFriend(friendId) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ "friend_id": friendId })
+      body: JSON.stringify({ "friend_id": friendId }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("invited friend succefully");
@@ -208,7 +211,7 @@ export async function getRelations() {
   }
   */
   try {
-    const response = await fetch(`${endpoint}/relationships`);
+    const response = await fetch(`${endpoint}/relationships`, {credentials: "include"});
     if (response.ok) {
       console.log("fetting relations succefully");
       const body = await response.json();
@@ -230,7 +233,8 @@ export async function acceptInvitation(id) {
     const response = await fetch(`${endpoint}/relationships/invite/accept/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "invitation_id": id })
+      body: JSON.stringify({ "invitation_id": id }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("accept invitation succefully");
@@ -253,7 +257,8 @@ export async function refuseInvitation(id) {
     const response = await fetch(`${endpoint}/relationships/invite/refuse/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "invitation_id": id })
+      body: JSON.stringify({ "invitation_id": id }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("refuse invitation succefully");
@@ -276,7 +281,8 @@ export async function cancelInvitation(id) {
     const response = await fetch(`${endpoint}/relationships/invite/cancel/`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "invitation_id": id })
+      body: JSON.stringify({ "invitation_id": id }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("cancel invitation succefully");
@@ -299,7 +305,8 @@ export async function removeFriend(id) {
     const response = await fetch(`${endpoint}/relationships/unfriend/`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "friendship_id": id })
+      body: JSON.stringify({ "friendship_id": id }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("remove friend succefully");
@@ -323,7 +330,8 @@ export async function blockUser(id) {
     const response = await fetch(`${endpoint}/relationships/block/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "user_id": id })
+      body: JSON.stringify({ "user_id": id }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("block user succefully");
@@ -346,7 +354,8 @@ export async function unblockUser(id) {
     const response = await fetch(`${endpoint}/relationships/unblock/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ "block_id": id })
+      body: JSON.stringify({ "block_id": id }),
+	  credentials: "include"
     })
     if (response.ok) {
       console.log("unblock user succefully");

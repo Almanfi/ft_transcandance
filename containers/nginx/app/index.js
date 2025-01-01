@@ -8,6 +8,9 @@ import {
 	searchUser
   } from "./utils.js";
   
+import {
+	ConnectToMessagingSocket
+} from "./websockets.js"
   const users = [
 	{
 	  firstname: "mohammed",
@@ -156,8 +159,18 @@ import {
 	await Promise.all(res.blocks.map(async e => await unblockUser(e.id)))
   }
   
+  
+  
   const a = document.createElement("a");
   a.href = "/api/oauth/42/";
   a.innerHTML = "go to 42 oauth"
   
   parent.appendChild(a)
+
+
+
+  create("Messaging Socket").onclick = async () => {
+	await Login(users[0])
+	// splitCookies()
+	const msg_sock = await ConnectToMessagingSocket()
+  }
