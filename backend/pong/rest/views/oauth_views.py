@@ -7,8 +7,8 @@ from django.middleware.csrf import _get_new_csrf_string
 from django.conf import settings
 from urllib.parse import urlencode
 from ..models import User
+from ..helpers import JWT_PRIVATE_KEY
 from ..serializers.user_serializers import UserSerializer
-import os
 import requests
 import jwt
 from uuid import uuid4
@@ -41,7 +41,7 @@ class OauthViews(GenericViewSet):
 		return user_serializer.validated_data
  
 	def login_42_user(self, user_data):
-		signed_jwt = jwt.encode({'id': user_data['id']}, os.getenv("JWT_SECRET"), algorithm="EdDSA")
+		signed_jwt = jwt.encode({'id': user_data['id']}, JWT_PRIVATE_KEY, algorithm="EdDSA")
 		res = Response(status=status.HTTP_200_OK)
 		cookie = {
 			"max_age" : 3600,

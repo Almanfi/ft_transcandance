@@ -1,7 +1,7 @@
-FROM alpine:latest
+FROM alpine:3.21
 
 RUN apk update && apk upgrade && \
-    apk add python3 py3-virtualenv py3-pip libpq-dev
+    apk add python3 py3-virtualenv py3-pip libpq-dev openssl
 
 WORKDIR /usr
 

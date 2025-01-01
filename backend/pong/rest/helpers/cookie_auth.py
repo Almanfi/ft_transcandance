@@ -9,8 +9,11 @@ from .parse_uuid import parse_uuid
 from jwt import decode
 import os
 
+JWT_PRIVATE_KEY = f"-----BEGIN PRIVATE KEY-----\n{os.getenv("JWT_SECRET")}\n-----END PRIVATE KEY-----"
+JWT_PUBLIC_KEY = f"-----BEGIN PUBLIC KEY-----\n{os.getenv("JWT_PUBLIC")}\n-----END PUBLIC KEY-----"
+
 def authenticate_user(token):
-    token = decode(token, os.getenv("JWT_SECRET"), algorithms=["EdDSA"])
+    token = decode(token, JWT_PRIVATE_KEY, algorithms=["EdDSA"])
     if "id" not in token:
         return None
     user_uuid = parse_uuid([token['id']])
