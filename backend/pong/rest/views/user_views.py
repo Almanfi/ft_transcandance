@@ -6,8 +6,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from ..models.user_model import User, users_images_path, user_image_route
 from ..serializers.user_serializers import UserSerializer
-from ..helpers import parse_uuid, save_uploaded_file, CookieAuth
-from datetime import datetime, timedelta
+from ..helpers import parse_uuid, save_uploaded_file, CookieAuth, JWT_PRIVATE_KEY
 import os
 import argon2
 import binascii
@@ -43,7 +42,7 @@ class UserInfo(ViewSet):
 			user["profile_picture"] = user_image_route(user["profile_picture"])
 		return Response(serialized_users.data, status=status.HTTP_200_OK)
 
-	@action(['get'], True)
+	@action(['post'], True)
 	def search_users(self, request):
 		if not 'search_term' in request.data or request.data['search_term'] == "":
 			return Response({"message": "No search term given", "error_code": 110}, status= status.HTTP_400_BAD_REQUEST)
@@ -121,19 +120,14 @@ class UserInfo(ViewSet):
 			return Response({"message":"wrong username", "error_code": 10}, status=status.HTTP_404_NOT_FOUND)
 		if not self.verify_password(user['password'], login_data['password']):
 			return Response({"message":"wrong password", "error_code": 11},status=status.HTTP_401_UNAUTHORIZED)
-		signed_jwt = jwt.encode({'id': user['id']}, os.getenv("JWT_SECRET"), algorithm="EdDSA")
+		signed_jwt = jwt.encode({'id': user['id']}, JWT_PRIVATE_KEY, algorithm="EdDSA")
 		res = Response({"message": "log-in sucessfull"}, status=status.HTTP_200_OK)
 		max_age = 7200  # 1 hour in seconds
-		expires = datetime.now() + timedelta(seconds=max_age)
 		cookie = {
-			# "max_age" : max_age,
-			"expires": expires,
+			"max_age" : max_age,
 			"samesite":'None',
-			"secure": True
-			# "httponly" : False,
-			# "path" : "/"
+			"secure": True,
 		}
-
 		res.set_cookie("id_key", signed_jwt, **cookie)
 		return res
 	

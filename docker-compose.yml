@@ -1,7 +1,7 @@
 services:
   postgres:
     build:
-      context: ./postgres
+      context: ./containers/postgres
       dockerfile: Dockerfile
       args:
         PG_ROOT_PASSWORD: ${PG_ROOT_PASSWORD}
@@ -32,7 +32,7 @@ services:
     restart: always
   redis:
     build:
-      context: ./redis
+      context: ./containers/redis
       dockerfile: Dockerfile
     image: redis:pong
     volumes:
@@ -43,7 +43,6 @@ services:
     restart: always
   django:
     build:
-      context: ../
       dockerfile: ./containers/django/Dockerfile
       args:
         PG_USERNAME: ${PG_USERNAME}
@@ -61,24 +60,25 @@ services:
       - redis
     networks:
       - pong
-    ports:
-      - "8000:8000"
     container_name: django
     restart: always
-  # nginx:
-  #   build:
-  #     context: ./nginx
-  #     dockerfile: Dockerfile
-  #   image: nginx:pong
-  #   networks:
-  #     - pong
-  #   ports:
-  #     - "8000:443"
-  #     - "8001:80"
-  #   depends_on:
-  #     - django
-  #   container_name: nginx
-  #   restart: always
+  nginx:
+    build:
+      context: ./containers/nginx
+      dockerfile: Dockerfile
+    image: nginx:pong
+    volumes:
+      - frontend_volume:/app
+    networks:
+      - pong
+    ports:
+      - "3000:3000" # frontend
+      - "8000:443" # backend api
+      - "8001:80" # backend websockets
+    depends_on:
+      - django
+    container_name: nginx
+    restart: always
 
 networks:
   pong:
@@ -89,10 +89,17 @@ volumes:
   redis_volume:
   postgres_volume:
   pgadmin_volume:
+  frontend_volume:
+    name: frontend_volume
+    driver: local
+    driver_opts:
+      type: none
+      device: ./containers/nginx/app
+      o: bind
   django_volume:
     name: django_volume
     driver: local
     driver_opts:
       type: none
-      device: ../backend
+      device: ./backend
       o: bind
