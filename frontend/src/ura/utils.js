@@ -19,9 +19,15 @@ export function loadCSS(filename) {
 }
 // UTILS
 export function deepEqual(a, b) {
-  // console.log("deep exual between", a, "and", b);
+  // Handle NaN case
+  if (a !== a && b !== b) return true; // NaN is the only value that is not equal to itself
+  // Handle primitive type comparison
   if (a === b) return true;
+  // Handle null and undefined
+  if (a == null || b == null) return false;
+  // Check if types are the same
   if (typeof a !== typeof b) return false;
+  // Handle Arrays
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
@@ -29,8 +35,13 @@ export function deepEqual(a, b) {
     }
     return true;
   }
-  if (typeof a === "function" && typeof b === "function")
-    return a.toString() === b.toString();
+  // Handle Dates
+  if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
+  // Handle RegExp
+  if (a instanceof RegExp && b instanceof RegExp) return a.toString() === b.toString();
+  // Handle functions
+  if (typeof a === "function" && typeof b === "function") return a.toString() === b.toString();
+  // Handle Objects
   if (typeof a === "object" && typeof b === "object") {
     const keysA = Object.keys(a);
     const keysB = Object.keys(b);

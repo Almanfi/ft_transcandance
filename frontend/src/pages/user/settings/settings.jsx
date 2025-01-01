@@ -4,7 +4,7 @@ import api from '../../../services/api.js';
 
 function Settings(props = {}) {
   const [render, State] = Ura.init();
-  let user = JSON.parse(Ura.store.get("user") || "{}");
+  // let user = JSON.parse(Ura.store.get("user") || "{}");
   const [getError, setError] = State([]);
 
   const update = async (e) => {
@@ -64,7 +64,7 @@ function Settings(props = {}) {
 
   return render(() => (
     <if cond={props.getShow()} className={`settings ${props.getShow() ? "" : "hidden"}`}>
-      <span className="close" onclick={() => props.setShow(!props.getShow())}>X</span>
+      {/* <span className="close" onclick={() => props.setShow(!props.getShow())}>X</span>
       <form className="content" onsubmit={update}>
         <div className="img">
           <img src={`/api/${user.profile_picture}`} alt="" className="img" />
@@ -101,7 +101,7 @@ function Settings(props = {}) {
           </div>
         </div>
         <button type="submit"><b>Save</b></button>
-      </form>
+      </form> */}
     </if>
   ));
 }

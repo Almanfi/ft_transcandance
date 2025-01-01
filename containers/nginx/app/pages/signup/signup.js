@@ -30,8 +30,20 @@ function Signup() {
             else {
                 try {
                     delete data["confirmpassword"];
-                    data["profile_picture"] = getImage();
-                    const res = await api.Signup(data);
+                    const formData = new FormData();
+                    Object.keys(data).forEach((key) => {
+                        formData.append(key, data[key]);
+                    });
+                    const image = getImage();
+                    if (image && image instanceof File) {
+                        console.log("Appending the image:", image);
+                        formData.append("profile_picture", image, "random.png");
+                    }
+                    else {
+                        console.log("No image or invalid image:", image);
+                    }
+                    console.log("send", formData);
+                    const res = await api.signup(formData);
                     console.log("signup response");
                     console.table(res);
                     /*
@@ -39,6 +51,7 @@ function Signup() {
                       lastname, profile_picture, username
                     */
                     //  Ura.store.set("user", JSON.stringify(res));
+                    Ura.navigate("/login");
                 }
                 catch (err) {
                     console.log("err", err);
@@ -57,10 +70,7 @@ function Signup() {
                 }
             }
         }
-        if (Errors.length) {
-            Errors.forEach((e, i) => Ura.create(Ura.e(Toast, { message: e, delay: i })));
-            return;
-        }
+        Errors.forEach((e, i) => Ura.create(Ura.e(Toast, { message: e, delay: i })));
     };
     return render(() => (Ura.e(Ura.fr, null,
         Ura.e(Navbar, null),
@@ -68,7 +78,7 @@ function Signup() {
             Ura.e("div", { id: "center" },
                 Ura.e("div", { id: "card" },
                     Ura.e("h3", { id: "title" }, "Sign up"),
-                    Ura.e("input", { type: "file", accept: "image/*", onChange: uploadImage }),
+                    Ura.e("input", { type: "file", accept: "image/*", onchange: uploadImage }),
                     Ura.e("div", { id: "input-section" },
                         Ura.e(Input, { value: "firstname" }),
                         Ura.e(Input, { value: "lastname" }),

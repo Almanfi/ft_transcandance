@@ -1,7 +1,7 @@
 import Ura from 'ura';
 import {
   deleteUser, getRelations, getPicture, getUser,
-  InviteFriend, Login, Signup, updateUser, acceptInvitation,
+  InviteFriend, Login, signup, updateUser, acceptInvitation,
   refuseInvitation, cancelInvitation,
   removeFriend,
   blockUser,
@@ -54,7 +54,7 @@ function Test(props = {}) {
   };
 
   const handleSignAllUsers = async () => {
-    const all = await Promise.all(users.map(user => Signup(user)));
+    const all = await Promise.all(users.map(user => signup(user)));
     setAllUsers(all);
     console.log("All users signed up:", all);
   };
@@ -67,7 +67,7 @@ function Test(props = {}) {
 
   return render(() => (
     <div className="test">
-      <button onclick={() => Signup(users[0])}>Sign Up</button>
+      <button onclick={() => signup(users[0])}>Sign Up</button>
       <button onclick={() => Login(users[0])}>Login</button>
       <button onclick={getUser}>Get User</button>
       <button onclick={() => searchUser("m")}>Search User</button>
@@ -79,7 +79,7 @@ function Test(props = {}) {
 
       <button onclick={() => updateUser({ display_name: "abcde" })}>Update User</button>
       <button onclick={deleteUser}>Delete User</button>
-      <button onclick={handleDeleteAllUsers}>Delete All Users</button>
+      <button onclick={handleDeleteAllUsers} style={{backgroundColor:"red"}} >Delete All Users</button>
       <button onclick={handleSignAllUsers}>Sign All Users</button>
       <button onclick={handleLogAllUsers}>Log All Users</button>
 

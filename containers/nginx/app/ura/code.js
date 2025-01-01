@@ -69,7 +69,7 @@ function e(tag, props = {}, ...children) {
         let res = {
             type: IF,
             tag: "if",
-            props: props,
+            props: props || {},
             children: check(props.cond && children.length ? children : []),
         };
         ifTag = res;
@@ -81,7 +81,7 @@ function e(tag, props = {}, ...children) {
         let res = {
             type: ELSE,
             tag: "else",
-            props: ifTag?.props,
+            props: ifTag?.props || {},
             children: check(ifTag && !ifTag.props.cond && children.length ? children : []),
         };
         return res;
@@ -253,6 +253,9 @@ function destroy(vdom) {
 function execute(mode, prev, next = null) {
     switch (mode) {
         case CREATE: {
+            if (prev.type === IF) {
+                console.error("create if tag");
+            }
             createDOM(prev);
             // console.log("prev", prev);
             prev.children?.map((child) => {
@@ -285,16 +288,17 @@ function execute(mode, prev, next = null) {
 }
 // RECONCILIATION
 function reconciliateProps(oldProps = {}, newProps = {}, vdom) {
+    if (!vdom.dom)
+        return false;
     oldProps = oldProps || {};
     newProps = newProps || {};
     let diff = false;
     Object.keys(oldProps || {}).forEach((key) => {
-        if (!newProps.hasOwnProperty(key) ||
-            !deepEqual(oldProps[key], newProps[key])) {
+        if (!newProps.hasOwnProperty(key) || !deepEqual(oldProps[key], newProps[key])) {
             diff = true;
             if (key.startsWith("on")) {
                 const eventType = key.slice(2).toLowerCase();
-                vdom.dom.removeEventListener(eventType, oldProps[key]);
+                vdom.dom.removeEventListener(eventType.toLowerCase(), oldProps[key]);
             }
             else if (key === "style") {
                 Object.keys(oldProps.style || {}).forEach((styleProp) => {
@@ -302,7 +306,10 @@ function reconciliateProps(oldProps = {}, newProps = {}, vdom) {
                 });
             }
             else {
-                if (vdom.dom[key] !== undefined)
+                console.log(vdom);
+                if (!vdom.dom)
+                    console.warn("undefined vdom");
+                else if (vdom.dom[key] !== undefined)
                     delete vdom.dom[key];
                 else {
                     try {
@@ -317,8 +324,7 @@ function reconciliateProps(oldProps = {}, newProps = {}, vdom) {
         }
     });
     Object.keys(newProps || {}).forEach((key) => {
-        if (!oldProps.hasOwnProperty(key) ||
-            !deepEqual(oldProps[key], newProps[key])) {
+        if (!oldProps.hasOwnProperty(key) || !deepEqual(oldProps[key], newProps[key])) {
             diff = true;
             if (key.startsWith("on")) {
                 const eventType = key.slice(2).toLowerCase();
@@ -337,6 +343,9 @@ function reconciliateProps(oldProps = {}, newProps = {}, vdom) {
     return diff;
 }
 function reconciliate(prev, next) {
+    if (prev.dom === undefined) {
+        // console.error("this is error", prev)
+    }
     if (prev.type != next.type || prev.tag != next.tag)
         return execute(REPLACE, prev, next);
     if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
@@ -371,7 +380,7 @@ function reconciliate(prev, next) {
 let GlobalVDOM = null;
 function display(vdom) {
     console.log("display ", vdom);
-    if (GlobalVDOM)
+    if (GlobalVDOM !== null)
         reconciliate(GlobalVDOM, vdom);
     else {
         execute(CREATE, vdom);
@@ -410,7 +419,7 @@ function init() {
             states[stateIndex] = newValue;
             // updateState();
             const newVDOM = Ura.e(View, null);
-            if (vdom)
+            if (vdom !== null)
                 execute(REPLACE, vdom, newVDOM);
             else
                 vdom = newVDOM;
@@ -419,7 +428,7 @@ function init() {
     };
     const updateState = () => {
         const newVDOM = Ura.e(View, null);
-        if (vdom)
+        if (vdom !== null)
             reconciliate(vdom, newVDOM);
         else
             vdom = newVDOM;
@@ -689,12 +698,12 @@ function clearGlobal() {
     localStorage.setItem('ura-store', JSON.stringify({}));
 }
 const Ura = {
-    store: {
-        set: setGlobal,
-        get: getGlobal,
-        remove: rmGlobal,
-        clear: clearGlobal
-    },
+    // store: {
+    //   set: setGlobal,
+    //   get: getGlobal,
+    //   remove: rmGlobal,
+    //   clear: clearGlobal
+    // },
     e,
     fr,
     setRoute,

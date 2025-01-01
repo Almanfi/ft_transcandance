@@ -1,4 +1,4 @@
-import { deleteUser, getRelations, getPicture, getUser, InviteFriend, Login, Signup, updateUser, acceptInvitation, refuseInvitation, cancelInvitation, removeFriend, blockUser, unblockUser, searchUser } from "./api.js";
+import { deleteUser, getRelations, getPicture, getUser, InviteFriend, Login, signup, updateUser, acceptInvitation, refuseInvitation, cancelInvitation, removeFriend, blockUser, unblockUser, searchUser } from "./api.js";
 const users = [
     {
         firstname: "mohammed",
@@ -18,8 +18,8 @@ const users = [
         firstname: "john",
         lastname: "doe",
         username: "jdoe",
+        display_name: "johnny",
         password: "JohnDoe789**",
-        display_name: "johnny"
     },
     {
         firstname: "emily",
@@ -31,6 +31,7 @@ const users = [
 ];
 console.log("hello");
 const parent = document.getElementById("root");
+let user = {};
 function create(value) {
     const elem = document.createElement("button");
     elem.id = value;
@@ -47,17 +48,25 @@ create("login").onclick = async () => {
     await Login(users[0]);
 };
 create("signup").onclick = async () => {
-    await Signup(users[0]);
+    await signup(users[0]);
 };
 create("get user").onclick = async () => {
-    await getUser();
+    user = await getUser();
 };
 create("search user").onclick = async () => {
     await searchUser("m");
 };
 const img = createImg();
 create("get image").onclick = async () => {
-    img.src = await getPicture();
+    try {
+        user = await getUser();
+        console.log(user);
+        const path = "/static/rest/images/users_profiles/nl6HulGQnbWP.png";
+        img.src = await getPicture(path);
+    }
+    catch (error) {
+        console.error("found error", error);
+    }
 };
 create("update user").onclick = async () => {
     await updateUser({
@@ -75,7 +84,7 @@ create("delete all users").onclick = async () => {
 };
 let all = null;
 create("signs all users").onclick = async () => {
-    all = await Promise.all(users.map(async (user) => await Signup(user)));
+    all = await Promise.all(users.map(async (user) => await signup(user)));
     console.log("all users:", all);
 };
 create("logs all users").onclick = async () => {

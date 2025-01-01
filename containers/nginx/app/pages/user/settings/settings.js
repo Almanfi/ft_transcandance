@@ -3,7 +3,7 @@ import Input from '../../../components/input/Input.js';
 import api from '../../../services/api.js';
 function Settings(props = {}) {
     const [render, State] = Ura.init();
-    let user = JSON.parse(Ura.store.get("user") || "{}");
+    // let user = JSON.parse(Ura.store.get("user") || "{}");
     const [getError, setError] = State([]);
     const update = async (e) => {
         e.preventDefault();
@@ -61,22 +61,6 @@ function Settings(props = {}) {
             return;
         }
     };
-    return render(() => (Ura.e("if", { cond: props.getShow(), className: `settings ${props.getShow() ? "" : "hidden"}` },
-        Ura.e("span", { className: "close", onclick: () => props.setShow(!props.getShow()) }, "X"),
-        Ura.e("form", { className: "content", onsubmit: update },
-            Ura.e("div", { className: "img" },
-                Ura.e("img", { src: `/api/${user.profile_picture}`, alt: "", className: "img" })),
-            Ura.e("div", { className: "card" },
-                Ura.e("div", { className: "infos" },
-                    Ura.e(Input, { value: "firstname", isError: getError().includes("firstname") }),
-                    Ura.e(Input, { value: "lastname", isError: getError().includes("lastname") }),
-                    Ura.e("br", null),
-                    Ura.e(Input, { value: "display name", isError: getError().includes("display_name") }),
-                    Ura.e(Input, { value: "password", isError: getError().includes("password") ||
-                            getError().includes("confirmpassword") }),
-                    Ura.e(Input, { value: "confirm password", isError: getError().includes("password") ||
-                            getError().includes("confirmpassword") }))),
-            Ura.e("button", { type: "submit" },
-                Ura.e("b", null, "Save"))))));
+    return render(() => (Ura.e("if", { cond: props.getShow(), className: `settings ${props.getShow() ? "" : "hidden"}` })));
 }
 export default Settings;

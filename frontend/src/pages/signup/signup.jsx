@@ -32,8 +32,23 @@ function Signup() {
         try {
           delete data["confirmpassword"];
 
-          data["profile_picture"] = getImage();
-          const res = await api.Signup(data);
+          const formData = new FormData();
+          Object.keys(data).forEach((key) => {
+            formData.append(key, data[key]);
+          });
+
+          const image = getImage();
+          if (image && image instanceof File) {
+            console.log("Appending the image:", image);
+            formData.append("profile_picture", image, "random.png");
+          } else {
+            console.log("No image or invalid image:", image);
+          }
+
+          console.log("send", formData);
+
+
+          const res = await api.signup(formData);
           console.log("signup response");
           console.table(res)
           /*
@@ -41,6 +56,7 @@ function Signup() {
             lastname, profile_picture, username
           */
           //  Ura.store.set("user", JSON.stringify(res));
+          Ura.navigate("/login");
         } catch (err) {
           console.log("err", err);
           if (err.message) setError([err.message]);
@@ -55,11 +71,7 @@ function Signup() {
         }
       }
     }
-
-    if (Errors.length) {
-      Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
-      return;
-    }
+    Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
   }
   return render(() => (
     <>
@@ -68,7 +80,7 @@ function Signup() {
         <div id="center">
           <div id="card">
             <h3 id="title">Sign up</h3>
-            <input type="file" accept="image/*" onChange={uploadImage} />
+            <input type="file" accept="image/*" onchange={uploadImage} />
             <div id="input-section">
               <Input value="firstname" />
               <Input value="lastname" />

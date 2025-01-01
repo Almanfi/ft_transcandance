@@ -1,5 +1,5 @@
 import Ura from 'ura';
-import { deleteUser, getRelations, getPicture, getUser, InviteFriend, Login, Signup, updateUser, acceptInvitation, refuseInvitation, cancelInvitation, removeFriend, blockUser, unblockUser, searchUser } from "../../services/api.js";
+import { deleteUser, getRelations, getPicture, getUser, InviteFriend, Login, signup, updateUser, acceptInvitation, refuseInvitation, cancelInvitation, removeFriend, blockUser, unblockUser, searchUser } from "../../services/api.js";
 const users = [
     {
         firstname: "mohammed",
@@ -41,7 +41,7 @@ function Test(props = {}) {
         }
     };
     const handleSignAllUsers = async () => {
-        const all = await Promise.all(users.map(user => Signup(user)));
+        const all = await Promise.all(users.map(user => signup(user)));
         setAllUsers(all);
         console.log("All users signed up:", all);
     };
@@ -51,7 +51,7 @@ function Test(props = {}) {
         console.log("All users logged in:", all);
     };
     return render(() => (Ura.e("div", { className: "test" },
-        Ura.e("button", { onclick: () => Signup(users[0]) }, "Sign Up"),
+        Ura.e("button", { onclick: () => signup(users[0]) }, "Sign Up"),
         Ura.e("button", { onclick: () => Login(users[0]) }, "Login"),
         Ura.e("button", { onclick: getUser }, "Get User"),
         Ura.e("button", { onclick: () => searchUser("m") }, "Search User"),
@@ -60,7 +60,7 @@ function Test(props = {}) {
             Ura.e("img", { src: getImageSrc(), alt: "Dynamic" })),
         Ura.e("button", { onclick: () => updateUser({ display_name: "abcde" }) }, "Update User"),
         Ura.e("button", { onclick: deleteUser }, "Delete User"),
-        Ura.e("button", { onclick: handleDeleteAllUsers }, "Delete All Users"),
+        Ura.e("button", { onclick: handleDeleteAllUsers, style: { backgroundColor: "red" } }, "Delete All Users"),
         Ura.e("button", { onclick: handleSignAllUsers }, "Sign All Users"),
         Ura.e("button", { onclick: handleLogAllUsers }, "Log All Users"),
         Ura.e("button", { onclick: async () => {

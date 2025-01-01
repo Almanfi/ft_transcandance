@@ -1,24 +1,25 @@
-const endpoint = "https://localhost:8000/";
-export async function Signup(user) {
-    // try {
-    const response = await fetch(`${endpoint}/users/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", },
-        body: JSON.stringify(user),
-    });
-    if (response.ok) {
-        console.log("user created succefully");
-        const body = await response.json();
-        return body;
+const endpoint = "https://localhost:8000";
+export async function signup(user) {
+    try {
+        const response = await fetch(`${endpoint}/users/`, {
+            method: "POST",
+            body: user, // FormData passed here
+        });
+        if (response.ok) {
+            console.log("User created successfully");
+            const body = await response.json();
+            return body;
+        }
+        else {
+            const body = await response.json();
+            console.log("Error creating user", body.message);
+            throw body;
+        }
     }
-    else {
-        const body = await response.json();
-        console.log("Error creating users", body.message);
-        throw body;
+    catch (error) {
+        console.log("Error:", error);
+        throw error;
     }
-    // } catch (error) {
-    //   console.log("error", error);
-    // }
 }
 export async function Login(user) {
     // try {
@@ -48,10 +49,10 @@ export async function getUser() {
     const response = await fetch(`${endpoint}/users/`, {
         credentials: "include",
     });
-    console.log("res", response);
+    // console.log("res", response);
     if (response.ok) {
         const body = await response.json();
-        console.log("get user succefully", body);
+        // console.log("get user succefully", body);
         // userData = body;
         // localStorage.setItem("user", JSON.stringify(userData))
         return body;
@@ -64,7 +65,7 @@ export async function getUser() {
     }
     else {
         const body = await response.json();
-        console.log("Error get user", body.message);
+        // console.log("Error get user", body.message);
         throw body;
     }
     // } catch (error) {
@@ -106,25 +107,23 @@ export async function searchUser(searchTerm) {
     }
 }
 export async function getPicture(pathname) {
-    try {
-        // if (!userData) throw "user data is null"
-        // console.log("fetch", userData.profile_picture);
-        const response = await fetch(`${endpoint}/${pathname}`, {
-            credentials: "include",
-        });
-        if (response.ok) {
-            const body = await response.blob();
-            console.log("hello", body);
-            const imageUrl = URL.createObjectURL(body);
-            return imageUrl;
-        }
-        else {
-            const body = await response.json();
-            console.log("Error get picture", body.message);
-        }
+    // if (!userData) throw "user data is null"
+    // console.log("fetch", userData.profile_picture);
+    const response = await fetch(`${endpoint}${pathname}`, {
+        method: "GET",
+        credentials: "include",
+        mode: "no-cors",
+    });
+    if (response.ok) {
+        const body = await response.blob();
+        console.log("hello", body);
+        const imageUrl = URL.createObjectURL(body);
+        return imageUrl;
     }
-    catch (error) {
-        console.log("error", error);
+    else {
+        const body = await response.text();
+        console.log("Error get picture", body);
+        throw body;
     }
 }
 export async function updateUser(data) {
@@ -371,7 +370,8 @@ export async function unblockUser(id) {
     }
 }
 const api = {
-    Signup,
+    endpoint,
+    signup,
     Login,
     getUser,
     getPicture,

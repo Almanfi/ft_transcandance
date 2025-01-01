@@ -7,25 +7,46 @@ import Settings from './settings/settings.jsx';
 import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
 import api from '../../services/api.js';
+import Toast from '../../components/Toast/Toast.jsx';
 function User() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);
     const [getLoading, setLoading] = State(true);
     const [getUserData, setUserData] = State({
-    // profile_picture: "/static/rest/images/users_profiles/default.jpg"
+        firstname: "",
+        lastname: "",
+        display_name: "",
+        profile_picture: "/static/rest/images/users_profiles/profile.jpg"
     });
-    let user = JSON.parse(Ura.store.get("user") || "{}");
-    api.getUser().then((fetchedUser) => {
-        console.log("this is the response", fetchedUser);
-        Ura.store.set("user", JSON.stringify(fetchedUser));
-        setUserData(fetchedUser);
-    })
-        .catch((error) => {
-        console.error("Error fetching user data:", error);
-    })
-        .finally(() => {
-        setLoading(false); // Update loading state
-    });
+    const fetchData = async () => {
+        const Errors = [];
+        try {
+            const res = await api.getUser();
+            console.log("response:", res);
+            setUserData(res);
+            console.log("img path", getUserData().profile_picture);
+            const img = await api.getPicture(getUserData().profile_picture);
+            console.log(img);
+            // setImage(`https://localhost:5000/${getUserData().profile_picture}`);
+        }
+        catch (err) {
+            console.error("err", err);
+            if (err.message)
+                Errors.push(err.message);
+            else if (typeof err == "object") {
+                Object.keys(err).forEach((key) => {
+                    if (typeof err[key] === "string")
+                        Errors.push(err[key]);
+                    else if (err[key].length && typeof err[key][0] === "string")
+                        err[key].forEach(elem => Errors.push(`${elem} (${key})`));
+                    else
+                        Errors.push(key);
+                });
+            }
+        }
+        Errors.forEach((e, i) => Ura.create(Ura.e(Toast, { message: e, delay: i })));
+    };
+    fetchData();
     const [getList, setList] = State([
         { src: "/assets/003.png", title: "user 0" },
         { src: "/assets/003.png", title: "user 1" },
@@ -33,14 +54,14 @@ function User() {
         { src: "/assets/003.png", title: "user 3" },
         { src: "/assets/003.png", title: "user 4" }
     ]);
-    console.log("hello this is user:", user);
-    return render(() => (Ura.e("if", { className: "user", cond: getLoading() === false },
+    console.log("hello this is user:", getUserData());
+    return render(() => (Ura.e("if", { className: "user", cond: getLoading() === true },
         Ura.e(Navbar, null),
         Ura.e(Settings, { getShow: getShow, setShow: setShow, setUserData: setUserData }),
         Ura.e("div", { id: "center" },
             Ura.e("div", { className: "user-card" },
                 Ura.e("div", { className: "img-container" },
-                    Ura.e("img", { src: `/api/${getUserData().profile_picture}`, alt: "", onclick: () => setShow(true) })),
+                    Ura.e("img", { src: `${api.endpoint}${getUserData().profile_picture}`, alt: "", onclick: () => setShow(true) })),
                 Ura.e("div", { className: "name" },
                     Ura.e("h3", null, `${getUserData().firstname} ${getUserData().lastname} (${getUserData().display_name})`)))),
         Ura.e("div", { id: "bottom" },

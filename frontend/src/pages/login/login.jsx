@@ -27,13 +27,14 @@ function Login() {
       try {
         const res = await api.Login(data);
         console.log("login response");
-        console.table(res)
+        // console.table(res)
         // res = await api.getUser();
         /*
         display_name, firstname, id
         lastname, profile_picture, username
         */
         // Ura.store.set("user", JSON.stringify(res));
+        Ura.navigate("/home");
       } catch (err) {
         console.log("err", err);
         if (err.message) Errors.push(err.message);
