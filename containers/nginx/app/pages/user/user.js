@@ -10,13 +10,22 @@ import api from '../../services/api.js';
 function User() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);
-    const [getUserData, setUserData] = State({});
+    const [getLoading, setLoading] = State(true);
+    const [getUserData, setUserData] = State({
+        profile_picture: "/static/rest/images/users_profiles/default.jpg"
+    });
     let user = JSON.parse(Ura.store.get("user") || "{}");
-    (async () => {
-        user = await api.getUser();
-        Ura.store.set("user", JSON.stringify(user));
-        setUserData(user);
-    })();
+    api.getUser().then((fetchedUser) => {
+        console.log("this is the response", fetchedUser);
+        Ura.store.set("user", JSON.stringify(fetchedUser));
+        setUserData(fetchedUser);
+    })
+        .catch((error) => {
+        console.error("Error fetching user data:", error);
+    })
+        .finally(() => {
+        setLoading(false); // Update loading state
+    });
     const [getList, setList] = State([
         { src: "/assets/003.png", title: "user 0" },
         { src: "/assets/003.png", title: "user 1" },
@@ -25,7 +34,7 @@ function User() {
         { src: "/assets/003.png", title: "user 4" }
     ]);
     console.log("hello this is user:", user);
-    return render(() => (Ura.e("div", { className: "user" },
+    return render(() => (Ura.e("if", { className: "user", cond: getLoading() === false },
         Ura.e(Navbar, null),
         Ura.e(Settings, { getShow: getShow, setShow: setShow, setUserData: setUserData }),
         Ura.e("div", { id: "center" },

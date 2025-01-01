@@ -10,7 +10,7 @@ import { logerror, loginfo, logmsg } from "./debug.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export const source = join(__dirname, "../src");
-export const output = "/home/mhrima/Desktop/ft_transcandance/containers/nginx/app"// join(__dirname, "../out");
+export const output = join(__dirname, "../../containers/nginx/app")// join(__dirname, "../out");
 export const root = join(__dirname, "../");
 
 const tsConfig = {

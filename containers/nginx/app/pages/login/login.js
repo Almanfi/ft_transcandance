@@ -7,8 +7,8 @@ import api from "../../services/api.js";
 // console.log(document.cookie);
 // logUser0();
 function Login() {
-    const [render, State] = Ura.init();
-    const [getError, setError] = State([]);
+    const [render, State, ForcedState] = Ura.init();
+    const [getError, setError] = ForcedState([]);
     const logUser = async (e) => {
         e.preventDefault();
         const inputSection = document.querySelector(".login #center #input-section");
@@ -34,7 +34,7 @@ function Login() {
             catch (err) {
                 console.log("err", err);
                 if (err.message)
-                    setError([err.message]);
+                    Errors.push(err.message);
                 else if (typeof err == "object") {
                     Object.keys(err).forEach((key) => {
                         if (typeof err[key] === "string")
@@ -47,6 +47,7 @@ function Login() {
                 }
             }
         }
+        console.log("errors:", Errors);
         if (Errors.length) {
             setError(Errors);
             return;
@@ -57,7 +58,7 @@ function Login() {
         Ura.e("form", { className: "login", onsubmit: logUser },
             Ura.e("div", { id: "center" },
                 Ura.e("div", { style: { position: "absolute", top: "20px" } },
-                    Ura.e("loop", { on: getError() }, (e, index) => Ura.e(Toast, { message: `Invalid ${e}`, delay: index * 1 }))),
+                    Ura.e("loop", { on: getError() }, (e, index) => Ura.e(Toast, { message: `${e}`, delay: index * 1 }))),
                 Ura.e("div", { id: "card" },
                     Ura.e("h3", { id: "title" }, "Login"),
                     Ura.e("div", { id: "input-section" },

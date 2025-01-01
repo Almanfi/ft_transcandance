@@ -11,14 +11,24 @@ import api from '../../services/api.js';
 function User() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
-  const [getUserData, setUserData] = State({});
+  const [getLoading, setLoading] = State(true);
+  const [getUserData, setUserData] = State({
+    profile_picture: "/static/rest/images/users_profiles/default.jpg"
+  });
   let user = JSON.parse(Ura.store.get("user") || "{}");
-  
-  (async () => {
-    user = await api.getUser();
-    Ura.store.set("user", JSON.stringify(user));
-    setUserData(user);
-  })()
+
+  api.getUser().then((fetchedUser) => {
+    console.log("this is the response", fetchedUser);
+
+    Ura.store.set("user", JSON.stringify(fetchedUser));
+    setUserData(fetchedUser);
+  })
+  .catch((error) => {
+    console.error("Error fetching user data:", error);
+  })
+  .finally(() => {
+    setLoading(false); // Update loading state
+  });
 
   const [getList, setList] = State([
     { src: "/assets/003.png", title: "user 0" },
@@ -30,9 +40,9 @@ function User() {
   console.log("hello this is user:", user);
 
   return render(() => (
-    <div className="user">
+    <if className="user" cond={getLoading() === false}>
       <Navbar />
-      <Settings getShow={getShow} setShow={setShow} setUserData={setUserData}/>
+      <Settings getShow={getShow} setShow={setShow} setUserData={setUserData} />
       <div id="center" >
         <div className="user-card">
           <div className="img-container">
@@ -76,7 +86,7 @@ function User() {
           </loop>
         </div>
       </div>
-    </div>
+    </if>
   ));
 }
 

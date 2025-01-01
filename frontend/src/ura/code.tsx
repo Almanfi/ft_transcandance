@@ -334,7 +334,13 @@ function reconciliate(prev: VDOM, next: VDOM) {
   if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
     return execute(REPLACE, prev, next);
   }
-  //  else return execute(REPLACE, prev, next);
+  if(next.type === EXEC)
+  {
+    console.log("replace exec");
+    prev.call();
+    next.call();
+    // return execute(REPLACE, prev, next);
+  }
 
   const prevs = prev.children || [];
   const nexts = next.children || [];
@@ -364,8 +370,8 @@ function display(vdom: VDOM) {
     execute(CREATE, vdom);
     GlobalVDOM = vdom;
   }
-  ExecStack.forEach(event => event());
-  ExecStack = [];
+  // ExecStack.forEach(event => event());
+  // ExecStack = [];
 }
 
 function init() {
@@ -390,6 +396,21 @@ function init() {
     return [getter, setter];
   };
 
+  const ForcedState = (initValue) => {
+    const stateIndex = index++;
+    states[stateIndex] = initValue;
+
+    const getter = () => states[stateIndex];
+    const setter = (newValue) => {
+      states[stateIndex] = newValue;
+      // updateState();
+      const newVDOM = <View />;
+      if(vdom) execute(REPLACE, vdom, newVDOM);
+      else vdom = newVDOM;
+    };
+    return [getter, setter];
+  };
+
   const updateState = () => {
     const newVDOM = <View />;
     if (vdom) reconciliate(vdom, newVDOM);
@@ -401,7 +422,7 @@ function init() {
     updateState();
     return vdom;
   };
-  return [render, State];
+  return [render, State, ForcedState];
 }
 
 // ROUTING

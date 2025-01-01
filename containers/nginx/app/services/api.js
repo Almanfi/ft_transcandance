@@ -45,12 +45,19 @@ export async function getUser() {
     // get user data
     // try {
     const response = await fetch(`${endpoint}/users/`);
+    console.log("res", response);
     if (response.ok) {
         const body = await response.json();
         console.log("get user succefully", body);
         // userData = body;
         // localStorage.setItem("user", JSON.stringify(userData))
         return body;
+    }
+    else if (response.status === 403) {
+        throw {
+            status: 403,
+            message: "",
+        };
     }
     else {
         const body = await response.json();

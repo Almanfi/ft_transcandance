@@ -336,7 +336,12 @@ function reconciliate(prev, next) {
     if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
         return execute(REPLACE, prev, next);
     }
-    //  else return execute(REPLACE, prev, next);
+    if (next.type === EXEC) {
+        console.log("replace exec");
+        prev.call();
+        next.call();
+        // return execute(REPLACE, prev, next);
+    }
     const prevs = prev.children || [];
     const nexts = next.children || [];
     for (let i = 0; i < Math.max(prevs.length, nexts.length); i++) {
@@ -366,8 +371,8 @@ function display(vdom) {
         execute(CREATE, vdom);
         GlobalVDOM = vdom;
     }
-    ExecStack.forEach(event => event());
-    ExecStack = [];
+    // ExecStack.forEach(event => event());
+    // ExecStack = [];
 }
 function init() {
     let index = 1;
@@ -388,6 +393,21 @@ function init() {
         };
         return [getter, setter];
     };
+    const ForcedState = (initValue) => {
+        const stateIndex = index++;
+        states[stateIndex] = initValue;
+        const getter = () => states[stateIndex];
+        const setter = (newValue) => {
+            states[stateIndex] = newValue;
+            // updateState();
+            const newVDOM = Ura.e(View, null);
+            if (vdom)
+                execute(REPLACE, vdom, newVDOM);
+            else
+                vdom = newVDOM;
+        };
+        return [getter, setter];
+    };
     const updateState = () => {
         const newVDOM = Ura.e(View, null);
         if (vdom)
@@ -400,7 +420,7 @@ function init() {
         updateState();
         return vdom;
     };
-    return [render, State];
+    return [render, State, ForcedState];
 }
 // ROUTING
 function Error(props) {

@@ -9,8 +9,8 @@ import api from "../../services/api.js";
 
 // logUser0();
 function Login() {
-  const [render, State] = Ura.init();
-  const [getError, setError] = State([]);
+  const [render, State, ForcedState] = Ura.init();
+  const [getError, setError] = ForcedState([]);
 
   const logUser = async (e) => {
     e.preventDefault();
@@ -36,7 +36,7 @@ function Login() {
         Ura.store.set("user", JSON.stringify(res));
       } catch (err) {
         console.log("err", err);
-        if (err.message) setError([err.message]);
+        if (err.message) Errors.push(err.message);
         else if (typeof err == "object") {
           Object.keys(err).forEach((key) => {
             if (typeof err[key] === "string") Errors.push(err[key]);
@@ -47,7 +47,8 @@ function Login() {
         }
       }
     }
-
+    console.log("errors:", Errors);
+    
     if (Errors.length) {
       setError(Errors);
       return;
@@ -62,7 +63,7 @@ function Login() {
         <div id="center">
           <div style={{ position: "absolute", top: "20px" }}>
             <loop on={getError()}>
-              {(e, index) => <Toast message={`Invalid ${e}`} delay={index * 1} />}
+              {(e, index) => <Toast message={`${e}`} delay={index * 1} />}
             </loop>
           </div>
 
