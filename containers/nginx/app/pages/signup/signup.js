@@ -6,37 +6,39 @@ import Input from "../../components/input/Input.jsx";
 import api from "../../services/api.js";
 function Signup() {
     const [render, State] = Ura.init();
-    const [getError, setError] = State([]);
-    const [getInvalid, setInvalid] = State([]);
+    const [getImage, setImage] = State(null);
+    const uploadImage = (e) => {
+        const file = e.target.files[0];
+        if (file)
+            setImage(file);
+    };
     const createUser = async (e) => {
         e.preventDefault();
-        setError([]);
+        const Errors = [];
         const section = document.querySelector(".signup #center #input-section");
         const inputs = section.querySelectorAll("input");
         const data = {};
-        let Errors = [];
         inputs.forEach((input) => {
-            // if (!input.value.length) Errors.push(input.name);
-            data[input.name] = input.value;
+            if (input.value.length)
+                data[input.name] = input.value;
+            else
+                Errors.push(`empty ${input.name} field`);
         });
         if (!Errors.length) {
             if (data.password !== data.confirm_password)
-                setError(["password", "confirmpassword"]);
+                Errors.push("Password and Confirm Password do not match");
             else {
                 try {
                     delete data["confirmpassword"];
+                    data["profile_picture"] = getImage();
                     const res = await api.Signup(data);
                     console.log("signup response");
                     console.table(res);
                     /*
-                    display_name
-                    firstname
-                    id
-                    lastname
-                    profile_picture
-                    username
+                      display_name, firstname, id
+                      lastname, profile_picture, username
                     */
-                    Ura.store.set("user", JSON.stringify(res));
+                    //  Ura.store.set("user", JSON.stringify(res));
                 }
                 catch (err) {
                     console.log("err", err);
@@ -56,7 +58,7 @@ function Signup() {
             }
         }
         if (Errors.length) {
-            setError(Errors);
+            Errors.forEach((e, i) => Ura.create(Ura.e(Toast, { message: e, delay: i })));
             return;
         }
     };
@@ -64,21 +66,17 @@ function Signup() {
         Ura.e(Navbar, null),
         Ura.e("form", { className: "signup", onsubmit: createUser },
             Ura.e("div", { id: "center" },
-                Ura.e("h1", null, "add upload image"),
-                Ura.e("div", { style: { position: "absolute", top: "20px" } },
-                    Ura.e("loop", { on: getError() }, (e, index) => (Ura.e(Toast, { message: `${e}`, delay: index * 1 })))),
                 Ura.e("div", { id: "card" },
                     Ura.e("h3", { id: "title" }, "Sign up"),
+                    Ura.e("input", { type: "file", accept: "image/*", onChange: uploadImage }),
                     Ura.e("div", { id: "input-section" },
-                        Ura.e(Input, { value: "firstname", isError: getError().includes("firstname") }),
-                        Ura.e(Input, { value: "lastname", isError: getError().includes("lastname") }),
+                        Ura.e(Input, { value: "firstname" }),
+                        Ura.e(Input, { value: "lastname" }),
                         Ura.e("br", null),
-                        Ura.e(Input, { value: "username", isError: getError().includes("username") }),
-                        Ura.e(Input, { value: "display name", isError: getError().includes("display_name") }),
-                        Ura.e(Input, { value: "password", isError: getError().includes("password") ||
-                                getError().includes("confirmpassword") }),
-                        Ura.e(Input, { value: "confirm password", isError: getError().includes("password") ||
-                                getError().includes("confirmpassword") })),
+                        Ura.e(Input, { value: "username" }),
+                        Ura.e(Input, { value: "display name" }),
+                        Ura.e(Input, { value: "password" }),
+                        Ura.e(Input, { value: "confirm password" })),
                     Ura.e("div", { id: "button-section" },
                         Ura.e("button", { id: "btn", type: "submit" },
                             Ura.e(Arrow, null))),

@@ -1,4 +1,4 @@
-const endpoint = "https://localhost:8000/api";
+const endpoint = "https://localhost:8000/";
 export async function Signup(user) {
     // try {
     const response = await fetch(`${endpoint}/users/`, {
@@ -25,6 +25,7 @@ export async function Login(user) {
     const response = await fetch(`${endpoint}/users/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(user),
     });
     if (response.ok) {
@@ -44,7 +45,9 @@ export async function Login(user) {
 export async function getUser() {
     // get user data
     // try {
-    const response = await fetch(`${endpoint}/users/`);
+    const response = await fetch(`${endpoint}/users/`, {
+        credentials: "include",
+    });
     console.log("res", response);
     if (response.ok) {
         const body = await response.json();
@@ -85,6 +88,7 @@ export async function searchUser(searchTerm) {
         const response = await fetch(`${endpoint}/users/search/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "search_term": searchTerm })
         });
         if (response.ok) {
@@ -105,7 +109,9 @@ export async function getPicture(pathname) {
     try {
         // if (!userData) throw "user data is null"
         // console.log("fetch", userData.profile_picture);
-        const response = await fetch(`${endpoint}/${pathname}`);
+        const response = await fetch(`${endpoint}/${pathname}`, {
+            credentials: "include",
+        });
         if (response.ok) {
             const body = await response.blob();
             console.log("hello", body);
@@ -130,6 +136,7 @@ export async function updateUser(data) {
     const response = await fetch(`${endpoint}/users/`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", },
+        credentials: "include",
         body: JSON.stringify(data)
     });
     if (response.ok) {
@@ -146,13 +153,15 @@ export async function updateUser(data) {
 }
 export async function deleteUser() {
     try {
-        if (!userData)
-            throw "user data is null";
+        // if (!userData) throw "user data is null"
         /*
         data than can be changed:
         display_name, firstname, lastname, profile_picture, username
         */
-        const response = await fetch(`${endpoint}/users/`, { method: "DELETE", });
+        const response = await fetch(`${endpoint}/users/`, {
+            method: "DELETE",
+            credentials: "include",
+        });
         if (response.ok) {
             console.log("user deleted succefully");
         }
@@ -171,6 +180,7 @@ export async function InviteFriend(friendId) {
         const response = await fetch(`${endpoint}/relationships/invite/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", },
+            credentials: "include",
             body: JSON.stringify({ "friend_id": friendId })
         });
         if (response.ok) {
@@ -198,7 +208,9 @@ export async function getRelations() {
     }
     */
     try {
-        const response = await fetch(`${endpoint}/relationships`);
+        const response = await fetch(`${endpoint}/relationships`, {
+            credentials: "include",
+        });
         if (response.ok) {
             console.log("fetting relations succefully");
             const body = await response.json();
@@ -221,6 +233,7 @@ export async function acceptInvitation(id) {
         const response = await fetch(`${endpoint}/relationships/invite/accept/`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "invitation_id": id })
         });
         if (response.ok) {
@@ -244,6 +257,7 @@ export async function refuseInvitation(id) {
         const response = await fetch(`${endpoint}/relationships/invite/refuse/`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "invitation_id": id })
         });
         if (response.ok) {
@@ -267,6 +281,7 @@ export async function cancelInvitation(id) {
         const response = await fetch(`${endpoint}/relationships/invite/cancel/`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "invitation_id": id })
         });
         if (response.ok) {
@@ -290,6 +305,7 @@ export async function removeFriend(id) {
         const response = await fetch(`${endpoint}/relationships/unfriend/`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "friendship_id": id })
         });
         if (response.ok) {
@@ -313,6 +329,7 @@ export async function blockUser(id) {
         const response = await fetch(`${endpoint}/relationships/block/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "user_id": id })
         });
         if (response.ok) {
@@ -336,6 +353,7 @@ export async function unblockUser(id) {
         const response = await fetch(`${endpoint}/relationships/unblock/`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ "block_id": id })
         });
         if (response.ok) {

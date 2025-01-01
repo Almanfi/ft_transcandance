@@ -12,7 +12,7 @@ function User() {
     const [getShow, setShow] = State(false);
     const [getLoading, setLoading] = State(true);
     const [getUserData, setUserData] = State({
-        profile_picture: "/static/rest/images/users_profiles/default.jpg"
+    // profile_picture: "/static/rest/images/users_profiles/default.jpg"
     });
     let user = JSON.parse(Ura.store.get("user") || "{}");
     api.getUser().then((fetchedUser) => {

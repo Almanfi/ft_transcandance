@@ -170,6 +170,12 @@ function createDOM(vdom) {
                         vdom.dom = document.getElementById("root");
                         break;
                     }
+                case "get":
+                    {
+                        console.log("get by ", vdom.props.by);
+                        vdom.dom = document.querySelector(vdom.props.by);
+                        break;
+                    }
                 default:
                     if (vdom.dom)
                         console.error("e already has dom"); // TODO: to be removed
@@ -374,6 +380,9 @@ function display(vdom) {
     // ExecStack.forEach(event => event());
     // ExecStack = [];
 }
+function create(vdom) {
+    return execute(CREATE, vdom);
+}
 function init() {
     let index = 1;
     let vdom = null;
@@ -478,9 +487,8 @@ function refresh(params = {}) {
     path = normalizePath(path);
     const RouteConfig = getRoute(path);
     // console.log("go to", path);
-    return display(Ura.e("root", null, 
-    //@ts-ignore
-    Ura.e(RouteConfig, { props: params })));
+    return display(Ura.e("root", null,
+        Ura.e(RouteConfig, { props: params })));
 }
 function navigate(route, params = {}) {
     route = route.split("?")[0];
@@ -692,6 +700,7 @@ const Ura = {
     setRoute,
     getRoute,
     display,
+    create,
     sync,
     loadCSS,
     init,
