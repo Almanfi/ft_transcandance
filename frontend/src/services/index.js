@@ -7,37 +7,7 @@ import {
   unblockUser,
   searchUser
 } from "./api.js";
-
-const users = [
-  {
-    firstname: "mohammed",
-    lastname: "hrima",
-    username: "mhrima",
-    display_name: "yuliy",
-    password: "Mhrima123@@"
-  },
-  {
-    firstname: "sara",
-    lastname: "smith",
-    username: "ssmith",
-    display_name: "sara_s",
-    password: "SaraSmith456##",
-  },
-  {
-    firstname: "john",
-    lastname: "doe",
-    username: "jdoe",
-    display_name: "johnny",
-    password: "JohnDoe789**",
-  },
-  {
-    firstname: "emily",
-    lastname: "brown",
-    username: "ebrown",
-    password: "EmilyBrown101!!",
-    display_name: "em_brown"
-  }
-];
+import users from "./users.js";
 
 console.log("hello");
 const parent = document.getElementById("root")
@@ -79,7 +49,7 @@ create("get image").onclick = async () => {
     console.log(user);
     const path = "/static/rest/images/users_profiles/nl6HulGQnbWP.png"
     img.src = await getPicture(path);
-    
+
   } catch (error) {
     console.error("found error", error);
   }
@@ -115,8 +85,23 @@ create("logs all users").onclick = async () => {
 
 create("invite friends").onclick = async () => {
   await Login(users[0]);
-  const res = await InviteFriend(all[1].id)
-  console.log("adding friend", res);
+  let i = 1;
+  while (i < 5) {
+    const res = await InviteFriend(users[i].id)
+    console.log("adding friend", res);
+    i++;
+  }
+}
+
+create("accept friends").onclick = async () => {
+  let i = 1;
+  while (i < 5) {
+    await Login(users[i]);
+    const res = await getRelations();
+    console.log("fetting relations", res);
+    await Promise.all(res.invited.map(async e => await acceptInvitation(e.id)))
+    i++;
+  }
 }
 
 create("get friends").onclick = async () => {
@@ -125,12 +110,6 @@ create("get friends").onclick = async () => {
   console.log("getting friends", res);
 }
 
-create("accept friend").onclick = async () => {
-  await Login(users[1]);
-  const res = await getRelations();
-  console.log("fetting relations", res);
-  await Promise.all(res.invited.map(async e => await acceptInvitation(e.id)))
-}
 
 create("cancel invitation").onclick = async () => {
   await Login(users[0]);

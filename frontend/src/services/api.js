@@ -1,5 +1,12 @@
 const endpoint = "https://localhost:8000";
 
+async function send(url, prams) {
+  return fetch(`${endpoint}${url}`, {
+    credentials: "include",
+    ...prams
+  })
+}
+
 export async function signup(user) {
   try {
     const response = await fetch(`${endpoint}/users/`, {
@@ -217,7 +224,7 @@ export async function getRelations() {
   }
   */
   try {
-    const response = await fetch(`${endpoint}/relationships`,
+    const response = await fetch(`${endpoint}/relationships/`,
       {
         credentials: "include",
       }
@@ -387,7 +394,9 @@ const api = {
   Login,
   getUser,
   getPicture,
-  updateUser
+  updateUser,
+  getRelations,
+  deleteUser
 }
 
 export default api

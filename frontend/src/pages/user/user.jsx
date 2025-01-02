@@ -13,12 +13,14 @@ function User() {
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
   const [getLoading, setLoading] = State(true);
-  const [getUserData, setUserData] = State({
+  const userData = State({
     firstname: "",
     lastname: "",
     display_name: "",
     profile_picture:"/static/rest/images/users_profiles/profile.jpg"
   });
+
+  const [getUserData, setUserData] = userData;
 
   const fetchData = async () => {
     const Errors = [];
@@ -28,8 +30,11 @@ function User() {
       console.log("response:", res);
       setUserData(res);
       console.log("img path", getUserData().profile_picture);
-      const img = await api.getPicture(getUserData().profile_picture);
-      console.log(img);
+      // const img = await api.getPicture(getUserData().profile_picture);
+      // console.log(img);
+      
+      const relations = await api.getRelations()
+      console.log("relations:", relations);
       
       
       // setImage(`https://localhost:5000/${getUserData().profile_picture}`);
@@ -61,7 +66,7 @@ function User() {
   return render(() => (
     <if className="user" cond={getLoading() === true}>
       <Navbar />
-      <Settings getShow={getShow} setShow={setShow} setUserData={setUserData} />
+      <Settings getShow={getShow} setShow={setShow} userData={userData} />
       <div id="center" >
         <div className="user-card">
           <div className="img-container">

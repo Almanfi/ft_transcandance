@@ -4,13 +4,21 @@ import Arrow from "../../components/Arrow/Arrow.jsx";
 import Toast from "../../components/Toast/Toast.jsx";
 import Input from "../../components/input/Input.jsx";
 import api from "../../services/api.js";
+function truncateString(str) {
+    if (str.length > 17)
+        return str.substring(0, 14) + '...';
+    return str;
+}
 function Signup() {
     const [render, State] = Ura.init();
+    const [getPath, setPath] = State("");
     const [getImage, setImage] = State(null);
     const uploadImage = (e) => {
         const file = e.target.files[0];
-        if (file)
+        if (file) {
             setImage(file);
+            setPath(file.name);
+        }
     };
     const createUser = async (e) => {
         e.preventDefault();
@@ -78,7 +86,10 @@ function Signup() {
             Ura.e("div", { id: "center" },
                 Ura.e("div", { id: "card" },
                     Ura.e("h3", { id: "title" }, "Sign up"),
-                    Ura.e("input", { type: "file", accept: "image/*", onchange: uploadImage }),
+                    Ura.e("label", { htmlFor: "fileInput", className: "file-input-label" },
+                        "Load Image ",
+                        truncateString(getPath())),
+                    Ura.e("input", { type: "file", id: "fileInput", accept: "image/*", onchange: uploadImage, hidden: true }),
                     Ura.e("div", { id: "input-section" },
                         Ura.e(Input, { value: "firstname" }),
                         Ura.e(Input, { value: "lastname" }),

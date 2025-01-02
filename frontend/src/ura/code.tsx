@@ -141,7 +141,8 @@ function setProps(vdom) {
         vdom.dom.addEventListener("mouseover", props[key]);
         vdom.dom.addEventListener("mouseout", props[key]);
       } else vdom.dom.addEventListener(eventType, props[key]);
-    } else if (key === "style") Object.assign(style, props[key]);
+    }
+    else if (key === "style") Object.assign(style, props[key]);
     else {
       if (svgElements.has(tag)) vdom.dom.setAttribute(key, props[key]);
       else vdom.dom[key] = props[key];
@@ -253,8 +254,7 @@ function destroy(vdom: VDOM): void {
 function execute(mode: number, prev: VDOM, next: VDOM = null) {
   switch (mode) {
     case CREATE: {
-      if(prev.type === IF)
-      {
+      if (prev.type === IF) {
         console.error("create if tag");
       }
       createDOM(prev);
@@ -289,7 +289,7 @@ function execute(mode: number, prev: VDOM, next: VDOM = null) {
 
 // RECONCILIATION
 function reconciliateProps(oldProps: Props = {}, newProps: Props = {}, vdom: VDOM) {
-  if(!vdom.dom) return false;
+  if (!vdom.dom) return false;
   oldProps = oldProps || {};
   newProps = newProps || {};
   let diff = false;
@@ -305,7 +305,7 @@ function reconciliateProps(oldProps: Props = {}, newProps: Props = {}, vdom: VDO
         });
       } else {
         console.log(vdom);
-        if(!vdom.dom) console.warn("undefined vdom");
+        if (!vdom.dom) console.warn("undefined vdom");
         else if (vdom.dom[key] !== undefined) delete vdom.dom[key];
         else {
           try {
@@ -336,8 +336,7 @@ function reconciliateProps(oldProps: Props = {}, newProps: Props = {}, vdom: VDO
 }
 
 function reconciliate(prev: VDOM, next: VDOM) {
-  if(prev.dom === undefined)
-  {
+  if (prev.dom === undefined) {
     // console.error("this is error", prev)
   }
   if (prev.type != next.type || prev.tag != next.tag)

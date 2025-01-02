@@ -29,6 +29,28 @@
   align-items: center;
   justify-content: center;
 }
+.signup #center #card #fileInput {
+  display: none;
+}
+.signup #center #card .file-input-label {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  text-align: left;
+  padding: 6px 8px 6px 15px;
+  margin-bottom: 5px;
+  background-color: var(--red2); /* Green background */
+  border: 1px solid var(--red2);
+  color: var(--red0);
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border-radius: 6px;
+}
+.signup #center #card .file-input-label:hover {
+  background-color: var(--red0);
+  color: var(--red2);
+}
 .signup #center #card #input-section {
   flex: 4;
   display: flex;
@@ -44,10 +66,6 @@
   border-bottom: 1.5px solid var(--red2);
   background-color: transparent;
   color: var(--black4);
-}
-.signup #center #card #input-section #checkbox {
-  display: flex;
-  align-items: center;
 }
 .signup #center #card #button-section {
   flex: 4;

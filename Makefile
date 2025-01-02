@@ -4,6 +4,9 @@ ENV_PATH = .env
 all:
 	docker-compose -f ${COMPOSE_FILE} --env-file ${ENV_PATH} up -d
 
+front:
+	npm --prefix ./frontend run start
+
 down :
 	docker-compose -f ${COMPOSE_FILE} --env-file ${ENV_PATH} down
 

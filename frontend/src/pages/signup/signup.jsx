@@ -5,13 +5,23 @@ import Toast from "../../components/Toast/Toast.jsx";
 import Input from "../../components/input/Input.jsx";
 import api from "../../services/api.js";
 
+function truncateString(str) {
+  if (str.length > 17) return str.substring(0, 14) + '...';
+  return str;
+}
+
+
 function Signup() {
   const [render, State] = Ura.init();
+  const [getPath, setPath] = State("");
   const [getImage, setImage] = State(null);
 
   const uploadImage = (e) => {
     const file = e.target.files[0];
-    if (file) setImage(file);
+    if (file) {
+      setImage(file);
+      setPath(file.name)
+    }
   };
 
   const createUser = async (e) => {
@@ -80,7 +90,8 @@ function Signup() {
         <div id="center">
           <div id="card">
             <h3 id="title">Sign up</h3>
-            <input type="file" accept="image/*" onchange={uploadImage} />
+            <label htmlFor="fileInput" className="file-input-label">Load Image {truncateString(getPath())}</label>
+            <input type="file" id="fileInput" accept="image/*" onchange={uploadImage} hidden />
             <div id="input-section">
               <Input value="firstname" />
               <Input value="lastname" />

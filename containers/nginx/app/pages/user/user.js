@@ -12,12 +12,13 @@ function User() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);
     const [getLoading, setLoading] = State(true);
-    const [getUserData, setUserData] = State({
+    const userData = State({
         firstname: "",
         lastname: "",
         display_name: "",
         profile_picture: "/static/rest/images/users_profiles/profile.jpg"
     });
+    const [getUserData, setUserData] = userData;
     const fetchData = async () => {
         const Errors = [];
         try {
@@ -25,8 +26,10 @@ function User() {
             console.log("response:", res);
             setUserData(res);
             console.log("img path", getUserData().profile_picture);
-            const img = await api.getPicture(getUserData().profile_picture);
-            console.log(img);
+            // const img = await api.getPicture(getUserData().profile_picture);
+            // console.log(img);
+            const relations = await api.getRelations();
+            console.log("relations:", relations);
             // setImage(`https://localhost:5000/${getUserData().profile_picture}`);
         }
         catch (err) {
@@ -57,7 +60,7 @@ function User() {
     console.log("hello this is user:", getUserData());
     return render(() => (Ura.e("if", { className: "user", cond: getLoading() === true },
         Ura.e(Navbar, null),
-        Ura.e(Settings, { getShow: getShow, setShow: setShow, setUserData: setUserData }),
+        Ura.e(Settings, { getShow: getShow, setShow: setShow, userData: userData }),
         Ura.e("div", { id: "center" },
             Ura.e("div", { className: "user-card" },
                 Ura.e("div", { className: "img-container" },
