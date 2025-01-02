@@ -38,6 +38,7 @@ export class KeyControls extends Controls {
         this.angle = 0;
         this.direction = new THREE.Vector3(0, 0, 0);
         this.move = { x: 0, y: 0 };
+        this.action = { f: false, d: false };
         this.Wkey.press = press.bind(this.Wkey);
         this.Akey.press = press.bind(this.Akey);
         this.Skey.press = press.bind(this.Skey);

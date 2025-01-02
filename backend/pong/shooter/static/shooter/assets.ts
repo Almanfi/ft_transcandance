@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Player } from './player';
+import { Player } from './player.js';
 
 
 export function initPlane(): THREE.Mesh {
@@ -19,6 +19,15 @@ function applyPlaneRotation(vect, angle) {
 	vect.applyMatrix3(new THREE.Matrix3(cosA, 0, sinA, 0, 1, 0, - sinA, 0, cosA));
 }
 
+interface TurretProps {
+    radius?: number;
+    color?: number;
+    initPosition?: THREE.Vector3;
+    speed?: number;
+    rotationSpeed?: number;
+    fireAngle?: number;
+}
+
 export class Turret extends THREE.Mesh {
     radius: number;
     color: number;
@@ -28,15 +37,21 @@ export class Turret extends THREE.Mesh {
     fireAngle: number;
     bulletManager: TurretBulletManager;
     timeStamp: number;
+    timeout: any;
 
-    constructor(props = {radius: 3, color: 0x000000}) {
-        let color = props.color;
-        const geometry = new THREE.SphereGeometry(props.radius);
+    constructor(bulletManager: TurretBulletManager,
+        props: TurretProps = { }) {
+        let color = props.color  || 0x000000;
+        let radius = props.radius || 3;
+        console.log('Turret props: ', props);
+        const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshPhysicalMaterial({ color });
         super(geometry, material);
 
         Object.assign(this, {
-            initPosition: { x: 0, y: 0, z: 0 },
+            radius: 3,
+            color: 0x000000,
+            initPosition: new THREE.Vector3(),
             speed: 0.5,
             rotationSpeed: 0.02,
             fireAngle: 0,
@@ -44,7 +59,13 @@ export class Turret extends THREE.Mesh {
 
 		this.position.set(this.initPosition.x, this.initPosition.y, this.initPosition.z);
         this.timeStamp = performance.now();
+        this.addBulletManager(bulletManager);
 	};
+
+    reset() {
+        this.timeStamp = performance.now();
+        this.fireAngle = 0;
+    }
 
     addBulletManager(bulletManager) {
         this.bulletManager = bulletManager;
@@ -70,21 +91,58 @@ export class Turret extends THREE.Mesh {
         this.bulletManager.spawnBullet(color, this.position, vect3, spawnTime);
 	};
 
-    fireAtAngle(color, angle) {
+    fireAtAngle(color: number, angle: number) {
         this.fireAngle += angle;
         this.fire(color);
         this.fireAngle -= angle;
     }
 
-
-	update(timeStamp) {
+	update(timeStamp: number) {
         this.timeStamp = timeStamp;
         let time = timeStamp;
         this.fireAngle = time / 1000;
 	};
-	addToScene(scene) {
+
+	addToScene(scene: THREE.Scene) {
 		scene.add(this);
-	}
+	};
+
+    sync(beat: { time: number, type: number, handled: boolean }) {
+        let listen = true;
+        if (listen && beat && beat.type && !beat.handled) {
+            beat.handled = true;
+            // console.log('beat: ', beat);
+            // console.log(performance.now() - startTime);
+            this.update(beat.time);
+
+            switch (beat.type) {
+                case 1:
+                    this.fire(0xfc7703);
+                    break;
+                case 2:
+                    this.fire(0xff0000);
+                    this.fireAtAngle(0xff0000, Math.PI / 8);
+                    this.fireAtAngle(0xff0000, 2 * Math.PI / 8);
+                    this.fireAtAngle(0xff0000, 3 * Math.PI / 8);
+                    break;
+            }
+
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+                this.timeout = null;
+            }
+
+            let scale = 1.2;
+            this.scale.set(scale, scale, scale)
+            let delay = 400;
+
+            this.timeout = setTimeout(() => {
+                let scale = 1;
+                this.scale.set(scale, scale, scale);
+                this.timeout = null;
+            }, delay, this.scale);
+        }
+    }
 }
 
 type MyGeometry = THREE.SphereGeometry | THREE.CapsuleGeometry;
@@ -332,7 +390,6 @@ class ABulletManager {
     bullets: Map<number, any>;
     bulletsPool: Map<number, any>;
     destroyedBullets: Map<number, any>;
-    startTime: number;
 
     constructor(scene: THREE.Scene) {
         this.scene = scene;
@@ -341,8 +398,7 @@ class ABulletManager {
         this.destroyedBullets = new Map();
     }
 
-    reset(startTime: number) {
-        this.startTime = startTime;
+    reset() {
         this.bullets.forEach((elem) => {
             this.despawnBullet(elem);
         })
@@ -433,8 +489,6 @@ class ABulletManager {
 
 }
 
-
-
 export class PlayersBulletManager extends ABulletManager {
     constructor(scene: THREE.Scene) {
         super (scene);
@@ -521,7 +575,7 @@ export class PlayersBulletManager extends ABulletManager {
         }
     }
 
-    checkCollision(other, s) {
+    checkCollision(other: Player, s: number) {
         let vex = new THREE.Vector3();
         for(var [key, bullet] of this.bullets) {
             if (bullet.intersects(other, s, vex)) {
@@ -542,7 +596,7 @@ export class PlayersBulletManager extends ABulletManager {
 }
 
 export class TurretBulletManager extends ABulletManager {
-    constructor(scene) {
+    constructor(scene: THREE.Scene) {
         super(scene);
         this.createBulletsPool(500);
     }
@@ -551,7 +605,8 @@ export class TurretBulletManager extends ABulletManager {
         return new TurretBullet();
     }
 
-    spawnBullet(color, position, speed, spawnTime) {
+    spawnBullet(color: number, position: THREE.Vector3,
+        speed: THREE.Vector3, spawnTime: number) {
         let bullet = this.getBullet() as TurretBullet;
         bullet.set(color, position, speed, spawnTime);
         bullet.visible = true;

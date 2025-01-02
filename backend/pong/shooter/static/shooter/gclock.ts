@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 export class gameClock {
 	scene: THREE.Scene;
-    camera: THREE.PerspectiveCamera;
-    renderer: THREE.WebGLRenderer;
+    camera: THREE.Camera;
+    renderer: THREE.Renderer;
 
     msPrev: number;
     msNow: number;
@@ -21,7 +21,7 @@ export class gameClock {
 	startTime: number;
 	saveTime: number;
 	
-	constructor(scene, camera, renderer) {
+	constructor(scene: THREE.Scene, camera: THREE.Camera, renderer: THREE.Renderer) {
 		this.setFps(60);
 		this.msPrev = 0;
 		this.msNow = performance.now();
@@ -40,7 +40,7 @@ export class gameClock {
 		this.saveTime = this.startTime;
 	}
 
-	setFps(fps) {
+	setFps(fps: number) {
 		this.fps = fps;
 		this.msPerFrame = Math.floor(1000 / fps);
 	}
@@ -54,7 +54,7 @@ export class gameClock {
 		this.frame++;
 	}
 
-	getFrameTime(reverseIdx) {
+	getFrameTime(reverseIdx: number) {
 		if (reverseIdx > 60) {
 			console.log("invalid frame time index");// get rid of this
 			return ;
@@ -62,7 +62,7 @@ export class gameClock {
 		return this.frameTimes[(this.frame - reverseIdx + 59) % 60];
 	}
 
-	setStartTime(startTime) {
+	setStartTime(startTime: number) {
 		this.msPrev = 0;
 		this.excessTime = 0;
 		this.frame = 0;
@@ -72,7 +72,9 @@ export class gameClock {
 	}
 
 
-	loop(animate, rollBack, handleInputs) {
+	loop(animate: (passed: number, prev: number) => void,
+		rollBack: (start: number) => void,
+		handleInputs: (passed: number, prev: number) => void) {
 		window.requestAnimationFrame(() => this.loop(animate, rollBack, handleInputs));
 		rollBack(this.startTime);
 		this.msNow = performance.now() - this.startTime;

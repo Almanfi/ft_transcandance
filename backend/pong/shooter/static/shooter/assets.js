@@ -8,328 +8,582 @@ export function initPlane() {
     plane.rotateX(Math.PI / 2);
     return plane;
 }
-class Inputs {
-    constructor() {
-        this.order = 0;
-        this.move = { x: 0, y: 0 };
-        this.angle = 0;
-        this.direction = new THREE.Vector3(1, 0, 0);
-        this.action = { f: false, d: false };
-        this.timeStamp = 0;
-    }
-    calcMovementVector(frontVector) {
-        var speedVect = new THREE.Vector3(0, 0, 0);
-        const sideOnPlane = frontVector.clone().cross(new THREE.Vector3(0, 1, 0));
-        let move = this.move;
-        speedVect.addScaledVector(frontVector, move.y);
-        speedVect.addScaledVector(sideOnPlane, move.x);
-        speedVect.normalize();
-        return speedVect;
-    }
-    fire() {
-        return this.action.f;
-    }
-    set(move, angle, direction, action, timeStamp) {
-        this.order++;
-        this.move = { x: move.x, y: move.y };
-        this.angle = angle;
-        this.direction = direction.clone();
-        this.action = { f: action.f, d: action.d };
-        this.timeStamp = timeStamp;
-    }
+function applyPlaneRotation(vect, angle) {
+    let cosA = Math.cos(angle);
+    let sinA = Math.sin(angle);
+    vect.applyMatrix3(new THREE.Matrix3(cosA, 0, sinA, 0, 1, 0, -sinA, 0, cosA));
 }
-export class Player extends THREE.Object3D {
-    constructor(position) {
-        super();
-        this.radius = 1.5;
-        var core = createCore();
-        var cannon = createCannon();
-        this.core = core;
-        this.cannon = cannon;
-        this.add(core);
-        this.add(cannon);
-        this.position.set(position.x, position.y, position.z);
-        let scale = 2;
-        this.scale.set(scale, scale, scale);
-        this.fireRate = 100;
-        this.bulletDelay = 50;
-        this.lastFire = 0;
-        this.fired = false;
-        this.inputs = new Inputs();
-        this.oldPosition = this.position.clone();
-        this.movementVector = new THREE.Vector3();
-        this.actions = new Map();
+export class Turret extends THREE.Mesh {
+    constructor(bulletManager, props = {}) {
+        let color = props.color || 0x000000;
+        let radius = props.radius || 3;
+        console.log('Turret props: ', props);
+        const geometry = new THREE.SphereGeometry(radius);
+        const material = new THREE.MeshPhysicalMaterial({ color });
+        super(geometry, material);
+        Object.assign(this, {
+            radius: 3,
+            color: 0x000000,
+            initPosition: new THREE.Vector3(),
+            speed: 0.5,
+            rotationSpeed: 0.02,
+            fireAngle: 0,
+        }, props);
+        this.position.set(this.initPosition.x, this.initPosition.y, this.initPosition.z);
+        this.timeStamp = performance.now();
+        this.addBulletManager(bulletManager);
     }
     ;
     reset() {
-        this.actions.clear();
-        this.lastFire = 0;
-    }
-    addToScene(scene) {
-        this.scene = scene;
-        scene.add(this);
-    }
-    setPlaneVector(planeFacingVector) {
-        this.planeFacingVector = planeFacingVector;
-    }
-    // attachControls(controls) {
-    //     this.controls = controls;
-    // }
-    addBulletSound(sound) {
-        // this.bulletSound = sound;
+        this.timeStamp = performance.now();
+        this.fireAngle = 0;
     }
     addBulletManager(bulletManager) {
         this.bulletManager = bulletManager;
     }
-    despawnUncertainBullets(time) {
-        time = time - this.bulletDelay;
-        // console.log('despawning bullets after time: ', time);
-        this.bulletManager.bullets.forEach(bullet => {
-            if (bullet.date > time) {
-                console.log('despawning bullet fired last at: ', bullet.date);
-                this.bulletManager.despawnBullet(bullet);
+    fire(color) {
+        let ballSpeed = this.speed;
+        let spawnTime = this.timeStamp;
+        let vect0 = new THREE.Vector3(1, 0, 0).multiplyScalar(ballSpeed);
+        applyPlaneRotation(vect0, this.fireAngle + 2 * Math.PI);
+        this.bulletManager.spawnBullet(color, this.position, vect0, spawnTime);
+        let vect1 = new THREE.Vector3(1, 0, 0).multiplyScalar(ballSpeed);
+        applyPlaneRotation(vect1, this.fireAngle + Math.PI / 2);
+        this.bulletManager.spawnBullet(color, this.position, vect1, spawnTime);
+        let vect2 = new THREE.Vector3(1, 0, 0).multiplyScalar(ballSpeed);
+        applyPlaneRotation(vect2, this.fireAngle + Math.PI);
+        this.bulletManager.spawnBullet(color, this.position, vect2, spawnTime);
+        let vect3 = new THREE.Vector3(1, 0, 0).multiplyScalar(ballSpeed);
+        applyPlaneRotation(vect3, this.fireAngle + 3 * Math.PI / 2);
+        this.bulletManager.spawnBullet(color, this.position, vect3, spawnTime);
+    }
+    ;
+    fireAtAngle(color, angle) {
+        this.fireAngle += angle;
+        this.fire(color);
+        this.fireAngle -= angle;
+    }
+    update(timeStamp) {
+        this.timeStamp = timeStamp;
+        let time = timeStamp;
+        this.fireAngle = time / 1000;
+    }
+    ;
+    addToScene(scene) {
+        scene.add(this);
+    }
+    ;
+    sync(beat) {
+        let listen = true;
+        if (listen && beat && beat.type && !beat.handled) {
+            beat.handled = true;
+            // console.log('beat: ', beat);
+            // console.log(performance.now() - startTime);
+            this.update(beat.time);
+            switch (beat.type) {
+                case 1:
+                    this.fire(0xfc7703);
+                    break;
+                case 2:
+                    this.fire(0xff0000);
+                    this.fireAtAngle(0xff0000, Math.PI / 8);
+                    this.fireAtAngle(0xff0000, 2 * Math.PI / 8);
+                    this.fireAtAngle(0xff0000, 3 * Math.PI / 8);
+                    break;
             }
-        });
-        this.bulletManager.destroyedBullets.forEach(bullet => {
-            if (bullet.date > time) {
-                console.log('despawning bullet');
-                this.bulletManager.returnDestroyedBullet(bullet);
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+                this.timeout = null;
             }
-        });
+            let scale = 1.2;
+            this.scale.set(scale, scale, scale);
+            let delay = 400;
+            this.timeout = setTimeout(() => {
+                let scale = 1;
+                this.scale.set(scale, scale, scale);
+                this.timeout = null;
+            }, delay, this.scale);
+        }
     }
-    rollbackActoin(action, lastActionTime, planeFacingVector, actionTime) {
-        // let spanS = (action.timeStamp - lastActionTime);
-        // console.log('rolling back action old actionat time: ', lastActionTime, " to: ", action.timeStamp);
-        // console.log(`at time of old action: ${lastActionTime}: position: ${JSON.stringify(this.position)}`);
-        // this.update(spanS, planeFacingVector, action.timeStamp, actionTime)
-        // console.log(`at time of new action: ${action.timeStamp}: position: ${JSON.stringify(this.position)}`);
-        // this.controls.applyAction(action);
+}
+class ABullet extends THREE.Mesh {
+    constructor(geometry, material) {
+        super(geometry, material);
+        // this.oldPosition = new THREE.Vector3();
     }
-    rollBack(timeStamp) {
-        // this.position.copy(this.controls.position);
-        // this.oldPosition.copy(this.position);
-        // this.movementVector.copy(this.controls.movementVector);
-        // this.position.addScaledVector(this.movementVector, 1);
-        // if (this.controls.wasFired())
-        // {
-        //     this.lastFire = timeStamp;
-        //     this.fired = this.fire(timeStamp);
-        // }
-        // this.addRollBackAction(timeStamp);
+    setOriginal(position, speed, spawnTime) {
+        this.date = spawnTime;
+        this.speed = speed;
+        this.position.set(position.x, position.y, position.z);
+        this.initPosition.copy(position);
     }
-    update(timeS, timeStamp, actionTime) {
-        let speed = (30 * timeS) / 1000;
-        const projectionOnPlane = this.planeFacingVector;
-        this.core.rotateY(0.1);
-        // this.cannon.head.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
-        this.cannon.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), this.inputs.angle);
-        this.oldPosition.copy(this.position);
-        // this.oldMovementVector.copy(this.movementVector);
-        this.movementVector.copy(this.inputs.calcMovementVector(projectionOnPlane));
-        // console.log(`movement vector: of ${this.name}`, this.movementVector);
-        // this.movementVector.multiplyScalar(speed);
-        this.position.addScaledVector(this.movementVector, speed);
-        // if (this.controls.sendActionToPeer && this.saveAction) {
-        //     this.currInput = {};
-        //     this.currmouse = {};
-        //     if (this.controls.Wkey.hold !== this.move.up)
-        //         this.currInput.up = this.controls.Wkey.hold;
-        //     if (this.controls.Skey.hold !== this.move.down)
-        //         this.currInput.down = this.controls.Skey.hold;
-        //     if (this.controls.Akey.hold !== this.move.left)
-        //         this.currInput.left = this.controls.Akey.hold;
-        //     if (this.controls.Dkey.hold !== this.move.right)
-        //         this.currInput.right = this.controls.Dkey.hold;
-        //     if (this.controls.Lclick.hold !== this.mouse.Lclick)
-        //         this.currMouseInput.Lclick = this.controls.Lclick.hold;
-        //     Object.assign(this.mouse, this.currMouseInput);
-        //     Object.assign(this.move, this.currInput);
-        // }
-        // this.addAction(actionTime);
-        // if (performance.now() - this.lastFire > 70)
-        this.fired = this.fire(timeStamp, timeS);
-        // if (this.fired) {
-        //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
-        // }
-    }
-    addRollBackAction(timeStamp) {
-        // let action = {
-        //     startPosition: this.oldPosition,
-        //     movementVector: this.movementVector,
-        //     fire: this.fired,
-        //     move: this.controls.move,
-        //     angle: this.controls.angle,
-        //     direction: this.controls.direction,
-        //     Lclick: this.controls.Lclick,
-        //     timeStamp: timeStamp,
-        //     frame: 0,
-        // }
-        // this.actions.set(timeStamp, action);
-    }
-    addAction(timeStamp) {
-        // let action = {
-        //     startPosition: this.oldPosition.clone(),
-        //     movementVector: this.oldMovementVector.clone(),
-        //     move: {...this.controls.move},
-        //     angle: this.controls.angle,
-        //     direction: this.controls.direction.clone(),
-        //     Lclick: this.controls.Lclick,
-        //     lastFire: this.lastFire,
-        //     timeStamp: timeStamp,
-        // }
-        // this.actions.set(timeStamp, action);
-        // if (this.controls.sendActionToPeer && this.saveAction) {
-        //     this.saveAction = false;
-        //     let data = {}
-        //     // data.position = this.oldPosition;
-        //     // data.movementVector = this.movementVector;
-        //     data.move = this.currInput;
-        //     data.angle = this.controls.angle;
-        //     data.direction = this.controls.direction;
-        //     data.mouse = this.currMouseInput;
-        //     // data.fired = this.fired;
-        //     data.timeStamp = timeStamp;
-        //     this.controls.sendActionToPeer(data);
-        // }
-    }
-    findStateAtTime(time) {
-        // let iterator = this.actions.entries();
-        // let action = iterator.next().value;
-        // let previousAction  = null;
-        // while (action) {
-        //     if (action[0] < time) {
-        //         // if (action[0] + 500 > time)
-        //         //     console.log('previous state at time: ', action[0], " pos: ", action[1].startPosition, " vect: ", action[1].movementVector);
-        //         // if (previousAction) {
-        //         //     this.actions.delete(previousAction[0]);
-        //         // }
-        //         previousAction = action;
-        //         action = iterator.next().value;
-        //     }
-        //     else
-        //         break;
-        // }
-        // // if (previousAction)// later
-        // //     action = previousAction;
-        // if (!action)
-        //     return;
-        // // this.position.copy(action[1].startPosition).addScaledVector(action[1].movementVector, 1);
-        // this.position.copy(action[1].startPosition);
-        // // console.log("old action at frame time: ", time, " action: ", JSON.stringify(action[1]));
-        // this.controls.move = action[1].move;
-        // this.controls.angle = action[1].angle;
-        // this.controls.direction = action[1].direction;
-        // this.controls.Lclick = action[1].Lclick;
-        // this.lastFire = action[1].lastFire;
-        // console.log('last state position: ', action[1].startPosition,
-        // 'movement vector: ', action[1].movementVector,
-        // ' at action time: ', action[0], "at time: ", time);
-        // // console.log("last fired of action: ", action[1].lastFire, " and of prev action: ", previousAction[1].lastFire);
-        // this.actions.clear();
-    }
-    findPositionAtTime(time) {
-        // let iterator = this.actions.entries();
-        // let action = iterator.next().value;
-        // let previousAction;
-        // while (action) {
-        //     if (action[0] < time) {
-        //         if (previousAction)
-        //             this.actions.delete(previousAction[0]);
-        //         previousAction = action;
-        //         action = iterator.next().value;
-        //     }
-        //     else
-        //         break;
-        // }
-        // if (!previousAction)
-        //     return;
-        // this.oldPosition.copy(previousAction[1].startPosition);
-        // this.movementVector.copy(previousAction[1].movementVector);
-        // this.position.copy(this.oldPosition).addScaledVector(this.movementVector, 1);
+    update(time) {
+        this.position.copy(this.initPosition)
+            .addScaledVector(this.speed, this.speedRate * ((time - this.date) / 1000));
     }
     getCurrentPosition(radius) {
-        let vect = new THREE.Vector3();
-        vect.copy(this.movementVector).normalize();
         let point = new THREE.Vector3();
         point.copy(this.position);
-        point.addScaledVector(this.movementVector, radius);
+        point.addScaledVector(this.speed, radius);
         return point;
     }
     getOldPosition(radius, s) {
-        let vect = new THREE.Vector3();
-        vect.copy(this.movementVector).normalize();
         let point = new THREE.Vector3();
-        point.copy(this.oldPosition);
-        point.addScaledVector(this.movementVector, -radius);
+        point.copy(this.position);
+        point.addScaledVector(this.speed, -radius - this.speedRate * s);
         return point;
     }
     lastPosition(s) {
-        return this.oldPosition;
+        // return this.oldPosition;
+        let lastPosition = new THREE.Vector3();
+        lastPosition.copy(this.position);
+        lastPosition.addScaledVector(this.speed, -this.speedRate * s);
+        return lastPosition;
     }
-    fire(time, span) {
-        if (!this.inputs.fire()) {
-            if (this.cannon.head.position.z < -2)
-                this.cannon.head.position.z += 0.2;
+}
+export class TurretBullet extends ABullet {
+    constructor() {
+        let radius = 1.5;
+        const geometry = new THREE.SphereGeometry(radius);
+        const material = new THREE.MeshBasicMaterial();
+        super(geometry, material);
+        this.radius = radius;
+        this.speedRate = 50;
+        this.initPosition = new THREE.Vector3();
+    }
+    set(color, position, speed, spawnTime) {
+        this.setOriginal(position, speed, spawnTime);
+        this.material.color.set(color);
+    }
+    isSlowerThan(other) {
+        return this.speedRate < other.speedRate;
+    }
+    intersects(other, s, vex) {
+        s = s / 1000;
+        let radius = this.radius + other.radius;
+        vex.subVectors(this.position, other.position);
+        let distance = vex.length();
+        if (distance < radius)
+            return true;
+        if (distance > 20) // filter far objects
+            return false;
+        let isSlow = this.isSlowerThan(other);
+        let fastest = isSlow ? other : this;
+        let slowest = isSlow ? this : other;
+        if (slowest.lastPosition(s).distanceTo(slowest.position) < 0.001) {
+            return lineIntersectsCircle(fastest.lastPosition(s), fastest.position, slowest.position, radius);
+        }
+        let thisStart = this.getOldPosition(radius, s);
+        let thisEnd = this.getCurrentPosition(radius);
+        let otherStart = other.getOldPosition(radius, s);
+        let otherEnd = other.getCurrentPosition(radius);
+        if (doIntersect(thisStart, thisEnd, otherStart, otherEnd)) {
+            // console.log(`doIntersect(${JSON.stringify(thisStart)}, ${JSON.stringify(thisEnd)}, ${JSON.stringify(otherStart)}, ${JSON.stringify(otherEnd)})`);
+            return true;
+        }
+        return false;
+    }
+}
+export class PlayerBullet extends ABullet {
+    constructor() {
+        let radius = 1;
+        const geometry = new THREE.CapsuleGeometry(radius, 2, 2, 4);
+        const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1 });
+        super(geometry, material);
+        this.radius = radius;
+        this.speedRate = 100;
+        this.initPosition = new THREE.Vector3();
+    }
+    set(color, position, speed, angle, spawnTime) {
+        this.setOriginal(position, speed, spawnTime);
+        this.material.color.set(color);
+        this.material.emissive.set(0xeeeeee);
+        this.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+        this.rotateX(Math.PI / 2);
+    }
+    getOldPosition(radius, s) {
+        let point = new THREE.Vector3();
+        point.copy(this.position);
+        point.addScaledVector(this.speed, -radius - this.speedRate * s);
+        return point;
+    }
+    lastPosition(s) {
+        // return this.oldPosition;
+        let lastPosition = new THREE.Vector3();
+        lastPosition.copy(this.position);
+        lastPosition.addScaledVector(this.speed, -this.speedRate * s);
+        return lastPosition;
+    }
+    intersects(other, s, vex) {
+        s = s / 1000;
+        let radius = this.radius + other.radius;
+        vex.subVectors(this.position, other.position);
+        let distance = vex.length();
+        if (distance < radius)
+            return true;
+        vex.subVectors(this.lastPosition(s), other.lastPosition(s));
+        distance = vex.length();
+        if (distance < radius)
+            return true;
+        if (distance > 20)
+            return false;
+        let thisStart = this.lastPosition(s);
+        let thisEnd = this.position;
+        let otherStart = other.lastPosition(s);
+        let otherEnd = other.position;
+        if (thisStart.distanceTo(thisEnd) < 0.001) {
+            return lineIntersectsCircle(otherStart, otherEnd, thisEnd, radius);
+        }
+        else if (otherStart.distanceTo(otherEnd) < 0.001) {
+            return lineIntersectsCircle(thisStart, thisEnd, otherEnd, radius);
+        }
+        if (lineIntersectsCircle(thisStart, thisEnd, otherStart, radius)) {
+            console.log('lineIntersectsCircle(thisStart, thisEnd, otherStart, radius)');
+            return true;
+        }
+        if (lineIntersectsCircle(thisStart, thisEnd, otherEnd, radius)) {
+            console.log('lineIntersectsCircle(thisStart, thisEnd, otherEnd, radius)');
+            return true;
+        }
+        if (doIntersect(thisStart, thisEnd, otherStart, otherEnd)) {
+            console.log('doIntersect(thisStart, thisEnd, otherStart, otherEnd)');
+            return true;
+        }
+        return false;
+    }
+}
+function doIntersect(p1, q1, p2, q2) {
+    function orientation(p, q, r) {
+        let val = (q.z - p.z) * (r.x - q.x) - (q.x - p.x) * (r.z - q.z);
+        if (val === 0)
+            return 0;
+        return (val > 0) ? 1 : 2;
+    }
+    function onSegment(p, q, r) {
+        return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
+            q.z <= Math.max(p.z, r.z) && q.z >= Math.min(p.z, r.z);
+    }
+    let o1 = orientation(p1, q1, p2);
+    let o2 = orientation(p1, q1, q2);
+    let o3 = orientation(p2, q2, p1);
+    let o4 = orientation(p2, q2, q1);
+    if (o1 !== o2 && o3 !== o4)
+        return true;
+    if (o1 === 0 && onSegment(p1, p2, q1))
+        return true;
+    if (o2 === 0 && onSegment(p1, q2, q1))
+        return true;
+    if (o3 === 0 && onSegment(p2, p1, q2))
+        return true;
+    if (o4 === 0 && onSegment(p2, q1, q2))
+        return true;
+    return false;
+}
+function lineIntersectsCircle(lineStart, lineEnd, circleCenter, radius) {
+    const dx = lineEnd.x - lineStart.x;
+    const dy = lineEnd.z - lineStart.z;
+    const fx = lineStart.x - circleCenter.x;
+    const fy = lineStart.z - circleCenter.z;
+    const A = dx * dx + dy * dy;
+    const B = 2 * (fx * dx + fy * dy);
+    const C = (fx * fx + fy * fy) - radius * radius;
+    const discriminant = B * B - 4 * A * C;
+    if (discriminant < 0) {
+        // No intersection
+        return false;
+    }
+    else {
+        // Check if the intersection points are within the segment
+        const t1 = (-B - Math.sqrt(discriminant)) / (2 * A);
+        const t2 = (-B + Math.sqrt(discriminant)) / (2 * A);
+        // Check if either t1 or t2 is within the range [0, 1]
+        if ((t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1)) {
+            return true;
+        }
+        else {
             return false;
         }
-        if (this.cannon.head.position.z > -2.4)
-            this.cannon.head.position.z -= 0.1;
-        let start = this.lastFire + this.fireRate;
-        if (start < time) {
-            console.log(`start: ${start} < time: ${time}`);
-            start = time;
-        }
-        // console.log(`start: ${start}, time: ${time}`)
-        let end = time + span;
-        // if (end <= start) {
-        //     console.log(`warning: end: ${end} >= start: ${start}`);
-        // }
-        while (start < end) {
-            // console.log('fired last at : ', this.lastFire);
-            this.lastFire = start;
-            let spawnTime = this.lastFire - this.bulletDelay;
-            console.log('fired at : ', this.lastFire);
-            // this.bulletManager.spawnBullet(0xffffff, this.position, this.inputs.direction.clone(), this.inputs.angle, spawnTime);
-            // uncomment for bullet sound
-            // this.bulletSound.stop();
-            // this.bulletSound.setDetune((0.5 - Math.random()) * 50)
-            // this.bulletSound.play();
-            // console.log('fire rate: ', this.fireRate, `start: ${start}, end: ${end}, timeS: ${spanS}`);
-            // console.log("bullet nbr ", this.bulletManager.bullets.size);
-            start += this.fireRate;
-        }
-        return true;
     }
 }
-function createCore() {
-    let scale = 1;
-    const geometry = new THREE.CapsuleGeometry(scale, 1, 4, 6);
-    const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.3, emissive: 0x777777, emissiveIntensity: 0.8 });
-    const core = new THREE.Mesh(geometry, material);
-    core.name = 'core';
-    core.position.set(0, 0, 0);
-    return core;
-}
-class CannonObject extends THREE.Object3D {
-    constructor() {
-        super();
-        const invisibleCore = createCore();
-        invisibleCore.visible = false;
-        const geometry = new THREE.CylinderGeometry(0, 0.7, 1.5, 6);
-        const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.1, emissive: 0xeeeef7, emissiveIntensity: 0.8 });
-        const cannonHead = new THREE.Mesh(geometry, material);
-        cannonHead.name = 'cannonHead';
-        cannonHead.position.y = 0;
-        cannonHead.position.z = -2;
-        cannonHead.position.x = 0;
-        cannonHead.rotateX(-Math.PI / 2);
-        this.head = cannonHead;
-        this.add(invisibleCore);
-        this.add(cannonHead);
-        this.name = 'cannon';
+class ABulletManager {
+    constructor(scene) {
+        this.scene = scene;
+        this.bullets = new Map();
+        this.bulletsPool = new Map();
+        this.destroyedBullets = new Map();
+    }
+    reset() {
+        this.bullets.forEach((elem) => {
+            this.despawnBullet(elem);
+        });
+        this.destroyedBullets.forEach((elem) => {
+            this.returnDestroyedBullet(elem);
+        });
+    }
+    createBullet() {
+        return new PlayerBullet();
+    }
+    createBulletsPool(poolSize) {
+        console.log('createBulletsPool of size: ', poolSize, "now pool has : ", this.bulletsPool.size, "and used bullets are : ", this.bullets.size);
+        for (let i = 0; i < poolSize; i++) {
+            let bullet = this.createBullet();
+            bullet.visible = false;
+            this.scene.add(bullet);
+            this.bulletsPool.set(bullet.id, bullet);
+        }
+    }
+    despawnBullet(bullet) {
+        bullet.visible = false;
+        this.returnBullet(bullet);
+    }
+    destroyBullet(bullet) {
+        bullet.visible = false;
+        bullet.destructionTime = performance.now();
+        this.destroyedBullets.set(bullet.id, bullet);
+        this.bullets.delete(bullet.id);
+    }
+    undestroyBullet(bullet) {
+        bullet.visible = true;
+        this.bullets.set(bullet.id, bullet);
+        this.destroyedBullets.delete(bullet.id);
+    }
+    getBullet() {
+        if (this.bulletsPool.size < 1) {
+            this.createBulletsPool(10);
+            return this.getBullet();
+        }
+        let bullet = this.bulletsPool.values().next().value;
+        this.bulletsPool.delete(bullet.id);
+        this.bullets.set(bullet.id, bullet);
+        return bullet;
+    }
+    returnBullet(bullet) {
+        this.bulletsPool.set(bullet.id, bullet);
+        this.bullets.delete(bullet.id);
+    }
+    returnDestroyedBullet(bullet) {
+        this.bulletsPool.set(bullet.id, bullet);
+        this.destroyedBullets.delete(bullet.id);
+    }
+    update(timeNow) {
+        let dateNow = timeNow;
+        this.bullets.forEach((elem) => {
+            if (dateNow > elem.date + 10 * 1000) {
+                this.despawnBullet(elem);
+            }
+            else
+                elem.update(dateNow);
+        });
+        this.destroyedBullets.forEach((elem) => {
+            if (dateNow > elem.date + 10 * 1000) {
+                this.returnDestroyedBullet(elem);
+            }
+        });
+    }
+    findPositionAtTime(time) {
+        this.bullets.forEach((elem) => {
+            if (time > elem.date)
+                elem.update(time);
+        });
+        this.destroyedBullets.forEach((elem) => {
+            if (time > elem.date)
+                elem.update(time);
+        });
     }
 }
-function createCannon() {
-    const cannon = new CannonObject();
-    return cannon;
+export class PlayersBulletManager extends ABulletManager {
+    constructor(scene) {
+        super(scene);
+        this.createBulletsPool(120);
+    }
+    createBullet() {
+        return new PlayerBullet();
+    }
+    spawnBullet(color, position, speed, angle, spawnTime) {
+        let bullet = this.getBullet();
+        bullet.set(color, position, speed, angle, spawnTime);
+        bullet.visible = true;
+    }
+    batchUndestroyBullet() {
+        // this.destroyedBullets.forEach((elem) => {
+        //     this.undestroyBullet(elem);
+        // })
+    }
+    checkRollbackCollision(other, s, time) {
+        var vex = new THREE.Vector3();
+        //normal bullets check
+        for (var [key, bullet] of this.bullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(other, s, vex)) {
+                bullet.material.color.set(0x00ff00);
+                bullet.material.emissive.set(0x000000);
+                return;
+            }
+            for (let [Pkey, otherBullet] of other.bulletManager.bullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    other.bulletManager.despawnBullet(otherBullet);
+                    break;
+                }
+            }
+            for (let [Pkey, otherBullet] of other.bulletManager.destroyedBullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    other.bulletManager.returnDestroyedBullet(otherBullet);
+                    break;
+                }
+            }
+        }
+        //destroyed bullets check
+        for (var [key, bullet] of this.destroyedBullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(other, s, vex)) {
+                this.undestroyBullet(bullet);
+                bullet.material.color.set(0x00ff00);
+                bullet.material.emissive.set(0x000000);
+                return;
+            }
+            for (let [Pkey, otherBullet] of other.bulletManager.bullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    other.bulletManager.despawnBullet(otherBullet);
+                    break;
+                }
+            }
+            for (let [Pkey, otherBullet] of other.bulletManager.destroyedBullets) {
+                if (otherBullet.date > time)
+                    continue;
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    other.bulletManager.returnDestroyedBullet(otherBullet);
+                    break;
+                }
+            }
+        }
+    }
+    checkCollision(other, s) {
+        let vex = new THREE.Vector3();
+        for (var [key, bullet] of this.bullets) {
+            if (bullet.intersects(other, s, vex)) {
+                bullet.material.color.set(0x000000);
+                bullet.material.emissive.set(0x000000);
+                return;
+            }
+            for (let [Pkey, otherBullet] of other.bulletManager.bullets) {
+                if (bullet.intersects(otherBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    other.bulletManager.despawnBullet(otherBullet);
+                    break;
+                }
+            }
+        }
+    }
+}
+export class TurretBulletManager extends ABulletManager {
+    constructor(scene) {
+        super(scene);
+        this.createBulletsPool(500);
+    }
+    createBullet() {
+        return new TurretBullet();
+    }
+    spawnBullet(color, position, speed, spawnTime) {
+        let bullet = this.getBullet();
+        bullet.set(color, position, speed, spawnTime);
+        bullet.visible = true;
+    }
+    batchUndestroyBullet() {
+        this.destroyedBullets.forEach((elem) => {
+            this.undestroyBullet(elem);
+        });
+    }
+    checkRollbackCollision(player, s, time) {
+        var vex = new THREE.Vector3();
+        //normal bullets check
+        for (var [key, bullet] of this.bullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(player, s, vex)) {
+                bullet.material.color.set(0x00ff00);
+                return;
+            }
+            if (bullet.material.color.getHex() === 0xff0000)
+                continue;
+            for (let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    player.bulletManager.despawnBullet(PlayerBullet);
+                    break;
+                }
+            }
+            for (let [Pkey, PlayerBullet] of player.bulletManager.destroyedBullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.despawnBullet(bullet);
+                    player.bulletManager.returnDestroyedBullet(PlayerBullet);
+                    break;
+                }
+            }
+        }
+        //destroyed bullets check
+        for (var [key, bullet] of this.destroyedBullets) {
+            if (bullet.date > time)
+                continue;
+            if (bullet.intersects(player, s, vex)) {
+                this.undestroyBullet(bullet);
+                bullet.material.color.set(0x00ff00);
+                return;
+            }
+            // no destroyed bullet is red
+            // if (this.bullets.get(key).material.color.getHex() === 0xff0000)
+            //     continue;
+            for (let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    player.bulletManager.despawnBullet(PlayerBullet);
+                    break;
+                }
+            }
+            for (let [Pkey, PlayerBullet] of player.bulletManager.destroyedBullets) {
+                if (PlayerBullet.date > time)
+                    continue;
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.returnDestroyedBullet(bullet);
+                    player.bulletManager.returnDestroyedBullet(PlayerBullet);
+                    break;
+                }
+            }
+        }
+    }
+    checkCollision(player, s) {
+        var vex = new THREE.Vector3();
+        for (var [key, bullet] of this.bullets) {
+            if (bullet.intersects(player, s, vex)) {
+                this.bullets.get(key).material.color.set(0x000000);
+                return;
+            }
+            if (this.bullets.get(key).material.color.getHex() === 0xff0000)
+                continue;
+            for (let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
+                if (bullet.intersects(PlayerBullet, s, vex)) {
+                    this.destroyBullet(bullet);
+                    player.bulletManager.destroyBullet(PlayerBullet);
+                    break;
+                }
+            }
+        }
+    }
 }
