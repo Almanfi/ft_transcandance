@@ -50,30 +50,33 @@ function Navbar() {
   const handleClique = () => setShow(!getShow())
   const handleInput = debounce((event) => {
     const value = event.target.value.toLowerCase();
-    if(value.length === 0) setList([]);
+    if (value.length === 0) setList([]);
     else setList(countries.filter(country => country.toLowerCase().startsWith(value)));
   }, 100)
 
   return render(() => (
     <div className="navbar">
       <div id="logo" onclick={() => { Ura.navigate("/home") }}>
-        <img src="/assets/tr.png" />Clashers
+        <img src="/assets/tr.png" /><h4>Clashers</h4> 
       </div>
       <input type="text" placeholder="Search.." oninput={handleInput} />
       <button className="show-navbar" onclick={handleClique}><Menu /></button>
       <loop on={getList()} className="search-loop">
-        {(e)=>(
-          <div>
-            {e}
-          </div>
-        )}
+        {(e) => (<div>{e}</div>)}
       </loop>
+
       <div className={`toogle-bar-${getShow() ? "show" : "hidden"}`}>
-        <button id="login-btn" onclick={() => { Ura.navigate("/login") }} >
+        <button id="login-btn" onclick={() => Ura.navigate("/login")}
+          style={{ display: Ura.getCookie("id_key") ? "none" : "block" }}>
           <h4>Login</h4>
         </button>
-        <button id="signup-btn" onclick={() => { Ura.navigate("/signup") }} >
+        <button id="signup-btn" onclick={() => Ura.navigate("/signup")}
+          style={{ display: Ura.getCookie("id_key") ? "none" : "block" }}>
           <h4>Sign up</h4>
+        </button>
+        <button id="login-btn" onclick={() => Ura.rmCookie("id_key")}
+          style={{ display: !Ura.getCookie("id_key") ? "none" : "block" }}>
+          <h4>Logout</h4>
         </button>
       </div>
 

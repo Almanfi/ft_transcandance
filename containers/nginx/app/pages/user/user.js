@@ -8,6 +8,7 @@ import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
 import api from '../../services/api.js';
 import Toast from '../../components/Toast/Toast.jsx';
+import Signup from '../signup/signup.jsx';
 function User() {
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);

@@ -4,6 +4,7 @@ import { conversationGroups } from './convs.js';
 import New from '../../components/create/create.jsx';
 
 function Chat(props = {}) {
+  if(!Ura.getCookie("id_key")) return Signup();
   const [render, State] = Ura.init();
 
   const [getIndex, setIndex] = State(-1);
@@ -32,9 +33,9 @@ function Chat(props = {}) {
             {(e, i) => (
               <div onclick={() => handle(e, i)}
                 className={`${getIndex() === i ? "selected" : ""}`}>
-                <h3>
+                <h4>
                   Group {e.id}
-                </h3>
+                </h4>
               </div>
             )}
           </loop>

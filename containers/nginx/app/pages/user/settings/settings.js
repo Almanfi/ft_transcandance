@@ -5,7 +5,7 @@ function Settings(props = {}) {
     const { getShow, setShow, userData } = props;
     const [render, State] = Ura.init();
     // let user = JSON.parse(Ura.store.get("user") || "{}");
-    const [getError, setError] = State([]);
+    // const [getError, setError] = State([]);
     const [getUserData, setUserData] = userData;
     const update = async (e) => {
         e.preventDefault();
@@ -22,7 +22,7 @@ function Settings(props = {}) {
         console.log(data);
         if (!Errors.length) {
             if (data.password !== data.confirm_password)
-                setError(["password", "confirmpassword"]);
+                Errors.push(...["password", "confirmpassword"]);
             else {
                 try {
                     delete data["confirmpassword"];
@@ -45,7 +45,7 @@ function Settings(props = {}) {
                 catch (err) {
                     console.log("err", err);
                     if (err.message)
-                        setError([err.message]);
+                        Errors.push(err.message);
                     else if (typeof err == "object") {
                         Object.keys(err).forEach((key) => {
                             if (typeof err[key] === "string")
@@ -66,12 +66,12 @@ function Settings(props = {}) {
         try {
             e.preventDefault();
             await api.deleteUser();
-            Ura.navigate("/home");
+            Ura.rmCookie("id_key");
         }
         catch (error) {
             console.log("err", err);
             if (err.message)
-                setError([err.message]);
+                Errors.push(err.message);
             else if (typeof err == "object") {
                 Object.keys(err).forEach((key) => {
                     if (typeof err[key] === "string")

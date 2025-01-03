@@ -4,6 +4,7 @@ import Arrow from "../../components/Arrow/Arrow.jsx";
 import Input from "../../components/input/Input.jsx";
 import Toast from "../../components/Toast/Toast.jsx";
 import api from "../../services/api.js";
+import Home from "../home/home.jsx";
 function Login() {
     const [render] = Ura.init();
     const logUser = async (e) => {

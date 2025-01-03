@@ -3,6 +3,8 @@ import Navbar from '../../components/Navbar/Navbar.jsx';
 import { conversationGroups } from './convs.js';
 import New from '../../components/create/create.jsx';
 function Chat(props = {}) {
+    if (!Ura.getCookie("id_key"))
+        return Signup();
     const [render, State] = Ura.init();
     const [getIndex, setIndex] = State(-1);
     const [getGroup, setGroup] = State(conversationGroups);
@@ -19,7 +21,7 @@ function Chat(props = {}) {
                     Ura.e("h4", null, "Create Group"))),
             Ura.e("div", { className: "down" },
                 Ura.e("loop", { on: getGroup() }, (e, i) => (Ura.e("div", { onclick: () => handle(e, i), className: `${getIndex() === i ? "selected" : ""}` },
-                    Ura.e("h3", null,
+                    Ura.e("h4", null,
                         "Group ",
                         e.id)))))),
         Ura.e("div", { className: "right" },

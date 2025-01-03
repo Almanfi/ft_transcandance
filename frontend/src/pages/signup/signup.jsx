@@ -4,12 +4,12 @@ import Arrow from "../../components/Arrow/Arrow.jsx";
 import Toast from "../../components/Toast/Toast.jsx";
 import Input from "../../components/input/Input.jsx";
 import api from "../../services/api.js";
+import Home from "../home/home.jsx";
 
 function truncateString(str) {
   if (str.length > 17) return str.substring(0, 14) + '...';
   return str;
 }
-
 
 function Signup() {
   const [render, State] = Ura.init();
@@ -69,7 +69,7 @@ function Signup() {
           Ura.navigate("/login");
         } catch (err) {
           console.log("err", err);
-          if (err.message) setError([err.message]);
+          if (err.message) Errors.push(err.message);
           else if (typeof err == "object") {
             Object.keys(err).forEach((key) => {
               if (typeof err[key] === "string") Errors.push(err[key]);

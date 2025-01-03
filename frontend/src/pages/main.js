@@ -18,26 +18,13 @@
 
 import Ura from "ura";
 
-import home from "./home/home.js";
-import login from "./login/login.js";
-import signup from "./signup/signup.js";
-import test from "./test/test.js";
-import user from "./user/user.js";
+import Home from "./home/home.js";
+import Login from "./login/login.js";
+import Signup from "./signup/signup.js";
+import User from "./user/user.js";
 import Chat from "./chat/chat.jsx";
 import Friend from "./friend/friend.jsx";
 import Test from "./test/test.js";
-
-Ura.setRoutes({
-  "*": home,
-  "/home": home,
-  "/login": login,
-  "/signup": signup,
-  "/test": test,
-  "/user": user,
-  "/chat": Chat,
-  "/friend": Friend,
-  "/test": Test
-});
 
 Ura.setStyles([
   "./pages/home/home.css",
@@ -56,5 +43,26 @@ Ura.setStyles([
   "./components/Toast/Toast.css",
   "./components/Navbar/Navbar.css",
 ]);
+
+Ura.onNavigate(() => {
+  if (Ura.getCookie("id_key")) {
+    Ura.setRoutes({
+      "*": Home,
+      "/home": Home,
+      "/user": User,
+      "/chat": Chat,
+      "/friend": Friend,
+      "/test": Test
+    });
+  }
+  else {
+    Ura.setRoutes({
+      "*": Login,
+      "/home": Home,
+      "/login": Login,
+      "/signup": Signup,
+    });
+  }
+})
 
 Ura.start();

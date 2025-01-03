@@ -54,15 +54,17 @@ function Navbar() {
     return render(() => (Ura.e("div", { className: "navbar" },
         Ura.e("div", { id: "logo", onclick: () => { Ura.navigate("/home"); } },
             Ura.e("img", { src: "/assets/tr.png" }),
-            "Clashers"),
+            Ura.e("h4", null, "Clashers")),
         Ura.e("input", { type: "text", placeholder: "Search..", oninput: handleInput }),
         Ura.e("button", { className: "show-navbar", onclick: handleClique },
             Ura.e(Menu, null)),
         Ura.e("loop", { on: getList(), className: "search-loop" }, (e) => (Ura.e("div", null, e))),
         Ura.e("div", { className: `toogle-bar-${getShow() ? "show" : "hidden"}` },
-            Ura.e("button", { id: "login-btn", onclick: () => { Ura.navigate("/login"); } },
+            Ura.e("button", { id: "login-btn", onclick: () => Ura.navigate("/login"), style: { display: Ura.getCookie("id_key") ? "none" : "block" } },
                 Ura.e("h4", null, "Login")),
-            Ura.e("button", { id: "signup-btn", onclick: () => { Ura.navigate("/signup"); } },
-                Ura.e("h4", null, "Sign up"))))));
+            Ura.e("button", { id: "signup-btn", onclick: () => Ura.navigate("/signup"), style: { display: Ura.getCookie("id_key") ? "none" : "block" } },
+                Ura.e("h4", null, "Sign up")),
+            Ura.e("button", { id: "login-btn", onclick: () => Ura.rmCookie("id_key"), style: { display: !Ura.getCookie("id_key") ? "none" : "block" } },
+                Ura.e("h4", null, "Logout"))))));
 }
 export default Navbar;

@@ -8,6 +8,10 @@ import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
 
 function Friend() {
+  if (!Ura.getCookie("id_key")) {
+    return Signup();
+  }
+
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
 
@@ -33,17 +37,17 @@ function Friend() {
         </div>
       </div>
       <div id="bottom">
-          <loop on={[Swords, Award, WinCup]} id="games">
-            {(Elem)=>(
-              <div id="history">
+        <loop on={[Swords, Award, WinCup]} id="games">
+          {(Elem) => (
+            <div id="history">
               <h4 id="title"><Elem />Games</h4>
               <div className="children">
                 <div className="child"><o>42%</o><h4>Pongers</h4></div>
                 <div className="child"><o>42%</o><h4>Pongers</h4></div>
               </div>
-            </div>              
-            )}
-          </loop>
+            </div>
+          )}
+        </loop>
         <div id="friends">
           {/* <loop className="inner" on={getList()}>
             {(e, i) => (

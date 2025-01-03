@@ -254,9 +254,6 @@ function destroy(vdom: VDOM): void {
 function execute(mode: number, prev: VDOM, next: VDOM = null) {
   switch (mode) {
     case CREATE: {
-      if (prev.type === IF) {
-        console.error("create if tag");
-      }
       createDOM(prev);
       // console.log("prev", prev);
       prev.children?.map((child) => {
@@ -463,7 +460,15 @@ function Error(props: Props | null) {
 }
 
 const Routes: { [path: string]: Function } = {};
-Routes["*"] = () => Error({ message: window.location.pathname });
+
+function resetRoutes() {
+  Object.keys(Routes).forEach(key => {
+    delete Routes[key];
+  })
+  Routes["*"] = () => Error({ message: window.location.pathname });
+}
+
+resetRoutes();
 
 function cleanPath(path) {
   if (path === "*") return path;
@@ -483,9 +488,16 @@ function getRoute(path) {
 
 
 function setRoutes(currRoutes) {
+  resetRoutes();
   Object.keys(currRoutes).forEach(key => {
     setRoute(cleanPath(key), currRoutes[key]);
   })
+}
+
+let navigate_handler = null;
+
+function onNavigate(callback) {
+  navigate_handler = callback;
 }
 
 function normalizePath(path) {
@@ -498,6 +510,8 @@ function normalizePath(path) {
 }
 
 function refresh(params = {}) {
+  if (navigate_handler) navigate_handler();
+
   let path = window.location.pathname || "/";
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
@@ -509,15 +523,13 @@ function refresh(params = {}) {
   );
 }
 
-
-
 function navigate(route, params = {}) {
   route = route.split("?")[0];
   route = normalizePath(route);
   console.log("navigate to", route, "with", params);
 
   window.history.pushState({}, "", `${route}`);
-  refresh(params);
+  return refresh(params);
 }
 
 // loadfiles
@@ -651,7 +663,7 @@ async function activate() {
     console.log(Ura.Routes);
     if (!type) console.error("type error");
 
-    if (type === "dev") sync();
+    if (window.location.protocol == "http") sync();
   } catch (error) {
     console.error("Error loading resources:", error);
   }
@@ -668,7 +680,9 @@ async function start() {
   Ura.refresh();
   console.log(Ura.Routes);
   //@ts-ignore
-  if (window.mode === "dev") sync();
+  if (window.location.protocol == "http") sync();
+  else console.log("in dev mode");
+
 }
 
 // HTTP
@@ -723,6 +737,22 @@ function clearGlobal() {
   localStorage.setItem('ura-store', JSON.stringify({}));
 }
 
+function getCookie(name) {
+  const cookies = document.cookie.split("; ").map(cookie => cookie.split("="));
+  const cookie = cookies.find(([key]) => key === name);
+  return cookie ? decodeURIComponent(cookie[1]) : null;
+}
+
+function rmCookie(name, path = "/", domain) {
+  if (domain) {
+    document.cookie = `${name}=; path=${path}; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  } else {
+    document.cookie = `${name}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
+  window.location.reload();
+}
+
+
 const Ura = {
   // store: {
   //   set: setGlobal,
@@ -750,6 +780,9 @@ const Ura = {
   // send: HTTP_Request,
   activate,
   start,
+  getCookie,
+  rmCookie,
+  onNavigate
 };
 
 export default Ura;

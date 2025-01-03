@@ -7,6 +7,9 @@ import Settings from './settings/settings.jsx';
 import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
 function Friend() {
+    if (!Ura.getCookie("id_key")) {
+        return Signup();
+    }
     const [render, State] = Ura.init();
     const [getShow, setShow] = State(false);
     const [getList, setList] = State([

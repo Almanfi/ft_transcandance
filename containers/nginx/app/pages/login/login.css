@@ -112,6 +112,10 @@ input:focus {
   visibility: hidden;
 }
 
+.none {
+  display: none;
+}
+
 .login {
   width: 100%;
   height: 100%;

@@ -8,8 +8,10 @@ import Play from '../../components/Play/Play.jsx';
 import Chat from '../../components/Chat/Chat.jsx';
 import api from '../../services/api.js';
 import Toast from '../../components/Toast/Toast.jsx';
+import Signup from '../signup/signup.jsx';
 
 function User() {
+
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
   const [getLoading, setLoading] = State(true);
@@ -17,7 +19,7 @@ function User() {
     firstname: "",
     lastname: "",
     display_name: "",
-    profile_picture:"/static/rest/images/users_profiles/profile.jpg"
+    profile_picture: "/static/rest/images/users_profiles/profile.jpg"
   });
 
   const [getUserData, setUserData] = userData;
@@ -32,11 +34,11 @@ function User() {
       console.log("img path", getUserData().profile_picture);
       // const img = await api.getPicture(getUserData().profile_picture);
       // console.log(img);
-      
+
       const relations = await api.getRelations()
       console.log("relations:", relations);
-      
-      
+
+
       // setImage(`https://localhost:5000/${getUserData().profile_picture}`);
     } catch (err) {
       console.error("err", err);

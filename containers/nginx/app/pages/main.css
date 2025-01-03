@@ -111,3 +111,7 @@ input:focus {
 .hidden {
   visibility: hidden;
 }
+
+.none {
+  display: none;
+}

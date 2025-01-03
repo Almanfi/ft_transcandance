@@ -2,15 +2,7 @@ import Ura from "ura";
 import Navbar from "../../components/Navbar/Navbar.jsx";
 
 function Home() {
-  const [render, State] = Ura.init();
-  const [getter, setter] = State(0);
-  
-
-  // if (!Ura.store.get("user")) {
-  //   Ura.navigate("/login")
-  //   window.location.reload();
-  // }
-  // else
+  const [render] = Ura.init();
   return render(() => (
     <div className="home" >
       <Navbar />
@@ -27,7 +19,6 @@ function Home() {
         <button onclick={() => Ura.navigate("/user")}>
           <h3>Enter the Arena</h3>
         </button>
-
       </div>
     </div>
   ));
