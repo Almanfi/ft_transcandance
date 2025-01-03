@@ -5,3 +5,6 @@ devenv/
 .env
 */out/
 /frontend/out/
+/backend/pong/rest/static/rest/images/users_profiles/*
+!/backend/pong/rest/static/rest/images/users_profiles/profile.jpg
+/containers/nginx/app/*
