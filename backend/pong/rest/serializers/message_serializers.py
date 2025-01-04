@@ -28,7 +28,7 @@ class MessagingException(APIException):
 
 class MessageSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
-    sender = UserSerializer(required = False)
+    sender = UserSerializer(required = False, context={"exclude": ['password', 'salt']})
     content = serializers.CharField(trim_whitespace=True, allow_blank=False)
     timestamp = serializers.DateTimeField(required=False)
     read = serializers.BooleanField(required=False)

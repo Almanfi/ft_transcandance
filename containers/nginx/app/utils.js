@@ -34,9 +34,10 @@ export async function Login(user) {
       body: JSON.stringify(user),
 	  credentials: 'include'
     });
-	console.log("The user is: ", user);
     if (response.ok) {
-      console.log("user login succefully", await response.json());
+	  const body = await response.json();
+      console.log("user login succefully", body);
+	  return body
     }
     else {
       const body = await response.json();
@@ -57,8 +58,7 @@ export async function getUser() {
     if (response.ok) {
       const body = await response.json();
       console.log("get user succefully", body);
-      userData = body;
-      localStorage.setItem("user", JSON.stringify(userData))
+	  return body
     }
     else {
       const body = await response.json();
@@ -167,7 +167,7 @@ export async function deleteUser() {
     }
     else {
       const body = await response.json();
-      console.log("Error deleting user", body.message);
+      console.log("Error deleting user", body);
     }
   } catch (error) {
     console.log("error", error);
@@ -176,8 +176,6 @@ export async function deleteUser() {
 
 export async function InviteFriend(friendId) {
   try {
-    console.log("ask", { "friend_id": friendId });
-
     const response = await fetch(`${endpoint}/relationships/invite/`, {
       method: "POST",
       headers: {
@@ -211,7 +209,7 @@ export async function getRelations() {
   }
   */
   try {
-    const response = await fetch(`${endpoint}/relationships`, {credentials: "include"});
+    const response = await fetch(`${endpoint}/relationships/`, {credentials: "include"});
     if (response.ok) {
       console.log("fetting relations succefully");
       const body = await response.json();
