@@ -13,6 +13,7 @@ export const source = join(__dirname, "../src");
 export const output = join(__dirname, "../../containers/nginx/app")// join(__dirname, "../out");
 export const root = join(__dirname, "../");
 
+
 const tsConfig = {
   compilerOptions: {
     module: "ESNext",

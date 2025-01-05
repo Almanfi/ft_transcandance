@@ -7,7 +7,7 @@ all:
 front:
 	npm --prefix ./frontend run start
 
-down :
+down:
 	docker-compose -f ${COMPOSE_FILE} --env-file ${ENV_PATH} down
 
 clean :

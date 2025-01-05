@@ -1,10 +1,10 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar/Navbar.jsx";
-import Arrow from "../../components/Arrow/Arrow.jsx";
-import Toast from "../../components/Toast/Toast.jsx";
-import Input from "../../components/input/Input.jsx";
+import Navbar from "../../components/Navbar/Navbar.js";
+import Arrow from "../../components/Arrow/Arrow.js";
+import Toast from "../../components/Toast/Toast.js";
+import Input from "../../components/input/Input.js";
 import api from "../../services/api.js";
-import Home from "../home/home.jsx";
+import Home from "../home/home.js";
 
 function truncateString(str) {
   if (str.length > 17) return str.substring(0, 14) + '...';

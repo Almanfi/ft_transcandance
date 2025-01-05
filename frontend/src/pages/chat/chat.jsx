@@ -1,7 +1,7 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar/Navbar.jsx';
+import Navbar from '../../components/Navbar/Navbar.js';
 import { conversationGroups } from './convs.js';
-import New from '../../components/create/create.jsx';
+import New from '../../components/create/create.js';
 
 function Chat(props = {}) {
   if(!Ura.getCookie("id_key")) return Signup();

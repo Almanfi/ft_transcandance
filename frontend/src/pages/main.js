@@ -22,8 +22,8 @@ import Home from "./home/home.js";
 import Login from "./login/login.js";
 import Signup from "./signup/signup.js";
 import User from "./user/user.js";
-import Chat from "./chat/chat.jsx";
-import Friend from "./friend/friend.jsx";
+import Chat from "./chat/chat.js";
+import Friend from "./friend/friend.js";
 import Test from "./test/test.js";
 
 Ura.setStyles([
@@ -35,13 +35,11 @@ Ura.setStyles([
   "./pages/user/settings/settings.css",
   "./pages/user/user.css",
   "./pages/chat/chat.css",
-  // "./pages/chat/create/create.css",
   "./pages/friend/friend.css",
   "./pages/friend/settings/settings.css",
   /* components */
-  // "./components/Award/Award.css",
-  "./components/Toast/Toast.css",
-  "./components/Navbar/Navbar.css",
+  "./pages/components/Toast/Toast.css",
+  "./pages/components/Navbar/Navbar.css",
 ]);
 
 Ura.onNavigate(() => {
@@ -61,6 +59,7 @@ Ura.onNavigate(() => {
       "/home": Home,
       "/login": Login,
       "/signup": Signup,
+      "/test": Test,
     });
   }
 })

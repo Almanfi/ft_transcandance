@@ -47,7 +47,7 @@ async function createServer() {
   let server = http.createServer((req, res) => {
     let uri = req.url.split("?")[0];
 
-    if (uri === "/") uri = join(root, "index.html");
+    if (uri === "/") uri = join(source, "index.html");
     else if (uri.startsWith("/node_modules/")) {
       loginfo("requesting from node_modules", uri);
       uri = join(root, uri)
@@ -68,7 +68,7 @@ async function createServer() {
           "If it's a js|jsx|ts|tsx file\n",
           "make sure to import it like this 'file/path.js'"
         );
-        uri = join(root, "index.html");
+        uri = join(source, "index.html");
         res.writeHead(200, { "Content-Type": MimeType(extension(uri)) });
         createReadStream(uri).pipe(res);
       } else if (stats.isFile()) {
@@ -150,7 +150,7 @@ async function createServer() {
   })
 
 
-  const arr = ["index.html", "config.json"].forEach(elem => {
+  const arr = ["./src/index.html", "config.json"].forEach(elem => {
     watch_path(join(root, elem), ["change"], async () => {
       if (elem === "config.json") {
         logerror("config.json did changed restart the server");

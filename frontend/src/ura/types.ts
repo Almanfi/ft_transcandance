@@ -11,4 +11,6 @@ export type VDOM = {
   render?: Function;
   children?: any;
   call?: Function;
+  // funcProps?: Props;
+  // isfunc?: Boolean;
 };

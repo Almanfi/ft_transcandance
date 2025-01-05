@@ -8,25 +8,25 @@ async function send(url, prams) {
 }
 
 export async function signup(user) {
-  try {
-    const response = await fetch(`${endpoint}/users/`, {
-      method: "POST",
-      body: user,  // FormData passed here
-    });
+  // try {
+  const response = await fetch(`${endpoint}/users/`, {
+    method: "POST",
+    body: user,  // FormData passed here
+  });
 
-    if (response.ok) {
-      console.log("User created successfully");
-      const body = await response.json();
-      return body;
-    } else {
-      const body = await response.json();
-      console.log("Error creating user", body.message);
-      throw body;
-    }
-  } catch (error) {
-    console.log("Error:", error);
-    throw error;
+  if (response.ok) {
+    console.log("User created successfully");
+    const body = await response.json();
+    return body;
+  } else {
+    const body = await response.json();
+    console.log("Error creating user", body.message);
+    throw body;
   }
+  // } catch (error) {
+  //   console.log("Error:", error);
+  //   throw error;
+  // }
 }
 
 export async function Login(user) {
@@ -95,26 +95,27 @@ username: "mhrima"
 }
 
 export async function searchUser(searchTerm) {
-  try {
-    const response = await fetch(`${endpoint}/users/search/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ "search_term": searchTerm })
-    })
-    if (response.ok) {
-      const body = await response.json();
-      console.log("searched user succesfully", body);
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error get user", body.message);
-    }
+  // try {
+  const response = await fetch(`${endpoint}/users/search/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ "search_term": searchTerm })
+  })
+  if (response.ok) {
+    const body = await response.json();
+    console.log("response search", body);
+    return body;
   }
-  catch (error) {
-    console.log("error", error);
+  else {
+    const body = await response.json();
+    console.log("Error search", body.message);
+    throw body;
   }
+  // }
+  // catch (error) {
+  //   console.log("error", error);
+  // }
 }
 
 export async function getPicture(pathname) {
@@ -396,7 +397,8 @@ const api = {
   getPicture,
   updateUser,
   getRelations,
-  deleteUser
+  deleteUser,
+  searchUser
 }
 
 export default api

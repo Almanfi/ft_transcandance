@@ -1,14 +1,14 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar/Navbar.jsx';
-import Swords from '../../components/Swords/Swords.jsx';
-import WinCup from '../../components/WinCup/WinCup.jsx';
-import Award from '../../components/Award/Award.jsx';
-import Settings from './settings/settings.jsx';
-import Play from '../../components/Play/Play.jsx';
-import Chat from '../../components/Chat/Chat.jsx';
+import Navbar from '../../components/Navbar/Navbar.js';
+import Swords from '../../components/Swords/Swords.js';
+import WinCup from '../../components/WinCup/WinCup.js';
+import Award from '../../components/Award/Award.js';
+import Settings from './settings/settings.js';
+import Play from '../../components/Play/Play.js';
+import Chat from '../../components/Chat/Chat.js';
 import api from '../../services/api.js';
-import Toast from '../../components/Toast/Toast.jsx';
-import Signup from '../signup/signup.jsx';
+import Toast from '../../components/Toast/Toast.js';
+import Signup from '../signup/signup.js';
 
 function User() {
 

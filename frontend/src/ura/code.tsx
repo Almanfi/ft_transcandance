@@ -22,7 +22,7 @@ function check(children: any): any {
   });
 }
 
-function fr(props: Props, ...children: any) {
+function fr(props: Props = {}, ...children: any) {
   return {
     type: FRAGMENT,
     children: children || [],
@@ -47,7 +47,7 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
   if (typeof tag === "function") {
     let functag = null;
     try {
-      functag = tag(props || {}, children);
+      functag = tag(props , children);
       if (!functag) {
         return {
           type: FRAGMENT,
@@ -62,14 +62,14 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
         children: [],
       };
     }
-    if (functag.type === FRAGMENT) functag = e("fr", functag.props, ...check(children || []));
+    if (functag.type === FRAGMENT) functag = e("fr", {}, ...check(children || []));
     return functag;
   }
   if (tag === "if") {
     let res = {
       type: IF,
       tag: "if",
-      props: props || {},
+      props: props ,
       children: check(props.cond && children.length ? children : []),
     };
     ifTag = res;
@@ -301,7 +301,7 @@ function reconciliateProps(oldProps: Props = {}, newProps: Props = {}, vdom: VDO
           vdom.dom.style[styleProp] = "";
         });
       } else {
-        console.log(vdom);
+        // console.log(vdom);
         if (!vdom.dom) console.warn("undefined vdom");
         else if (vdom.dom[key] !== undefined) delete vdom.dom[key];
         else {
@@ -348,12 +348,13 @@ function reconciliate(prev: VDOM, next: VDOM) {
     // return execute(REPLACE, prev, next);
   }
 
+
   const prevs = prev.children || [];
   const nexts = next.children || [];
   for (let i = 0; i < Math.max(prevs.length, nexts.length); i++) {
     let child1 = prevs[i];
     let child2 = nexts[i];
-
+  
     if (child1 && child2) {
       reconciliate(child1 as VDOM, child2 as VDOM);
     } else if (!child1 && child2) {
@@ -422,7 +423,7 @@ function init() {
   };
 
   const updateState = () => {
-    const newVDOM = <View />;
+    const newVDOM = View();
     if (vdom !== null) reconciliate(vdom, newVDOM);
     else vdom = newVDOM;
   };
@@ -570,9 +571,9 @@ async function loadJSFiles(routes, base) {
 }
 
 function setEventListeners() {
-  window.addEventListener("hashchange", Ura.refresh);
-  window.addEventListener("DOMContentLoaded", Ura.refresh);
-  window.addEventListener("popstate", Ura.refresh);
+  window.addEventListener("hashchange", () => Ura.refresh());
+  window.addEventListener("DOMContentLoaded", () => Ura.refresh());
+  window.addEventListener("popstate", () => Ura.refresh());
   // window.addEventListener("storage", (event) => {
   //   if (event.key === 'ura-store') {
   //     // refresh();
