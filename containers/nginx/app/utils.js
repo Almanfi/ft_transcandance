@@ -368,3 +368,142 @@ export async function unblockUser(id) {
     console.log("error", error);
   }
 }
+
+export async function  createGame() {
+	try {
+		const response = await fetch(`${endpoint}/games/`, {
+		  method: "POST",
+		  credentials: "include"
+		})
+		if (response.ok) {
+			const body = await response.json();
+			console.log("Game created Sucesfully: ", body);
+			return body;
+		}
+		else {
+		  const body = await response.json();
+		  console.log("Error Creating Game: ", body);
+		}
+	} catch (error) {
+		console.log("error", error);
+	}
+}
+
+export async function getGameInvites()
+{
+	try {
+		const response = await fetch(`${endpoint}/games/`, {
+			method: "GET",
+			credentials:"include"
+		})
+		if (response.ok) {
+			const body = await response.json();
+			console.log("Get game invites Sucesfull: ", body);
+			return body;
+		}
+		else {
+		  const body = await response.json();
+		  console.log("Error get Game invites : ", body);
+		}
+	}
+	catch (error) {
+		console.log("error", error);
+	}
+}
+
+export async function invitePlayer(game_id, invited_id)
+{
+	try {
+		const res = await fetch(`${endpoint}/games/invite/`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ game_id, invited_id }),
+			credentials : "include"
+		})
+		if (res.ok)
+		{
+			const body = await res.json();
+			console.log("invited player: ", body)
+			return body
+		}
+		else {
+			const body = await res.json();
+			console.log("Error invite player : ", body);
+		}
+	}
+	catch (error) {
+		console.log("error", error);
+	}
+}
+
+export async function  cancelGameInvite(invite_id) {
+	try {
+		const res = await fetch(`${endpoint}/games/invite/cancel/`, {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ invite_id }),
+			credentials : "include"
+		})
+		if (res.ok)
+		{
+			const body = await res.json();
+			console.log("canceled game invite: ", body)
+			return body
+		}
+		else {
+			const body = await res.json();
+			console.log("Error canceling game invite: ", body);
+		}
+	}
+	catch (error) {
+		console.log("error", error);
+	}
+}
+
+export async function acceptGameInvite(invite_id) {
+	try {
+		const res = await fetch(`${endpoint}/games/invite/accept/`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ invite_id }),
+			credentials : "include"
+		})
+		if (res.ok)
+		{
+			const body = await res.json();
+			console.log("accepted game invite: ", body)
+			return body
+		}
+		else {
+			const body = await res.json();
+			console.log("Error accepting game invite : ", body);
+		}
+	}
+	catch (error) {
+		console.log("error", error);
+	}
+}
+
+export async function refuseGameInvite(invite_id) {
+	try {
+		const res = await fetch(`${endpoint}/games/invite/refuse/`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ invite_id }),
+			credentials : "include"
+		})
+		if (res.ok)
+		{
+			const body = await res.json();
+			console.log("refused game invite: ", body)
+			return body
+		}
+		else {
+			const body = await res.json();
+			console.log("Error refusing game invite : ", body);
+		}
+	}
+	catch (error) {
+		console.log("error", error);
+	}
+}

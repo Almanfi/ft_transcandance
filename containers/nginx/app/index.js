@@ -14,6 +14,12 @@ import {
   blockUser,
   unblockUser,
   searchUser,
+  createGame,
+  getGameInvites, 
+  invitePlayer,
+  acceptGameInvite,
+  refuseGameInvite,
+  cancelGameInvite
 } from "./utils.js";
 
 import { ConnectToMessagingSocket } from "./websockets.js";
@@ -237,5 +243,47 @@ create("Retrieve All Messages").onclick = async () => {
 create("Close Messaging Socket").onclick = async () => {
 	if (socketIsAlive()) return console.error("No Messaging Socket is active");
 	socket.close();
+}
+
+let new_game = undefined;
+let game_invite = undefined;
+
+create("New Game").onclick = async () => {
+	await Login(users[0])
+	new_game = await createGame()
+}
+
+create("get Invites").onclick = async () => {
+	await Login(users[0])
+	await getGameInvites()
+}
+
+create("Invite in Game").onclick = async () => {
+	await Login(users[0])
+	if (new_game === undefined)
+		return console.error("No game to invite to")
+	const found = await searchUser(users[1].display_name);
+	console.log("the found player is: ", found)
+	const invited_id = found[0]['id']
+	game_invite = await invitePlayer(new_game.id, invited_id)
+}
+
+create("Cancel Game Invite").onclick = async () => {
+	await Login(users[0])
+	if (game_invite  === undefined)
+		return console.error("No game invite to cancel");
+	await cancelGameInvite(game_invite.id)
+}
+
+create("Accept Game Invite").onclick = async () => {
+	await Login(users[1]);
+	const invites = await getGameInvites();
+	await acceptGameInvite(invites[0].id);
+}
+
+create("Refuse Game Invite").onclick = async () => {
+	await Login(users[1]);
+	const invites = await getGameInvites();
+	await refuseGameInvite(invites[0].id);
 }
 

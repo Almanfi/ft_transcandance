@@ -16,3 +16,8 @@ export async function ConnectToMessagingSocket() {
 	const socket = new WebSocket(`${websocketApi}/ws/messaging/`);
 	return socket;
 }
+
+export async function ConnectToCustomGameSocket(game_id) {
+	const custom_game = new WebSocket(`${websocketApi}/ws/game/${game_id}/`)
+}
+
