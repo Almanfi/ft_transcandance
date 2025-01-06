@@ -47,7 +47,7 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
   if (typeof tag === "function") {
     let functag = null;
     try {
-      functag = tag(props , children);
+      functag = tag(props, children);
       if (!functag) {
         return {
           type: FRAGMENT,
@@ -69,7 +69,7 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
     let res = {
       type: IF,
       tag: "if",
-      props: props ,
+      props: props,
       children: check(props.cond && children.length ? children : []),
     };
     ifTag = res;
@@ -354,7 +354,7 @@ function reconciliate(prev: VDOM, next: VDOM) {
   for (let i = 0; i < Math.max(prevs.length, nexts.length); i++) {
     let child1 = prevs[i];
     let child2 = nexts[i];
-  
+
     if (child1 && child2) {
       reconciliate(child1 as VDOM, child2 as VDOM);
     } else if (!child1 && child2) {
@@ -371,7 +371,7 @@ function reconciliate(prev: VDOM, next: VDOM) {
 
 let GlobalVDOM = null;
 function display(vdom: VDOM) {
-  console.log("display ", vdom);
+  // console.log("display ", vdom);
   if (GlobalVDOM !== null) reconciliate(GlobalVDOM, vdom);
   else {
     execute(CREATE, vdom);
@@ -504,7 +504,7 @@ function onNavigate(callback) {
 function normalizePath(path) {
   if (!path || path == "") return "/";
   path = path.replace(/^\s+|\s+$/gm, "");
-  if (!path.startsWith("/")) path = "/" + path;
+  if (!path.startsWith("/") && !path.startsWith("./")) path = "/" + path;
   path = path.replace(/\/{2,}/g, "/");
   if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
   return path;
@@ -583,8 +583,8 @@ function setEventListeners() {
 }
 
 function handleCSSUpdate(filename) {
-  const path = normalizePath("/" + filename);
-  // console.log("css:", path);
+  const path = normalizePath(filename);
+  // console.log("path:", path, "filename:", filename);
   let found = false;
 
   document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
@@ -779,7 +779,7 @@ const Ura = {
   setRoutes,
   setStyles,
   // send: HTTP_Request,
-  activate,
+  // activate,
   start,
   getCookie,
   rmCookie,

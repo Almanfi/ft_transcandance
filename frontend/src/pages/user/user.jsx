@@ -8,13 +8,28 @@ import Play from '../../components/Play/Play.js';
 import Chat from '../../components/Chat/Chat.js';
 import api from '../../services/api.js';
 import Toast from '../../components/Toast/Toast.js';
-import Signup from '../signup/signup.js';
+
+/*
+invites: sent invitations
+invited: received invitations
+friends: friends
+blocks: blocked
+*/
 
 function User() {
 
   const [render, State] = Ura.init();
   const [getShow, setShow] = State(false);
   const [getLoading, setLoading] = State(true);
+  const [getData, setData] = State([]);
+
+  const handleSelect = async (e) => {
+    e.preventDefault();
+    // let res = await api.getRelations();
+    // setData(res[e.target.value] || []);
+    // console.log("select:", e.target.value, "data:", getData());    
+  }
+
   const userData = State({
     firstname: "",
     lastname: "",
@@ -26,6 +41,7 @@ function User() {
 
   const fetchData = async () => {
     const Errors = [];
+    let reload = false;
 
     try {
       const res = await api.getUser();
@@ -37,12 +53,19 @@ function User() {
 
       const relations = await api.getRelations()
       console.log("relations:", relations);
+      setData(relations["friends"]);
+      console.log("data", getData());
+      
 
 
       // setImage(`https://localhost:5000/${getUserData().profile_picture}`);
     } catch (err) {
       console.error("err", err);
       if (err.message) Errors.push(err.message);
+      else if (err.status === 403) {
+        Errors.push("Internal Error");
+        reload = true
+      }
       else if (typeof err == "object") {
         Object.keys(err).forEach((key) => {
           if (typeof err[key] === "string") Errors.push(err[key]);
@@ -53,17 +76,11 @@ function User() {
       }
     }
     Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
+    if (reload) Ura.rmCookie("id_key");
   }
   fetchData();
 
-  const [getList, setList] = State([
-    { src: "/assets/003.png", title: "user 0" },
-    { src: "/assets/003.png", title: "user 1" },
-    { src: "/assets/003.png", title: "user 2" },
-    { src: "/assets/003.png", title: "user 3" },
-    { src: "/assets/003.png", title: "user 4" }
-  ]);
-  console.log("hello this is user:", getUserData());
+  // console.log("hello this is user:", getUserData());
 
   return render(() => (
     <if className="user" cond={getLoading() === true}>
@@ -94,7 +111,13 @@ function User() {
           )}
         </loop>
         <div id="friends">
-          <loop className="inner" on={getList()}>
+          <select name="select" className="select" onchange={handleSelect}>
+            <option value="friends">Friends</option>
+            <option value="invited">Sent Invitations</option>
+            <option value="invites">Received Invitations</option>
+            <option value="blocks">Blocked Users</option>
+          </select>
+          {/* <loop className="inner" on={getData()}>
             {(e, i) => (
               <div className="card" key={i}>
                 <div className="content">
@@ -109,7 +132,7 @@ function User() {
                 </div>
               </div>
             )}
-          </loop>
+          </loop> */}
         </div>
       </div>
     </if>

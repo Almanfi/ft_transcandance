@@ -1,25 +1,26 @@
 + Trancedence:
     [*] Landing Page
     [ ] sign in:
+        [*] normal auth
         [ ] use intra
         [ ] Google auth
     [ ] Sign up:
-        [ ] uplaod images
+        [*] uplaod images
         [ ] choose avatar
-        [ ] user choose nickname
         [ ] use intra
         [ ] Google auth
     [ ] user page
     [ ] friend page
     [ ] game page
     [ ] matches page
-    [ ] user setting page
+    [*] user setting page
     [ ] messages Page
-    [ ] search bar
+    [*] search bar
     [ ] add friends
     [ ] 2 players in same keyboard
     [ ] access token / refresh token
     [ ] remove search bar if user not logged in
+    [ ] in all functions check if is forbiden logout user
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

@@ -37,6 +37,7 @@ function Friend() {
         </div>
       </div>
       <div id="bottom">
+        <button>add friend</button>
         <loop on={[Swords, Award, WinCup]} id="games">
           {(Elem) => (
             <div id="history">

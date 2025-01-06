@@ -1,151 +1,130 @@
-import {
-  deleteUser, getRelations, getPicture, getUser,
-  InviteFriend, Login, signup, updateUser, acceptInvitation,
-  refuseInvitation, cancelInvitation,
-  removeFriend,
-  blockUser,
-  unblockUser,
-  searchUser
-} from "./api.js";
+// Array of items
+import api from "./api.js";
 import users from "./users.js";
+const Selected = new Set();
 
-console.log("hello");
+const getLast = () => [...Selected].at(-1);
+
+const root = document.getElementById('users');
+const ids = {};
+
+users.forEach((item, index) => {
+  const div = document.createElement('div');
+  div.textContent = item.username;
+  div.style.cursor = 'pointer';
+  div.addEventListener('click', () => {
+    if (Selected.has(index)) {
+      Selected.delete(index);
+      div.className = '';
+    } else {
+      Selected.add(index);
+      div.className = 'selected';
+    }
+    console.log('Selected input_value:', item);
+  });
+  root.appendChild(div);
+});
+
 const parent = document.getElementById("root")
-let user = {};
-function create(value) {
-  const elem = document.createElement("button");
-  elem.id = value;
-  elem.innerHTML = value
+
+function create(input_value, tag = "button") {
+  const elem = document.createElement(tag);
+  elem.id = input_value;
+  elem.innerHTML = input_value
   parent.appendChild(elem);
   return elem;
 }
 
-function createImg() {
-  const elem = document.createElement("img");
-  parent.appendChild(elem);
-  return elem;
+function Form(data) {
+  const formData = new FormData();
+  Object.keys(data).forEach((key) => {
+    formData.append(key, data[key]);
+  });
+  return formData
 }
+
+let input_value = null
+create("", "input").oninput = (e) => {
+  input_value = e.target.value
+  console.log("input_value:", input_value);
+}
+
 
 create("login").onclick = async () => {
-  await Login(users[0])
+  for (const i of Selected) {
+    console.log("log in as", users[i].username);
+    await api.login(users[i]);
+  }
+  if (Selected.size == 0) console.error("Select at least one user");
 }
+
+/*
+mhrima: "3922dafa-97b1-4af3-96a4-524bbf56102e"
+ssmith: "bf16cfaa-1baf-4707-8f9b-62df094004aa"
+jdoe:   "5c97be95-dc9a-4815-80f7-85e8d6cc4dcd"
+ebrown: "2cfc9a0b-ce9a-445e-a983-cf010e1c76f5"
+agreen: "a005400f-17a7-4f8d-bfef-50974105a3ee"
+*/
 
 create("signup").onclick = async () => {
-  await signup(users[0]);
-}
-
-create("get user").onclick = async () => {
-  user = await getUser();
-}
-
-create("search user").onclick = async () => {
-  await searchUser("m")
-}
-
-const img = createImg()
-create("get image").onclick = async () => {
-  try {
-    user = await getUser();
-    console.log(user);
-    const path = "/static/rest/images/users_profiles/nl6HulGQnbWP.png"
-    img.src = await getPicture(path);
-
-  } catch (error) {
-    console.error("found error", error);
+  for (const i of Selected) {
+    console.log("sign up as", users[i].username);
+    await api.signup(Form(users[i]));
   }
-}
-
-create("update user").onclick = async () => {
-  await updateUser({
-    display_name: "abcde"
-  })
+  if (Selected.size == 0) console.error("Select at least one user");
 }
 
 create("delete user").onclick = async () => {
-  await deleteUser();
-}
-
-create("delete all users").onclick = async () => {
-  users.forEach(async user => {
-    await Login(user)   // TODO: must return something
-    await deleteUser(); // TODO: must return something
-  })
-}
-
-let all = null;
-create("signs all users").onclick = async () => {
-  all = await Promise.all(users.map(async user => await signup(user)));
-  console.log("all users:", all);
-}
-
-create("logs all users").onclick = async () => {
-  all = await Promise.all(users.map(async user => await Login(user)));
-  console.log("all users:", all);
-}
-
-create("invite friends").onclick = async () => {
-  await Login(users[0]);
-  let i = 1;
-  while (i < 5) {
-    const res = await InviteFriend(users[i].id)
-    console.log("adding friend", res);
-    i++;
+  for (const i of Selected) {
+    console.log("log in as", users[i].username);
+    await api.login(users[i]);
+    await api.deleteUser();
   }
+  if (Selected.size == 0) console.error("Select at least one user");
 }
 
-create("accept friends").onclick = async () => {
-  let i = 1;
-  while (i < 5) {
-    await Login(users[i]);
-    const res = await getRelations();
-    console.log("fetting relations", res);
-    await Promise.all(res.invited.map(async e => await acceptInvitation(e.id)))
-    i++;
-  }
+let user = null;
+create("get user").onclick = async () => {
+  user = await api.getUser();
+  console.log(user);
+}
+
+
+create("log ids").onclick = () => {
+  console.log(ids);
 }
 
 create("get friends").onclick = async () => {
-  await Login(users[0]);
-  const res = await getRelations();
+  const res = await api.getRelations();
   console.log("getting friends", res);
 }
 
+/*
+invites: sent invitations
+invited: received invitations
+friends: friends
+blocks: blocked
+*/
 
-create("cancel invitation").onclick = async () => {
-  await Login(users[0]);
-  const res = await getRelations();
-  console.log("fetting relations", res);
-  await Promise.all(res.invites.map(async e => await cancelInvitation(e.id)))
+create("invite friend").onclick = async () => {
+  const res = await api.inviteFriend(input_value)
+  console.log("invite friend:", res);
+}
+
+create("accept invitation").onclick = async () => {
+  const res = await api.acceptInvitation(input_value);
+  console.log("accept invitation", res);
 }
 
 create("refuse invitation").onclick = async () => {
-  await Login(users[1]);
-  const res = await getRelations();
-  console.log("fetting relations", res);
-  await Promise.all(res.invited.map(async e => await refuseInvitation(e.id)))
+  const res = await api.refuseInvitation(input_value);
+  console.log("refuse invitation", res);
 }
 
-create("remove friend").onclick = async () => {
-  await Login(users[0]);
-  const res = await getRelations();
-  console.log("fetting relations", res);
-  await Promise.all(res.friends.map(async e => await removeFriend(e.id)))
+create("cancel invitation").onclick = async () => {
+  const res = await api.cancelInvitation(input_value);
+  console.log("cancel invitation", res);
 }
 
-create("block user").onclick = async () => {
-  await Login(users[0]);
-  await blockUser(all[1].id)
-}
 
-create("unblock user").onclick = async () => {
-  await Login(users[0]);
-  const res = await getRelations();
-  console.log("fetting relations", res);
-  await Promise.all(res.blocks.map(async e => await unblockUser(e.id)))
-}
 
-const a = document.createElement("a");
-a.href = "/api/oauth/42/";
-a.innerHTML = "go to 42 oauth"
-
-parent.appendChild(a)

@@ -4,6 +4,7 @@
       min-height: 100px;
     }
   }
+
 }
 
 /* Large screens (e.g., desktops) */
@@ -17,7 +18,8 @@
 
     background-color: var(--red0);
 
-    & #center {
+
+    #center {
       width: 100%;
       display: flex;
       flex: 2;
@@ -35,7 +37,7 @@
       }
     }
 
-    & #bottom {
+    #bottom {
       flex: 1;
       width: 100%;
       display: flex;
@@ -43,7 +45,7 @@
       align-items: center;
       cursor: pointer;
 
-      & button {
+      button {
         width: 400px;
         height: 40%;
         background-color: transparent;
@@ -74,7 +76,7 @@
     height: 100%;
     background-color: var(--red0);
 
-    & #center {
+    #center {
       width: 100%;
       display: flex;
       flex: 2;
@@ -83,16 +85,16 @@
       align-items: center;
       text-align: center;
 
-      & b {
+      b {
         color: var(--blue3);
       }
 
-      & o {
+      o {
         color: var(--red2);
       }
     }
 
-    & #bottom {
+    #bottom {
       flex: 1;
       width: 100%;
       display: flex;
@@ -100,7 +102,7 @@
       align-items: center;
       cursor: pointer;
 
-      & button {
+      button {
         /* width: 400px; */
         height: 40%;
         background-color: transparent;
@@ -131,7 +133,7 @@
     height: 100%;
     background-color: var(--red0);
 
-    & #center {
+    #center {
       width: 100%;
       display: flex;
       flex: 2;
@@ -140,16 +142,16 @@
       align-items: center;
       text-align: center;
 
-      & b {
+      b {
         color: var(--blue3);
       }
 
-      & o {
+      o {
         color: var(--red2);
       }
     }
 
-    & #bottom {
+    #bottom {
       flex: 1;
       width: 100%;
       display: flex;
@@ -157,7 +159,7 @@
       align-items: center;
       cursor: pointer;
 
-      & button {
+      button {
         width: 400px;
         height: 40%;
         background-color: transparent;

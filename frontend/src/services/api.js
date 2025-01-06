@@ -29,7 +29,7 @@ export async function signup(user) {
   // }
 }
 
-export async function Login(user) {
+export async function login(user) {
   // try {
   const response = await fetch(`${endpoint}/users/login/`, {
     method: "POST",
@@ -190,7 +190,39 @@ export async function deleteUser() {
   }
 }
 
-export async function InviteFriend(friendId) {
+export async function getRelations() {
+  /*
+  return
+  {
+    blocks: [], // blocked users
+    friends:[], // existing friends
+    invited:[], // peoplewho sent me invitations
+    invites: [], // people whom I send invitations
+  }
+  */
+  // try {
+  const response = await fetch(`${endpoint}/relationships/`,
+    {
+      credentials: "include",
+    }
+  );
+  if (response.ok) {
+    // console.log("fetting relations succefully");
+    const body = await response.json();
+    return body;
+  }
+  else {
+    const body = await response.json();
+    throw body;
+
+    // console.log("Error getting relations", body.message);
+  }
+  // } catch (error) {
+  //   // console.log("error", error);
+  // }
+}
+
+export async function inviteFriend(friendId) {
   try {
     console.log("ask", { "friend_id": friendId });
 
@@ -214,58 +246,29 @@ export async function InviteFriend(friendId) {
   }
 }
 
-export async function getRelations() {
-  /*
-  return
-  {
-    blocks: [], // blocked users
-    friends:[], // existing friends
-    invited:[], // peoplewho sent me invitations
-    invites: [], // people whom I send invitations
-  }
-  */
-  try {
-    const response = await fetch(`${endpoint}/relationships/`,
-      {
-        credentials: "include",
-      }
-    );
-    if (response.ok) {
-      console.log("fetting relations succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error getting relations", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
-  }
-}
-// 'invite/accept/'
 export async function acceptInvitation(id) {
-  try {
-    if (!id) throw "invitation id is NULL";
+  // try {
+  if (!id) throw "invitation id is NULL";
 
-    const response = await fetch(`${endpoint}/relationships/invite/accept/`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ "invitation_id": id })
-    })
-    if (response.ok) {
-      console.log("accept invitation succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error accepting invitation ", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
+  const response = await fetch(`${endpoint}/relationships/invite/accept/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ "invitation_id": id })
+  })
+  if (response.ok) {
+    console.log("accept invitation succefully");
+    const body = await response.json();
+    return body;
   }
+  else {
+    const body = await response.json();
+    console.log("Error accepting invitation ", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 }
 
 export async function refuseInvitation(id) {
@@ -392,13 +395,17 @@ export async function unblockUser(id) {
 const api = {
   endpoint,
   signup,
-  Login,
+  login,
   getUser,
   getPicture,
   updateUser,
   getRelations,
   deleteUser,
-  searchUser
+  searchUser,
+  inviteFriend,
+  acceptInvitation,
+  refuseInvitation,
+  cancelInvitation
 }
 
 export default api

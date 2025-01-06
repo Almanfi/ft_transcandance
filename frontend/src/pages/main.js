@@ -24,22 +24,22 @@ import Signup from "./signup/signup.js";
 import User from "./user/user.js";
 import Chat from "./chat/chat.js";
 import Friend from "./friend/friend.js";
-import Test from "./test/test.js";
+// import Test from "./test/test.js";
 
 Ura.setStyles([
-  "./pages/home/home.css",
-  "./pages/login/login.css",
-  "./pages/main.css",
-  "./pages/signup/signup.css",
-  "./pages/test/test.css",
-  "./pages/user/settings/settings.css",
-  "./pages/user/user.css",
-  "./pages/chat/chat.css",
-  "./pages/friend/friend.css",
-  "./pages/friend/settings/settings.css",
+  "/pages/home/home.css",
+  "/pages/login/login.css",
+  "/pages/main.css",
+  "/pages/signup/signup.css",
+  "/pages/test/test.css",
+  "/pages/user/settings/settings.css",
+  "/pages/user/user.css",
+  "/pages/chat/chat.css",
+  "/pages/friend/friend.css",
+  "/pages/friend/settings/settings.css",
   /* components */
-  "./pages/components/Toast/Toast.css",
-  "./pages/components/Navbar/Navbar.css",
+  "/components/Toast/Toast.css",
+  "/components/Navbar/Navbar.css",
 ]);
 
 Ura.onNavigate(() => {
@@ -50,7 +50,7 @@ Ura.onNavigate(() => {
       "/user": User,
       "/chat": Chat,
       "/friend": Friend,
-      "/test": Test
+      // "/test": Test
     });
   }
   else {
@@ -59,7 +59,7 @@ Ura.onNavigate(() => {
       "/home": Home,
       "/login": Login,
       "/signup": Signup,
-      "/test": Test,
+      // "/test": Test,
     });
   }
 })
