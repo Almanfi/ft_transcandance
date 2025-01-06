@@ -1,7 +1,7 @@
 import Ura from "ura";
 import Navbar from "../../components/Navbar/Navbar.js";
 import Arrow from "../../components/Arrow/Arrow.js";
-import Input from "../../components/input/Input.js";
+import Input from "../../components/Input/Input.js";
 import Toast from "../../components/Toast/Toast.js";
 import api from "../../services/api.js";
 import Home from "../home/home.js";
@@ -26,7 +26,7 @@ function Login() {
       console.log("log with ", data);
 
       try {
-        const res = await api.Login(data);
+        const res = await api.login(data);
         console.log("login response");
         // console.table(res)
         // res = await api.getUser();

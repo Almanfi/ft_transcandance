@@ -2,7 +2,7 @@ import Ura from "ura";
 import Navbar from "../../components/Navbar/Navbar.js";
 import Arrow from "../../components/Arrow/Arrow.js";
 import Toast from "../../components/Toast/Toast.js";
-import Input from "../../components/input/Input.js";
+import Input from "../../components/Input/Input.js";
 import api from "../../services/api.js";
 import Home from "../home/home.js";
 

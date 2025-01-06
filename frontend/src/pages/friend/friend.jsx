@@ -3,7 +3,6 @@ import Navbar from '../../components/Navbar/Navbar.js';
 import Swords from '../../components/Swords/Swords.js';
 import WinCup from '../../components/WinCup/WinCup.js';
 import Award from '../../components/Award/Award.js';
-import Settings from './settings/settings.js';
 import Play from '../../components/Play/Play.js';
 import Chat from '../../components/Chat/Chat.js';
 
@@ -13,7 +12,6 @@ function Friend() {
   }
 
   const [render, State] = Ura.init();
-  const [getShow, setShow] = State(false);
 
   const [getList, setList] = State([
     { src: "/assets/003.png", title: "user 0" },
@@ -29,7 +27,7 @@ function Friend() {
       <div id="center" >
         <div className="user-card">
           <div className="img-container">
-            <img src="/assets/profile.png" alt="" onclick={() => setShow(true)} />
+            <img src="/assets/profile.png" alt="" />
           </div>
           <div className="name">
             <h3>Friend</h3>
