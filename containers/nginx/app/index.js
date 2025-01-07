@@ -22,7 +22,6 @@ import {
   cancelGameInvite
 } from "./utils.js";
 
-import { ConnectToMessagingSocket } from "./websockets.js";
 let users = [
   {
     firstname: "mohammed",
@@ -60,8 +59,17 @@ function create(value) {
   const elem = document.createElement("button");
   elem.id = value;
   elem.innerHTML = value;
-  document.body.appendChild(elem);
+  parent.appendChild(elem);
   return elem;
+}
+
+function breaker(text)
+{
+	const elem = document.createElement("h1");
+	const br = document.createElement("br");
+	elem.innerHTML = text
+	parent.appendChild(elem);
+	// parent.appendChild(br);
 }
 
 function createImg() {
@@ -69,6 +77,7 @@ function createImg() {
   parent.appendChild(elem);
   return elem;
 }
+breaker("User Api /users/")
 
 create("login").onclick = async () => {
   await Login(users[0]);
@@ -77,6 +86,11 @@ create("login").onclick = async () => {
 create("signup").onclick = async () => {
   await Signup(users[0]);
 };
+
+const a = document.createElement("a");
+a.href = "/api/oauth/42/";
+a.innerHTML = "go to 42 oauth";
+parent.appendChild(a);
 
 create("get user").onclick = async () => {
   await getUser();
@@ -124,6 +138,8 @@ create("get all users").onclick = async () => {
 	})
 	console.log("All users", users)
 }
+
+breaker("Relationships Api /relationships")
 
 create("invite friends").onclick = async () => {
   await Login(users[0]);
@@ -177,73 +193,7 @@ create("unblock user").onclick = async () => {
   await Promise.all(res.blocks.map(async (e) => await unblockUser(e.id)));
 };
 
-const a = document.createElement("a");
-a.href = "/api/oauth/42/";
-a.innerHTML = "go to 42 oauth";
-
-parent.appendChild(a);
-
-const socket_messager = document.createElement("input");
-socket_messager.type = "number";
-socket_messager.defaultValue = 0;
-const socket_message = document.createElement("input");
-socket_message.type = "text";
-socket_message.defaultValue = "Hello";
-const socket_receiver = document.createElement("input");
-socket_receiver.type = "number";
-socket_receiver.defaultValue = 1;
-parent.appendChild(socket_messager);
-parent.appendChild(socket_message);
-parent.appendChild(socket_receiver);
-let socket = undefined;
-
-create("Messaging Socket").onclick = async () => {
-  const messager_id = socket_messager.value;
-  await Login(users[messager_id]);
-  socket = await ConnectToMessagingSocket();
-  socket.addEventListener("open", (event) => {
-    console.log("WebSocket connection established.");
-  });
-
-  socket.addEventListener("message", (event) => {
-    console.log("Message from server:", event.data);
-  });
-
-  socket.addEventListener('close', (event) => {
-  	console.log('WebSocket connection closed');
-  });
-
-  // socket.addEventListener('error', (event) => {
-  // 	console.error('WebSocket error:', event);
-  // });
-};
-
-function socketIsAlive()
-{
-	return (socket == undefined || socket.readyState === WebSocket.CLOSED);
-}
-
-create("Send Message").onclick = async () => {
-  if (socketIsAlive()) return console.error("No Messaging Socket is active");
-  const message = socket_message.value;
-  const receiver_idx = socket_receiver.value;
-  const found = await searchUser(users[receiver_idx].display_name);
-  const friend_id = found[0].id;
-  socket.send(JSON.stringify({ type: "chat.message", friend_id, message }));
-};
-
-create("Retrieve All Messages").onclick = async () => {
-	if (socketIsAlive()) return console.error("No Messaging Socket is active");
-	const receiver_idx = socket_receiver.value;
-	const found = await searchUser(users[receiver_idx].display_name);
-	const friend_id = found[0].id;
-	socket.send(JSON.stringify({type: "chat.message.retrieve", friend_id}))
-}
-
-create("Close Messaging Socket").onclick = async () => {
-	if (socketIsAlive()) return console.error("No Messaging Socket is active");
-	socket.close();
-}
+breaker("Game Api /games")
 
 let new_game = undefined;
 let game_invite = undefined;
@@ -287,3 +237,127 @@ create("Refuse Game Invite").onclick = async () => {
 	await refuseGameInvite(invites[0].id);
 }
 
+breaker("Events and Messaging Socket /ws/messaging");
+
+const websocketApi = "http://localhost:8001"
+
+const socket_messager = document.createElement("input");
+socket_messager.type = "number";
+socket_messager.defaultValue = 0;
+const socket_message = document.createElement("input");
+socket_message.type = "text";
+socket_message.defaultValue = "Hello";
+const socket_receiver = document.createElement("input");
+socket_receiver.type = "number";
+socket_receiver.defaultValue = 1;
+parent.appendChild(socket_messager);
+parent.appendChild(socket_message);
+parent.appendChild(socket_receiver);
+let socket = undefined;
+
+create("Messaging Socket").onclick = async () => {
+  const messager_id = socket_messager.value;
+  await Login(users[messager_id]);
+  socket = new WebSocket(`${websocketApi}/ws/messaging/`);;
+  socket.addEventListener("open", (event) => {
+    console.log("WebSocket connection established.");
+  });
+
+  socket.addEventListener("message", (event) => {
+    console.log("Message from server:", event.data);
+  });
+
+  socket.addEventListener('close', (event) => {
+  	console.log('WebSocket connection closed');
+  });
+
+  // socket.addEventListener('error', (event) => {
+  // 	console.error('WebSocket error:', event);
+  // });
+};
+
+function socketIsDead(sock)
+{
+	return (sock == undefined || sock.readyState === WebSocket.CLOSED);
+}
+
+create("Send Message").onclick = async () => {
+  if (socketIsDead(socket)) return console.error("No Messaging Socket is active");
+  const message = socket_message.value;
+  const receiver_idx = socket_receiver.value;
+  const found = await searchUser(users[receiver_idx].display_name);
+  const friend_id = found[0].id;
+  socket.send(JSON.stringify({ type: "chat.message", friend_id, message }));
+};
+
+create("Retrieve All Messages").onclick = async () => {
+	if (socketIsDead(socket)) return console.error("No Messaging Socket is active");
+	const receiver_idx = socket_receiver.value;
+	const found = await searchUser(users[receiver_idx].display_name);
+	const friend_id = found[0].id;
+	socket.send(JSON.stringify({type: "chat.message.retrieve", friend_id}))
+}
+
+create("Close Messaging Socket").onclick = async () => {
+	if (socketIsDead(socket)) return console.error("No Messaging Socket is active");
+	socket.close();
+}
+
+breaker("Game Socket /ws/game//uuid:gam_id/")
+
+let game_socket = undefined
+
+const game_message = document.createElement("input");
+game_message.type = "text";
+game_message.defaultValue = "Hello Game";
+parent.append(game_message)
+
+create("Connect to Game Lobby").onclick = async () =>
+{
+	await Login(users[0])
+	if (new_game === undefined)
+		return console.error("No game to conect to")
+	game_socket = new WebSocket(`${websocketApi}/ws/game/${new_game.id}/`);
+	game_socket.addEventListener('open', (e) => {
+		console.log("Connected to game Lobby");
+	});
+
+	game_socket.addEventListener("message", (e) => {
+		console.log("Game Lobby message: ", e.data)
+	})
+
+	game_socket.addEventListener('close', (e) => {
+		console.log("Game Lobby quit");
+		game_socket = undefined;
+	})
+}
+
+create("Game Lobby Move Teams").onclick = async () => {
+	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
+	game_socket.send(JSON.stringify({type:"game.move"}));
+}
+
+create("Quit Game Lobby").onclick = async () => {
+	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
+	game_socket.send(JSON.stringify({type: "game.quit"}));
+}
+
+create("Start Game").onclick = async () => {
+	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
+	game_socket.send(JSON.stringify({type: "game.start"}))
+}
+
+create("Cancel Game").onclick = async () => {
+	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
+	game_socket.send(JSON.stringify({type: "game.cancel"}))
+}
+
+create("Game Lobby message").onclick = async () => {
+	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
+	game_socket.send(JSON.stringify({type:"game.message", message:game_message.value}))
+}
+
+create("Game Lobby Retrieve Messages").onclick = async () => {
+	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
+	game_socket.send(JSON.stringify({type: "game.retrieve_messages"}))
+}

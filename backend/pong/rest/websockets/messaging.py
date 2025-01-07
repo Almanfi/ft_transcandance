@@ -53,8 +53,7 @@ class MessagingSocket(WebsocketConsumer):
 		messages = Message.retrieve_messages(relation=relationship[0])
 		messages = MessageSerializer(messages, many=True)
 		for message in messages.data:
-			del message["sender"]['password']
-			del message["sender"]['salt']
+			MessageSerializer.remove_secrets(message)
 		return messages.data
 
 	def receive(self, text_data=None, bytes_data=None):
