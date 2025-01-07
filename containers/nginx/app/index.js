@@ -361,3 +361,65 @@ create("Game Lobby Retrieve Messages").onclick = async () => {
 	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
 	game_socket.send(JSON.stringify({type: "game.retrieve_messages"}))
 }
+
+breaker("Matchmaking /ws/matchmaking/")
+
+const matchmaking_user_id = document.createElement("input");
+matchmaking_user_id.type = "number";
+matchmaking_user_id.defaultValue = 0;
+parent.append(matchmaking_user_id)
+
+let matchmaking_socket = undefined;
+
+create("Enter MatchMaking").onclick = async () => {
+	// console.log(users[matchmaking_user_id])
+	await Login(users[matchmaking_user_id.value])
+	matchmaking_socket = new WebSocket(`${websocketApi}/ws/matchmaking/`);
+	matchmaking_socket.addEventListener("open", (e) => {
+		console.log("Entered Matchmaking");
+	});
+	matchmaking_socket.addEventListener("message", (e) => {
+		console.log("Received event from matchmaking: ", e.data);
+	});
+	matchmaking_socket.addEventListener("close", (e) => {
+		console.log("Exited Matchmaking");
+	});
+}
+
+breaker("Tournament Making /ws/tournamentmaking/")
+
+let tournamentmaking_socket = undefined;
+let tournament = undefined
+
+create("Enter Tournament Making").onclick = async () => {
+	await Login(users[matchmaking_user_id.value])
+	tournamentmaking_socket = new WebSocket(`${websocketApi}/ws/tournamentmaking/`);
+	tournamentmaking_socket.addEventListener("open", (e) => {
+		console.log("Entered Tournament Making")
+	})
+	tournamentmaking_socket.addEventListener("message", (e) => {
+		console.log("Received event from tournament Making: ", e.data);
+	})
+	tournamentmaking_socket.addEventListener("close", (e) => {
+		console.log("Exited Tournament Making");
+	})
+}
+
+breaker("Tournament Socket /ws/tournament/<uuid:tournament_id>/");
+
+let tournamentlobby_socket = undefined;
+
+create("Enter Tournament Lobby").onclick = async () => {
+	if (tournament === undefined) return console.error("No Tournament to join");
+	await Login(users[matchmaking_user_id.value])
+	tournamentlobby_socket = new WebSocket(`${websocketApi}/ws/tournament/${tournament.id}/`);
+	tournamentlobby_socket.addEventListener("open", () => { 
+		console.log("Entered Tournament Lobby Socket");
+	})
+	tournamentlobby_socket.addEventListener("message", (e) => {
+		console.log("Received event from Tournament Lobby: ", e.data);
+	})
+	tournamentlobby_socket.addEventListener("close", (e) => {
+		console.log("Exited Tournament Lobby");
+	});
+}
