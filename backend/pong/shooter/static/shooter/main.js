@@ -5,6 +5,7 @@ import { KeyControls, getCameraDir } from './keyControls.js';
 import { gameClock } from './gclock.js';
 import { MusicSync } from './sync.js';
 import { musicMap } from './assets/reolMap.js';
+import { Connection } from './connection.js';
 function initThreeJS() {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -23,9 +24,13 @@ function initThreeJS() {
     scene.add(light2);
     return { scene, camera, renderer };
 }
+let foe = user.id === users[0].id ? users[1] : users[0];
+console.log('user: ', user, ' foe: ', foe);
 const { scene, camera, renderer } = initThreeJS();
 const keyControls = new KeyControls(camera);
 const gClock = new gameClock(scene, camera, renderer);
+const connection = new Connection();
+connection.init(foe.id);
 const musicSyncer = new MusicSync(camera);
 musicSyncer.loadMusic('/static/shooter/assets/No_title.mp3');
 musicSyncer.addMusicMap(musicMap);
@@ -74,8 +79,10 @@ function handleInputs(s, timeStamp) {
     let { angle, direction } = keyControls.findPlayerAngle(playerPosition);
     let move = keyControls.findPlayerMove();
     let action = keyControls.findPlayerAction();
-    if (action.d)
+    if (action.d) {
+        connection.send("hello");
         startGame(performance.now() + 1000);
+    }
     let inputs = player.inputs.set(move, angle, direction, action, timeStamp);
 }
 ;
