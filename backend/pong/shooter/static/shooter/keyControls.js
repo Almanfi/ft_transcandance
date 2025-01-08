@@ -54,6 +54,7 @@ export class KeyControls extends Controls {
         this.Jkey.release = release.bind(this.Jkey);
         this.keydownListener();
         this.keyupListener();
+        this.handled = true;
     }
     findPlayerMove() {
         this.move.x = this.Wkey.hold - this.Skey.hold;
@@ -83,6 +84,7 @@ export class KeyControls extends Controls {
         return { angle: this.angle, direction: this.direction };
     }
     onMouseMove(event) {
+        this.handled = false;
         event.preventDefault();
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -99,47 +101,63 @@ export class KeyControls extends Controls {
     fire() {
         return this.Lclick.hold;
     }
+    setAsHandeled() {
+        this.handled = true;
+    }
+    checkforNewInputs() {
+        let value = !this.handled;
+        this.handled = true;
+        return value;
+    }
     keydownListener() {
         window.addEventListener('mousemove', this.onMouseMove.bind(this));
         window.addEventListener('mousedown', (e) => {
             if (!this.Lclick.hold)
-                this.Lclick.pressVal = true;
+                this.handled = false;
+            this.Lclick.pressVal = true;
             this.Lclick.hold = true;
         });
         window.addEventListener('keydown', (e) => {
+            // this.handled = false;
             switch (e.code) {
                 case 'KeyW':
                     if (!this.Wkey.hold) {
+                        this.handled = false;
                         this.Wkey.pressVal = true;
                     }
                     this.Wkey.hold = true;
                     break;
                 case 'KeyA':
                     if (!this.Akey.hold) {
+                        this.handled = false;
                         this.Akey.pressVal = true;
                     }
                     this.Akey.hold = true;
                     break;
                 case 'KeyS':
                     if (!this.Skey.hold) {
+                        this.handled = false;
                         this.Skey.pressVal = true;
                     }
                     this.Skey.hold = true;
                     break;
                 case 'KeyD':
                     if (!this.Dkey.hold) {
+                        this.handled = false;
                         this.Dkey.pressVal = true;
                     }
                     this.Dkey.hold = true;
                     break;
                 case 'ShiftLeft':
                     if (!this.shift.hold) {
+                        this.handled = false;
                         this.shift.pressVal = true;
                     }
                     this.shift.hold = true;
                     break;
                 case 'KeyJ':
                     if (!this.Jkey.hold) {
+                        this.handled = false;
                         this.Jkey.pressVal = true;
                     }
                     this.Jkey.hold = true;
@@ -151,10 +169,12 @@ export class KeyControls extends Controls {
     }
     keyupListener() {
         window.addEventListener('mouseup', (e) => {
+            this.handled = false;
             this.Lclick.releaseVal = true;
             this.Lclick.hold = false;
         });
         window.addEventListener('keyup', (e) => {
+            this.handled = false;
             switch (e.code) {
                 case 'KeyW':
                     this.Wkey.releaseVal = true;

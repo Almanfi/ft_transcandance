@@ -44,15 +44,15 @@ export class gameClock {
         this.frameCount = 0;
         this.startTime = startTime;
     }
-    loop(animate, rollBack, handleInputs) {
-        window.requestAnimationFrame(() => this.loop(animate, rollBack, handleInputs));
+    loop(animate, rollBack) {
+        window.requestAnimationFrame(() => this.loop(animate, rollBack));
         rollBack(this.startTime);
         this.msNow = performance.now() - this.startTime;
         this.msPassed = this.msNow - this.msPrev;
         this.msPrevTrue = this.msNow;
         if (this.msPassed < this.msPerFrame)
             return;
-        handleInputs(this.msPassed, this.msPrev);
+        // handleInputs(this.msPassed, this.msPrev);
         animate(this.msPassed, this.msPrev);
         this.setFrameTime();
         this.excessTime = 0;

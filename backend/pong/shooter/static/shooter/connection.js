@@ -1,6 +1,11 @@
 class WebSocketCnx {
     constructor() {
         this.receiver = "";
+        this.connected = false;
+    }
+    defaultEventHandler() { }
+    changeDefaultEventHandler(handler) {
+        this.defaultEventHandler = handler;
     }
     send(msg) {
         var _a;
@@ -20,9 +25,13 @@ class WebSocketCnx {
         this.initSocket(address, socketMsgHandler);
     }
     onSocketOpen(e) {
+        this.connected = true;
+        this.defaultEventHandler();
         console.log('socket open', e);
     }
     onSocketClose(e) {
+        this.connected = false;
+        this.defaultEventHandler();
         console.log('socket close', e);
     }
     OnSocketError(e) {
@@ -37,11 +46,16 @@ class WebSocketCnx {
     }
 }
 class WebRtcCnx {
-    constructor(onIceCandidateCallback) {
+    constructor(onIceCandidateCallback, onRtcChannelMsg) {
         this.RTCConnected = false;
         let iceConfiguration = this.createIceConfiguration(null);
         this.remoteConnection = new RTCPeerConnection(iceConfiguration);
         this.onIceCandidateCallback = onIceCandidateCallback;
+        this.onRtcChannelMsgCallback = onRtcChannelMsg;
+    }
+    defaultEventHandler() { }
+    changeDefaultEventHandler(handler) {
+        this.defaultEventHandler = handler;
     }
     send(msg) {
         var _a;
@@ -145,16 +159,18 @@ class WebRtcCnx {
     }
     onDataChannelOpen(e) {
         console.log("open!!!!");
+        this.RTCConnected = true;
+        this.defaultEventHandler();
         // this.send = this.sendRtcMsg;
         console.log("sending message by RTC");
         // this.startPing();
-        // this.RtcConnected = true;
         // if (this.webRTC.remoteConnection)
         //     this.initSync();
     }
     onDataChannelClose(e) {
         console.log("closed!!!!!!");
         this.RTCConnected = false;
+        this.defaultEventHandler();
         // if (this.send === this.sendRtcMsg)
         //     this.send =  this.sendSocketMsg;
         // this.stopPing();
@@ -179,12 +195,6 @@ class WebRtcCnx {
             console.error('ICE connection failed catched by me'); // ---------- catch ICE connection failure
         }
     }
-    // setupRemoteConnection() {
-    //     if (!this.remoteConnection)
-    //         return;
-    //     console.log('Sending answer: ', this.remoteConnection.localDescription);
-    //     this.sendSocketMsg({ answer: this.webRTC.remoteConnection.localDescription });
-    // }
     createIceConfiguration(url) {
         // const iceConfiguration = {
         //     iceServers: [
@@ -196,27 +206,9 @@ class WebRtcCnx {
         return undefined;
     }
     initRtcChannel(channel) {
-        channel.onmessage = this.onRtcChannelMsg.bind(this);
+        channel.onmessage = this.onRtcChannelMsgCallback;
         channel.onopen = this.onDataChannelOpen.bind(this);
         channel.onclose = this.onDataChannelClose.bind(this);
-    }
-    setupLocalConnection() {
-        console.log("Sending offer: ", this.remoteConnection.localDescription);
-        // this.sendSocketMsg({ offer: this.webRTC.localConnection.localDescription });
-    }
-    onRtcChannelMsg(e) {
-        let data = JSON.parse(e.data);
-        console.log("rtc msg: ", data);
-        // if (data.type === "ping") {
-        //     this.sendRtcMsg(JSON.stringify({ type: "pong", timestamp: data.timestamp }));
-        // } else if (data.type === "pong") {
-        //     let pingEndTime = performance.now();
-        //     let latency = pingEndTime - data.timestamp;
-        //     console.log(`Ping: ${latency.toFixed(2)} ms`);
-        // }
-        // else {
-        //     this.handlePlayerAction(data);
-        // }
     }
 }
 export class Connection {
@@ -224,6 +216,8 @@ export class Connection {
         this.socket = new WebSocketCnx();
         this.webRTC = null;
         this.activeProtocol = this.socket;
+        this.recievedData = new Map();
+        this.recievedDataOrder = 1;
         // this.pingInterval = null;
         // this.RtcConnected = false;
         // this.ping = new Array();
@@ -233,13 +227,31 @@ export class Connection {
         // this.timeDiffAvrg = 0;
         // this.peerTimeDiff = 0;
     }
+    reset() {
+        this.recievedData.clear();
+        this.recievedDataOrder = 1;
+    }
+    recheckConnection() {
+        if (this.webRTC && this.webRTC.RTCConnected)
+            this.activeProtocol = this.webRTC;
+        else if (this.socket.connected)
+            this.activeProtocol = this.socket;
+        else {
+            let receiver = this.socket.receiver;
+            this.socket = new WebSocketCnx();
+            this.init(receiver);
+            this.activeProtocol = this.socket;
+        }
+    }
     init(receiver) {
         this.socket.setReciever(receiver);
+        this.socket.changeDefaultEventHandler(this.recheckConnection.bind(this));
         this.socket.connectToServer(this.handleSocketMessage.bind(this));
     }
     handleRtcCnx(data) {
         if (!this.webRTC) {
-            this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this));
+            this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this), this.handleRtcMessage.bind(this));
+            this.webRTC.changeDefaultEventHandler(this.recheckConnection.bind(this));
             this.webRTC.initRemoteConnection();
         }
         if (this.webRTC.RTCConnected)
@@ -253,14 +265,19 @@ export class Connection {
     handleSocketMessage(e) {
         let socketPayload = JSON.parse(e.data);
         let data = socketPayload.message;
-        console.log("socket message: ", data);
+        // console.log("socket message: ", data);
         if (socketPayload.status == "sent")
             return;
         if (data.rtc)
             return this.handleRtcCnx(data);
         if (!socketPayload.from)
             return;
-        this.handlePlayerAction(data);
+        this.handleData(data);
+    }
+    handleRtcMessage(e) {
+        let data = JSON.parse(e.data);
+        console.log("rtc msg: ", data);
+        this.handleData(data);
     }
     handleRtcIceCandidate(e) {
         let iceCandidate = e.candidate;
@@ -282,7 +299,8 @@ export class Connection {
         if (this.webRTC)
             return;
         console.log("init rtc");
-        this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this));
+        this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this), this.handleRtcMessage.bind(this));
+        this.webRTC.changeDefaultEventHandler(this.recheckConnection.bind(this));
         let offerPromise = this.webRTC.startRtcConnection();
         offerPromise === null || offerPromise === void 0 ? void 0 : offerPromise.then(offer => {
             this.activeProtocol.send({ rtc: true, offer: offer });
@@ -301,8 +319,16 @@ export class Connection {
             this.handlePlayerAction(data);
         }
     }
+    getRecivedDataOrdered() {
+        let data = this.recievedData.get(this.recievedDataOrder);
+        if (data)
+            this.recievedDataOrder++;
+        // this.recievedData.delete(order);
+        return data;
+    }
     handlePlayerAction(data) {
-        console.log("player action: ", data);
+        if (data.order)
+            this.recievedData.set(data.order, data.info);
         // if (data.type === "sync")
         //     this.handleSyncWithPeer(data);
         // if (data.timeStamp)

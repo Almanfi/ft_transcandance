@@ -69,7 +69,8 @@ player.setPlaneVector(planeFacingVector);
 
 var rollBack = (startTime) => {}
 
-var animate = (s: number, timeStamp: number) => {
+var animate = (span: number, timeStamp: number) => {
+    handleInputs(span, timeStamp);
     let startTime = gClock.startTime;
     // if (justRolledBack) {
     //     let lastFrame = gClock.getFrameTime(0);
@@ -80,9 +81,9 @@ var animate = (s: number, timeStamp: number) => {
     //     // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
     // }
 
-    player.update(s, timeStamp, timeStamp);
+    player.update(span, timeStamp, timeStamp);
     playerBulletM.update(timeStamp);
-    // foe.update(s, planeFacingVector, timeStamp, timeStamp);
+    // foe.update(span, planeFacingVector, timeStamp, timeStamp);
 
     let beat = musicSyncer.findCurrentBeat();
     if (beat)
@@ -91,29 +92,40 @@ var animate = (s: number, timeStamp: number) => {
 
 
     // if (justRolledBack) {
-    //     // console.log('(just rolled back) after animete at time', timeStamp + s, ' postion: ', foe.position);
+    //     // console.log('(just rolled back) after animete at time', timeStamp + span, ' postion: ', foe.position);
     //     justRolledBack = false;
     // }
 
 
-    turretBulletM.checkCollision(player, s);
-    // turretBulletManager.checkCollision(foe, s);
-    // playerBulletManager.checkCollision(foe, s);
-    // foeBulletManager.checkCollision(player, s);
+    turretBulletM.checkCollision(player, span);
+    // turretBulletManager.checkCollision(foe, span);
+    // playerBulletManager.checkCollision(foe, span);
+    // foeBulletManager.checkCollision(player, span);
 }
 
-function handleInputs(s: number, timeStamp: number) {
+function handleInputs(span: number, timeStamp: number) {
+    let recievedData = connection.getRecivedDataOrdered();
+    if (recievedData) {
+        player.inputs.deserialize(recievedData);
+        return ;
+    }
+    
+    if (!keyControls.checkforNewInputs())
+        return ;
+    keyControls.setAsHandeled();
+
     let playerPosition = player.position;
     let {angle, direction} = keyControls.findPlayerAngle(playerPosition)
     let move = keyControls.findPlayerMove();
     let action = keyControls.findPlayerAction();
     if (action.d) {
-        connection.send("hello");
         startGame(performance.now() + 1000);
     }
 
     let inputs = player.inputs.set(move, angle,
                     direction, action, timeStamp);
+    let data = inputs.serializeForSend();
+    connection.send(JSON.stringify(data));
 };
 
 function startGame(timeStamp) {
@@ -121,6 +133,8 @@ function startGame(timeStamp) {
         musicSyncer.stopMusic();
         turretBulletM.reset();
         playerBulletM.reset();
+        player.reset();
+        connection.reset();
     setTimeout(() => {
         // while(timeStamp > performance.now());
         gClock.setStartTime(musicSyncer.playMusic());
@@ -129,6 +143,7 @@ function startGame(timeStamp) {
         playerBulletM.reset();
         player.reset();
         turret.reset();
+        connection.reset();
     }, (timeStamp - performance.now()));
 }
 
@@ -138,7 +153,7 @@ function setPlaneVector(camera: THREE.Camera, player: Player, foe: Player) {
     foe.setPlaneVector(planeFacingVector);
 }
 
-gClock.loop(animate, rollBack, handleInputs);
+gClock.loop(animate, rollBack);
 // gClock.setStartTime(musicSyncer.playMusic());
 gClock.setStartTime(musicSyncer.startTime);
 

@@ -3,20 +3,70 @@ import { Move, GameAction } from './keyControls.js';
 import { PlayersBulletManager } from './assets.js';
 
 class Inputs {
-    order: number
-    move: Move
-    angle: number
-    direction: THREE.Vector3
-    action: GameAction
-    timeStamp: number
+    move: Move;
+    angle: number;
+    direction: THREE.Vector3;
+    action: GameAction;
+    timeStamp: number;
+    serializedData: string;
+    sendOrder: number;
 
     constructor() {
-        this.order = 0;
         this.move = {x: 0, y: 0};
+        this.action = {f: false, d: false};
         this.angle = 0;
         this.direction = new THREE.Vector3(1, 0, 0);
-        this.action = {f: false, d: false};
         this.timeStamp = 0;
+        this.serializedData = '';
+        this.sendOrder = 1;
+    }
+
+    reset() {
+        this.sendOrder = 1;
+    }
+
+    serializeForSend(): {order: number, info: string} {
+        this.serialize();
+        let order = this.sendOrder;
+        let data = {
+            order,
+            info: this.serializedData
+        }
+        this.sendOrder++;
+        return data;
+    }
+
+    numberEncode(n: number): string {
+        n = n * 10 + 10;
+        return n.toString(36);
+    }
+
+    numberDecode(n: string): number {
+        return (parseInt(n, 36) - 10) / 10;
+    }
+
+    serialize(): string {
+        let actionComb = <number>(<unknown>this.action.f) * 1
+                        + <number>(<unknown>this.action.d) * 2;
+        let x = this.numberEncode(this.move.x);
+        let y = this.numberEncode(this.move.y);
+        let info = `${x}${y}${actionComb}`;
+        info += `${this.angle}|${this.direction.toArray()}|${this.timeStamp}`;
+        this.serializedData = info;
+
+        return this.serializedData;
+    }
+
+    deserialize(data: string) {
+        this.move = {x: this.numberDecode(data[0]) , y: this.numberDecode(data[1])};
+        let actionComb = Number(data[2]);
+        this.action.f = Boolean(actionComb >>> 0 & 1);
+        this.action.d = Boolean(actionComb >>> 1 & 1);
+        let others = data.slice(3).split('|');
+        this.angle = Number(others[0]);
+        let directionArray = others[1].split(',').map(parseFloat);
+        this.direction.fromArray(directionArray);
+        this.timeStamp = Number(others[2]);
     }
 
     calcMovementVector(frontVector: THREE.Vector3): THREE.Vector3 {
@@ -36,12 +86,13 @@ class Inputs {
 
     set(move: Move, angle: number, direction: THREE.Vector3,
         action: GameAction, timeStamp: number) {
-        this.order++;
         this.move = {x: move.x, y: move.y};
         this.angle = angle;
         this.direction = direction.clone();
         this.action = {f: action.f, d: action.d};
         this.timeStamp = timeStamp;
+
+        return this;
     }
 }
 
@@ -104,6 +155,7 @@ export class Player extends THREE.Object3D {
     };
 
     reset() {
+        this.inputs.reset();
         this.actions.clear();
         this.lastFire = 0;
     }
