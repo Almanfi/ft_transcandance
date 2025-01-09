@@ -389,7 +389,7 @@ create("Enter MatchMaking").onclick = async () => {
 breaker("Tournament Making /ws/tournamentmaking/")
 
 let tournamentmaking_socket = undefined;
-let tournament = undefined
+let tournament_id = undefined
 
 create("Enter Tournament Making").onclick = async () => {
 	await Login(users[matchmaking_user_id.value])
@@ -399,6 +399,9 @@ create("Enter Tournament Making").onclick = async () => {
 	})
 	tournamentmaking_socket.addEventListener("message", (e) => {
 		console.log("Received event from tournament Making: ", e.data);
+		const data = JSON.parse(e.data);
+		if (data['type'] === "tournament.found")
+			tournament_id = data['tournament_id'];
 	})
 	tournamentmaking_socket.addEventListener("close", (e) => {
 		console.log("Exited Tournament Making");
@@ -410,9 +413,8 @@ breaker("Tournament Socket /ws/tournament/<uuid:tournament_id>/");
 let tournamentlobby_socket = undefined;
 
 create("Enter Tournament Lobby").onclick = async () => {
-	if (tournament === undefined) return console.error("No Tournament to join");
-	await Login(users[matchmaking_user_id.value])
-	tournamentlobby_socket = new WebSocket(`${websocketApi}/ws/tournament/${tournament.id}/`);
+	if (tournament_id === undefined) return console.error("No Tournament Id given");
+	tournamentlobby_socket = new WebSocket(`${websocketApi}/ws/tournament/${tournament_id}/`);
 	tournamentlobby_socket.addEventListener("open", () => { 
 		console.log("Entered Tournament Lobby Socket");
 	})
@@ -422,4 +424,19 @@ create("Enter Tournament Lobby").onclick = async () => {
 	tournamentlobby_socket.addEventListener("close", (e) => {
 		console.log("Exited Tournament Lobby");
 	});
+}
+
+create("Tournament Lobby participants").onclick = async () => {
+	if (socketIsDead(tournamentlobby_socket)) return console.error("No Tournament Socket Lobby Alive");
+	tournamentlobby_socket.send(JSON.stringify({type:"tournament.lobby"}))
+}
+
+create("Tournament Lobby Ready").onclick = async () => {
+	if (socketIsDead(tournamentlobby_socket)) return console.error("No Tournament Socket Lobby Alive");
+	tournamentlobby_socket.send(JSON.stringify({type: "tournament.ready"}))
+}
+
+create("Tournament Lobby Unready").onclick = async () => {
+	if (socketIsDead(tournamentlobby_socket)) return console.error("No Tournament Socket Lobby Alive");
+	tournamentlobby_socket.send(JSON.stringify({type: "tournament.unready"}))
 }
