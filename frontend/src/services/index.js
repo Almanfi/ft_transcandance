@@ -126,5 +126,10 @@ create("cancel invitation").onclick = async () => {
   console.log("cancel invitation", res);
 }
 
-
-
+create("get user by id").onclick = async () => {
+  if (!input_value || !input_value.length) console.error("check input");
+  else {
+    const res = await api.getUserById([input_value])
+    console.log(res);
+  }
+}

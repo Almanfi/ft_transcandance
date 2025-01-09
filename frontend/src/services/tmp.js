@@ -1,4 +1,4 @@
-import {
+import api, {
   deleteUser, getRelations, getPicture, getUser,
   InviteFriend, Login, signup, updateUser, acceptInvitation,
   refuseInvitation, cancelInvitation,
@@ -143,6 +143,7 @@ create("unblock user").onclick = async () => {
   console.log("fetting relations", res);
   await Promise.all(res.blocks.map(async e => await unblockUser(e.id)))
 }
+
 
 const a = document.createElement("a");
 a.href = "/api/oauth/42/";

@@ -1,9 +1,10 @@
 import Ura from 'ura';
-import Input from '../../../components/input/Input.js';
+import Input from '../../../components/Input/Input.jsx';
 import api from '../../../services/api.js';
 
 function Settings(props = {}) {
-  const { getShow, setShow, userData } = props;
+  const { Show, userData } = props;
+  const[getShow, setShow] = Show;
   const [render, State] = Ura.init();
   // let user = JSON.parse(Ura.store.get("user") || "{}");
   // const [getError, setError] = State([]);

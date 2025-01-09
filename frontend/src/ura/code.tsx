@@ -510,22 +510,36 @@ function normalizePath(path) {
   return path;
 }
 
-function refresh(params = {}) {
+function getQueries()
+{
+  const res = {};
+  const urlParams = new URLSearchParams(window.location.search);
+  for (const [key, value] of urlParams) {
+    console.log(key, ":", value);
+    res[key] = value;
+  }
+  return res;
+}
+
+function refresh(params = null) {
+  console.log("call refresh", params);
+
   if (navigate_handler) navigate_handler();
 
-  let path = window.location.pathname || "/";
+  let path = window.location.pathname || "*";
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
-  // console.log("go to", path);
+
   return display(
     <root >
-      <RouteConfig props={params} />
+      {RouteConfig(params)}
     </root>
   );
 }
 
 function navigate(route, params = {}) {
-  route = route.split("?")[0];
+  
+  // route = route.split("?")[0];
   route = normalizePath(route);
   console.log("navigate to", route, "with", params);
 
@@ -571,7 +585,7 @@ async function loadJSFiles(routes, base) {
 }
 
 function setEventListeners() {
-  window.addEventListener("hashchange", () => Ura.refresh());
+  // window.addEventListener("hashchange", () => Ura.refresh());
   window.addEventListener("DOMContentLoaded", () => Ura.refresh());
   window.addEventListener("popstate", () => Ura.refresh());
   // window.addEventListener("storage", (event) => {
@@ -783,7 +797,8 @@ const Ura = {
   start,
   getCookie,
   rmCookie,
-  onNavigate
+  onNavigate,
+  getQueries
 };
 
 export default Ura;

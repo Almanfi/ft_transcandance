@@ -94,6 +94,41 @@ username: "mhrima"
   */
 }
 
+export async function getUsersById(ids) {
+  // get user data
+  // try {
+  const response = await fetch(`${endpoint}/users/fetch/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body : JSON.stringify(ids)
+  });
+  // console.log("res", response);
+
+  if (response.ok) {
+    const body = await response.json();
+    // console.log("get user succefully", body);
+    // userData = body;
+    // localStorage.setItem("user", JSON.stringify(userData))
+    return body;
+  }
+  else if (response.status === 403) {
+    throw {
+      status: 403,
+      message: "",
+    }
+  }
+  else {
+    const body = await response.json();
+    // console.log("Error get user", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
+}
+
+
 export async function searchUser(searchTerm) {
   // try {
   const response = await fetch(`${endpoint}/users/search/`, {
@@ -405,7 +440,8 @@ const api = {
   inviteFriend,
   acceptInvitation,
   refuseInvitation,
-  cancelInvitation
+  cancelInvitation,
+  getUsersById
 }
 
 export default api

@@ -24,6 +24,7 @@ import Signup from "./signup/signup.js";
 import User from "./user/user.js";
 import Chat from "./chat/chat.js";
 import Friend from "./friend/friend.js";
+import Game from "./game/game.js";
 // import Test from "./test/test.js";
 
 Ura.setStyles([
@@ -40,6 +41,7 @@ Ura.setStyles([
   /* components */
   "/components/Toast/Toast.css",
   "/components/Navbar/Navbar.css",
+  "/pages/game/game.css"
 ]);
 
 Ura.onNavigate(() => {
@@ -50,7 +52,8 @@ Ura.onNavigate(() => {
       "/user": User,
       "/chat": Chat,
       "/friend": Friend,
-      // "/test": Test
+      "/game": Game,
+      "/friend": Friend
     });
   }
   else {
@@ -59,7 +62,6 @@ Ura.onNavigate(() => {
       "/home": Home,
       "/login": Login,
       "/signup": Signup,
-      // "/test": Test,
     });
   }
 })

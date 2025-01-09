@@ -19,7 +19,7 @@ blocks: blocked
 function User() {
 
   const [render, State] = Ura.init();
-  const [getShow, setShow] = State(false);
+  const Show = State(false);
   const [getLoading, setLoading] = State(true);
   const [getData, setData] = State([]);
 
@@ -38,6 +38,7 @@ function User() {
   });
 
   const [getUserData, setUserData] = userData;
+  const [getShow, setShow] = Show;
 
   const fetchData = async () => {
     const Errors = [];
@@ -55,7 +56,7 @@ function User() {
       console.log("relations:", relations);
       setData(relations["friends"]);
       console.log("data", getData());
-      
+
 
 
       // setImage(`https://localhost:5000/${getUserData().profile_picture}`);
@@ -85,19 +86,24 @@ function User() {
   return render(() => (
     <if className="user" cond={getLoading() === true}>
       <Navbar />
-      <Settings getShow={getShow} setShow={setShow} userData={userData} />
+      <Settings Show={Show} userData={userData} />
       <div id="center" >
         <div className="user-card">
           <div className="img-container">
-            <img src={`${api.endpoint}${getUserData().profile_picture}`} alt="" onclick={() => setShow(true)} />
+            <img
+              src={`${api.endpoint}${getUserData().profile_picture}`}
+              alt="" onclick={() => setShow(true)} />
           </div>
           <div className="name">
             <h3>
-              {`${getUserData().firstname} ${getUserData().lastname} (${getUserData().display_name})`}
+              {getUserData().firstname} {" "}
+              {getUserData().lastname} {" "}
+              ({getUserData().display_name})
             </h3>
           </div>
         </div>
       </div>
+
       <div id="bottom">
         <loop on={[Swords, Award, WinCup]} id="games">
           {(Elem) => (

@@ -30,7 +30,6 @@ function Navbar() {
         const res = await api.searchUser(value);
         console.log("search respone", res);
         setList(res);
-
       } catch (err) {
         console.log("err", err);
         if (err.message) Errors.push(err.message);
@@ -54,7 +53,8 @@ function Navbar() {
 
   const handleInput = debounce(search, 100)
   const seeFriend = (data) => {
-    console.log("navigate to", data);
+    console.log("go to /friend with ", data.id);
+    Ura.navigate(`/friend?id=${data.id}`);
   }
 
   return render(() => (

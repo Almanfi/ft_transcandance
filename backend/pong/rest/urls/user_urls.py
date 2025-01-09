@@ -11,6 +11,9 @@ urlpatterns = [
         }),
         name='user_crud'
     ),
+    path("fetch/", UserInfo.as_view({
+        'post': 'get_users'
+    })),
 	path('search/', UserInfo.as_view({
 		'post': 'search_users'
 	})),

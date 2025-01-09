@@ -21,6 +21,9 @@
     [ ] access token / refresh token
     [ ] remove search bar if user not logged in
     [ ] in all functions check if is forbiden logout user
+    [ ] match making
+    [ ] friend
+    [ ] in friend page if something failed go to home page
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/
