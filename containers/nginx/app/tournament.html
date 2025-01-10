@@ -5,7 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Tournament</title>
 </head>
-<body>
+<script type="module" src="./tournament.js"></script>
+<body id="root">
 	<div id="Tournament">
 		<ul class="tournament_players_left">
 			<li class="tournament_field" id="t_player_1">
@@ -15,23 +16,23 @@
 			<li class="tournament_field" id="t_player_2">
 				<h2>Player 2</h2>
 			</li>
-			<li class="tournament_field" id="t_player_3">
-				<h2>Player 3</h2>
+			<li class="tournament_field" id="t_player_5">
+				<h2>TBD</h2>
 			</li>
 		</ul>
 		<div class="tournament_trophy">
 			<img class="trophy_img" src="assets/images/trophy.png" />
 		</div>
 		<ul class="tournament_players_right">
+			<li class="tournament_field" id="t_player_3">
+				<h2>Player 3</h2>
+			</li>
+			<h1 class="tournament_vs" id="VS_2">VS</h1>
 			<li class="tournament_field" id="t_player_4">
 				<h2>Player 4</h2>
 			</li>
-			<h1 class="tournament_vs" id="VS_2">VS</h1>
-			<li class="tournament_field" id="t_player_5">
-				<h2>Player 5</h2>
-			</li>
 			<li class="tournament_field" id="t_player_6">
-				<h2>Player 6</h2>
+				<h2>TBD</h2>
 			</li>
 		</ul>
 	</div>
@@ -77,7 +78,7 @@
 		grid-row: 3;
 	}
 
-	#t_player_3 {
+	#t_player_5 {
 		grid-column: 3;
 		grid-row: 2;
 	}
@@ -85,6 +86,10 @@
 	.tournament_field {
 		list-style: none;
 		display: flex;
+		border-style: solid;
+		border-width: 2px;
+		padding: 2rem;
+		border-radius: 12%;
 	}
 
 	.tournament_trophy{
@@ -100,7 +105,7 @@
 		justify-content: center;
 		align-items: center;
 		grid-row: 2;
-		width: 8rem;
+		width: 10rem;
 	}
 	.tournament_players_right{
 		display: grid;
@@ -110,7 +115,7 @@
 		grid-row: 1;
 	}
 
-	#t_player_4 {
+	#t_player_3 {
 		grid-column: 3;
 		grid-row: 1 / 2;
 	}
@@ -119,7 +124,7 @@
 		grid-column: 3;
 		grid-row: 2;
 	}
-	#t_player_5 {
+	#t_player_4 {
 		grid-column: 3;
 		grid-row: 3;
 	}
@@ -129,4 +134,5 @@
 		grid-row: 2;
 	}
 </style>
+
 </html>

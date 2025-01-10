@@ -69,7 +69,6 @@ function breaker(text)
 	const br = document.createElement("br");
 	elem.innerHTML = text
 	parent.appendChild(elem);
-	// parent.appendChild(br);
 }
 
 function createImg() {
