@@ -70,6 +70,7 @@ player.setPlaneVector(planeFacingVector);
 var rollBack = (startTime) => {}
 
 var animate = (span: number, timeStamp: number) => {
+    let frameIndex = gClock.getFrameIndex(timeStamp);
     handleInputs(span, timeStamp);
     let startTime = gClock.startTime;
     // if (justRolledBack) {
@@ -82,6 +83,7 @@ var animate = (span: number, timeStamp: number) => {
     // }
 
     player.update(span, timeStamp, timeStamp);
+    player.savePlayerData(frameIndex);
     playerBulletM.update(timeStamp);
     // foe.update(span, planeFacingVector, timeStamp, timeStamp);
 

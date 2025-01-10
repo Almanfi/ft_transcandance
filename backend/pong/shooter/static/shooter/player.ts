@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { Move, GameAction } from './keyControls.js';
 import { PlayersBulletManager } from './assets.js';
+import { Rollback } from './rollback.js';
+
 
 class Inputs {
     move: Move;
@@ -43,6 +45,10 @@ class Inputs {
 
     numberDecode(n: string): number {
         return (parseInt(n, 36) - 10) / 10;
+    }
+
+    getSerializedData() {
+        return this.serializedData;
     }
 
     serialize(): string {
@@ -121,8 +127,7 @@ export class Player extends THREE.Object3D {
     // uncomment for bullet sound
     bulletSound: THREE.Audio;
     bulletManager: PlayersBulletManager;
-
-
+    rollback: Rollback;
 
     constructor(position: THREE.Vector3,
         bulletManager: PlayersBulletManager) {
@@ -146,6 +151,7 @@ export class Player extends THREE.Object3D {
         this.fired = false;
 
         this.inputs = new Inputs();
+        this.rollback = new Rollback();
 
         this.oldPosition =  this.position.clone();
         this.movementVector = new THREE.Vector3();
@@ -238,12 +244,13 @@ export class Player extends THREE.Object3D {
         // console.log(`movement vector: of ${this.name}`, this.movementVector);
         // this.movementVector.multiplyScalar(speed);
 
-        this.position.addScaledVector(this.movementVector, speed);
 
+        this.position.addScaledVector(this.movementVector, speed);
+        
         // if (this.controls.sendActionToPeer && this.saveAction) {
-        //     this.currInput = {};
-        //     this.currmouse = {};
-        //     if (this.controls.Wkey.hold !== this.move.up)
+            //     this.currInput = {};
+            //     this.currmouse = {};
+            //     if (this.controls.Wkey.hold !== this.move.up)
         //         this.currInput.up = this.controls.Wkey.hold;
         //     if (this.controls.Skey.hold !== this.move.down)
         //         this.currInput.down = this.controls.Skey.hold;
@@ -257,12 +264,18 @@ export class Player extends THREE.Object3D {
         //     Object.assign(this.move, this.currInput);
         // }
         // this.addAction(actionTime);
-
+        
         // if (performance.now() - this.lastFire > 70)
         this.fired = this.fire(timeStamp, timeS);
         // if (this.fired) {
-        //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
-        // }
+            //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
+            // }
+ 
+    }
+
+    savePlayerData(frameIndex: number) {
+        this.rollback.saveFrame(frameIndex, this.oldPosition.clone(),
+                this.movementVector.clone(), this.inputs.serialize());
     }
 
     addRollBackAction(timeStamp: number) {

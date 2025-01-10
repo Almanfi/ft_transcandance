@@ -45,6 +45,19 @@ export class gameClock {
 		this.msPerFrame = Math.floor(1000 / fps);
 	}
 
+	getFrameIndex(currentTime: number): number {
+		if (this.frameTimes[this.frame] === currentTime)
+			return this.frame;
+		let maxIterate = 60;
+		let index = this.frame;
+		while (this.frameTimes[index] > currentTime) {
+			index = (index - 1 + 60) % 60;
+			if (--maxIterate)
+				return -1;
+		}
+		return index;
+	}
+
 	setFrameTime() {
 		if (this.frame === 60) {
 			this.full = true;
@@ -82,10 +95,10 @@ export class gameClock {
 		if (this.msPassed < this.msPerFrame)
 			return ;
 
+		this.setFrameTime();
 		// handleInputs(this.msPassed, this.msPrev);
 		
 		animate(this.msPassed, this.msPrev);
-		this.setFrameTime();
 		this.excessTime = 0;
 		this.msPrev = this.msNow - this.excessTime;
 
