@@ -218,22 +218,23 @@ export class Connection {
         this.activeProtocol = this.socket;
         this.recievedData = new Map();
         this.recievedDataOrder = 1;
-        // this.pingInterval = null;
-        // this.RtcConnected = false;
-        // this.ping = new Array();
-        // this.ping.size = 0;
-        // this.pingAvrg = 0;
-        // this.timeDiff = new Array();
-        // this.timeDiffAvrg = 0;
-        // this.peerTimeDiff = 0;
+        this.pingInterval = null;
+        this.ping = new Array();
+        this.pingSize = 0;
+        this.pingAvrg = 0;
+        this.timeDiff = new Array();
+        this.timeDiffAvrg = 0;
+        this.peerTimeDiff = 0;
     }
     reset() {
         this.recievedData.clear();
         this.recievedDataOrder = 1;
     }
     recheckConnection() {
-        if (this.webRTC && this.webRTC.RTCConnected)
+        if (this.webRTC && this.webRTC.RTCConnected) {
             this.activeProtocol = this.webRTC;
+            this.initSync();
+        }
         else if (this.socket.connected)
             this.activeProtocol = this.socket;
         else {
@@ -276,7 +277,7 @@ export class Connection {
     }
     handleRtcMessage(e) {
         let data = JSON.parse(e.data);
-        console.log("rtc msg: ", data);
+        // console.log("rtc msg: ", data)
         this.handleData(data);
     }
     handleRtcIceCandidate(e) {
@@ -307,58 +308,83 @@ export class Connection {
         });
     }
     handleData(data) {
-        if (data.type === "ping") {
-            this.send(JSON.stringify({ type: "pong", timestamp: data.timestamp }));
-        }
-        else if (data.type === "pong") {
-            let pingEndTime = performance.now();
-            let latency = pingEndTime - data.timestamp;
-            console.log(`Ping: ${latency.toFixed(2)} ms`);
+        if (data.sync) {
+            this.handleSyncWithPeer(data);
         }
         else {
             this.handlePlayerAction(data);
         }
+        // if (data.type === "ping") {
+        //     this.send(JSON.stringify({ type: "pong", timestamp: data.timestamp }));
+        // }
+        // else if (data.type === "pong") {
+        //     let pingEndTime = performance.now();
+        //     let latency = pingEndTime - data.timestamp;
+        //     console.log(`Ping: ${latency.toFixed(2)} ms`);
+        // }
+        // else {
+        //     this.handlePlayerAction(data);
+        // }
     }
-    getRecivedDataOrdered() {
+    hasRecievedData() {
+        return (this.recievedData.has(this.recievedDataOrder));
+    }
+    getRecievedDataOrdered() {
         let data = this.recievedData.get(this.recievedDataOrder);
-        if (data)
-            this.recievedDataOrder++;
+        // if (data)
+        //     this.recievedDataOrder++;
         // this.recievedData.delete(order);
         return data;
     }
+    next() {
+        if (this.recievedData.has(this.recievedDataOrder))
+            this.recievedDataOrder++;
+    }
     handlePlayerAction(data) {
-        if (data.order)
+        if (data.order) {
             this.recievedData.set(data.order, data.info);
-        // if (data.type === "sync")
-        //     this.handleSyncWithPeer(data);
-        // if (data.timeStamp)
-        //     this.playerSyncData.makeBackup(data);
-        //remove bellow after applying the roolback
-        // if (data.move)
-        //     this.playerSyncData.move = Object.assign(this.playerSyncData.move, data.move);
-        // if (data.position) {
-        //     this.playerSyncData.position = data.position;
-        // }
-        // else
-        //     this.playerSyncData.position = null;
-        // if (data.direction)
-        //     this.playerSyncData.direction.copy(data.direction);
-        // if (data.angle)
-        //     this.playerSyncData.angle = data.angle;
-        // if (data.mouse)
-        //     this.playerSyncData.Lclick = data.mouse.Lclick;
-        // this.playerSyncData.newState = true;
+        }
     }
-    startPing() {
-        // this.pingInterval = setInterval(() => {
-        //     this.sendRtcMsg(JSON.stringify({ type: "ping", timestamp: performance.now() }));
-        // }, 1000);
+    isPingDone() {
+        let samplesize = 200;
+        if (this.pingSize !== samplesize)
+            return false;
+        this.pingAvrg = this.ping.reduce((a, b) => a + b) / samplesize;
+        this.timeDiffAvrg = this.timeDiff.reduce((a, b) => a + b) / samplesize;
+        this.ping = new Array();
+        this.pingSize = 0;
+        this.timeDiff = new Array();
+        this.send(JSON.stringify({ sync: "sync", getTime: true, timestamp: performance.now() }));
+        return true;
     }
-    stopPing() {
-        // clearInterval(this.pingInterval);
+    handleSyncWithPeer(data) {
+        let samplesize = 200;
+        if (data.sync === "sync")
+            this.syncWithPeer(data);
+        else if (data.sync === "ping") {
+            this.send(JSON.stringify({ sync: "pong", timestamp: data.timestamp, peerClock: performance.now() }));
+        }
+        else if (data.sync === "pong") {
+            let ping = performance.now() - data.timestamp;
+            this.pingSize++;
+            this.ping.push(ping);
+            let timeDiff = data.peerClock - performance.now() - ping / 2;
+            this.timeDiff.push(timeDiff);
+            if (this.isPingDone())
+                return;
+            this.send(JSON.stringify({ sync: "ping", timestamp: performance.now(), ping: true }));
+        }
     }
+    // startPing() {
+    //     // this.pingInterval = setInterval(() => {
+    //     //     this.sendRtcMsg(JSON.stringify({ type: "ping", timestamp: performance.now() }));
+    //     // }, 1000);
+    // }
+    // stopPing() {
+    //     // clearInterval(this.pingInterval);
+    // }
     initSync() {
-        this.send(JSON.stringify({ type: "sync", timestamp: performance.now(), ping: true }));
+        this.send(JSON.stringify({ sync: "ping", timestamp: performance.now() }));
     }
     // checkSync() {
     //     this.send(JSON.stringify({ type: "sync", pingAvrg: this.pingAvrg, timestamp: performance.now()}));
@@ -366,7 +392,49 @@ export class Connection {
     signalStart() {
         console.log("signaling start");
         let time = performance.now() + 1000;
-        this.send(JSON.stringify({ type: "sync", startAt: time }));
+        this.send(JSON.stringify({ sync: "sync", startAt: time }));
         this.startGame(time);
+    }
+    syncWithPeer(data) {
+        if (data.startAt) {
+            console.log("start in: ", data.startAt);
+            if (this.timeDiffAvrg === 0) {
+                console.log("time difference not calculated yet");
+                this.initSync();
+                return;
+            }
+            let mytime = performance.now() + 1000;
+            let convertedTime = data.startAt - this.timeDiffAvrg;
+            console.log("my time is: ", mytime);
+            console.log("peer time is: ", convertedTime);
+            this.startGame(convertedTime);
+            return;
+        }
+        if (data.setTimeData) {
+            this.peerTimeDiff = -data.timeDiffAvrg;
+            this.initSync();
+        }
+        if (data.showTime) {
+            this.showTime(data);
+        }
+        if (data.getTime) {
+            this.send(JSON.stringify({ sync: "sync", timestamp: data.timestamp, peerClock: performance.now(), showTime: true }));
+            return;
+        }
+    }
+    showTime(data) {
+        console.log("my time is: ", performance.now());
+        console.log("peer time is: ", data.peerClock);
+        console.log("average time difference is: ", this.timeDiffAvrg);
+        console.log("ping average is: ", this.pingAvrg);
+        let currentPing = performance.now() - data.timestamp;
+        console.log("(avrg ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - this.pingAvrg / 2);
+        console.log("(curr ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - currentPing / 2);
+        if (data.setTimeData || this.peerTimeDiff !== 0)
+            return;
+        this.send(JSON.stringify({ sync: "sync", timestamp: data.timestamp, peerClock: performance.now(), showTime: true,
+            setTimeData: true, timeDiffAvrg: this.timeDiffAvrg, pingAvrg: this.pingAvrg
+        }));
+        return;
     }
 }

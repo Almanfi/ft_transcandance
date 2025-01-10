@@ -21,6 +21,26 @@ export class gameClock {
         this.fps = fps;
         this.msPerFrame = Math.floor(1000 / fps);
     }
+    getFrameTime(index) {
+        return this.frameTimes[index];
+    }
+    getFrameIndex(currentTime) {
+        let index = (this.frame - 1 + 60) % 60;
+        if (this.frameTimes[index] === currentTime) {
+            // console.log("frame time is the same as current time");
+            return index;
+        }
+        let maxIterate = 60;
+        while (this.frameTimes[index] > currentTime && --maxIterate) {
+            index = (index - 1 + 60) % 60;
+            // console.log('frame time: ', this.frameTimes[index]);
+            // if (--maxIterate)
+            // 	return -1;
+        }
+        if (maxIterate === 0)
+            return -1;
+        return index;
+    }
     setFrameTime() {
         if (this.frame === 60) {
             this.full = true;
@@ -29,7 +49,7 @@ export class gameClock {
         this.frameTimes[this.frame] = this.msPrev;
         this.frame++;
     }
-    getFrameTime(reverseIdx) {
+    getFrameTimeRevrese(reverseIdx) {
         if (reverseIdx > 60) {
             console.log("invalid frame time index"); // get rid of this
             return;
@@ -52,9 +72,9 @@ export class gameClock {
         this.msPrevTrue = this.msNow;
         if (this.msPassed < this.msPerFrame)
             return;
+        this.setFrameTime();
         // handleInputs(this.msPassed, this.msPrev);
         animate(this.msPassed, this.msPrev);
-        this.setFrameTime();
         this.excessTime = 0;
         this.msPrev = this.msNow - this.excessTime;
         this.renderer.render(this.scene, this.camera);

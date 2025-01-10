@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { initPlane, PlayersBulletManager, TurretBulletManager, Turret } from './assets.js';
-import { Player } from './player.js';
+import { Player, Inputs } from './player.js';
 import { KeyControls, getCameraDir } from './keyControls.js';
 import { gameClock } from './gclock.js';
 import { MusicSync } from './sync.js';
@@ -24,13 +24,14 @@ function initThreeJS() {
     scene.add(light2);
     return { scene, camera, renderer };
 }
-let foe = user.id === users[0].id ? users[1] : users[0];
-console.log('user: ', user, ' foe: ', foe);
+let player2 = user.id === users[0].id ? users[1] : users[0];
+console.log('user: ', user, ' foe: ', player2);
 const { scene, camera, renderer } = initThreeJS();
 const keyControls = new KeyControls(camera);
 const gClock = new gameClock(scene, camera, renderer);
 const connection = new Connection();
-connection.init(foe.id);
+connection.init(player2.id);
+connection.attatchGameStart(startGame);
 const musicSyncer = new MusicSync(camera);
 musicSyncer.loadMusic('/static/shooter/assets/No_title.mp3');
 musicSyncer.addMusicMap(musicMap);
@@ -38,29 +39,108 @@ const bulletSound = musicSyncer.loadNewSound('/static/shooter/assets/a6.mp3');
 const plane = initPlane();
 scene.add(plane);
 const turretBulletM = new TurretBulletManager(scene);
-const turret = new Turret(turretBulletM, { initPosition: new THREE.Vector3(5, 0, 0) });
+const turret = new Turret(turretBulletM, { initPosition: new THREE.Vector3(15, 0, 0) });
 turret.addToScene(scene);
 const playerBulletM = new PlayersBulletManager(scene);
 const player = new Player(new THREE.Vector3(0, 0, 0), playerBulletM);
 player.addToScene(scene);
 player.add(camera);
 player.addBulletSound(bulletSound);
+const foeBulletM = new PlayersBulletManager(scene);
+const foe = new Player(new THREE.Vector3(-7, 0, 0), foeBulletM);
+foe.addToScene(scene);
+foe.addBulletSound(bulletSound);
 const planeFacingVector = getCameraDir(camera);
 player.setPlaneVector(planeFacingVector);
-var rollBack = (startTime) => { };
+foe.setPlaneVector(planeFacingVector);
+var justRolledBack = false;
+function rollBack(startTime) {
+    let currentTime = performance.now() - startTime;
+    const planeFacingVector = getCameraDir(camera);
+    if (connection.hasRecievedData() === false)
+        return;
+    console.log('received data order ', connection.recievedDataOrder);
+    let recievedData = connection.getRecievedDataOrdered();
+    let actionTime = Inputs.findTimeStamp(recievedData);
+    console.log('action time: ', actionTime, ' received data: ', JSON.stringify(recievedData));
+    if (currentTime < actionTime) // back to the future!
+        return;
+    console.log('rolling back : ', currentTime - actionTime);
+    let finalFrameIndex = gClock.getFrameIndex(currentTime);
+    let lastFrameIndex = gClock.getFrameIndex(actionTime);
+    if (lastFrameIndex < 0) {
+        console.log('invalid frame index: ', lastFrameIndex);
+        return;
+        throw Error("could not find the frame");
+    }
+    // console.log('roll back from frame: ', lastFrameIndex, ' to: ', finalFrameIndex);
+    let lastFrameTime = gClock.getFrameTime(lastFrameIndex);
+    // return ;
+    foe.despawnUncertainBullets(lastFrameTime); // later only despown bullet that
+    foe._findStateInFrame(lastFrameIndex);
+    // foe.findStateAtTime(lastFrameTime);
+    // foe.actions.clear();
+    while (lastFrameIndex < finalFrameIndex) {
+        let nextFrameTime = gClock.getFrameTime(lastFrameIndex + 1);
+        const frameSpan = nextFrameTime - lastFrameTime;
+        player._findPositonInFrame(lastFrameIndex); // underscore methods are unsafe
+        foe.rollBack(recievedData, lastFrameTime, actionTime);
+        connection.next();
+        console.log('next received data order ', connection.recievedDataOrder);
+        let lastActionTime = actionTime;
+        while (connection.hasRecievedData()) {
+            recievedData = connection.getRecievedDataOrdered();
+            actionTime = Inputs.findTimeStamp(recievedData);
+            if (actionTime >= nextFrameTime)
+                break;
+            foe.rollBack(recievedData, lastActionTime, actionTime);
+            lastActionTime = actionTime;
+            connection.next();
+            console.log('next received data order ', connection.recievedDataOrder);
+        }
+        if (lastActionTime < nextFrameTime) {
+            // console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
+            let timeS = nextFrameTime - lastActionTime;
+            foe.update(timeS, lastActionTime, lastFrameTime);
+            // console.log(`after finishing action at time : ${nextFrameTime} position: ${JSON.stringify(foe.position)}`);
+        }
+        foe.savePlayerData(lastFrameIndex);
+        turretBulletM.findPositionAtTime(lastFrameTime);
+        playerBulletM.findPositionAtTime(lastFrameTime);
+        foeBulletM.findPositionAtTime(lastFrameTime);
+        turretBulletM.checkRollbackCollision(player, frameSpan, lastFrameTime);
+        turretBulletM.checkRollbackCollision(foe, frameSpan, lastFrameTime);
+        playerBulletM.checkRollbackCollision(foe, frameSpan, lastFrameTime);
+        foeBulletM.checkRollbackCollision(player, frameSpan, lastFrameTime);
+        lastFrameTime = nextFrameTime;
+        lastFrameIndex++;
+    }
+    turretBulletM.batchUndestroyBullet();
+    turretBulletM.batchUndestroyBullet();
+    playerBulletM.batchUndestroyBullet();
+    foeBulletM.batchUndestroyBullet();
+    // console.log('roll back time: ', performance.now() - startTime - currentTime);
+    justRolledBack = true;
+}
 var animate = (span, timeStamp) => {
+    let frameIndex = gClock.getFrameIndex(timeStamp);
     handleInputs(span, timeStamp);
     let startTime = gClock.startTime;
-    // if (justRolledBack) {
-    //     let lastFrame = gClock.getFrameTime(0);
-    //     let span = timeStamp - lastFrame;
-    //     // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
-    //     // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
-    //     foe.update(span, planeFacingVector, lastFrame, lastFrame);
-    //     // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
-    // }
+    if (justRolledBack) {
+        justRolledBack = false;
+        let lastFrame = gClock.getFrameTime(frameIndex - 1);
+        let span = timeStamp - lastFrame;
+        // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
+        // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
+        foe.update(span, lastFrame, lastFrame);
+        // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
+    }
     player.update(span, timeStamp, timeStamp);
+    player.savePlayerData(frameIndex);
     playerBulletM.update(timeStamp);
+    foe.update(span, timeStamp, timeStamp);
+    foe.savePlayerData(frameIndex);
+    foeBulletM.update(timeStamp);
     // foe.update(span, planeFacingVector, timeStamp, timeStamp);
     let beat = musicSyncer.findCurrentBeat();
     if (beat)
@@ -71,16 +151,17 @@ var animate = (span, timeStamp) => {
     //     justRolledBack = false;
     // }
     turretBulletM.checkCollision(player, span);
+    turretBulletM.checkCollision(foe, span);
     // turretBulletManager.checkCollision(foe, span);
     // playerBulletManager.checkCollision(foe, span);
     // foeBulletManager.checkCollision(player, span);
 };
 function handleInputs(span, timeStamp) {
-    let recievedData = connection.getRecivedDataOrdered();
-    if (recievedData) {
-        player.inputs.deserialize(recievedData);
-        return;
-    }
+    // let recievedData = connection.getRecievedDataOrdered();
+    // if (recievedData) {
+    //     player.inputs.deserialize(recievedData);
+    //     return ;
+    // }
     if (!keyControls.checkforNewInputs())
         return;
     keyControls.setAsHandeled();
@@ -89,7 +170,9 @@ function handleInputs(span, timeStamp) {
     let move = keyControls.findPlayerMove();
     let action = keyControls.findPlayerAction();
     if (action.d) {
-        startGame(performance.now() + 1000);
+        connection.signalStart();
+        // startGame(performance.now() + 1000);
+        // connection.send(JSON.stringify({start: true}));
     }
     let inputs = player.inputs.set(move, angle, direction, action, timeStamp);
     let data = inputs.serializeForSend();

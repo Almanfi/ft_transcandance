@@ -46,6 +46,7 @@ const keyControls = new KeyControls(camera);
 const gClock = new gameClock(scene, camera, renderer);
 const connection = new Connection();
 connection.init(player2.id);
+connection.attatchGameStart(startGame);
 const musicSyncer = new MusicSync(camera);
 musicSyncer.loadMusic('/static/shooter/assets/No_title.mp3');
 musicSyncer.addMusicMap(musicMap);
@@ -56,7 +57,7 @@ scene.add(plane);
 
 
 const turretBulletM = new TurretBulletManager(scene);
-const turret = new Turret(turretBulletM, {initPosition: new THREE.Vector3(5, 0, 0)});
+const turret = new Turret(turretBulletM, {initPosition: new THREE.Vector3(15, 0, 0)});
 turret.addToScene(scene);
 
 const playerBulletM = new PlayersBulletManager(scene);
@@ -66,7 +67,7 @@ player.add(camera);
 player.addBulletSound(bulletSound);
 
 const foeBulletM = new PlayersBulletManager(scene);
-const foe = new Player(new THREE.Vector3(0, 0, 0), foeBulletM);
+const foe = new Player(new THREE.Vector3(-7, 0, 0), foeBulletM);
 foe.addToScene(scene);
 foe.addBulletSound(bulletSound);
 
@@ -84,18 +85,26 @@ function rollBack(startTime: number) {
 
     if (connection.hasRecievedData() === false)
         return ;
+    console.log('received data order ', connection.recievedDataOrder);
     let recievedData = connection.getRecievedDataOrdered();
 
     let actionTime = Inputs.findTimeStamp(recievedData as string);
+    console.log('action time: ', actionTime, ' received data: ', JSON.stringify(recievedData));
     if (currentTime < actionTime) // back to the future!
         return;
+    console.log('rolling back : ', currentTime - actionTime);
 
     let finalFrameIndex = gClock.getFrameIndex(currentTime);
     let lastFrameIndex = gClock.getFrameIndex(actionTime);
-    if (lastFrameIndex < 0)
+    if (lastFrameIndex < 0) {
+        console.log('invalid frame index: ', lastFrameIndex);
+        return ;
         throw Error("could not find the frame");
+    }
+    // console.log('roll back from frame: ', lastFrameIndex, ' to: ', finalFrameIndex);
     let lastFrameTime = gClock.getFrameTime(lastFrameIndex);
 
+    // return ;
     foe.despawnUncertainBullets(lastFrameTime);// later only despown bullet that
     foe._findStateInFrame(lastFrameIndex);
     // foe.findStateAtTime(lastFrameTime);
@@ -107,21 +116,28 @@ function rollBack(startTime: number) {
         
         player._findPositonInFrame(lastFrameIndex);// underscore methods are unsafe
         
-        let lastActionTime = lastFrameTime;
+        foe.rollBack(recievedData as string, lastFrameTime, actionTime);
+        connection.next();
+        console.log('next received data order ', connection.recievedDataOrder);
+
+        let lastActionTime = actionTime;
         while (connection.hasRecievedData()) {
+            recievedData = connection.getRecievedDataOrdered() as string;
+            actionTime = Inputs.findTimeStamp(recievedData);
             if (actionTime >= nextFrameTime)
                 break;
-            recievedData = connection.getRecievedDataOrdered();
-            foe.rollbackActoin(recievedData, lastActionTime, planeFacingVector, lastFrameTime);
+            foe.rollBack(recievedData, lastActionTime, actionTime);
             lastActionTime = actionTime;
             connection.next();
+            console.log('next received data order ', connection.recievedDataOrder);
         }
         if (lastActionTime < nextFrameTime) {
-            console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
+            // console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
             let timeS = nextFrameTime - lastActionTime;
             foe.update(timeS, lastActionTime, lastFrameTime);
             // console.log(`after finishing action at time : ${nextFrameTime} position: ${JSON.stringify(foe.position)}`);
         }
+        foe.savePlayerData(lastFrameIndex)
 
         turretBulletM.findPositionAtTime(lastFrameTime);
         playerBulletM.findPositionAtTime(lastFrameTime);
@@ -141,7 +157,7 @@ function rollBack(startTime: number) {
     playerBulletM.batchUndestroyBullet();
     foeBulletM.batchUndestroyBullet();
 
-    console.log('roll back time: ', performance.now() - startTime - currentTime);
+    // console.log('roll back time: ', performance.now() - startTime - currentTime);
     justRolledBack = true;
 }
 
@@ -149,18 +165,23 @@ var animate = (span: number, timeStamp: number) => {
     let frameIndex = gClock.getFrameIndex(timeStamp);
     handleInputs(span, timeStamp);
     let startTime = gClock.startTime;
-    // if (justRolledBack) {
-    //     let lastFrame = gClock.getFrameTime(0);
-    //     let span = timeStamp - lastFrame;
-    //     // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
-    //     // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
-    //     foe.update(span, planeFacingVector, lastFrame, lastFrame);
-    //     // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
-    // }
+    if (justRolledBack) {
+        justRolledBack = false;
+        let lastFrame = gClock.getFrameTime(frameIndex - 1);
+        let span = timeStamp - lastFrame;
+        // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
+        // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
+        foe.update(span, lastFrame, lastFrame);
+        // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
+    }
 
     player.update(span, timeStamp, timeStamp);
     player.savePlayerData(frameIndex);
     playerBulletM.update(timeStamp);
+
+    foe.update(span, timeStamp, timeStamp);
+    foe.savePlayerData(frameIndex);
+    foeBulletM.update(timeStamp);
     // foe.update(span, planeFacingVector, timeStamp, timeStamp);
 
     let beat = musicSyncer.findCurrentBeat();
@@ -176,17 +197,18 @@ var animate = (span: number, timeStamp: number) => {
 
 
     turretBulletM.checkCollision(player, span);
+    turretBulletM.checkCollision(foe, span);
     // turretBulletManager.checkCollision(foe, span);
     // playerBulletManager.checkCollision(foe, span);
     // foeBulletManager.checkCollision(player, span);
 }
 
 function handleInputs(span: number, timeStamp: number) {
-    let recievedData = connection.getRecievedDataOrdered();
-    if (recievedData) {
-        player.inputs.deserialize(recievedData);
-        return ;
-    }
+    // let recievedData = connection.getRecievedDataOrdered();
+    // if (recievedData) {
+    //     player.inputs.deserialize(recievedData);
+    //     return ;
+    // }
     
     if (!keyControls.checkforNewInputs())
         return ;
@@ -197,7 +219,9 @@ function handleInputs(span: number, timeStamp: number) {
     let move = keyControls.findPlayerMove();
     let action = keyControls.findPlayerAction();
     if (action.d) {
-        startGame(performance.now() + 1000);
+        connection.signalStart();
+        // startGame(performance.now() + 1000);
+        // connection.send(JSON.stringify({start: true}));
     }
 
     let inputs = player.inputs.set(move, angle,

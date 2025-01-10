@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-class Inputs {
+import { Rollback } from './rollback.js';
+export class Inputs {
     constructor() {
         this.move = { x: 0, y: 0 };
         this.action = { f: false, d: false };
@@ -29,6 +30,9 @@ class Inputs {
     numberDecode(n) {
         return (parseInt(n, 36) - 10) / 10;
     }
+    getSerializedData() {
+        return this.serializedData;
+    }
     serialize() {
         let actionComb = this.action.f * 1
             + this.action.d * 2;
@@ -49,6 +53,11 @@ class Inputs {
         let directionArray = others[1].split(',').map(parseFloat);
         this.direction.fromArray(directionArray);
         this.timeStamp = Number(others[2]);
+    }
+    static findTimeStamp(data) {
+        let others = data.slice(3).split('|');
+        let timeStamp = Number(others[2]);
+        return timeStamp;
     }
     calcMovementVector(frontVector) {
         var speedVect = new THREE.Vector3(0, 0, 0);
@@ -90,6 +99,7 @@ export class Player extends THREE.Object3D {
         this.lastFire = 0;
         this.fired = false;
         this.inputs = new Inputs();
+        this.rollback = new Rollback();
         this.oldPosition = this.position.clone();
         this.movementVector = new THREE.Vector3();
         this.actions = new Map();
@@ -136,26 +146,31 @@ export class Player extends THREE.Object3D {
             }
         });
     }
-    rollbackActoin(action, lastActionTime, planeFacingVector, actionTime) {
+    rollbackActoin(action, lastActionTime, actionTime) {
         // let spanS = (action.timeStamp - lastActionTime);
-        // console.log('rolling back action old actionat time: ', lastActionTime, " to: ", action.timeStamp);
-        // console.log(`at time of old action: ${lastActionTime}: position: ${JSON.stringify(this.position)}`);
-        // this.update(spanS, planeFacingVector, action.timeStamp, actionTime)
-        // console.log(`at time of new action: ${action.timeStamp}: position: ${JSON.stringify(this.position)}`);
+        // // console.log('rolling back action old actionat time: ', lastActionTime, " to: ", action.timeStamp);
+        // // console.log(`at time of old action: ${lastActionTime}: position: ${JSON.stringify(this.position)}`);
+        // this.update(spanS, action.timeStamp, actionTime);
+        // // console.log(`at time of new action: ${action.timeStamp}: position: ${JSON.stringify(this.position)}`);
         // this.controls.applyAction(action);
     }
-    rollBack(timeStamp) {
-        // this.position.copy(this.controls.position);
-        // this.oldPosition.copy(this.position);
-        // this.movementVector.copy(this.controls.movementVector);
-        // this.position.addScaledVector(this.movementVector, 1);
-        // if (this.controls.wasFired())
-        // {
-        //     this.lastFire = timeStamp;
-        //     this.fired = this.fire(timeStamp);
-        // }
-        // this.addRollBackAction(timeStamp);
+    rollBack(receivedData, lastTime, actionTime) {
+        let spanS = (actionTime - lastTime);
+        this.update(spanS, lastTime, actionTime);
+        this.inputs.deserialize(receivedData);
     }
+    // rollBack(timeStamp) {
+    //     // this.position.copy(this.controls.position);
+    //     // this.oldPosition.copy(this.position);
+    //     // this.movementVector.copy(this.controls.movementVector);
+    //     // this.position.addScaledVector(this.movementVector, 1);
+    //     // if (this.controls.wasFired())
+    //     // {
+    //     //     this.lastFire = timeStamp;
+    //     //     this.fired = this.fire(timeStamp);
+    //     // }
+    //     // this.addRollBackAction(timeStamp);
+    // }
     update(timeS, timeStamp, actionTime) {
         let speed = (this.speedRate * timeS) / 1000;
         const projectionOnPlane = this.planeFacingVector;
@@ -190,6 +205,9 @@ export class Player extends THREE.Object3D {
         // if (this.fired) {
         //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
         // }
+    }
+    savePlayerData(frameIndex) {
+        this.rollback.saveFrame(frameIndex, this.oldPosition.clone(), this.movementVector.clone(), this.inputs.serialize(), this.lastFire);
     }
     addRollBackAction(timeStamp) {
         // let action = {
@@ -231,6 +249,16 @@ export class Player extends THREE.Object3D {
         //     this.controls.sendActionToPeer(data);
         // }
     }
+    _findStateInFrame(frameIndex) {
+        let data = this.rollback.rollbackFrame(frameIndex);
+        let input = this.inputs;
+        input.deserialize(data.input);
+        this.oldPosition.copy(data.position);
+        this.movementVector.copy(data.speed);
+        this.position.copy(this.oldPosition);
+        // .addScaledVector(this.movementVector, 1);
+        this.lastFire = data.lastFire;
+    }
     findStateAtTime(time) {
         // let iterator = this.actions.entries();
         // let action = iterator.next().value;
@@ -266,25 +294,34 @@ export class Player extends THREE.Object3D {
         // // console.log("last fired of action: ", action[1].lastFire, " and of prev action: ", previousAction[1].lastFire);
         // this.actions.clear();
     }
+    _findPositonInFrame(frameIndex) {
+        let data = this.rollback.rollbackFrame(frameIndex);
+        // let input = this.inputs
+        // input.deserialize(data.input);
+        this.oldPosition.copy(data.position);
+        this.movementVector.copy(data.speed);
+        this.position.copy(this.oldPosition)
+            .addScaledVector(this.movementVector, 1);
+    }
     findPositionAtTime(time) {
-        // let iterator = this.actions.entries();
-        // let action = iterator.next().value;
-        // let previousAction;
-        // while (action) {
-        //     if (action[0] < time) {
-        //         if (previousAction)
-        //             this.actions.delete(previousAction[0]);
-        //         previousAction = action;
-        //         action = iterator.next().value;
-        //     }
-        //     else
-        //         break;
-        // }
-        // if (!previousAction)
-        //     return;
-        // this.oldPosition.copy(previousAction[1].startPosition);
-        // this.movementVector.copy(previousAction[1].movementVector);
-        // this.position.copy(this.oldPosition).addScaledVector(this.movementVector, 1);
+        let iterator = this.actions.entries();
+        let action = iterator.next().value;
+        let previousAction;
+        while (action) {
+            if (action[0] < time) {
+                if (previousAction)
+                    this.actions.delete(previousAction[0]);
+                previousAction = action;
+                action = iterator.next().value;
+            }
+            else
+                break;
+        }
+        if (!previousAction)
+            return;
+        this.oldPosition.copy(previousAction[1].startPosition);
+        this.movementVector.copy(previousAction[1].movementVector);
+        this.position.copy(this.oldPosition).addScaledVector(this.movementVector, 1);
     }
     getCurrentPosition(radius) {
         let vect = new THREE.Vector3();
@@ -315,7 +352,7 @@ export class Player extends THREE.Object3D {
             this.cannon.head.position.z -= 0.1;
         let start = this.lastFire + this.fireRate;
         if (start < time) {
-            console.log(`start: ${start} < time: ${time}`);
+            // console.log(`start: ${start} < time: ${time}`);
             start = time;
         }
         // console.log(`start: ${start}, time: ${time}`)
@@ -327,7 +364,7 @@ export class Player extends THREE.Object3D {
             // console.log('fired last at : ', this.lastFire);
             this.lastFire = start;
             let spawnTime = this.lastFire - this.bulletDelay;
-            console.log('fired at : ', this.lastFire);
+            // console.log('fired at : ', this.lastFire);
             this.bulletManager.spawnBullet(0xffffff, this.position, this.inputs.direction.clone(), this.inputs.angle, spawnTime);
             // uncomment for bullet sound
             this.bulletSound.stop();

@@ -50,15 +50,20 @@ export class gameClock {
 	}
 
 	getFrameIndex(currentTime: number): number {
-		if (this.frameTimes[this.frame] === currentTime)
-			return this.frame;
-		let maxIterate = 60;
-		let index = this.frame;
-		while (this.frameTimes[index] > currentTime) {
-			index = (index - 1 + 60) % 60;
-			if (--maxIterate)
-				return -1;
+		let index = (this.frame - 1 + 60) % 60;
+		if (this.frameTimes[index] === currentTime) {
+			// console.log("frame time is the same as current time");
+			return index;
 		}
+		let maxIterate = 60;
+		while (this.frameTimes[index] > currentTime && --maxIterate) {
+			index = (index - 1 + 60) % 60;
+			// console.log('frame time: ', this.frameTimes[index]);
+			// if (--maxIterate)
+			// 	return -1;
+		}
+		if (maxIterate === 0)
+			return -1;
 		return index;
 	}
 
