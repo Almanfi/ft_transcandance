@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { Move, GameAction } from './keyControls.js';
 import { PlayersBulletManager } from './assets.js';
-import { Rollback } from './rollback.js';
+import { Rollback, dataSaved } from './rollback.js';
 
 
-class Inputs {
+export class Inputs {
     move: Move;
     angle: number;
     direction: THREE.Vector3;
@@ -73,6 +73,12 @@ class Inputs {
         let directionArray = others[1].split(',').map(parseFloat);
         this.direction.fromArray(directionArray);
         this.timeStamp = Number(others[2]);
+    }
+
+    static findTimeStamp(data: string): number {
+        let others = data.slice(3).split('|');
+        let timeStamp = Number(others[2]);
+        return timeStamp;
     }
 
     calcMovementVector(frontVector: THREE.Vector3): THREE.Vector3 {
@@ -275,7 +281,8 @@ export class Player extends THREE.Object3D {
 
     savePlayerData(frameIndex: number) {
         this.rollback.saveFrame(frameIndex, this.oldPosition.clone(),
-                this.movementVector.clone(), this.inputs.serialize());
+                this.movementVector.clone(), this.inputs.serialize(),
+                this.lastFire);
     }
 
     addRollBackAction(timeStamp: number) {
@@ -320,6 +327,18 @@ export class Player extends THREE.Object3D {
         // }
     }
 
+    _findStateInFrame(frameIndex : number) { // '_' for unsafe
+        let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
+        let input = this.inputs
+        input.deserialize(data.input);
+
+        this.oldPosition.copy(data.position);
+        this.movementVector.copy(data.speed);
+        this.position.copy(this.oldPosition);
+        // .addScaledVector(this.movementVector, 1);
+        this.lastFire = data.lastFire;
+    }
+
     findStateAtTime(time: number) {
         // let iterator = this.actions.entries();
         // let action = iterator.next().value;
@@ -357,25 +376,36 @@ export class Player extends THREE.Object3D {
         // this.actions.clear();
     }
 
+    _findPositonInFrame(frameIndex: number) { // '_' for unsafe
+        let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
+        // let input = this.inputs
+        // input.deserialize(data.input);
+
+        this.oldPosition.copy(data.position);
+        this.movementVector.copy(data.speed);
+        this.position.copy(this.oldPosition)
+        .addScaledVector(this.movementVector, 1);
+    }
+
     findPositionAtTime(time: number) {
-        // let iterator = this.actions.entries();
-        // let action = iterator.next().value;
-        // let previousAction;
-        // while (action) {
-        //     if (action[0] < time) {
-        //         if (previousAction)
-        //             this.actions.delete(previousAction[0]);
-        //         previousAction = action;
-        //         action = iterator.next().value;
-        //     }
-        //     else
-        //         break;
-        // }
-        // if (!previousAction)
-        //     return;
-        // this.oldPosition.copy(previousAction[1].startPosition);
-        // this.movementVector.copy(previousAction[1].movementVector);
-        // this.position.copy(this.oldPosition).addScaledVector(this.movementVector, 1);
+        let iterator = this.actions.entries();
+        let action = iterator.next().value;
+        let previousAction;
+        while (action) {
+            if (action[0] < time) {
+                if (previousAction)
+                    this.actions.delete(previousAction[0]);
+                previousAction = action;
+                action = iterator.next().value;
+            }
+            else
+                break;
+        }
+        if (!previousAction)
+            return;
+        this.oldPosition.copy(previousAction[1].startPosition);
+        this.movementVector.copy(previousAction[1].movementVector);
+        this.position.copy(this.oldPosition).addScaledVector(this.movementVector, 1);
     }
 
     getCurrentPosition(radius: number) {

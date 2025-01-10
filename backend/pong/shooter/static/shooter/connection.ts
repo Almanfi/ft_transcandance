@@ -416,12 +416,21 @@ export class Connection {
         }
     }
 
-    getRecivedDataOrdered() : string | undefined {
+    hasRecievedData(): boolean {
+        return (this.recievedData.has(this.recievedDataOrder));
+    }
+
+    getRecievedDataOrdered() : string | undefined {
         let data = this.recievedData.get(this.recievedDataOrder);
-        if (data)
-            this.recievedDataOrder++;
+        // if (data)
+        //     this.recievedDataOrder++;
         // this.recievedData.delete(order);
         return data;
+    }
+
+    next() {
+        if (this.recievedData.has(this.recievedDataOrder))
+            this.recievedDataOrder++;
     }
 
     handlePlayerAction(data) {

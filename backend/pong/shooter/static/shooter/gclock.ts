@@ -45,6 +45,10 @@ export class gameClock {
 		this.msPerFrame = Math.floor(1000 / fps);
 	}
 
+	getFrameTime(index: number): number {
+		return this.frameTimes[index];
+	}
+
 	getFrameIndex(currentTime: number): number {
 		if (this.frameTimes[this.frame] === currentTime)
 			return this.frame;
@@ -67,7 +71,7 @@ export class gameClock {
 		this.frame++;
 	}
 
-	getFrameTime(reverseIdx: number) {
+	getFrameTimeRevrese(reverseIdx: number) {
 		if (reverseIdx > 60) {
 			console.log("invalid frame time index");// get rid of this
 			return ;

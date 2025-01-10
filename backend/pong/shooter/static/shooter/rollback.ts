@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 
-type dataSaved = {
+export type dataSaved = {
     // frameIndex: number;
     position: THREE.Vector3;
     speed: THREE.Vector3;
+    lastFire: number;
     input: string;
 }
 
@@ -18,8 +19,8 @@ export class Rollback {
     }
 
     saveFrame(frameIndex: frameIndex, position: THREE.Vector3,
-        speed: THREE.Vector3, input: string) {
-        this.savedData.set(frameIndex, {position, speed, input});
+        speed: THREE.Vector3, input: string, lastFire: number) {
+        this.savedData.set(frameIndex, {position, speed, input, lastFire});
     }
 
     rollbackFrame(frameIndex: frameIndex) {
