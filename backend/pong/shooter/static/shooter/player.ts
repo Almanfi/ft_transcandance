@@ -168,7 +168,7 @@ export class Player extends THREE.Object3D {
 
     reset() {
         this.inputs.reset();
-        this.actions.clear();
+        // this.actions.clear();
         this.lastFire = 0;
     }
 
@@ -251,9 +251,10 @@ export class Player extends THREE.Object3D {
         // this.cannon.head.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
         this.cannon.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), this.inputs.angle);
         
+        this.movementVector.copy(this.inputs.calcMovementVector(projectionOnPlane));
+
         this.oldPosition.copy(this.position);
         // this.oldMovementVector.copy(this.movementVector);
-        this.movementVector.copy(this.inputs.calcMovementVector(projectionOnPlane));
         // console.log(`movement vector: of ${this.name}`, this.movementVector);
         // this.movementVector.multiplyScalar(speed);
 
@@ -287,8 +288,9 @@ export class Player extends THREE.Object3D {
     }
 
     savePlayerData(frameIndex: number) {
+        let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
         this.rollback.saveFrame(frameIndex, this.oldPosition.clone(),
-                this.movementVector.clone(), this.inputs.serialize(),
+                currMoveVect, this.inputs.serialize(),
                 this.lastFire);
     }
 
@@ -336,12 +338,13 @@ export class Player extends THREE.Object3D {
 
     _findStateInFrame(frameIndex : number) { // '_' for unsafe
         let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
+        // let oldData = this.rollback.rollbackFrame(frameIndex - 1) as dataSaved;
         let input = this.inputs
         input.deserialize(data.input);
 
-        this.oldPosition.copy(data.position);
+        // this.oldPosition.copy(oldData.position);
         this.movementVector.copy(data.speed);
-        this.position.copy(this.oldPosition);
+        this.position.copy(data.position);
         // .addScaledVector(this.movementVector, 1);
         this.lastFire = data.lastFire;
     }

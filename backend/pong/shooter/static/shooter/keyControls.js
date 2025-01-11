@@ -106,7 +106,7 @@ export class KeyControls extends Controls {
     }
     checkforNewInputs() {
         let value = !this.handled;
-        this.handled = true;
+        // this.handled = true;
         return value;
     }
     keydownListener() {

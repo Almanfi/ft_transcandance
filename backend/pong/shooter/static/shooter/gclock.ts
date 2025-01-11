@@ -46,8 +46,16 @@ export class gameClock {
 	}
 
 	getFrameTime(index: number): number {
+		index = index  % 60;
 		return this.frameTimes[index];
 	}
+
+	// sameFrame(start: number, final: number): boolean {
+	// 	if (start > final)
+	// 		final += 60;
+	// 	if (final - start > 60)
+		
+	// }
 
 	getFrameIndex(currentTime: number): number {
 		let index = (this.frame - 1 + 60) % 60;
@@ -97,16 +105,16 @@ export class gameClock {
 	loop(animate: (passed: number, prev: number) => void,
 		rollBack: (start: number) => void) {
 		window.requestAnimationFrame(() => this.loop(animate, rollBack));
-		rollBack(this.startTime);
 		this.msNow = performance.now() - this.startTime;
 		this.msPassed = this.msNow - this.msPrev;
 		this.msPrevTrue = this.msNow;
 		if (this.msPassed < this.msPerFrame)
 			return ;
-
+		
 		this.setFrameTime();
 		// handleInputs(this.msPassed, this.msPrev);
 		
+		rollBack(this.startTime);
 		animate(this.msPassed, this.msPrev);
 		this.excessTime = 0;
 		this.msPrev = this.msNow - this.excessTime;

@@ -22,8 +22,14 @@ export class gameClock {
         this.msPerFrame = Math.floor(1000 / fps);
     }
     getFrameTime(index) {
+        index = index % 60;
         return this.frameTimes[index];
     }
+    // sameFrame(start: number, final: number): boolean {
+    // 	if (start > final)
+    // 		final += 60;
+    // 	if (final - start > 60)
+    // }
     getFrameIndex(currentTime) {
         let index = (this.frame - 1 + 60) % 60;
         if (this.frameTimes[index] === currentTime) {
@@ -66,7 +72,6 @@ export class gameClock {
     }
     loop(animate, rollBack) {
         window.requestAnimationFrame(() => this.loop(animate, rollBack));
-        rollBack(this.startTime);
         this.msNow = performance.now() - this.startTime;
         this.msPassed = this.msNow - this.msPrev;
         this.msPrevTrue = this.msNow;
@@ -74,6 +79,7 @@ export class gameClock {
             return;
         this.setFrameTime();
         // handleInputs(this.msPassed, this.msPrev);
+        rollBack(this.startTime);
         animate(this.msPassed, this.msPrev);
         this.excessTime = 0;
         this.msPrev = this.msNow - this.excessTime;
