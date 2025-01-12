@@ -156,10 +156,21 @@ export class Player extends THREE.Object3D {
         // // console.log(`at time of new action: ${action.timeStamp}: position: ${JSON.stringify(this.position)}`);
         // this.controls.applyAction(action);
     }
-    rollBack(receivedData, lastTime, actionTime) {
+    rollBack(receivedData, lastTime, actionTime, frameIndex) {
+        let rollBackData = this.rollback.rollbackFrame(frameIndex);
+        let rollBackInputs = rollBackData.input;
+        for (let i = 0; i < rollBackInputs.length - 1; i++) { // handle before last inputs
+            let nextInput = rollBackInputs[i + 1];
+            let nextActionTime = Inputs.findTimeStamp(nextInput);
+            this.rollbackNextAction(nextInput, lastTime, nextActionTime);
+            lastTime = nextActionTime;
+        }
+        this.rollbackNextAction(receivedData, lastTime, actionTime);
+    }
+    rollbackNextAction(nextInput, lastTime, actionTime) {
         let spanS = (actionTime - lastTime);
-        this.update(spanS, lastTime, actionTime);
-        this.inputs.deserialize(receivedData);
+        this.update(spanS, lastTime, 0);
+        this.inputs.deserialize(nextInput);
     }
     // rollBack(timeStamp) {
     //     // this.position.copy(this.controls.position);
@@ -212,8 +223,11 @@ export class Player extends THREE.Object3D {
         // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
         return this.rollback.saveFrame(frameIndex, this.position.clone(), this.movementVector, this.inputs.serialize(), this.lastFire);
     }
-    saveRollBackData(frameIndex, position, speed, input, lastFire) {
-        this.rollback.saveFrame(frameIndex, position, speed, input, lastFire);
+    saveRollBackData(frameIndex) {
+        let rollBackData = this.rollback.rollbackFrame(frameIndex);
+        if (!rollBackData)
+            return;
+        rollBackData.addInput(this.inputs.serialize());
     }
     addRollBackAction(timeStamp) {
         // let action = {

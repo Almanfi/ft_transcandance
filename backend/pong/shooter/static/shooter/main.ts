@@ -15,7 +15,8 @@ function initThreeJS(): { scene: THREE.Scene,
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
-    camera.position.set(20, 150, -10);
+    camera.position.set(0, 150, 0);
+    // camera.position.set(20, 150, -10);
     camera.lookAt(0,0,0);
 
     const renderer = new THREE.WebGLRenderer();
@@ -119,6 +120,7 @@ function rollBack(startTime: number) {
         return ;
     // console.log('received data order ', connection.recievedDataOrder);
     let recievedData = connection.getRecievedDataOrdered();
+    console.log('received data: ', recievedData);
 
     let actionTime = Inputs.findTimeStamp(recievedData as string);
     // console.log('action time: ', actionTime, ' received data: ', JSON.stringify(recievedData));
@@ -151,7 +153,8 @@ function rollBack(startTime: number) {
         
         player._findPositonInFrame(lastFrameIndex);// underscore methods are unsafe
         
-        foe.rollBack(recievedData as string, lastFrameTime, actionTime);
+        foe.savePlayerData(lastFrameIndex);
+        foe.rollBack(recievedData as string, lastFrameTime, actionTime, lastFrameIndex);
         // console.log('after rolling back: ', foe.position);
         connection.next();
         // console.log('next received data order ', connection.recievedDataOrder);
@@ -164,7 +167,8 @@ function rollBack(startTime: number) {
             if (actionTime >= nextFrameTime)
                 break;
             // console.log('new data:  start handling')
-            foe.rollBack(recievedData, lastActionTime, actionTime);
+            foe.saveRollBackData(lastFrameIndex);
+            foe.rollbackNextAction(recievedData, lastActionTime, actionTime);
             // console.log('after rolling back: ', foe.position);
             lastActionTime = actionTime;
             connection.next();
@@ -174,6 +178,7 @@ function rollBack(startTime: number) {
         if (lastActionTime < nextFrameTime) {
             // console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
             let timeS = nextFrameTime - lastActionTime;
+            foe.saveRollBackData(lastFrameIndex);
             foe.update(timeS, lastActionTime, lastFrameTime);
             console.log('finish frame update: ', foe.position);
             // console.log(`after finishing action at time : ${nextFrameTime} position: ${JSON.stringify(foe.position)}`);
@@ -211,12 +216,13 @@ var animate = (span: number, timeStamp: number) => {
     handleInputs(span, timeStamp);
     // let startTime = gClock.startTime;
     if (justRolledBack) {
-        justRolledBack = false;
+        // justRolledBack = false;
         let lastFrame = gClock.getFrameTime(frameIndex - 1);
         let span = timeStamp - lastFrame;
         // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
         // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
         foe.update(span, lastFrame, lastFrame);
+        console.log('after just rolling back: ', foe.position);
         // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
     }
 
@@ -240,10 +246,10 @@ var animate = (span: number, timeStamp: number) => {
     turretBulletM.update(timeStamp);
 
 
-    // if (justRolledBack) {
-    //     // console.log('(just rolled back) after animete at time', timeStamp + span, ' postion: ', foe.position);
-    //     justRolledBack = false;
-    // }
+    if (justRolledBack) {
+        console.log('(just rolled back) after animete at time', timeStamp + span, ' postion: ', foe.position);
+        justRolledBack = false;
+    }
 
 
     turretBulletM.checkCollision(player, span);
@@ -251,7 +257,9 @@ var animate = (span: number, timeStamp: number) => {
     // turretBulletManager.checkCollision(foe, span);
     // playerBulletManager.checkCollision(foe, span);
     // foeBulletManager.checkCollision(player, span);
-    console.log("player pos", player.position, "foe pos", foe.position);
+    
+
+    // console.log("player pos", player.position, "foe pos", foe.position);
 }
 
 function handleInputs(span: number, timeStamp: number) {
@@ -279,6 +287,7 @@ function handleInputs(span: number, timeStamp: number) {
                     direction, action, timeStamp);
     let data = inputs.serializeForSend();
     connection.send(JSON.stringify(data));
+    console.log('sent data: ', data);
 };
 
 function startGame(timeStamp) {
