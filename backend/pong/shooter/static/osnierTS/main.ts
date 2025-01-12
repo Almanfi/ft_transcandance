@@ -80,7 +80,7 @@ var animate = (s, timeStamp) => {
     // if (listen && beat && beat.type && !beat.handled) {
     //     beat.handled = true;
     //     // console.log('beat: ', beat);
-    //     // console.log(performance.now() - startTime);
+    //     // console.log(new Date().valueOf() - startTime);
     //     limit = 0;
     //     scale = 1.2;
     //     turret.update(beat.time, startTime);

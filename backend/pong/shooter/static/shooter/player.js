@@ -66,6 +66,10 @@ export class Inputs {
         speedVect.addScaledVector(frontVector, move.x);
         speedVect.addScaledVector(sideOnPlane, move.y);
         speedVect.normalize();
+        // speedVect.x = parseFloat(speedVect.x.toFixed(1));
+        // speedVect.z = parseFloat(speedVect.z.toFixed(1));
+        speedVect.x = Math.sign(speedVect.x) * Math.round(speedVect.x * speedVect.x * 10);
+        speedVect.z = Math.sign(speedVect.z) * Math.round(speedVect.z * speedVect.z * 10);
         return speedVect;
     }
     fire() {
@@ -83,9 +87,10 @@ export class Inputs {
 export class Player extends THREE.Object3D {
     constructor(position, bulletManager) {
         super();
-        this.radius = 1.5;
-        var core = createCore();
-        var cannon = createCannon();
+        let size = 70;
+        this.radius = size * 1.5;
+        var core = createCore(size);
+        var cannon = createCannon(size);
         this.core = core;
         this.cannon = cannon;
         this.add(core);
@@ -93,7 +98,7 @@ export class Player extends THREE.Object3D {
         this.position.set(position.x, position.y, position.z);
         let scale = 2;
         this.scale.set(scale, scale, scale);
-        this.speedRate = 30;
+        this.speedRate = 2;
         this.fireRate = 100;
         this.bulletDelay = 50;
         this.lastFire = 0;
@@ -118,6 +123,10 @@ export class Player extends THREE.Object3D {
         scene.add(this);
     }
     setPlaneVector(planeFacingVector) {
+        planeFacingVector.normalize();
+        planeFacingVector.x = parseFloat(planeFacingVector.x.toFixed(1));
+        planeFacingVector.y = parseFloat(planeFacingVector.y.toFixed(1));
+        planeFacingVector.z = parseFloat(planeFacingVector.z.toFixed(1));
         this.planeFacingVector = planeFacingVector;
     }
     // attachControls(controls) {
@@ -159,17 +168,22 @@ export class Player extends THREE.Object3D {
     rollBack(receivedData, lastTime, actionTime, frameIndex) {
         let rollBackData = this.rollback.rollbackFrame(frameIndex);
         let rollBackInputs = rollBackData.input;
+        console.log(`rolling back from ${lastTime} to ${actionTime}`);
         for (let i = 0; i < rollBackInputs.length - 1; i++) { // handle before last inputs
+            console.log("handling in between inputs");
             let nextInput = rollBackInputs[i + 1];
             let nextActionTime = Inputs.findTimeStamp(nextInput);
             this.rollbackNextAction(nextInput, lastTime, nextActionTime);
             lastTime = nextActionTime;
+            console.log("done handling in between inputs");
         }
         this.rollbackNextAction(receivedData, lastTime, actionTime);
     }
     rollbackNextAction(nextInput, lastTime, actionTime) {
+        // console.log(`before at time : ${lastTime} action : `, JSON.stringify(this.position));
         let spanS = (actionTime - lastTime);
         this.update(spanS, lastTime, 0);
+        // console.log(`after at time : ${actionTime} action : `, JSON.stringify(this.position));
         this.inputs.deserialize(nextInput);
     }
     // rollBack(timeStamp) {
@@ -184,8 +198,15 @@ export class Player extends THREE.Object3D {
     //     // }
     //     // this.addRollBackAction(timeStamp);
     // }
+    floorPosition(position) {
+        position.x = Math.floor(this.position.x * 1000) / 1000;
+        position.z = Math.floor(this.position.z * 1000) / 1000;
+        return position;
+        // this.position.y = this.position.y;// no chango for y
+    }
     update(timeS, timeStamp, actionTime) {
-        let speed = (this.speedRate * timeS) / 1000;
+        let speed = this.speedRate * timeS / 10;
+        // let speed = timeS
         const projectionOnPlane = this.planeFacingVector;
         this.core.rotateY(0.1);
         // this.cannon.head.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
@@ -196,6 +217,7 @@ export class Player extends THREE.Object3D {
         // console.log(`movement vector: of ${this.name}`, this.movementVector);
         // this.movementVector.multiplyScalar(speed);
         this.position.addScaledVector(this.movementVector, speed);
+        // this.floorPosition(this.position);
         // if (this.controls.sendActionToPeer && this.saveAction) {
         //     this.currInput = {};
         //     this.currmouse = {};
@@ -213,7 +235,7 @@ export class Player extends THREE.Object3D {
         //     Object.assign(this.move, this.currInput);
         // }
         // this.addAction(actionTime);
-        // if (performance.now() - this.lastFire > 70)
+        // if (new Date().valueOf() - this.lastFire > 70)
         this.fired = this.fire(timeStamp, timeS);
         // if (this.fired) {
         //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
@@ -365,12 +387,12 @@ export class Player extends THREE.Object3D {
     }
     fire(time, span) {
         if (!this.inputs.fire()) {
-            if (this.cannon.head.position.z < -2)
-                this.cannon.head.position.z += 0.2;
+            if (this.cannon.head.position.z < (this.radius) / 1.5 * -2.2)
+                this.cannon.head.position.z += 10;
             return false;
         }
-        if (this.cannon.head.position.z > -2.4)
-            this.cannon.head.position.z -= 0.1;
+        if (this.cannon.head.position.z > (this.radius) / 1.5 * -2.5)
+            this.cannon.head.position.z -= 5;
         let start = this.lastFire + this.fireRate;
         if (start < time) {
             // console.log(`start: ${start} < time: ${time}`);
@@ -398,8 +420,7 @@ export class Player extends THREE.Object3D {
         return true;
     }
 }
-function createCore() {
-    let scale = 1;
+function createCore(scale) {
     const geometry = new THREE.CapsuleGeometry(scale, 1, 4, 6);
     const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.3, emissive: 0x777777, emissiveIntensity: 0.8 });
     const core = new THREE.Mesh(geometry, material);
@@ -408,16 +429,17 @@ function createCore() {
     return core;
 }
 class CannonObject extends THREE.Object3D {
-    constructor() {
+    constructor(scale = 70) {
         super();
-        const invisibleCore = createCore();
+        const invisibleCore = createCore(70);
         invisibleCore.visible = false;
         const geometry = new THREE.CylinderGeometry(0, 0.7, 1.5, 6);
         const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.1, emissive: 0xeeeef7, emissiveIntensity: 0.8 });
         const cannonHead = new THREE.Mesh(geometry, material);
         cannonHead.name = 'cannonHead';
+        cannonHead.scale.set(scale, scale, scale);
         cannonHead.position.y = 0;
-        cannonHead.position.z = -2;
+        cannonHead.position.z = -2.2 * scale;
         cannonHead.position.x = 0;
         cannonHead.rotateX(-Math.PI / 2);
         this.head = cannonHead;
@@ -426,7 +448,7 @@ class CannonObject extends THREE.Object3D {
         this.name = 'cannon';
     }
 }
-function createCannon() {
-    const cannon = new CannonObject();
+function createCannon(scale) {
+    const cannon = new CannonObject(scale);
     return cannon;
 }

@@ -25,7 +25,7 @@ export class Connection {
     startGame(timeStamp) {
         setTimeout(() => {
             console.log("game started");
-        }, timeStamp - performance.now());
+        }, timeStamp - new Date().valueOf());
     }
 
     sendAdapter(msg) {
@@ -316,7 +316,7 @@ export class Connection {
         if (data.type === "ping") {
             this.sendRtcMsg(JSON.stringify({ type: "pong", timestamp: data.timestamp }));
         } else if (data.type === "pong") {
-            let pingEndTime = performance.now();
+            let pingEndTime = new Date().valueOf();
             let latency = pingEndTime - data.timestamp;
             console.log(`Ping: ${latency.toFixed(2)} ms`);
         }
@@ -357,7 +357,7 @@ export class Connection {
 
     startPing() {
         // this.pingInterval = setInterval(() => {
-        //     this.sendRtcMsg(JSON.stringify({ type: "ping", timestamp: performance.now() }));
+        //     this.sendRtcMsg(JSON.stringify({ type: "ping", timestamp: new Date().valueOf() }));
         // }, 1000);
     }
 
@@ -366,16 +366,16 @@ export class Connection {
     }
 
     initSync() {
-        this.send(JSON.stringify({ type: "sync", timestamp: performance.now(), ping: true}));
+        this.send(JSON.stringify({ type: "sync", timestamp: new Date().valueOf(), ping: true}));
     }
 
     checkSync() {
-        this.send(JSON.stringify({ type: "sync", pingAvrg: this.pingAvrg, timestamp: performance.now()}));
+        this.send(JSON.stringify({ type: "sync", pingAvrg: this.pingAvrg, timestamp: new Date().valueOf()}));
     }
 
     signalStart() {
         console.log("signaling start");
-        let time = performance.now() + 1000;
+        let time = new Date().valueOf() + 1000;
         this.send(JSON.stringify({ type: "sync", startAt: time}));
         this.startGame(time);
     }
@@ -390,7 +390,7 @@ export class Connection {
                 this.initSync();
                 return;
             }
-            let mytime = performance.now() + 1000;
+            let mytime = new Date().valueOf() + 1000;
             let convertedTime = data.startAt - this.timeDiffAvrg;
             console.log("my time is: ", mytime);
             console.log("peer time is: ", convertedTime);
@@ -404,23 +404,23 @@ export class Connection {
             this.initSync();
         }
         if (data.showTime) {
-            console.log("my time is: ", performance.now());
+            console.log("my time is: ", new Date().valueOf());
             console.log("peer time is: ", data.peerClock);
             console.log("average time difference is: ", this.timeDiffAvrg);
             console.log("ping average is: ", this.pingAvrg);
-            let currentPing = performance.now() - data.timestamp;
+            let currentPing = new Date().valueOf() - data.timestamp;
             console.log("(avrg ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - this.pingAvrg / 2);
             console.log("(curr ping) estimated time is: ", data.peerClock - this.timeDiffAvrg - currentPing / 2);
             
             if (data.setTimeData || this.peerTimeDiff !== 0)
                 return;
-            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), showTime: true,
+            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: new Date().valueOf(), showTime: true,
                 setTimeData: true, timeDiffAvrg: this.timeDiffAvrg, pingAvrg: this.pingAvrg
             }));
             return;
         }
         if (data.getTime) {
-            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), showTime: true}));
+            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: new Date().valueOf(), showTime: true}));
             return;
         }
         if (this.ping.size === samplesize) {
@@ -429,22 +429,22 @@ export class Connection {
             this.ping = new Array();
             this.ping.size = 0;
             this.timeDiff = new Array();
-            this.send(JSON.stringify({ type: "sync", getTime: true, timestamp: performance.now()}));
+            this.send(JSON.stringify({ type: "sync", getTime: true, timestamp: new Date().valueOf()}));
             return;
         }
 
         if (data.ping) {
             // console.log("ping recieved");
-            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: performance.now(), pong: true}));
+            this.send(JSON.stringify({ type: "sync", timestamp: data.timestamp, peerClock: new Date().valueOf(), pong: true}));
         }
         if(data.pong) {
             // console.log("pong recieved");
-            let ping = performance.now() - data.timestamp;
+            let ping = new Date().valueOf() - data.timestamp;
             this.ping.size++;
             this.ping.push(ping);
-            let timeDiff = data.peerClock - performance.now() - ping / 2;
+            let timeDiff = data.peerClock - new Date().valueOf() - ping / 2;
             this.timeDiff.push(timeDiff);
-            this.send(JSON.stringify({ type: "sync", timestamp: performance.now(), ping: true}));
+            this.send(JSON.stringify({ type: "sync", timestamp: new Date().valueOf(), ping: true}));
         }
 
     }

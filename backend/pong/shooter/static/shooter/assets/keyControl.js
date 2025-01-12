@@ -217,7 +217,7 @@ export class KeyControls extends Controls {
 
     sendAngleToPeer(angle, direction) {
         // this.player.saveAction = true;
-        // let data = {angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: performance.now()};
+        // let data = {angle: angle, direction: direction, actionOrder: this.actionOrder, timeStamp: new Date().valueOf()};
         // // this.send(JSON.stringify(data));
         // this.actionOrder++;
     }
@@ -229,7 +229,7 @@ export class KeyControls extends Controls {
         // data.position = position ? position : undefined;
         // data.mouse = mouse ? mouse : undefined;
         // data.actionOrder = this.actionOrder;
-        // data.timeStamp = performance.now();
+        // data.timeStamp = new Date().valueOf();
         // // this.send(JSON.stringify(data));
         // this.actionOrder++;
     }

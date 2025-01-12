@@ -75,7 +75,7 @@ export class MusicSync {
     }
 
     findCurrentBeat() {// for safe measure an array of beats should be returned        
-        let time = performance.now() - this.startTime;
+        let time = new Date().valueOf() - this.startTime;
         if (this.nextBeat && this.nextBeat.time > time || !this.nextBeat && this.currBeat) {
             let cooldown = 400;
             if (this.nextBeat && this.currBeat
@@ -104,10 +104,10 @@ export class MusicSync {
     // nextBeat() {
     //     var beat = { value: 0, new: false };
     //     let holdInterval = 400;
-    //     if (this.entry.value[0] > performance.now() - this.startTime) {
+    //     if (this.entry.value[0] > new Date().valueOf() - this.startTime) {
     //         // if (this.keepFiring) {
-    //         if (this.keepFiring && performance.now() - this.lastBeatTime > holdInterval) {
-    //             this.lastBeatTime = performance.now();
+    //         if (this.keepFiring && new Date().valueOf() - this.lastBeatTime > holdInterval) {
+    //             this.lastBeatTime = new Date().valueOf();
     //             beat.value = 2;
     //         }
     //         return beat;
@@ -125,9 +125,9 @@ export class MusicSync {
     //         beat.value = 1;
     //     }
     //     else if (value === "1" || value === "3") {
-    //         if (performance.now() - this.lastBeatTime > holdInterval) {
+    //         if (new Date().valueOf() - this.lastBeatTime > holdInterval) {
     //             beat.value = 2;
-    //             this.lastBeatTime = performance.now();
+    //             this.lastBeatTime = new Date().valueOf();
     //         }
     //         beat.value = 2;
     //         this.keepFiring = true;
@@ -142,7 +142,7 @@ export class MusicSync {
             // this.music.setLoop( true );
             this.music.setVolume( 0.5 );
             this.music.play();
-            this.startTime = performance.now();
+            this.startTime = new Date().valueOf();
             // this.musicPlaying = true;
 
             if (this.music.source) {
@@ -167,7 +167,7 @@ export class MusicSync {
         this.music.stop();
         if (!this.music.isPlaying)
             this.music.play();
-        this.startTime = performance.now();
+        this.startTime = new Date().valueOf();
         if (!this.music.source || !this.musicMap)
             return this.startTime;
         this.music.source.connect(this.analyser);
@@ -213,7 +213,7 @@ export class MusicSync {
     //     this.lastAmplitude = this.dataArray[this.chosenFreq]
     //     // this.lowestAmplitude = 1;
     //     return 0;
-    //     // this.frequancies.set(performance.now(), new Uint8Array(this.dataArray));
+    //     // this.frequancies.set(new Date().valueOf(), new Uint8Array(this.dataArray));
 
     //     let highs = find_medium(this.dataArray, 61, 84);
     //     let mids = find_medium(this.dataArray, 10, 30);

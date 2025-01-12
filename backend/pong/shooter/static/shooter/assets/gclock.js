@@ -2,7 +2,7 @@ export class gameClock {
 	constructor(scene, camera, renderer) {
 		this.setFps(60);
 		this.msPrev = 0;
-		this.msNow = performance.now();
+		this.msNow = new Date().valueOf();
 		this.excessTime = 0;
 		this.loop = this.loop.bind(this);
 		this.msPrevTrue = this.msNow;
@@ -13,7 +13,7 @@ export class gameClock {
 		this.frame = 0;
 		this.full = false;
 		this.frameCount = 0;
-		this.startTime = performance.now();
+		this.startTime = new Date().valueOf();
 		this.saveTime = this.startTime;
 	}
 
@@ -51,7 +51,7 @@ export class gameClock {
 	loop(animate, rollBack) {
 		window.requestAnimationFrame(() => this.loop(animate, rollBack));
 		rollBack(this.startTime);
-		this.msNow = performance.now() - this.startTime;
+		this.msNow = new Date().valueOf() - this.startTime;
 		this.msPassed = this.msNow - this.msPrev;
 		// animate((this.msNow - this.msPrevTrue) / 1000);
 		this.msPrevTrue = this.msNow;
@@ -63,11 +63,11 @@ export class gameClock {
 		this.setFrameTime();
 		this.excessTime = 0;
 		this.msPrev = this.msNow - this.excessTime;
-		// let time = performance.now() - this.startTime;
+		// let time = new Date().valueOf() - this.startTime;
 		// // console.log(this.msPerFrame)
 		// console.log(time - this.saveTime);
 		// this.saveTime = time;
-		// controls.update();performance.now() - this.startTime
+		// controls.update();new Date().valueOf() - this.startTime
 		// if (player.currAnimation.nextSprite >= 0)
 		// 	console.log(player.currAnimation.hitBox[player.currAnimation.nextSprite][0].mesh.visible);
 		this.renderer.render( this.scene, this.camera );

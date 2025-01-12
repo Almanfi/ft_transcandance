@@ -3,7 +3,7 @@ import { Player } from './player.js';
 
 
 export function initPlane(): THREE.Mesh {
-    const geometry = new THREE.PlaneGeometry( 400, 300 );
+    const geometry = new THREE.PlaneGeometry( 19000, 12000 );
     const material = new THREE.MeshBasicMaterial( {color: 0xcccccd, side: THREE.DoubleSide} );
     const plane = new THREE.Mesh( geometry, material );
     plane.receiveShadow = true;
@@ -42,14 +42,14 @@ export class Turret extends THREE.Mesh {
     constructor(bulletManager: TurretBulletManager,
         props: TurretProps = { }) {
         let color = props.color  || 0x000000;
-        let radius = props.radius || 3;
+        let radius = props.radius || 30;
         console.log('Turret props: ', props);
         const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshPhysicalMaterial({ color });
         super(geometry, material);
 
         Object.assign(this, {
-            radius: 3,
+            radius: radius,
             color: 0x000000,
             initPosition: new THREE.Vector3(),
             speed: 0.5,
@@ -58,12 +58,12 @@ export class Turret extends THREE.Mesh {
         }, props);
 
 		this.position.set(this.initPosition.x, this.initPosition.y, this.initPosition.z);
-        this.timeStamp = performance.now();
+        this.timeStamp = new Date().valueOf();
         this.addBulletManager(bulletManager);
 	};
 
     reset() {
-        this.timeStamp = performance.now();
+        this.timeStamp = new Date().valueOf();
         this.fireAngle = 0;
     }
 
@@ -112,7 +112,7 @@ export class Turret extends THREE.Mesh {
         if (listen && beat && beat.type && !beat.handled) {
             beat.handled = true;
             // console.log('beat: ', beat);
-            // console.log(performance.now() - startTime);
+            // console.log(new Date().valueOf() - startTime);
             this.update(beat.time);
 
             switch (beat.type) {
@@ -173,7 +173,7 @@ abstract class ABullet extends THREE.Mesh {
 
     update(time: number) {
         this.position.copy(this.initPosition)
-        .addScaledVector(this.speed, this.speedRate * ((time - this.date) / 1000));
+        .addScaledVector(this.speed, this.speedRate * (time - this.date));
     }
 
     getCurrentPosition(radius: number) {
@@ -202,12 +202,12 @@ abstract class ABullet extends THREE.Mesh {
 
 export class TurretBullet extends ABullet {
     constructor() {
-        let radius = 1.5;
+        let radius =  70 * 1.5;
         const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshBasicMaterial();
         super(geometry, material);
         this.radius = radius;
-        this.speedRate = 50;
+        this.speedRate = 4;
         this.initPosition = new THREE.Vector3();
     }
 
@@ -255,12 +255,12 @@ export class TurretBullet extends ABullet {
 
 export class PlayerBullet extends ABullet {
     constructor() {
-        let radius = 1;
+        let radius = 70;
         const geometry = new THREE.CapsuleGeometry( radius, 2, 2, 4);
         const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1} );
         super(geometry, material);
         this.radius = radius;
-        this.speedRate = 100;
+        this.speedRate = 6;
         this.initPosition = new THREE.Vector3();
     }
 
@@ -428,7 +428,7 @@ class ABulletManager {
 
     destroyBullet(bullet: ABullet) {
         bullet.visible = false;
-        bullet.destructionTime = performance.now();
+        bullet.destructionTime = new Date().valueOf();
         this.destroyedBullets.set(bullet.id, bullet);
         this.bullets.delete(bullet.id);
     }

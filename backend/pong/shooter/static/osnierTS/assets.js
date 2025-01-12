@@ -146,7 +146,7 @@ export class Player extends THREE.Object3D {
         //     Object.assign(this.move, this.currInput);
         // }
         // this.addAction(actionTime);
-        // if (performance.now() - this.lastFire > 70)
+        // if (new Date().valueOf() - this.lastFire > 70)
         this.fired = this.fire(timeStamp, timeS);
         // if (this.fired) {
         //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);

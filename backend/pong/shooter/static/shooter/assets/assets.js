@@ -27,7 +27,7 @@ export class Turret extends THREE.Mesh {
         this.scene = null;
 
 		this.position.set(this.initPosition.x, this.initPosition.y, this.initPosition.z);
-        this.timeStamp = performance.now();
+        this.timeStamp = new Date().valueOf();
 
 		// this.box = new THREE.Box3();
 		// this.mesh.geometry.computeBoundingBox();
@@ -69,7 +69,7 @@ export class Turret extends THREE.Mesh {
 
 
 	update(timeStamp, startTime) {
-        // console.log(`beatTime: ${timeStamp}, now: ${performance.now() - startTime}`);
+        // console.log(`beatTime: ${timeStamp}, now: ${new Date().valueOf() - startTime}`);
 		// this.fireAngle += this.rotationSpeed;
         // let ballSpeed = 0.3;
         // this.fireAngle += timeS / ballSpeed;
@@ -106,7 +106,7 @@ export class TurretBullet extends THREE.Mesh {
     //     const material = new THREE.MeshBasicMaterial( {color, side: THREE.DoubleSide} );
     //     super(geometry, material);
     //     this.speed = speed;
-    //     this.date = performance.now();
+    //     this.date = new Date().valueOf();
     //     this.position.set(position.x, position.y, position.z);
     //     scene.add(this);
     // };
@@ -258,7 +258,7 @@ export class Bullet extends THREE.Mesh {
     //     const material = new THREE.MeshStandardMaterial( {color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1} );
     //     super(geometry, material);
     //     this.speed = speed;
-    //     this.date = performance.now();
+    //     this.date = new Date().valueOf();
     //     this.position.set(position.x, position.y, position.z);
     //     this.position.addScaledVector(this.speed, 2);
     //     this.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), angle);
@@ -745,7 +745,7 @@ export class Player extends THREE.Object3D {
         }
         this.addAction(actionTime);
 
-        // if (performance.now() - this.lastFire > 70)
+        // if (new Date().valueOf() - this.lastFire > 70)
         this.fired = this.fire(timeStamp, timeS);
         // if (this.fired) {
         //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
@@ -953,7 +953,7 @@ export class PlayersBulletManager {
 
     destroyBullet(bullet) {
         bullet.visible = false;
-        bullet.destructionTime = performance.now();
+        bullet.destructionTime = new Date().valueOf();
         this.destroyedBullets.set(bullet.id, bullet);
         this.bullets.delete(bullet.id);
     }
@@ -1141,7 +1141,7 @@ export class TurretBulletManager {
 
     destroyBullet(bullet) {
         bullet.visible = false;
-        bullet.destructionTime = performance.now();
+        bullet.destructionTime = new Date().valueOf();
         this.destroyedBullets.set(bullet.id, bullet);
         this.bullets.delete(bullet.id);
     }

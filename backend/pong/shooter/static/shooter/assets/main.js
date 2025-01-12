@@ -36,14 +36,14 @@ var entry = mapIterator.next();
 let limit1 = 0;
 
 function startGame(timeStamp) {
-    console.log('starting game in: ', timeStamp - performance.now());
+    console.log('starting game in: ', timeStamp - new Date().valueOf());
     plane.material.color.setHex(0x000000);
         musicSyncer.stopMusic();
         turretBulletManager.reset();
         playerBulletManager.reset();
         foeBulletManager.reset();
     setTimeout(() => {
-        // while(timeStamp > performance.now());
+        // while(timeStamp > new Date().valueOf());
         plane.material.color.setHex(0xcccccd);
         gClock.setStartTime(musicSyncer.playMusic());
         limit1 = 0;
@@ -59,7 +59,7 @@ function startGame(timeStamp) {
         foeBulletManager.reset(gClock.startTime);
         player.reset();
         foe.reset();
-    }, (timeStamp - performance.now()));
+    }, (timeStamp - new Date().valueOf()));
 }
 
 function startMusic(timeStamp) {
@@ -209,11 +209,11 @@ function rollBack(startTime) {
     
     if (!playerSyncData.actions.has(foeActionOrder))
         return;
-    // let startTime = performance.now();
+    // let startTime = new Date().valueOf();
     // let timeStampTransformed  = playerSyncData.actions.get(foeActionOrder).timeStamp - timeDiff;
     // if (startTime - timeStampTransformed < 0)
     //     return;
-    let currentTime = performance.now() - startTime;
+    let currentTime = new Date().valueOf() - startTime;
     let actionTime = playerSyncData.actions.get(foeActionOrder).timeStamp;
     
     if (currentTime < actionTime)
@@ -319,7 +319,7 @@ function rollBack(startTime) {
     // save for next roll back
     // playerSyncData.backUpPosition.copy(foe.position);
     playerSyncData.actionOrder = foeActionOrder;
-   console.log('roll back time: ', performance.now() - startTime - currentTime);
+   console.log('roll back time: ', new Date().valueOf() - startTime - currentTime);
    justRolledBack = true;
 }
 
@@ -359,7 +359,7 @@ var animate = (s, timeStamp) => {
     if (listen && beat && beat.type && !beat.handled) {
         beat.handled = true;
         // console.log('beat: ', beat);
-        // console.log(performance.now() - startTime);
+        // console.log(new Date().valueOf() - startTime);
         limit = 0;
         scale = 1.2;
         turret.update(beat.time, startTime);

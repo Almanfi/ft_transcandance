@@ -24,7 +24,7 @@ export class gameClock {
 	constructor(scene: THREE.Scene, camera: THREE.Camera, renderer: THREE.Renderer) {
 		this.setFps(60);
 		this.msPrev = 0;
-		this.msNow = performance.now();
+		this.msNow = new Date().valueOf();
 		this.excessTime = 0;
 		this.loop = this.loop.bind(this);
 		this.msPrevTrue = this.msNow;
@@ -36,7 +36,7 @@ export class gameClock {
 		this.frame = 0;
 		this.full = false;
 		this.frameCount = 0;
-		this.startTime = performance.now();
+		this.startTime = new Date().valueOf();
 		this.saveTime = this.startTime;
 	}
 
@@ -105,16 +105,17 @@ export class gameClock {
 	loop(animate: (passed: number, prev: number) => void,
 		rollBack: (start: number) => void) {
 		window.requestAnimationFrame(() => this.loop(animate, rollBack));
-		this.msNow = performance.now() - this.startTime;
+		this.msNow = new Date().valueOf() - this.startTime;
 		this.msPassed = this.msNow - this.msPrev;
 		this.msPrevTrue = this.msNow;
-		rollBack(this.startTime);
-		if (this.msPassed < this.msPerFrame)
+		if (this.msPassed < this.msPerFrame) {
+			rollBack(this.startTime);
 			return ;
+		}
 		
 		this.setFrameTime();
+		rollBack(this.startTime);
 		// handleInputs(this.msPassed, this.msPrev);
-		
 		animate(this.msPassed, this.msPrev);
 		this.excessTime = 0;
 		this.msPrev = this.msNow - this.excessTime;
