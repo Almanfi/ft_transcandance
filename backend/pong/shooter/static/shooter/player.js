@@ -110,6 +110,8 @@ export class Player extends THREE.Object3D {
         this.inputs.reset();
         // this.actions.clear();
         this.lastFire = 0;
+        this.position.set(0, 0, 0);
+        this.oldPosition.set(0, 0, 0);
     }
     addToScene(scene) {
         this.scene = scene;
@@ -207,8 +209,11 @@ export class Player extends THREE.Object3D {
         // }
     }
     savePlayerData(frameIndex) {
-        let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
-        this.rollback.saveFrame(frameIndex, this.oldPosition.clone(), currMoveVect, this.inputs.serialize(), this.lastFire);
+        // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
+        return this.rollback.saveFrame(frameIndex, this.position.clone(), this.movementVector, this.inputs.serialize(), this.lastFire);
+    }
+    saveRollBackData(frameIndex, position, speed, input, lastFire) {
+        this.rollback.saveFrame(frameIndex, position, speed, input, lastFire);
     }
     addRollBackAction(timeStamp) {
         // let action = {
@@ -254,7 +259,7 @@ export class Player extends THREE.Object3D {
         let data = this.rollback.rollbackFrame(frameIndex);
         // let oldData = this.rollback.rollbackFrame(frameIndex - 1) as dataSaved;
         let input = this.inputs;
-        input.deserialize(data.input);
+        input.deserialize(data.input[0]);
         // this.oldPosition.copy(oldData.position);
         this.movementVector.copy(data.speed);
         this.position.copy(data.position);

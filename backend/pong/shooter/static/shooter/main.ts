@@ -141,8 +141,8 @@ function rollBack(startTime: number) {
     // return ;
     foe.despawnUncertainBullets(lastFrameTime);// later only despown bullet that
     foe._findStateInFrame(lastFrameIndex);
-    // console.log('after finding state in frame: ', foe.position);
     // foe.findStateAtTime(lastFrameTime);
+    // console.log('after finding state in frame: ', foe.position);
     // foe.actions.clear();
 
     while (lastFrameIndex !== finalFrameIndex) {
@@ -210,22 +210,21 @@ var animate = (span: number, timeStamp: number) => {
     let frameIndex = gClock.getFrameIndex(timeStamp);
     handleInputs(span, timeStamp);
     // let startTime = gClock.startTime;
-    // if (justRolledBack) {
-    //     justRolledBack = false;
-    //     let lastFrame = gClock.getFrameTime(frameIndex - 1);
-    //     let span = timeStamp - lastFrame;
-    //     // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
-    //     // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
-    //     foe.update(span, lastFrame, lastFrame);
-    //     // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
-    // }
+    if (justRolledBack) {
+        justRolledBack = false;
+        let lastFrame = gClock.getFrameTime(frameIndex - 1);
+        let span = timeStamp - lastFrame;
+        // console.log('just rolled back at time: ', timeStamp, ' span: ', span);
+        // console.log('(just rolled back) before animete at time', lastFrame, ' postion: ', foe.position);
+        foe.update(span, lastFrame, lastFrame);
+        // console.log('(just rolled back) before animete at time', timeStamp, ' postion: ', foe.position);
+    }
 
     player.savePlayerData(frameIndex);
     player.update(span, timeStamp, timeStamp);
     playerBulletM.update(timeStamp);
 
     if (keyControls.checkforNewInputs()) {
-        console.log("hello");
         console.log("player pos", player.position);
         keyControls.setAsHandeled();
     }
@@ -252,6 +251,7 @@ var animate = (span: number, timeStamp: number) => {
     // turretBulletManager.checkCollision(foe, span);
     // playerBulletManager.checkCollision(foe, span);
     // foeBulletManager.checkCollision(player, span);
+    console.log("player pos", player.position, "foe pos", foe.position);
 }
 
 function handleInputs(span: number, timeStamp: number) {
@@ -287,6 +287,7 @@ function startGame(timeStamp) {
         turretBulletM.reset();
         playerBulletM.reset();
         player.reset();
+        foe.reset();
         connection.reset();
     setTimeout(() => {
         // while(timeStamp > performance.now());
@@ -295,6 +296,7 @@ function startGame(timeStamp) {
         turretBulletM.reset();
         playerBulletM.reset();
         player.reset();
+        foe.reset();
         turret.reset();
         connection.reset();
     }, (timeStamp - performance.now()));

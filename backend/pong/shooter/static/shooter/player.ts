@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Move, GameAction } from './keyControls.js';
 import { PlayersBulletManager } from './assets.js';
-import { Rollback, dataSaved } from './rollback.js';
+import { Rollback, dataSaved, RollData } from './rollback.js';
 
 
 export class Inputs {
@@ -170,6 +170,8 @@ export class Player extends THREE.Object3D {
         this.inputs.reset();
         // this.actions.clear();
         this.lastFire = 0;
+        this.position.set(0, 0, 0);
+        this.oldPosition.set(0, 0, 0);
     }
 
     addToScene(scene: THREE.Scene) {
@@ -288,10 +290,15 @@ export class Player extends THREE.Object3D {
     }
 
     savePlayerData(frameIndex: number) {
-        let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
-        this.rollback.saveFrame(frameIndex, this.oldPosition.clone(),
-                currMoveVect, this.inputs.serialize(),
+        // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
+        return this.rollback.saveFrame(frameIndex, this.position.clone(),
+                this.movementVector, this.inputs.serialize(),
                 this.lastFire);
+    }
+
+    saveRollBackData(frameIndex: number, position: THREE.Vector3,
+        speed: THREE.Vector3, input: string, lastFire: number) {
+        this.rollback.saveFrame(frameIndex, position, speed, input, lastFire);
     }
 
     addRollBackAction(timeStamp: number) {
@@ -340,7 +347,7 @@ export class Player extends THREE.Object3D {
         let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
         // let oldData = this.rollback.rollbackFrame(frameIndex - 1) as dataSaved;
         let input = this.inputs
-        input.deserialize(data.input);
+        input.deserialize(data.input[0]);
 
         // this.oldPosition.copy(oldData.position);
         this.movementVector.copy(data.speed);
