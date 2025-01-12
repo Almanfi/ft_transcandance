@@ -144,7 +144,7 @@ class UserInfo(ViewSet):
 			return Response({"message": "Not allowed update fields", "error_code": 99}, status=status.HTTP_400_BAD_REQUEST)
 		updated_user = UserSerializer(old_user.instance, data = update_data)
 		if not updated_user.is_valid():
-			return Response(old_user.errrors, status= status.HTTP_400_BAD_REQUEST)
+			return Response({"message": "Wrong update request", "error_code": 117, "details": old_user.errrors}, status= status.HTTP_400_BAD_REQUEST)
 		if 'password' in update_data:
 			self.hash_password(updated_user)
 		if picture != None:
@@ -178,11 +178,11 @@ class UserInfo(ViewSet):
 		users_ids = parse_uuid([request.user.data['id']])
 		(deletion_info, deleted_users)= User.remove_users(users_ids)
 		if (deletion_info[0] <= 0):
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+			return Response({"message": "No user to be deleted", "error_code": 116}, status=status.HTTP_400_BAD_REQUEST)
 		deleted_users = UserSerializer(deleted_users, many=True)
 		for user in deleted_users.data:
 			if 'profile_picture' in user and not user['profile_picture'] == "profile.jpg":
 				os.remove(f"{users_images_path()}/{user["profile_picture"]}")
-		return Response(status=status.HTTP_204_NO_CONTENT)
+		return Response({"message": "User deleted sucessfully"} ,status=status.HTTP_200_OK)
 
 # Create your views here.

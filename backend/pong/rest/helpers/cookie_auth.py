@@ -46,7 +46,7 @@ class WebSocketAuth(BaseMiddleware):
         super().__init__(inner)
 
     async def __call__(self, scope, receive, send):
-        scope['user'] = None
+        scope['user'] = None       
         if 'id_key' not in scope.get("cookies"):
             return await self.inner(scope, receive, send)
         id_key: str = scope.get("cookies")['id_key']

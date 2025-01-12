@@ -39,7 +39,7 @@ class TournamentSocket(WebsocketConsumer):
 			user.enter_lobby()
 			super().connect()
 			async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
-			self.send(text_data=json.dumps(invites.data))
+			self.send(text_data=json.dumps({"type": "lobby.matches", "matches": invites.data}))
 			async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.join", "player": user.data})
 		except Exception as e:
 			raise DenyConnection()
