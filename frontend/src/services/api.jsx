@@ -1,3 +1,6 @@
+import Ura from 'ura';
+import Toast from '../components/Toast/Toast.js';
+
 const endpoint = "https://localhost:8000";
 
 async function send(url, prams) {
@@ -66,12 +69,12 @@ export async function getUser() {
     // localStorage.setItem("user", JSON.stringify(userData))
     return body;
   }
-  else if (response.status === 403) {
-    throw {
-      status: 403,
-      message: "",
-    }
-  }
+  // else if (response.status === 403) {
+  //   throw {
+  //     status: 403,
+  //     message: "",
+  //   }
+  // }
   else {
     const body = await response.json();
     // console.log("Error get user", body.message);
@@ -97,11 +100,20 @@ username: "mhrima"
 export async function getUsersById(ids) {
   // get user data
   // try {
+  // if(ids.length === 0)
+  // {
+  //   console.error("request empty");
+  //   return []
+  // }
+  // else
+  // {
+  // console.warn("send getUsersById", ids);
+  console.log(JSON.stringify(ids));
   const response = await fetch(`${endpoint}/users/fetch/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body : JSON.stringify(ids)
+    body: JSON.stringify(ids)
   });
   // console.log("res", response);
 
@@ -112,17 +124,18 @@ export async function getUsersById(ids) {
     // localStorage.setItem("user", JSON.stringify(userData))
     return body;
   }
-  else if (response.status === 403) {
-    throw {
-      status: 403,
-      message: "",
-    }
-  }
+  // else if (response.status === 403) {
+  //   throw {
+  //     status: 403,
+  //     message: "",
+  //   }
+  // }
   else {
     const body = await response.json();
     // console.log("Error get user", body.message);
     throw body;
   }
+  // }
   // } catch (error) {
   //   console.log("error", error);
   // }
@@ -231,8 +244,8 @@ export async function getRelations() {
   {
     blocks: [], // blocked users
     friends:[], // existing friends
-    invited:[], // peoplewho sent me invitations
-    invites: [], // people whom I send invitations
+    invited:[], // recieved invitations
+    invites: [], //sent invitations
   }
   */
   // try {
@@ -258,32 +271,33 @@ export async function getRelations() {
 }
 
 export async function inviteFriend(friendId) {
-  try {
-    console.log("ask", { "friend_id": friendId });
+  // try {
+  console.log("ask", { "friend_id": friendId });
 
-    const response = await fetch(`${endpoint}/relationships/invite/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", },
-      credentials: "include",
-      body: JSON.stringify({ "friend_id": friendId })
-    })
-    if (response.ok) {
-      console.log("invited friend succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error inviting friend", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
+  const response = await fetch(`${endpoint}/relationships/invite/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", },
+    credentials: "include",
+    body: JSON.stringify({ "friend_id": friendId })
+  })
+  if (response.ok) {
+    console.log("invited friend succefully");
+    const body = await response.json();
+    return body;
   }
+  else {
+    const body = await response.json();
+    // console.log("Error inviting friend", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 }
 
 export async function acceptInvitation(id) {
   // try {
-  if (!id) throw "invitation id is NULL";
+  // if (!id) throw "invitation id is NULL";
 
   const response = await fetch(`${endpoint}/relationships/invite/accept/`, {
     method: "PATCH",
@@ -308,7 +322,7 @@ export async function acceptInvitation(id) {
 
 export async function refuseInvitation(id) {
   try {
-    if (!id) throw "invitation id is NULL";
+    // if (!id) throw "invitation id is NULL";
 
     const response = await fetch(`${endpoint}/relationships/invite/refuse/`, {
       method: "PATCH",
@@ -332,7 +346,7 @@ export async function refuseInvitation(id) {
 
 export async function cancelInvitation(id) {
   try {
-    if (!id) throw "invitation id is NULL";
+    // if (!id) throw "invitation id is NULL";
 
     const response = await fetch(`${endpoint}/relationships/invite/cancel/`, {
       method: "DELETE",
@@ -348,83 +362,149 @@ export async function cancelInvitation(id) {
     else {
       const body = await response.json();
       console.log("Error canceling invitation ", body.message);
+      throw body;
     }
   } catch (error) {
     console.log("error", error);
   }
 }
 
-export async function removeFriend(id) {
-  try {
-    if (!id) throw "invitation id is NULL";
+export async function unFriend(id) {
+  // try {
+  // if (!id) throw "invitation id is NULL";
 
-    const response = await fetch(`${endpoint}/relationships/unfriend/`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ "friendship_id": id })
-    })
-    if (response.ok) {
-      console.log("remove friend succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error removing friend ", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
+  const response = await fetch(`${endpoint}/relationships/unfriend/`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ "friendship_id": id })
+  })
+  if (response.ok) {
+    console.log("remove friend succefully");
+    const body = await response.json();
+    return body;
   }
+  else {
+    const body = await response.json();
+    console.log("Error removing friend ", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 }
 
 
 export async function blockUser(id) {
-  try {
-    if (!id) throw "invitation id is NULL";
+  // try {
+  // if (!id) throw "invitation id is NULL";
 
-    const response = await fetch(`${endpoint}/relationships/block/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ "user_id": id })
-    })
-    if (response.ok) {
-      console.log("block user succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error blocking user ", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
+  const response = await fetch(`${endpoint}/relationships/block/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ "user_id": id })
+  })
+  if (response.ok) {
+    console.log("block user succefully");
+    const body = await response.json();
+    return body;
   }
+  else {
+    const body = await response.json();
+    console.log("Error blocking user ", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 }
 
 export async function unblockUser(id) {
-  try {
-    if (!id) throw "invitation id is NULL";
+  // try {
+  // if (!id) throw "invitation id is NULL";
 
-    const response = await fetch(`${endpoint}/relationships/unblock/`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ "block_id": id })
-    })
-    if (response.ok) {
-      console.log("unblock user succefully");
-      const body = await response.json();
-      return body;
-    }
-    else {
-      const body = await response.json();
-      console.log("Error unblock user ", body.message);
-    }
-  } catch (error) {
-    console.log("error", error);
+  const response = await fetch(`${endpoint}/relationships/unblock/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ "block_id": id })
+  })
+  if (response.ok) {
+    console.log("unblock user succefully");
+    const body = await response.json();
+    return body;
   }
+  else {
+    const body = await response.json();
+    console.log("Error unblock user ", body.message);
+    throw body;
+  }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
+}
+
+function handleError(err) {
+  const Errors = [];
+  console.error("err", err);
+  if (err.message) Errors.push(err.message);
+  else if (err.status === 403) Errors.push("Internal Error");
+  else if (typeof err == "object") {
+    Object.keys(err).forEach((key) => {
+      if (typeof err[key] === "string") Errors.push(err[key]);
+      else if (err[key].length && typeof err[key][0] === "string")
+        err[key].forEach(elem => Errors.push(`${elem} (${key})`))
+      else Errors.push(key);
+    });
+  }
+  Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
+  if (['9999', '9998'].includes(err.error_code)) Ura.rmCookie("id_key")
+  return (err.status == 403);
+}
+
+const websocketApi = "http://localhost:8001"
+let webSocket = null;
+
+let Events = {
+
+};
+
+function getSocket(type, handler) {
+
+
+  if (!webSocket) {
+    webSocket = new WebSocket(`${websocketApi}/ws/messaging/`);;
+    webSocket.onopen = (event) => {
+      console.log("WebSocket connection established.");
+    };
+
+    webSocket.onmessage = (event) => {
+      console.log("Message from server:", event.data);
+      const data = JSON.parse(event.data);
+
+      if (data['type'] === type && Events[type]) {
+        Events[type](data)
+      }
+      // if (data['type'] === "friendship_received") {
+      //   Ura.create(<Toast message={"new invitation recieved"} delay={1} />)
+      //   handler(data["user_id"]);
+      // }
+    };
+
+    webSocket.onclose = (event) => {
+      console.log('WebSocket connection closed');
+      Events = {};
+    };
+  }
+  else
+    console.log("socker already exists");
+  if (type && handler) Events[type] = handler;
+  return webSocket;
+};
+
+function setUrl(path) {
+  window.location.pathname = path
 }
 
 const api = {
@@ -440,8 +520,14 @@ const api = {
   inviteFriend,
   acceptInvitation,
   refuseInvitation,
+  unFriend,
+  unblockUser,
+  blockUser,
   cancelInvitation,
-  getUsersById
+  getUsersById,
+  handleError,
+  setUrl,
+  getSocket
 }
 
 export default api

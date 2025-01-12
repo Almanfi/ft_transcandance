@@ -4,23 +4,25 @@ import Navbar from "../../components/Navbar/Navbar.js";
 function Home() {
   const [render] = Ura.init();
   return render(() => (
-    <div className="home" >
-      <Navbar />
-      <div id="center">
-        <h1>
-          Join Your <b>Friends</b>
-        </h1>
-        <h1>and</h1>
-        <h1>
-          <o>Beat</o> them
-        </h1>
+    <root>
+      <div className="home" >
+        <Navbar />
+        <div id="center">
+          <h1>
+            Join Your <b>Friends</b>
+          </h1>
+          <h1>and</h1>
+          <h1>
+            <o>Beat</o> them
+          </h1>
+        </div>
+        <div id="bottom">
+          <button onclick={() => Ura.navigate("/user")}>
+            <h3>Enter the Arena</h3>
+          </button>
+        </div>
       </div>
-      <div id="bottom">
-        <button onclick={() => Ura.navigate("/user")}>
-          <h3>Enter the Arena</h3>
-        </button>
-      </div>
-    </div>
+    </root>
   ));
 }
 

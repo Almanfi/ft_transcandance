@@ -5,7 +5,7 @@ function Toast({ message, delay }) {
 
   return render(() => (
     <root>
-      <div className="utils-toast" style={{ animationDelay: `${delay}s`, }}>
+      <div className="utils-toast" style={{ animationDelay: `${delay}s`, backgroundColor: "red" }}>
         <h4>Error: {message}</h4>
       </div>
     </root>

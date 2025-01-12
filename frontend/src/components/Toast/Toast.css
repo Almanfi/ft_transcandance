@@ -4,7 +4,7 @@
   left: 50%;
   transform: translateX(-50%); /* Center horizontally */
   top: -50px; /* Initially above the viewport */
-  background-color: red; /* Red background */
+   /* Red background */
   color: white; /* White text color */
   padding: 10px;
   border-radius: 5px;

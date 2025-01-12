@@ -12,54 +12,39 @@ function Login() {
 
   const logUser = async (e) => {
     e.preventDefault();
-    const Errors = [];
+    try {
 
-    const inputSection = document.querySelector(".login #center #input-section");
-    const inputs = inputSection.querySelectorAll("input");
-    const data = {};
-    inputs.forEach((input) => {
-      if (input.value.length) data[input.name] = input.value
-      else Errors.push(`empty ${input.name} field`);
-    });
+      const inputSection = document.querySelector(".login #center #input-section");
+      const inputs = inputSection.querySelectorAll("input");
 
-    if (!Errors.length) {
+      const data = {};
+      inputs.forEach((input) => {
+        if (input.value.length) data[input.name] = input.value
+        else throw `empty ${input.name} field`;
+      });
       console.log("log with ", data);
+      const res = await api.login(data);
+      // const webSocket = api.getSocket();
+      console.log("login response", res);
+      // console.log("socket response", webSocket);
 
-      try {
-        const res = await api.login(data);
-        console.log("login response");
-        // console.table(res)
-        // res = await api.getUser();
-        /*
-        display_name, firstname, id
-        lastname, profile_picture, username
-        */
-        // Ura.store.set("user", JSON.stringify(res));
-        Ura.navigate("/home");
-      } catch (err) {
-        console.log("err", err);
-        if (err.message) Errors.push(err.message);
-        else if (typeof err == "object") {
-          Object.keys(err).forEach((key) => {
-            if (typeof err[key] === "string") Errors.push(err[key]);
-            else if (err[key].length && typeof err[key][0] === "string")
-              err[key].forEach(elem => Errors.push(`${elem} (${key})`))
-            else Errors.push(key);
-          });
-        }
-      }
-    }
-    console.log("errors:", Errors);
-
-    if (Errors.length) {
-      Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
-      return;
+      const res0 = await api.getUser();
+      Ura.store.set("id", res0.id);
+      // console.table(res)
+      // res = await api.getUser();
+      /*
+      display_name, firstname, id
+      lastname, profile_picture, username
+      */
+      // Ura.store.set("user", JSON.stringify(res));
+      Ura.navigate("/home");
+    } catch (err) {
+      api.handleError(err);
     }
   };
 
-
   return render(() => (
-    <>
+    <root>
       <Navbar />
       <form className="login" onsubmit={logUser}>
         <div id="center">
@@ -78,7 +63,7 @@ function Login() {
           </div>
         </div>
       </form>
-    </>
+    </root>
   ));
 }
 

@@ -107,29 +107,33 @@ blocks: blocked
 */
 
 create("invite friend").onclick = async () => {
+  console.log("invite friend:", input_value);
   const res = await api.inviteFriend(input_value)
-  console.log("invite friend:", res);
+  console.log("res:", res);
 }
 
 create("accept invitation").onclick = async () => {
+  console.log("accept invitation", input_value);
   const res = await api.acceptInvitation(input_value);
-  console.log("accept invitation", res);
+  console.log("res:", res);
 }
 
 create("refuse invitation").onclick = async () => {
+  console.log("refuse invitation", input_value);
   const res = await api.refuseInvitation(input_value);
-  console.log("refuse invitation", res);
+  console.log("res:", res);
 }
 
 create("cancel invitation").onclick = async () => {
+  console.log("cancel invitation", input_value);
   const res = await api.cancelInvitation(input_value);
-  console.log("cancel invitation", res);
+  console.log("res:", res);
 }
 
 create("get user by id").onclick = async () => {
   if (!input_value || !input_value.length) console.error("check input");
   else {
-    const res = await api.getUserById([input_value])
+    const res = await api.getUsersById([input_value])
     console.log(res);
   }
 }

@@ -84,7 +84,7 @@ function Signup() {
     Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
   }
   return render(() => (
-    <>
+    <root>
       <Navbar />
       <form className="signup" onsubmit={createUser}>
         <div id="center">
@@ -112,7 +112,7 @@ function Signup() {
           </div>
         </div>
       </form>
-    </>
+    </root>
   ));
 }
 

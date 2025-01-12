@@ -162,6 +162,7 @@ function setProps(vdom) {
 }
 
 let ExecStack = [];
+let GlobalVDOM = null;
 
 function createDOM(vdom): VDOM {
   // console.log(vdom);
@@ -358,9 +359,14 @@ function reconciliate(prev: VDOM, next: VDOM) {
     if (child1 && child2) {
       reconciliate(child1 as VDOM, child2 as VDOM);
     } else if (!child1 && child2) {
+      // console.log("prev:", prev);
+      // console.log("next:", next);
+      // console.log("child2:", child2);
       execute(CREATE, child2 as VDOM);
-      prevs.push(child2);
-      prev.dom.appendChild((child2 as VDOM).dom);
+      if (child2.dom && prev.dom) {
+        prevs.push(child2);
+        prev.dom.appendChild((child2 as VDOM).dom);
+      }
     } else if (child1 && !child2) {
       execute(REMOVE, child1 as VDOM);
       prevs.splice(i, 1);
@@ -369,14 +375,19 @@ function reconciliate(prev: VDOM, next: VDOM) {
   }
 }
 
-let GlobalVDOM = null;
 function display(vdom: VDOM) {
   // console.log("display ", vdom);
+  if (GlobalVDOM) {
+    console.warn("global vdom exists");
+    console.log("old:", GlobalVDOM);
+    console.log("new:", vdom);
+  }
   if (GlobalVDOM !== null) reconciliate(GlobalVDOM, vdom);
   else {
     execute(CREATE, vdom);
     GlobalVDOM = vdom;
   }
+  return GlobalVDOM
   // ExecStack.forEach(event => event());
   // ExecStack = [];
 }
@@ -397,9 +408,7 @@ function init() {
 
     const getter = () => states[stateIndex];
     const setter = (newValue) => {
-      // console.log("call setter", deepEqual(states[stateIndex], newValue));
       if (!deepEqual(states[stateIndex], newValue)) {
-        // console.log("call update for", newValue);
         states[stateIndex] = newValue;
         updateState();
       }
@@ -414,10 +423,7 @@ function init() {
     const getter = () => states[stateIndex];
     const setter = (newValue) => {
       states[stateIndex] = newValue;
-      // updateState();
-      const newVDOM = <View />;
-      if (vdom !== null) execute(REPLACE, vdom, newVDOM);
-      else vdom = newVDOM;
+      updateState();
     };
     return [getter, setter];
   };
@@ -510,8 +516,7 @@ function normalizePath(path) {
   return path;
 }
 
-function getQueries()
-{
+function getQueries() {
   const res = {};
   const urlParams = new URLSearchParams(window.location.search);
   for (const [key, value] of urlParams) {
@@ -531,14 +536,12 @@ function refresh(params = null) {
   const RouteConfig = getRoute(path);
 
   return display(
-    <root >
-      {RouteConfig(params)}
-    </root>
+    <RouteConfig props={params} />
   );
 }
 
 function navigate(route, params = {}) {
-  
+
   // route = route.split("?")[0];
   route = normalizePath(route);
   console.log("navigate to", route, "with", params);
@@ -586,8 +589,15 @@ async function loadJSFiles(routes, base) {
 
 function setEventListeners() {
   // window.addEventListener("hashchange", () => Ura.refresh());
-  window.addEventListener("DOMContentLoaded", () => Ura.refresh());
-  window.addEventListener("popstate", () => Ura.refresh());
+  window.addEventListener("DOMContentLoaded", () => {
+    // console.error("load dom");
+
+    Ura.refresh()
+  });
+  window.addEventListener("popstate", () => {
+    console.error("popstate");
+    Ura.refresh()
+  });
   // window.addEventListener("storage", (event) => {
   //   if (event.key === 'ura-store') {
   //     // refresh();
@@ -765,16 +775,21 @@ function rmCookie(name, path = "/", domain) {
     document.cookie = `${name}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   }
   window.location.reload();
+  clearGlobal();
 }
 
+// @ts-ignore
+window.seeTree = function () {
+  console.log(GlobalVDOM);
+};
 
 const Ura = {
-  // store: {
-  //   set: setGlobal,
-  //   get: getGlobal,
-  //   remove: rmGlobal,
-  //   clear: clearGlobal
-  // },
+  store: {
+    set: setGlobal,
+    get: getGlobal,
+    remove: rmGlobal,
+    clear: clearGlobal
+  },
   e,
   fr,
   setRoute,

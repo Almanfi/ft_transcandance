@@ -24,6 +24,7 @@
     [ ] match making
     [ ] friend
     [ ] in friend page if something failed go to home page
+    [ ] test Toast for small screens
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

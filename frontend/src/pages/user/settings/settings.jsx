@@ -1,5 +1,5 @@
 import Ura from 'ura';
-import Input from '../../../components/Input/Input.jsx';
+import Input from '../../../components/Input/Input.js';
 import api from '../../../services/api.js';
 
 function Settings(props = {}) {

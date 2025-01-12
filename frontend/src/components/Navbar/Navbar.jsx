@@ -25,28 +25,12 @@ function Navbar() {
     const value = e.target.value;
     if (value.length === 0) setList([]);
     else {
-      const Errors = [];
       try {
         const res = await api.searchUser(value);
         console.log("search respone", res);
         setList(res);
       } catch (err) {
-        console.log("err", err);
-        if (err.message) Errors.push(err.message);
-        else if (typeof err == "object") {
-          Object.keys(err).forEach((key) => {
-            if (typeof err[key] === "string") Errors.push(err[key]);
-            else if (err[key].length && typeof err[key][0] === "string")
-              err[key].forEach(elem => Errors.push(`${elem} (${key})`))
-            else Errors.push(key);
-          });
-        }
-      }
-      console.log("errors:", Errors);
-
-      if (Errors.length) {
-        Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />))
-        return;
+        api.handleError(err)
       }
     }
   }
