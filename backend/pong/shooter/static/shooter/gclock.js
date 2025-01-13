@@ -81,7 +81,6 @@ export class gameClock {
         }
         this.setFrameTime();
         rollBack(this.startTime);
-        // handleInputs(this.msPassed, this.msPrev);
         animate(this.msPassed, this.msPrev);
         this.excessTime = 0;
         this.msPrev = this.msNow - this.excessTime;

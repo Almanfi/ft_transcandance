@@ -181,15 +181,19 @@ export class KeyControls extends Controls {
     }
 
     findPlayerMove(): Move {
-        this.move.x = <number>(<unknown>this.Wkey.hold) - <number>(<unknown>this.Skey.hold);
-        this.move.y = <number>(<unknown>this.Dkey.hold) - <number>(<unknown>this.Akey.hold);
-        return this.move;
+        let move: Move = {
+            x: <number>(<unknown>this.Wkey.hold) - <number>(<unknown>this.Skey.hold),
+            y: <number>(<unknown>this.Dkey.hold) - <number>(<unknown>this.Akey.hold)
+        };
+        return move;
     }
 
     findPlayerAction(): GameAction {
-        this.action.f = this.Lclick.hold;
-        this.action.d = this.shift.hold;
-        return this.action;
+        let action: GameAction = {
+            f: this.Lclick.hold,
+            d: this.shift.hold,
+        }
+        return action;
     }
 
     findPlayerAngle(playerPosition: THREE.Vector3): {angle: number, direction: THREE.Vector3} {
@@ -209,11 +213,11 @@ export class KeyControls extends Controls {
            }
            this.direction.set(dx, 0, dz).normalize();
         }
-        return {angle: this.angle, direction: this.direction};
+        return {angle: this.angle, direction: this.direction.clone()};
     }
 
     onMouseMove( event ) {
-        this.handled = false;
+        // this.handled = false;
         event.preventDefault();
     
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;

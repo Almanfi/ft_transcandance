@@ -61,10 +61,12 @@ const player = new Player(new THREE.Vector3(0, 0, 0), playerBulletM);
 player.addToScene(scene);
 player.add(camera);
 player.addBulletSound(bulletSound);
+player.name = "player";
 const foeBulletM = new PlayersBulletManager(scene);
 const foe = new Player(new THREE.Vector3(0, 0, 0), foeBulletM);
 foe.addToScene(scene);
 foe.addBulletSound(bulletSound);
+foe.name = "foe";
 const planeFacingVector = getCameraDir(camera);
 player.setPlaneVector(planeFacingVector);
 foe.setPlaneVector(planeFacingVector);
@@ -117,10 +119,12 @@ function rollBack(startTime) {
         const frameSpan = nextFrameTime - lastFrameTime;
         player._findPositonInFrame(lastFrameIndex); // underscore methods are unsafe
         foe.savePlayerData(lastFrameIndex);
-        foe.rollBack(recievedData, lastFrameTime, actionTime, lastFrameIndex);
-        // console.log('after rolling back: ', foe.position);
-        connection.next();
-        // console.log('next received data order ', connection.recievedDataOrder);
+        if (connection.hasRecievedData()) {
+            foe.rollBack(recievedData, lastFrameTime, actionTime, lastFrameIndex);
+            // console.log('after rolling back: ', foe.position);
+            connection.next();
+            // console.log('next received data order ', connection.recievedDataOrder);        
+        }
         let lastActionTime = actionTime;
         while (connection.hasRecievedData()) {
             // console.log('new data');
@@ -187,6 +191,7 @@ var animate = (span, timeStamp) => {
     player.update(span, timeStamp, timeStamp);
     playerBulletM.update(timeStamp);
     if (keyControls.checkforNewInputs()) {
+        console.log('new inputs handled');
         // console.log("player pos", JSON.stringify(player.oldPosition));
         // console.log("player move vect ", JSON.stringify(player.movementVector));
         // console.log("plane vector: ", JSON.stringify(foe.planeFacingVector));
@@ -210,7 +215,7 @@ var animate = (span, timeStamp) => {
     // turretBulletManager.checkCollision(foe, span);
     // playerBulletManager.checkCollision(foe, span);
     // foeBulletManager.checkCollision(player, span);
-    console.log("player pos", player.position, "foe pos", foe.position);
+    // console.log("player pos", player.position, "foe pos", foe.position);
 };
 function handleInputs(span, inputTimeStamp) {
     // let recievedData = connection.getRecievedDataOrdered();
@@ -233,7 +238,7 @@ function handleInputs(span, inputTimeStamp) {
     let inputs = player.inputs.set(move, angle, direction, action, inputTimeStamp);
     let data = inputs.serializeForSend();
     connection.send(JSON.stringify(data));
-    // console.log('sent data: ', data);
+    console.log('sent data: ', data);
 }
 ;
 function startGame(timeStamp) {

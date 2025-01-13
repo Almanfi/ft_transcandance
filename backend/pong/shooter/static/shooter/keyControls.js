@@ -57,14 +57,18 @@ export class KeyControls extends Controls {
         this.handled = true;
     }
     findPlayerMove() {
-        this.move.x = this.Wkey.hold - this.Skey.hold;
-        this.move.y = this.Dkey.hold - this.Akey.hold;
-        return this.move;
+        let move = {
+            x: this.Wkey.hold - this.Skey.hold,
+            y: this.Dkey.hold - this.Akey.hold
+        };
+        return move;
     }
     findPlayerAction() {
-        this.action.f = this.Lclick.hold;
-        this.action.d = this.shift.hold;
-        return this.action;
+        let action = {
+            f: this.Lclick.hold,
+            d: this.shift.hold,
+        };
+        return action;
     }
     findPlayerAngle(playerPosition) {
         this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -81,10 +85,10 @@ export class KeyControls extends Controls {
             }
             this.direction.set(dx, 0, dz).normalize();
         }
-        return { angle: this.angle, direction: this.direction };
+        return { angle: this.angle, direction: this.direction.clone() };
     }
     onMouseMove(event) {
-        this.handled = false;
+        // this.handled = false;
         event.preventDefault();
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;

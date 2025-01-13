@@ -109,6 +109,7 @@ export class Player extends THREE.Object3D {
         this.movementVector = new THREE.Vector3();
         this.actions = new Map();
         this.setBulletManager(bulletManager);
+        this.positionBackup = this.position.clone();
     }
     ;
     reset() {
@@ -117,6 +118,7 @@ export class Player extends THREE.Object3D {
         this.lastFire = 0;
         this.position.set(0, 0, 0);
         this.oldPosition.set(0, 0, 0);
+        this.positionBackup.copy(this.position);
     }
     addToScene(scene) {
         this.scene = scene;
@@ -241,6 +243,11 @@ export class Player extends THREE.Object3D {
         // if (this.fired) {
         //     console.log(`timeStamp: ${timeStamp}, frameTime: ${actionTime}`);
         // }
+        if (!this.position.equals(this.positionBackup)) {
+            this.positionBackup.copy(this.position);
+            console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
+            console.log(` -position of ${this.name} at time: ${timeStamp + timeS} is: `, JSON.stringify(this.position));
+        }
     }
     savePlayerData(frameIndex) {
         // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();

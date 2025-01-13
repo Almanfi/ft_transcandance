@@ -87,12 +87,13 @@ const player = new Player(new THREE.Vector3(0, 0, 0), playerBulletM);
 player.addToScene(scene);
 player.add(camera);
 player.addBulletSound(bulletSound);
+player.name = "player";
 
 const foeBulletM = new PlayersBulletManager(scene);
 const foe = new Player(new THREE.Vector3(0, 0, 0), foeBulletM);
 foe.addToScene(scene);
 foe.addBulletSound(bulletSound);
-
+foe.name = "foe";
 
 const planeFacingVector = getCameraDir(camera);
 player.setPlaneVector(planeFacingVector);
@@ -157,10 +158,12 @@ function rollBack(startTime: number) {
         player._findPositonInFrame(lastFrameIndex);// underscore methods are unsafe
         
         foe.savePlayerData(lastFrameIndex);
-        foe.rollBack(recievedData as string, lastFrameTime, actionTime, lastFrameIndex);
-        // console.log('after rolling back: ', foe.position);
-        connection.next();
-        // console.log('next received data order ', connection.recievedDataOrder);
+        if (connection.hasRecievedData()) {
+            foe.rollBack(recievedData as string, lastFrameTime, actionTime, lastFrameIndex);
+            // console.log('after rolling back: ', foe.position);
+            connection.next();
+            // console.log('next received data order ', connection.recievedDataOrder);        
+        }
 
         let lastActionTime = actionTime;
         while (connection.hasRecievedData()) {
@@ -237,6 +240,7 @@ var animate = (span: number, timeStamp: number) => {
     playerBulletM.update(timeStamp);
 
     if (keyControls.checkforNewInputs()) {
+        console.log('new inputs handled');
         // console.log("player pos", JSON.stringify(player.oldPosition));
         // console.log("player move vect ", JSON.stringify(player.movementVector));
         // console.log("plane vector: ", JSON.stringify(foe.planeFacingVector));
@@ -268,7 +272,7 @@ var animate = (span: number, timeStamp: number) => {
     // foeBulletManager.checkCollision(player, span);
     
 
-    console.log("player pos", player.position, "foe pos", foe.position);
+    // console.log("player pos", player.position, "foe pos", foe.position);
 }
 
 function handleInputs(span: number, inputTimeStamp: number) {
@@ -296,7 +300,7 @@ function handleInputs(span: number, inputTimeStamp: number) {
                     direction, action, inputTimeStamp);
     let data = inputs.serializeForSend();
     connection.send(JSON.stringify(data));
-    // console.log('sent data: ', data);
+    console.log('sent data: ', data);
 };
 
 function startGame(timeStamp) {
