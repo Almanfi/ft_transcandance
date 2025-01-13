@@ -44,6 +44,8 @@ export class Inputs {
         return this.serializedData;
     }
     deserialize(data) {
+        if (!data)
+            return;
         this.move = { x: this.numberDecode(data[0]), y: this.numberDecode(data[1]) };
         let actionComb = Number(data[2]);
         this.action.f = Boolean(actionComb >>> 0 & 1);
@@ -100,7 +102,7 @@ export class Player extends THREE.Object3D {
         this.scale.set(scale, scale, scale);
         this.speedRate = 2;
         this.fireRate = 100;
-        this.bulletDelay = 50;
+        this.bulletDelay = 100;
         this.lastFire = 0;
         this.fired = false;
         this.inputs = new Inputs();

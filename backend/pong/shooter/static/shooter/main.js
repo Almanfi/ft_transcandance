@@ -10,8 +10,8 @@ import { Connection } from './connection.js';
 function initThreeJS() {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200000);
-    camera.position.set(0, 100000, 0);
-    // camera.position.set(20, 150, -10);
+    // camera.position.set(0, 100000, 0);
+    camera.position.set(20, 100000, -10);
     camera.lookAt(0, 0, 0);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -116,37 +116,39 @@ function rollBack(startTime) {
     while (lastFrameIndex !== finalFrameIndex) {
         let nextFrameTime = gClock.getFrameTime(lastFrameIndex + 1);
         // console.log(`rolling back from ${lastFrameTime} to ${nextFrameTime}`);
+        let lastActionTime = lastFrameTime;
         const frameSpan = nextFrameTime - lastFrameTime;
         player._findPositonInFrame(lastFrameIndex); // underscore methods are unsafe
         foe.savePlayerData(lastFrameIndex);
         if (connection.hasRecievedData()) {
             foe.rollBack(recievedData, lastFrameTime, actionTime, lastFrameIndex);
+            lastActionTime = actionTime;
             // console.log('after rolling back: ', foe.position);
             connection.next();
-            // console.log('next received data order ', connection.recievedDataOrder);        
+            console.log('next received data order ', connection.recievedDataOrder);
         }
-        let lastActionTime = actionTime;
         while (connection.hasRecievedData()) {
-            // console.log('new data');
+            console.log('new data');
             recievedData = connection.getRecievedDataOrdered();
             actionTime = Inputs.findTimeStamp(recievedData);
             if (actionTime >= nextFrameTime)
                 break;
-            // console.log('new data:  start handling')
+            console.log('new data:  start handling');
             foe.saveRollBackData(lastFrameIndex);
             foe.rollbackNextAction(recievedData, lastActionTime, actionTime);
             // console.log('after rolling back: ', foe.position);
             lastActionTime = actionTime;
             connection.next();
             // console.log('next received data order ', connection.recievedDataOrder);
-            // console.log('new data:  done handling')
+            console.log('new data:  done handling');
         }
         if (lastActionTime < nextFrameTime) {
             // console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
             let timeS = nextFrameTime - lastActionTime;
             foe.saveRollBackData(lastFrameIndex);
-            foe.update(timeS, lastActionTime, lastFrameTime);
-            // console.log('finish frame update: ', JSON.stringify(foe.position));
+            console.log('before frame update: ', JSON.stringify(foe.position));
+            foe.update(timeS, lastActionTime, 0);
+            console.log('finish frame update: ', JSON.stringify(foe.position));
             // console.log("foe move vect ", JSON.stringify(foe.movementVector));
             // console.log(`after finishing action at time : ${nextFrameTime} position: ${JSON.stringify(foe.position)}`);
         }

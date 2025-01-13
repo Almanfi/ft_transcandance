@@ -88,7 +88,7 @@ export class KeyControls extends Controls {
         return { angle: this.angle, direction: this.direction.clone() };
     }
     onMouseMove(event) {
-        // this.handled = false;
+        this.handled = false;
         event.preventDefault();
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;

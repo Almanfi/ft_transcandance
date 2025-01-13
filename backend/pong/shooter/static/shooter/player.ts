@@ -64,6 +64,8 @@ export class Inputs {
     }
 
     deserialize(data: string) {
+        if (!data)
+            return;
         this.move = {x: this.numberDecode(data[0]) , y: this.numberDecode(data[1])};
         let actionComb = Number(data[2]);
         this.action.f = Boolean(actionComb >>> 0 & 1);
@@ -158,7 +160,7 @@ export class Player extends THREE.Object3D {
         this.speedRate = 2;
 
         this.fireRate = 100;
-        this.bulletDelay = 50;
+        this.bulletDelay = 100;
         this.lastFire = 0;
         this.fired = false;
 
@@ -292,7 +294,7 @@ export class Player extends THREE.Object3D {
         this.core.rotateY(0.1);
         // this.cannon.head.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.05);
         this.cannon.setRotationFromAxisAngle(new THREE.Vector3(0,1,0), this.inputs.angle);
-        
+
         this.movementVector.copy(this.inputs.calcMovementVector(projectionOnPlane));
 
         this.oldPosition.copy(this.position);
