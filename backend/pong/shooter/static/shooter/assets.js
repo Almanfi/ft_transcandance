@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 export function initPlane() {
-    const geometry = new THREE.PlaneGeometry(19000, 12000);
+    const geometry = new THREE.PlaneGeometry(190000, 120000);
     const material = new THREE.MeshBasicMaterial({ color: 0xcccccd, side: THREE.DoubleSide });
     const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
@@ -16,7 +16,7 @@ function applyPlaneRotation(vect, angle) {
 export class Turret extends THREE.Mesh {
     constructor(bulletManager, props = {}) {
         let color = props.color || 0x000000;
-        let radius = props.radius || 30;
+        let radius = props.radius || 300;
         console.log('Turret props: ', props);
         const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshPhysicalMaterial({ color });
@@ -143,12 +143,12 @@ class ABullet extends THREE.Mesh {
 }
 export class TurretBullet extends ABullet {
     constructor() {
-        let radius = 70 * 1.5;
+        let radius = 700 * 1.5;
         const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshBasicMaterial();
         super(geometry, material);
         this.radius = radius;
-        this.speedRate = 4;
+        this.speedRate = 30;
         this.initPosition = new THREE.Vector3();
     }
     set(color, position, speed, spawnTime) {
@@ -186,12 +186,12 @@ export class TurretBullet extends ABullet {
 }
 export class PlayerBullet extends ABullet {
     constructor() {
-        let radius = 70;
+        let radius = 700;
         const geometry = new THREE.CapsuleGeometry(radius, 2, 2, 4);
         const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.17, emissive: 0xeeeeee, emissiveIntensity: 1 });
         super(geometry, material);
         this.radius = radius;
-        this.speedRate = 6;
+        this.speedRate = 40;
         this.initPosition = new THREE.Vector3();
     }
     set(color, position, speed, angle, spawnTime) {

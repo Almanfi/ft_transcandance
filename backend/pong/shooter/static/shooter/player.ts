@@ -91,8 +91,8 @@ export class Inputs {
         speedVect.normalize();
         // speedVect.x = parseFloat(speedVect.x.toFixed(1));
         // speedVect.z = parseFloat(speedVect.z.toFixed(1));
-        speedVect.x = Math.sign(speedVect.x) * Math.round(speedVect.x * speedVect.x * 10);
-        speedVect.z = Math.sign(speedVect.z) * Math.round(speedVect.z * speedVect.z * 10);
+        speedVect.x = Math.round(speedVect.x * 10);
+        speedVect.z = Math.round(speedVect.z * 10);
         return speedVect;
     }
 
@@ -142,7 +142,7 @@ export class Player extends THREE.Object3D {
     constructor(position: THREE.Vector3,
         bulletManager: PlayersBulletManager) {
         super();
-        let size = 70;
+        let size = 700;
         this.radius = size * 1.5;
         var core = createCore(size);
         var cannon = createCannon(size);
@@ -282,7 +282,7 @@ export class Player extends THREE.Object3D {
     }
     
     update(timeS: number, timeStamp: number, actionTime: number) {
-        let speed = this.speedRate * timeS / 10;
+        let speed = this.speedRate * timeS;
         // let speed = timeS
         const projectionOnPlane = this.planeFacingVector;
         
@@ -297,6 +297,7 @@ export class Player extends THREE.Object3D {
         // console.log(`movement vector: of ${this.name}`, this.movementVector);
         // this.movementVector.multiplyScalar(speed);
 
+        // console.log(`movement vector: `, JSON.stringify(this.movementVector));
 
         this.position.addScaledVector(this.movementVector, speed);
         // this.floorPosition(this.position);

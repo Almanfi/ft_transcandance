@@ -14,8 +14,8 @@ function initThreeJS(): { scene: THREE.Scene,
         renderer: THREE.WebGLRenderer } {
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 50000 );
-    camera.position.set(0, 10000, 0);
+    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 200000 );
+    camera.position.set(0, 100000, 0);
     // camera.position.set(20, 150, -10);
     camera.lookAt(0,0,0);
 
