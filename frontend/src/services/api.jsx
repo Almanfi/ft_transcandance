@@ -32,7 +32,6 @@ async function login(user) {
     credentials: "include",
     body: JSON.stringify(user),
   });
-  Ura.store.set("id", (await getUser()).id);
   if (response.ok) {
   } else {
     const body = await response.json();
@@ -57,9 +56,7 @@ async function login(user) {
  */
 
 async function getUser() {
-  const response = await fetch(`${endpoint}/users/`, {
-    credentials: "include",
-  });
+  const response = await fetch(`${endpoint}/users/`, {credentials: "include"});
   if (response.ok) {
     const body = await response.json();
     return body;
@@ -463,7 +460,7 @@ function sendMessage(dest, message) {
   }
 }
 
-const getMessages = async (id) => {
+const retrieveMessages = async (id) => {
   try {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
       console.log("Getting messages from", id);
@@ -511,7 +508,7 @@ const api = {
   handleError,
   openSocket,
   sendMessage,
-  getMessages,
+  retrieveMessages,
 };
 
 export default api;

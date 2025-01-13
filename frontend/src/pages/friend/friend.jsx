@@ -7,16 +7,16 @@ import Play from '../../components/icons/Play/Play.js';
 import Chat from '../../components/icons/Chat/Chat.js';
 import api from '../../services/api.js';
 import Toast from '../../components/Toast/Toast.js';
+import { GlobalUser } from '../../services/store.js';
 
+const [getter, setter] = GlobalUser;
+// TODO: check if id is not for current user
 function Friend() {
   const { id } = Ura.getQueries() || {};
   if (!id) {
     Ura.create(<Toast message={"rendering friend page"} delay={0} />)
     return Ura.navigate("/home");
   }
-  else if (id === Ura.store.get("id"))
-    return Ura.navigate("/user");
-
 
   const [render, State] = Ura.init();
   const [getList, setList] = State([]);
@@ -26,6 +26,7 @@ function Friend() {
     invited: [],
     invites: []
   });
+
 
   const [getAction, setAction] = State("Add friend");
 
@@ -40,6 +41,7 @@ function Friend() {
   const fetchData = async () => {
     console.log("search for id", id);
     try {
+
       const res = await api.getUsersById([id]);
 
       if (res.length === 0) {

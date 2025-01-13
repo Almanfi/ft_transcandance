@@ -526,11 +526,18 @@ function getQueries() {
   return res;
 }
 
+function setQuery(key, value) {
+  const url = new URL(window.location.href);
+  const urlParams = url.searchParams;
+  if (value === null || value === undefined) urlParams.delete(key);
+  else urlParams.set(key, value);
+  window.history.replaceState({}, '', `${url.pathname}?${urlParams}`);
+}
+
+
 function refresh(params = null) {
   console.log("call refresh", params);
-
   if (navigate_handler) navigate_handler();
-
   let path = window.location.pathname || "*";
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
@@ -539,8 +546,6 @@ function refresh(params = null) {
 }
 
 function navigate(route, params = {}) {
-
-  // route = route.split("?")[0];
   route = normalizePath(route);
   console.log("navigate to", route, "with", params);
 
@@ -553,8 +558,6 @@ async function loadRoutes() {
   try {
     const response = await fetch("/pages/routes.json");
     const data = await response.json();
-    // console.log("data", data);
-
     return data;
   } catch (error) {
     console.error("Error loading routes.json:", error);
@@ -598,16 +601,11 @@ function setEventListeners() {
 
 function handleCSSUpdate(filename) {
   const path = normalizePath(filename);
-  // console.log("path:", path, "filename:", filename);
   let found = false;
-
   document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
     //@ts-ignore
     const linkUri = new URL(link.href).pathname;
-    // console.log("old", linkUri);
-
     if (linkUri === path) {
-      // console.log("found");
       found = true;
       const newLink = link.cloneNode();
       //@ts-ignore
@@ -616,11 +614,7 @@ function handleCSSUpdate(filename) {
       return;
     }
   });
-
-  if (!found) {
-    // console.log("CSS file not found in <link> tags. Adding it.");
-    loadCSS(path);
-  }
+  if (!found) loadCSS(path);
 }
 
 async function sync() {
@@ -666,24 +660,6 @@ async function sync() {
   };
 }
 
-// async function activate() {
-//   try {
-//     const data = await loadRoutes();
-//     const { routes, styles, base, type } = data;
-//     if (routes) await loadJSFiles(routes, base);
-//     loadCSSFiles(styles);
-//     setEventListeners();
-//     Ura.refresh();
-//     console.log(data);
-//     console.log(Ura.Routes);
-//     if (!type) console.error("type error");
-
-//     if (window.location.protocol == "http") sync();
-//   } catch (error) {
-//     console.error("Error loading resources:", error);
-//   }
-// }
-
 async function setStyles(list) {
   list.forEach(elem => {
     handleCSSUpdate(elem);
@@ -692,64 +668,9 @@ async function setStyles(list) {
 
 async function start() {
   setEventListeners();
-  // Ura.refresh();
   console.log(Ura.Routes);
   //@ts-ignore
   if (window.location.protocol == "http") sync();
-  else console.log("in dev mode");
-
-}
-
-// HTTP
-async function HTTP_Request(method, url, headers = {}, body) {
-  try {
-    const response = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json", ...headers },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    let responseData = null;
-    const contentType = response.headers.get("Content-Type");
-    if (contentType && contentType.includes("application/json")) responseData = await response.json();
-    else if (contentType && contentType.includes("text/")) responseData = await response.text();
-    else if (contentType) responseData = await response.blob();
-    return {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    };
-  } catch (error) {
-    throw error;
-  }
-}
-
-// API
-if (!localStorage.getItem('ura-store')) localStorage.setItem('ura-store', JSON.stringify({}));
-
-function setGlobal(name, value) {
-  let store = JSON.parse(localStorage.getItem('ura-store'));
-  if (!deepEqual(store[name], value)) {
-    store[name] = value;
-    localStorage.setItem('ura-store', JSON.stringify(store));
-  }
-}
-
-function getGlobal(name) {
-  let store = JSON.parse(localStorage.getItem('ura-store')) || {};
-  return store[name];
-}
-
-function rmGlobal(name) {
-  let store = JSON.parse(localStorage.getItem('ura-store')) || {};
-  if (store[name]) {
-    delete store[name];
-    localStorage.setItem('ura-store', JSON.stringify(store));
-  }
-}
-
-function clearGlobal() {
-  localStorage.setItem('ura-store', JSON.stringify({}));
 }
 
 function getCookie(name) {
@@ -764,8 +685,6 @@ function rmCookie(name, path = "/", domain) {
   } else {
     document.cookie = `${name}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   }
-  // window.location.reload();
-  clearGlobal();
 }
 
 // @ts-ignore
@@ -774,12 +693,6 @@ window.seeTree = function () {
 };
 
 const Ura = {
-  store: {
-    set: setGlobal,
-    get: getGlobal,
-    remove: rmGlobal,
-    clear: clearGlobal
-  },
   e,
   fr,
   setRoute,
@@ -803,7 +716,8 @@ const Ura = {
   getCookie,
   rmCookie,
   onNavigate,
-  getQueries
+  getQueries,
+  setQuery
 };
 
 export default Ura;

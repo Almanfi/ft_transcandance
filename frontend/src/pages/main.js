@@ -26,6 +26,7 @@ import Chat from "./chat/chat.js";
 import Friend from "./friend/friend.js";
 import Game from "./game/game.js";
 import api from "../services/api.js";
+import { GlobalUser } from "../services/store.js";
 // import Test from "./test/test.js";
 
 Ura.setStyles([
@@ -58,7 +59,7 @@ function Toast({ message, delay }) {
 }
 
 Ura.onNavigate(() => {
-  if (Ura.getCookie("id_key") && Ura.store.get("id")) {
+  if (Ura.getCookie("id_key")) {
     api.openSocket();
 
     api.setEvent("friendship_received", async (data) => {
@@ -79,7 +80,11 @@ Ura.onNavigate(() => {
     });
   }
   else {
+    const [getGlobal, setGlobal] = GlobalUser;
+
     Ura.rmCookie("id_key");
+    setGlobal(undefined);
+
     Ura.setRoutes({
       "*": Login,
       "/home": Home,
