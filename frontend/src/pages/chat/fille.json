@@ -1,0 +1,842 @@
+[
+  {
+    "id": "79aa7bcd-684d-43ce-90cd-734b77a5499b",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:10:01.682195Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "d360b9c4-2eb5-4a59-8528-b06ed5abe66c",
+    "sender": {
+      "id": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "firstname": "mohammed",
+      "lastname": "hrima",
+      "username": "mhrima",
+      "display_name": "yuliy",
+      "created_at": "2025-01-07T11:31:52.050825Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello2",
+    "timestamp": "2025-01-12T22:10:20.999296Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "bdd5a404-d984-40e4-8164-85f4a101093a",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:23.567600Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "18d8a16f-449e-4afb-8090-074d04649b4d",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:25.444468Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "b51c539f-b823-437f-a112-ae825972ee18",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:25.846637Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "039e6e82-b120-448b-8341-1e9705c02efe",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:26.351353Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "df1aed85-5dea-4681-ba45-3c0e456e4862",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:26.811212Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "5f00305a-97e2-4eed-8c11-b151e8392875",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:27.098938Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "55a2ed7b-a2e7-4ff1-80ff-16b5c98271cf",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:27.290866Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "d269dd21-825e-4fa3-885a-336ed8cda3e0",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:27.475139Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "3c8f413e-22dd-4376-9474-d91bc50f6186",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:27.682479Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "dd9f16db-44b6-4975-84b4-5902e18dac7c",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:27.847911Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "af0dcdb4-220f-4320-ae22-395be291340b",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:28.067763Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "04187bf5-038f-4199-a63f-2a6b3782a6f2",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:28.243069Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "8f015b47-7967-4c9f-bbab-f6f449563064",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:28.456941Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "29c269d5-8318-4dbc-ad43-7989a1e067e2",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:28.643301Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "63de8069-681b-475f-b5af-f5783d5c45a5",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:28.815098Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "9ecf6bb3-597e-4f08-a566-3c6c84fb12c6",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:29.008568Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "3d76ac14-5b05-4da4-9178-821d20b69a27",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:29.195930Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "41a34175-90cf-4365-901a-ae4a3b24223a",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:29.404145Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "ee0cdeea-65f6-4a6f-b50f-b3148786db92",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:29.550284Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "82406856-715b-4063-aaf1-2e63cdb65559",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:29.755171Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "478b7b82-42dc-4b52-b8a6-c3f08819e04e",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:29.919756Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "a9811c26-30d1-47f2-8fd2-c59c5f39a977",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:30.139475Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "5e78588a-a7c5-4eb6-aee1-3d221452093e",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:30.299414Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "edcd59b4-5f2c-43a0-bcf9-35b11b2ef3c0",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:30.503651Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "6fda0b36-2fec-47bd-b646-576a982cb141",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:30.692370Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  },
+  {
+    "id": "0f0d4536-eba9-4143-a305-a11187d29785",
+    "sender": {
+      "id": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "display_name": "sara_s",
+      "created_at": "2025-01-07T11:31:57.505998Z",
+      "profile_picture": "profile.jpg",
+      "oauth_user": false,
+      "oauth_username": null,
+      "status": "connected"
+    },
+    "content": "hello",
+    "timestamp": "2025-01-12T22:12:30.882471Z",
+    "read": false,
+    "relationship": {
+      "id": "de38a011-520c-4016-98c8-43ab8c694217",
+      "accepted": true,
+      "blocked": false,
+      "type": "friendship",
+      "from_user": "ef8ae6ca-e3cb-43a0-b4e2-87c818968572",
+      "to_user": "81491396-64e7-493e-b58f-64b67a5c5217",
+      "created_at": "2025-01-12T22:00:58.245638Z",
+      "updated_at": "2025-01-12T22:01:03.182050Z"
+    },
+    "game": null,
+    "type": "relationship"
+  }
+]

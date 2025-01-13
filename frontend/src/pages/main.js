@@ -25,9 +25,6 @@ import User from "./user/user.js";
 import Chat from "./chat/chat.js";
 import Friend from "./friend/friend.js";
 import Game from "./game/game.js";
-import Elem1 from "./elem1/elem1.js";
-import Elem0 from "./elem0/elem0.js";
-import Elem2 from "./elem2/elem2.js";
 import api from "../services/api.js";
 // import Test from "./test/test.js";
 
@@ -61,14 +58,16 @@ function Toast({ message, delay }) {
 }
 
 Ura.onNavigate(() => {
-  if (Ura.getCookie("id_key")) {
-    api.getSocket("friendship_received", async (data) => {
+  if (Ura.getCookie("id_key") && Ura.store.get("id")) {
+    api.openSocket();
+
+    api.setEvent("friendship_received", async (data) => {
       const res = await api.getUsersById([data.user_id]);
       console.log("get user", res);
       Ura.create(<Toast message={`new invitation from ${res[0].username}`} delay={1} />);
       Ura.refresh();
-    });
-    
+    })
+
     Ura.setRoutes({
       "*": Home,
       "/home": Home,
@@ -77,12 +76,10 @@ Ura.onNavigate(() => {
       "/friend": Friend,
       "/game": Game,
       "/friend": Friend,
-      // "/elem0": Elem0,
-      // "/elem1": Elem1,
-      // "/elem2": Elem2
     });
   }
   else {
+    Ura.rmCookie("id_key");
     Ura.setRoutes({
       "*": Login,
       "/home": Home,

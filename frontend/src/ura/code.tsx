@@ -535,9 +535,7 @@ function refresh(params = null) {
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
 
-  return display(
-    <RouteConfig props={params} />
-  );
+  return display(<RouteConfig props={params} />);
 }
 
 function navigate(route, params = {}) {
@@ -588,22 +586,14 @@ async function loadJSFiles(routes, base) {
 }
 
 function setEventListeners() {
-  // window.addEventListener("hashchange", () => Ura.refresh());
   window.addEventListener("DOMContentLoaded", () => {
-    // console.error("load dom");
-
+    console.error("load dom");
     Ura.refresh()
   });
   window.addEventListener("popstate", () => {
     console.error("popstate");
     Ura.refresh()
   });
-  // window.addEventListener("storage", (event) => {
-  //   if (event.key === 'ura-store') {
-  //     // refresh();
-  //     // window.location.reload();
-  //   }
-  // });
 }
 
 function handleCSSUpdate(filename) {
@@ -676,23 +666,23 @@ async function sync() {
   };
 }
 
-async function activate() {
-  try {
-    const data = await loadRoutes();
-    const { routes, styles, base, type } = data;
-    if (routes) await loadJSFiles(routes, base);
-    loadCSSFiles(styles);
-    setEventListeners();
-    Ura.refresh();
-    console.log(data);
-    console.log(Ura.Routes);
-    if (!type) console.error("type error");
+// async function activate() {
+//   try {
+//     const data = await loadRoutes();
+//     const { routes, styles, base, type } = data;
+//     if (routes) await loadJSFiles(routes, base);
+//     loadCSSFiles(styles);
+//     setEventListeners();
+//     Ura.refresh();
+//     console.log(data);
+//     console.log(Ura.Routes);
+//     if (!type) console.error("type error");
 
-    if (window.location.protocol == "http") sync();
-  } catch (error) {
-    console.error("Error loading resources:", error);
-  }
-}
+//     if (window.location.protocol == "http") sync();
+//   } catch (error) {
+//     console.error("Error loading resources:", error);
+//   }
+// }
 
 async function setStyles(list) {
   list.forEach(elem => {
@@ -702,7 +692,7 @@ async function setStyles(list) {
 
 async function start() {
   setEventListeners();
-  Ura.refresh();
+  // Ura.refresh();
   console.log(Ura.Routes);
   //@ts-ignore
   if (window.location.protocol == "http") sync();
@@ -774,7 +764,7 @@ function rmCookie(name, path = "/", domain) {
   } else {
     document.cookie = `${name}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   }
-  window.location.reload();
+  // window.location.reload();
   clearGlobal();
 }
 

@@ -1,18 +1,11 @@
 import Ura from 'ura';
 import Navbar from '../../components/Navbar/Navbar.js';
-import Swords from '../../components/Swords/Swords.js';
-import WinCup from '../../components/WinCup/WinCup.js';
-import Award from '../../components/Award/Award.js';
+import Swords from '../../components/icons/Swords/Swords.js';
+import WinCup from '../../components/icons/WinCup/WinCup.js';
+import Award from '../../components/icons/Award/Award.js';
 import Settings from './settings/settings.js';
 import api from '../../services/api.js';
-import Relations from './relations/relations.jsx';
-
-/*
-invites: sent invitations
-invited: received invitations
-friends: friends
-blocks: blocked
-*/
+import Relations from './relations/relations.js';
 
 function User() {
   const [render, State] = Ura.init();

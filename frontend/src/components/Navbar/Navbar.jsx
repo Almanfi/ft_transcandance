@@ -1,6 +1,5 @@
 import Ura from "ura";
-import Menu from "../Menu/Menu.js";
-import Toast from "../Toast/Toast.js";
+import Menu from "../icons/Menu/Menu.js";
 import api from "../../services/api.js";
 
 // import "./Navbar.css"
@@ -41,6 +40,10 @@ function Navbar() {
     Ura.navigate(`/friend?id=${data.id}`);
   }
 
+  const handleLogout = (e) => {
+    api.logout();
+  }
+
   return render(() => (
     <div className="navbar">
       <div id="logo" onclick={() => { Ura.navigate("/home") }}>
@@ -61,7 +64,7 @@ function Navbar() {
           style={{ display: Ura.getCookie("id_key") ? "none" : "block" }}>
           <h4>Sign up</h4>
         </button>
-        <button id="login-btn" onclick={() => Ura.rmCookie("id_key")}
+        <button id="login-btn" onclick={handleLogout}
           style={{ display: !Ura.getCookie("id_key") ? "none" : "block" }}>
           <h4>Logout</h4>
         </button>

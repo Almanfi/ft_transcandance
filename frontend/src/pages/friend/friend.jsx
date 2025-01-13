@@ -1,30 +1,22 @@
 import Ura from 'ura';
 import Navbar from '../../components/Navbar/Navbar.js';
-import Swords from '../../components/Swords/Swords.js';
-import WinCup from '../../components/WinCup/WinCup.js';
-import Award from '../../components/Award/Award.js';
-import Play from '../../components/Play/Play.js';
-import Chat from '../../components/Chat/Chat.js';
+import Swords from '../../components/icons/Swords/Swords.js';
+import WinCup from '../../components/icons/WinCup/WinCup.js';
+import Award from '../../components/icons/Award/Award.js';
+import Play from '../../components/icons/Play/Play.js';
+import Chat from '../../components/icons/Chat/Chat.js';
 import api from '../../services/api.js';
 import Toast from '../../components/Toast/Toast.js';
-import User from '../user/user.js';
 
 function Friend() {
   const { id } = Ura.getQueries() || {};
   if (!id) {
     Ura.create(<Toast message={"rendering friend page"} delay={0} />)
-    // const tag = Ura.navigate("/home");
-    // window.location.reload();
-    // return tag;
     return Ura.navigate("/home");
   }
-  else if (id === Ura.store.get("id")) {
-    // window.location.reload();    
-    // return tag
-    // console.warn("same id");
+  else if (id === Ura.store.get("id"))
     return Ura.navigate("/user");
-    // return User
-  }
+
 
   const [render, State] = Ura.init();
   const [getList, setList] = State([]);

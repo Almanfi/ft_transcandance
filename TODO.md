@@ -25,6 +25,8 @@
     [ ] friend
     [ ] in friend page if something failed go to home page
     [ ] test Toast for small screens
+    [ ] user mut update image
+    [ ] implement user game history
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

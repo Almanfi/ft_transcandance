@@ -27,10 +27,11 @@ users.forEach((item, index) => {
 
 const parent = document.getElementById("root")
 
-function create(input_value, tag = "button") {
+function create(value, tag = "button", placeholder) {
   const elem = document.createElement(tag);
-  elem.id = input_value;
-  elem.innerHTML = input_value
+  elem.id = value;
+  elem.innerHTML = value
+  if (placeholder) elem.placeholder = placeholder
   parent.appendChild(elem);
   return elem;
 }
@@ -44,7 +45,7 @@ function Form(data) {
 }
 
 let input_value = null
-create("", "input").oninput = (e) => {
+create("", "input", "user_id").oninput = (e) => {
   input_value = e.target.value
   console.log("input_value:", input_value);
 }
@@ -137,3 +138,49 @@ create("get user by id").onclick = async () => {
     console.log(res);
   }
 }
+
+create("init soket").onclick = (e) => {
+  try {
+    console.log("click init socket");
+    api.getSocket()
+  } catch (error) {
+    api.handleError(error)
+  }
+}
+
+let receiver_id = ""
+create("", "input", "receiver id").oninput = (e) => {
+  try {
+    receiver_id = e.target.value
+    console.log("receiver:", receiver_id);
+    
+  } catch (error) {
+    api.handleError(error)
+  }
+}
+
+let message = "";
+create("", "input", "text message").oninput = (e) => {
+  message = e.target.value
+  console.log("message:", message);
+}
+
+create("Send Message").onclick = async () => {
+  try {
+    console.log("click send message");
+    api.sendMessage(receiver_id, message)
+  } catch (error) {
+    api.handleError(error)
+  }
+};
+
+
+create("Retrieve Messages").onclick = async () => {
+  try {
+    console.log("click retrieve messages");
+    api.getMessages(receiver_id)
+  } catch (error) {
+    api.handleError(error)
+  }
+}
+

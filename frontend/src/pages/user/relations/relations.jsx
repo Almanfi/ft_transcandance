@@ -1,192 +1,121 @@
 import Ura from 'ura';
-import api, { getUser } from '../../../services/api.js';
-import Chat from '../../../components/Chat/Chat.js';
-import Play from '../../../components/Play/Play.js';
-import Accept from '../../../components/Accept/Accept.js';
+import api from '../../../services/api.js';
+import Chat from '../../../components/icons/Chat/Chat.js';
+import Play from '../../../components/icons/Play/Play.js';
+import Accept from '../../../components/icons/Accept/Accept.js';
 
 function Relations() {
   const [render, State, ForceState] = Ura.init();
   const [getData, setData] = ForceState([])
-  const [getEvents, setEvents] = State([])
+  const [getEvents, setEvents] = State({})
+
+  const Icons = {
+    accept: () => "accept",
+    refuse: () => "refuse",
+    cancel: () => "cancel",
+    unblock: () => "unblock",
+    block: () => "block",
+    chat: () => "chat",
+    play: () => "play",
+    unfriend: () => "unfriend",
+  }
+
+  const handleEvent = (type) => {
+    switch (type) {
+      case "invited": {
+        setEvents({
+          accept: async (e) => {
+            console.log("accept ", e.invite_id)
+            await api.acceptInvitation(e.invite_id);
+            setData(await api.getInvited());
+          },
+          refuse: async (e) => {
+            console.log("refuse ", e.invite_id)
+            await api.refuseInvitation(e.invite_id);
+            setData(await api.getInvited());
+          },
+        })
+        break;
+      }
+      case "invites": { // sent invitations
+        setEvents({
+          cancel: async (e) => {
+            await api.cancelInvitation(e.invite_id)
+            setData(await api.getInvites());
+          }
+        })
+        break;
+      }
+      case "blocks": {
+        setEvents({
+          unblock: async (e) => {
+            console.log("unblock", e)
+            await api.unblockUser(e.invite_id);
+            setData(await api.getBlocks())
+          }
+        })
+        break;
+      }
+      case "friends": {
+        setEvents({
+          play: (e) => { console.log("play", e) },
+          chat: (e) => {
+            console.log("chat", e)
+            Ura.navigate(`/chat?id=${e.id}`);
+          },
+          block: async (e) => {
+            console.log("block", e);
+            await api.blockUser(e.id);
+            setData(await api.getFriends())
+          },
+          unfriend: async (e) => {
+            console.log("accept ", e.invite_id)
+            await api.unFriend(e.invite_id);
+            setData(await api.getFriends())
+          },
+        })
+        break;
+      }
+      default:
+        break;
+    }
+  }
 
   const fetchRelations = async (type) => {
     console.log("fetch ", type);
-
     try {
-      // const relations = await api.getRelations()
-      const user = await api.getUser();
-      let ids = [];
-      let events = [];
       switch (type) {
         case "invited": { // received invitations
-          const getInvited = async () => {
-            const relations = await api.getRelations()
-            const data = relations[type].map(invite => invite.from_user);
-            ids = await api.getUsersById(data);
-            for (const fetchedUser of ids) {
-              for (const invite of relations[type]) {
-                if (invite.from_user == fetchedUser.id) {
-                  fetchedUser['invite_id'] = invite['id'];
-                  break;
-                }
-              }
-            }
-            setData(ids)
-          }
-          events = [{
-            name: "accept",
-            handler: async (e) => {
-              console.log("accept ", e.invite_id)
-              await api.acceptInvitation(e.invite_id);
-              await getInvited();
-            },
-            Icon: Accept
-          },
-          {
-            name: "refuse",
-            handler: async (e) => {
-              console.log("refuse ", e.invite_id)
-              await api.refuseInvitation(e.invite_id);
-              await getInvited();
-            },
-            Icon: Play
-          }]
-
-          await getInvited();
+          setData(await api.getInvited());
           break;
         }
         case "invites": { // sent invitations
-          const getInvites = async ( ) => {
-            const relations = await api.getRelations()
-            const data = relations[type].map(user => user.to_user);
-            ids = await api.getUsersById(data);
-            for (const fetchedUser of ids) {
-              for (const invite of relations[type]) {
-                if (invite.to_user == fetchedUser.id) {
-                  fetchedUser['invite_id'] = invite['id'];
-                  break;
-                }
-              }
-            }
-            setData(ids)
-          }
-          await getInvites();
-          events = [{
-            name: "cancel",
-            handler: async (e) => { 
-              await api.cancelInvitation(e.invite_id)
-              await getInvites();
-            },
-            Icon: Chat
-          }]
-
+          setData(await api.getInvites());
           break;
         }
         case "blocks": {
-          const getBlocked = async () => {
-            const relations = await api.getRelations()
-            let data = []
-            for (const invite of relations[type]) {
-              if (user.id == invite.from_user) data.push(invite.to_user);
-              else data.push(invite.from_user);
-            }
-            ids = await api.getUsersById(data);
-            for (const fetchedUser of ids) {
-              for (const invite of relations[type]) {
-                if (invite.from_user == fetchedUser.id || invite.to_user == fetchedUser.id) {
-                  console.warn("found")
-                  fetchedUser['invite_id'] = invite['id'];
-                  break;
-                }
-              }
-            }
-            setData(ids)
-            console.log("logger:", getData());
-          }
-          await getBlocked()
-
-
-          events = [{
-            name: "unblock",
-            handler: async (e) => {
-              console.log("unblock", e)
-              await api.unblockUser(e.invite_id);
-              await getBlocked();
-            },
-            Icon: Chat
-          }]
+          setData(await api.getBlocks())
           break;
         }
         case "friends": {
-          const getFriends = async () => {
-            const relations = await api.getRelations()
-            let data = []
-            for (const invite of relations[type]) {
-              if (user.id == invite.from_user) data.push(invite.to_user);
-              else data.push(invite.from_user);
-            }
-            ids = await api.getUsersById(data);
-            for (const fetchedUser of ids) {
-              for (const invite of relations[type]) {
-                if (invite.from_user == fetchedUser.id || invite.to_user == fetchedUser.id) {
-                  fetchedUser['invite_id'] = invite['id'];
-                  break;
-                }
-              }
-            }
-            setData(ids)
-          }
-
-          await getFriends();
-
-          events = [{
-            name: "chat",
-            handler: (e) => { console.log("chat", e) },
-            Icon: Chat
-          },
-          {
-            name: "play",
-            handler: (e) => { console.log("play", e) },
-            Icon: Play
-          },
-          {
-            name: "block",
-            handler: async (e) => {
-              console.log("block", e);
-              await api.blockUser(e.id);
-              await getFriends()
-            },
-            Icon: Chat,
-
-          },
-          {
-            name: "unfriend",
-            handler: async (e) => {
-              console.log("accept ", e.invite_id)
-              await api.unFriend(e.invite_id);
-              await getFriends();
-            },
-            Icon: Chat
-          }
-          ]
-
+          setData(await api.getFriends())
           break;
         }
         default:
           break;
       }
-      // console.log(type, ", relations:", relations, ", ids:", ids);
-      // setData(ids)
-      setEvents(events);
+      handleEvent(type)
+
     } catch (error) {
       api.handleError(error)
     }
   }
 
+
   const handleSelect = async (e) => {
     e.preventDefault();
     try {
-      console.log(e.target.value);
+      // console.log(e.target.value);
       await fetchRelations(e.target.value)
     } catch (error) {
       api.handleError(error)
@@ -194,8 +123,6 @@ function Relations() {
   }
 
   fetchRelations("friends");
-
-
 
   return render(() => (
     <div id="friends">
@@ -215,8 +142,11 @@ function Relations() {
                   onclick={() => Ura.navigate(`/friend?id=${parent.id}`)} />
                 <h4>{parent.username}</h4>
               </div>
-              <loop on={getEvents()} className="down">
-                {(child) => <span onclick={() => child.handler(parent)} name={child.name} >{child.name}</span>}
+              <loop on={Object.keys(getEvents())} className="down">
+                {(key) => {
+                  // console.log("key", key);
+                  return <span onclick={() => getEvents()[key](parent)} name={key} >{Icons[key]()}</span>
+                }}
               </loop>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import Ura from "ura";
 import Navbar from "../../components/Navbar/Navbar.js";
-import Arrow from "../../components/Arrow/Arrow.js";
+import Arrow from "../../components/icons/Arrow/Arrow.js";
 import Input from "../../components/Input/Input.js";
 import Toast from "../../components/Toast/Toast.js";
 import api from "../../services/api.js";
@@ -22,21 +22,7 @@ function Login() {
         if (input.value.length) data[input.name] = input.value
         else throw `empty ${input.name} field`;
       });
-      console.log("log with ", data);
-      const res = await api.login(data);
-      // const webSocket = api.getSocket();
-      console.log("login response", res);
-      // console.log("socket response", webSocket);
-
-      const res0 = await api.getUser();
-      Ura.store.set("id", res0.id);
-      // console.table(res)
-      // res = await api.getUser();
-      /*
-      display_name, firstname, id
-      lastname, profile_picture, username
-      */
-      // Ura.store.set("user", JSON.stringify(res));
+      await api.login(data);
       Ura.navigate("/home");
     } catch (err) {
       api.handleError(err);
