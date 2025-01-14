@@ -247,7 +247,7 @@ export class Player extends THREE.Object3D {
         // }
         if (!this.position.equals(this.positionBackup)) {
             this.positionBackup.copy(this.position);
-            // console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
+            console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
             console.log(` -position of ${this.name} at time: ${timeStamp + timeS} is: `, JSON.stringify(this.position));
         }
     }
