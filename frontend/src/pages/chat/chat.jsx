@@ -1,9 +1,8 @@
 import Ura from "ura";
 import Navbar from "../../components/Navbar/Navbar.js";
-import { conversationGroups } from "./convs.js";
 import New from "../../components/create/create.js";
 import api from "../../services/api.js";
-import { GlobalUser } from "../../services/store.js";
+// import { GlobalUser } from "../../services/store.js";
 
 /*
 + TODO:
@@ -14,7 +13,7 @@ import { GlobalUser } from "../../services/store.js";
   + send message and update it using setConv
 */
 
-const [getGlobalUser, setGlobalUser] = GlobalUser;
+// const [getGlobalUser, setGlobalUser] = GlobalUser;
 
 function Chat(props = {}) {
   const [render, State] = Ura.init();
@@ -79,7 +78,7 @@ function Chat(props = {}) {
 
   const call = async () => {
     console.warn("before");
-    const user = { ...await getGlobalUser() }
+    const user = { ...await api.getUser() }
     console.warn("after", user);
     setUser(user);
   }
@@ -110,10 +109,7 @@ function Chat(props = {}) {
         {/* <New/> */}
         <div className="left">
           <div className="up">
-            <div className="create-group">
-              {/* create group */}
-              <h4>Create Group</h4>
-            </div>
+              <h4>Friends</h4>
           </div>
           <div className="down">
             {/* friends to start chat with */}
@@ -129,6 +125,10 @@ function Chat(props = {}) {
 
         <div className="right">
           {/* conversation */}
+          <div className="title">
+            <h4>Play game</h4>
+            <h4>Block</h4>
+          </div>
           <loop on={getConv()} className="up">
             {(e) => (
               <div className={e.id === getUser().id ? "mine" : "other"}>

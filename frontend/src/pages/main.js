@@ -24,10 +24,8 @@ import Signup from "./signup/signup.js";
 import User from "./user/user.js";
 import Chat from "./chat/chat.js";
 import Friend from "./friend/friend.js";
-import Game from "./game/game.js";
 import api from "../services/api.js";
-import { GlobalUser } from "../services/store.js";
-// import Test from "./test/test.js";
+import Game from "./game/game.js";
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -80,10 +78,10 @@ Ura.onNavigate(() => {
     });
   }
   else {
-    const [getGlobal, setGlobal] = GlobalUser;
+    // const [getGlobal, setGlobal] = GlobalUser;
+    // setGlobal(undefined);
 
     Ura.rmCookie("id_key");
-    setGlobal(undefined);
 
     Ura.setRoutes({
       "*": Login,

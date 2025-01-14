@@ -184,3 +184,91 @@ create("Retrieve Messages").onclick = async () => {
   }
 }
 
+create("Create Game").onclick = async () => {
+  try{
+    const new_game = await api.createGame();
+    console.log("The game is: ", new_game)
+  } catch(error)
+  {
+    api.handleError(error)
+  }
+}
+
+let game_lobby_socket = null;
+let game_id = null;
+let enemy_id = null;
+let game_invite_id = null;
+const websocketApi = "http://localhost:8001";
+
+create("", "input", "Game Id").oninput = (e) => {
+  game_id = e.target.value;
+}
+
+create("Join Game Lobby").onclick= (e) => {
+  try
+  {
+    game_lobby_socket = new WebSocket(`${websocketApi}/ws/game/${game_id}/`);
+    game_lobby_socket.addEventListener('open', (e) => {
+      console.log("Connected to game Lobby");
+    });
+  
+    game_lobby_socket.addEventListener("message", (e) => {
+      console.log("Game Lobby message: ", e.data)
+    })
+  
+    game_lobby_socket.addEventListener('close', (e) => {
+      console.log("Game Lobby quit");
+      game_lobby_socket = undefined;
+    })
+  }
+  catch (error)
+  {
+    api.handleError(error)
+  }
+}
+
+create("", "input", "Enemy player").oninput = (e) => {
+  enemy_id = e.target.value
+}
+
+create("Invite Enemy Player").onclick = async (e) => {
+  if (!enemy_id || !game_id)
+    return console.error("No enemy to invite or WebSocket Active");
+  try {
+    const game_invite = await api.invitePlayer(game_id, enemy_id);
+  } catch (error)
+  {
+    api.handleError(error);
+  }
+}
+
+create("", "input", "Game Invite Id").oninput = (e) => {
+  game_invite_id = e.target.value;
+}
+
+create("Accept Game Invite").onclick = async (e) => {
+  try {
+    const accepted_game_invite = api.acceptGameInvite(game_invite_id)
+  }catch (error)
+  {
+    api.handleError(error);
+  }
+}
+
+create("Refuse Game Invite").onclick = async (e) => {
+  try {
+    const refused_game_invite = api.refuseGameInvite(game_invite_id);
+  }
+  catch(error)
+  {
+    api.handleError(error)
+  }
+}
+
+create("Cancel Game Invite").onclick = async (e) => {
+  try {
+    const canceled_game_invite = api.cancelGameInvite(game_invite_id);
+  } catch(error){
+    api.handleError(error)
+  }
+}

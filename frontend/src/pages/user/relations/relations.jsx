@@ -58,7 +58,15 @@ function Relations() {
       }
       case "friends": {
         setEvents({
-          play: (e) => { console.log("play", e) },
+          play: async (e) => {
+            try {
+              const game = await api.createGame();
+              const res = await api.invitePlayer(game.id, e.id);
+              Ura.navigate(`/game?id=${game.id}`)
+            } catch (error) {
+              api.handleError(error)
+            }
+          },
           chat: (e) => {
             console.log("chat", e)
             Ura.navigate(`/chat?id=${e.id}`);

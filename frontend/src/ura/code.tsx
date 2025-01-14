@@ -377,11 +377,11 @@ function reconciliate(prev: VDOM, next: VDOM) {
 
 function display(vdom: VDOM) {
   // console.log("display ", vdom);
-  if (GlobalVDOM) {
-    console.warn("global vdom exists");
-    console.log("old:", GlobalVDOM);
-    console.log("new:", vdom);
-  }
+  // if (GlobalVDOM) {
+  //   console.warn("global vdom exists");
+  //   console.log("old:", GlobalVDOM);
+  //   console.log("new:", vdom);
+  // }
   if (GlobalVDOM !== null) reconciliate(GlobalVDOM, vdom);
   else {
     execute(CREATE, vdom);
@@ -541,6 +541,8 @@ function refresh(params = null) {
   let path = window.location.pathname || "*";
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
+  console.log("view:", RouteConfig);
+  
 
   return display(<RouteConfig props={params} />);
 }

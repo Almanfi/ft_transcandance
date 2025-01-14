@@ -1,5 +1,6 @@
 import Ura from "ura";
 import Toast from "../components/Toast/Toast.js";
+import { GameState } from "../pages/user/openGame/openGame.js";
 
 const endpoint = "https://localhost:8000";
 
@@ -56,7 +57,7 @@ async function login(user) {
  */
 
 async function getUser() {
-  const response = await fetch(`${endpoint}/users/`, {credentials: "include"});
+  const response = await fetch(`${endpoint}/users/`, { credentials: "include" });
   if (response.ok) {
     const body = await response.json();
     return body;
@@ -399,15 +400,19 @@ function setEvent(name, handler) {
 
 const websocketApi = "http://localhost:8001";
 
+
+let r = 0;
 function openSocket() {
   if (!webSocket || webSocket.readyState === WebSocket.CLOSED) {
     console.log("Creating a new WebSocket connection.");
     webSocket = new WebSocket(`${websocketApi}/ws/messaging/`);
-    webSocket.onopen = (event) => { console.log("WebSocket connection established."); };
+    webSocket.onopen = (event) => { r = 0, console.log("WebSocket connection established."); };
 
     webSocket.onmessage = (event) => {
       console.log("Message from server:");
       console.log("event type:", event.type);
+      console.log("data:", event.data);
+
       const data = JSON.parse(event.data);
 
       switch (data.type) {
@@ -421,24 +426,28 @@ function openSocket() {
         }
         case "chat.message.retrieve": {
           if (Events[data.type]) return Events[data.type](data);
+          break
+        }
+        case "game_invite": {
+          const [getter, setter] = GameState;
+          const inviteId = data.invite;
+          setter([
+            ...getter(),
+            inviteId
+          ])
+          break
         }
         default:
           break;
       }
     };
 
-    let reconnectionAttempts = 0;
-    const maxReconnectionAttempts = 5;
-
     webSocket.onclose = (event) => {
       console.log("WebSocket connection closed. Reconnecting...");
       Events = {};
       webSocket = null;
-      if (reconnectionAttempts < maxReconnectionAttempts) {
-        setTimeout(() => {
-          reconnectionAttempts++;
-          openSocket();
-        }, 3000);
+      if (r < 3) {
+        setTimeout(() => { r++; openSocket(); }, 3000);
       } else {
         console.error("Maximum reconnection attempts reached.");
       }
@@ -473,11 +482,112 @@ const retrieveMessages = async (id) => {
   }
 };
 
-// setInterval(() => {
-//   if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-//     webSocket.send(JSON.stringify({ type: "ping" }));
-//   }
-// }, 30000);
+async function createGame() {
+  const response = await fetch(`${endpoint}/games/`, {
+    method: "POST",
+    credentials: "include"
+  })
+  if (response.ok) {
+    const body = await response.json();
+    console.log("Game created Sucesfully: ", body);
+    return body;
+  }
+  else {
+    const body = await response.json();
+    console.log("Error Creating Game: ", body);
+    throw body
+  }
+}
+
+async function invitePlayer(game_id, invited_id) {
+  const res = await fetch(`${endpoint}/games/invite/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ game_id, invited_id }),
+    credentials: "include"
+  })
+  if (res.ok) {
+    const body = await res.json();
+    console.log("invited player: ", body)
+    return body
+  }
+  else {
+    const body = await res.json();
+    console.log("Error invite player : ", body);
+    throw body
+  }
+}
+
+
+async function acceptGameInvite(invite_id) {
+  const res = await fetch(`${endpoint}/games/invite/accept/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ invite_id }),
+    credentials: "include"
+  })
+  if (res.ok) {
+    const body = await res.json();
+    console.log("accepted game invite: ", body)
+    return body
+  }
+  else {
+    const body = await res.json();
+    console.log("Error accepting game invite : ", body);
+    throw body
+  }
+}
+
+async function refuseGameInvite(invite_id) {
+  const res = await fetch(`${endpoint}/games/invite/refuse/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ invite_id }),
+    credentials: "include"
+  })
+  if (res.ok) {
+    const body = await res.json();
+    console.log("refused game invite: ", body)
+    return body
+  }
+  else {
+    const body = await res.json();
+    console.log("Error refusing game invite : ", body);
+    throw body
+  }
+}
+
+export async function cancelGameInvite(invite_id) {
+  const res = await fetch(`${endpoint}/games/invite/cancel/`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ invite_id }),
+    credentials: "include"
+  })
+  if (res.ok) {
+    const body = await res.json();
+    console.log("canceled game invite: ", body)
+    return body
+  }
+  else {
+    const body = await res.json();
+    console.log("Error canceling game invite: ", body);
+  }
+}
+
+let gameSocket = null;
+function openGameSocket(game_id) {
+  gameSocket = new WebSocket(`${websocketApi}/ws/game/${game_id}/`);
+  gameSocket.onopen = (e) => { console.log("Connected to game Lobby") };
+  gameSocket.onmessage = (e) => { console.log("Game Lobby message: ", e.data) }
+  gameSocket.onclose = (e) => {
+    console.log("Game Lobby quit");
+    gameSocket = null;
+  }
+  gameSocket.onerror = (err) => handleError(err);
+}
+
+
 
 const api = {
   endpoint,
@@ -509,6 +619,13 @@ const api = {
   openSocket,
   sendMessage,
   retrieveMessages,
+
+  openGameSocket,
+  createGame,
+  invitePlayer,
+  acceptGameInvite,
+  refuseGameInvite,
+  cancelGameInvite
 };
 
 export default api;

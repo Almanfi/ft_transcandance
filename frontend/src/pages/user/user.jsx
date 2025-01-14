@@ -6,6 +6,7 @@ import Award from '../../components/icons/Award/Award.js';
 import Settings from './settings/settings.js';
 import api from '../../services/api.js';
 import Relations from './relations/relations.js';
+import OpenGame from './openGame/openGame.js';
 
 function User() {
   const [render, State] = Ura.init();
@@ -67,6 +68,10 @@ function User() {
             )}
           </loop>
           <Relations />
+        </div>
+
+        <div>
+          <OpenGame/>
         </div>
       </if>
     </root>

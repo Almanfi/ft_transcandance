@@ -20,27 +20,23 @@
       display: flex;
       /* margin: 10px; */
 
-      .create-group {
+
+      h4 {
         cursor: pointer;
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         height: 60px;
-
-        h4 {
-          /* font-size: 20px; */
-          font-weight: bold;
-        }
-      }
-      &:hover {
-        background-color: transparent;
-        color: var(--red2);
+        /* font-size: 20px; */
+        font-weight: bold;
       }
     }
+
     .down {
       /* background-color: blue; */
       flex: 1;
+
       loop {
         div {
           cursor: pointer;
@@ -54,14 +50,17 @@
           /* justify-content: center; */
           align-items: center;
           text-align: left;
+
           h3 {
             /* font-size: 16px; */
           }
+
           &:hover {
             background-color: transparent;
           }
         }
-        .selected{
+
+        .selected {
           background-color: transparent;
         }
       }
@@ -76,6 +75,36 @@
     flex: 3;
     display: flex;
     flex-direction: column;
+
+    .title {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 62px;
+      cursor: pointer;
+
+      h4 {
+        display: flex;
+        height: 100%;
+        font-weight: bold;
+        flex: 1;
+
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+
+        color: var(--red0);
+        background-color: var(--red2);
+        border: 1px solid var(--red2);
+
+        &:hover{
+          color: var(--red2);
+          background-color: var(--red0);
+        }
+      }
+
+    }
 
     .up {
       flex: 1;
@@ -95,31 +124,38 @@
           text-align: left;
           margin: 1px 0px;
           padding: 6px 10px;
+
           l {
             /* font-size: 8px; */
             font-weight: lighter;
           }
         }
       }
+
       .mine {
         flex-direction: row-reverse;
+
         p {
           background-color: var(--red2);
           border-radius: 8px;
         }
       }
+
       .other {
         justify-content: flex-start;
+
         p {
           background-color: var(--blue2);
           border-radius: 8px;
         }
       }
     }
+
     if {
       flex: 1;
       max-height: 160px;
     }
+
     .down {
       display: flex;
 
@@ -138,6 +174,7 @@
         font-size: 15px;
         resize: none;
       }
+
       button {
         display: flex;
         justify-content: center;
@@ -151,6 +188,7 @@
         background-color: var(--red3);
         border: 2px solid var(--red3);
         color: var(--red0);
+
         &:hover {
           background-color: var(--red0);
           color: var(--red3);

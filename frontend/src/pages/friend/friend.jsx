@@ -7,9 +7,9 @@ import Play from '../../components/icons/Play/Play.js';
 import Chat from '../../components/icons/Chat/Chat.js';
 import api from '../../services/api.js';
 import Toast from '../../components/Toast/Toast.js';
-import { GlobalUser } from '../../services/store.js';
+// import { GlobalUser } from '../../services/store.js';
 
-const [getter, setter] = GlobalUser;
+// const [getGlobalUser, setGlobalUser] = GlobalUser;
 // TODO: check if id is not for current user
 function Friend() {
   const { id } = Ura.getQueries() || {};
@@ -17,6 +17,7 @@ function Friend() {
     Ura.create(<Toast message={"rendering friend page"} delay={0} />)
     return Ura.navigate("/home");
   }
+
 
   const [render, State] = Ura.init();
   const [getList, setList] = State([]);
@@ -43,8 +44,13 @@ function Friend() {
     try {
 
       const res = await api.getUsersById([id]);
+      const user = await api.getUser();
 
-      if (res.length === 0) {
+      if (user.id === id) {
+        Ura.create(<Toast message={"invalid page"} delay={0} />)
+        Ura.navigate("/home");
+      }
+      else if (res.length === 0) {
         Ura.create(<Toast message={"user not found"} />);
         Ura.navigate("/home");
       }
