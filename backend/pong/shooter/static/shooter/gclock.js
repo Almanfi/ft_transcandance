@@ -16,6 +16,7 @@ export class gameClock {
         this.frameCount = 0;
         this.startTime = new Date().valueOf();
         this.saveTime = this.startTime;
+        this.lastRanderTime = 0;
     }
     setFps(fps) {
         this.fps = fps;
@@ -70,17 +71,21 @@ export class gameClock {
         this.frameCount = 0;
         this.startTime = startTime;
     }
+    getLastRanderTime() {
+        return this.lastRanderTime;
+    }
     loop(animate, rollBack) {
         window.requestAnimationFrame(() => this.loop(animate, rollBack));
         this.msNow = new Date().valueOf() - this.startTime;
         this.msPassed = this.msNow - this.msPrev;
         this.msPrevTrue = this.msNow;
         if (this.msPassed < this.msPerFrame) {
-            rollBack(this.startTime);
+            rollBack(this.startTime, "fast");
             return;
         }
         this.setFrameTime();
-        rollBack(this.startTime);
+        this.lastRanderTime = this.msPrev + this.msPerFrame;
+        rollBack(this.startTime, "slow");
         animate(this.msPassed, this.msPrev);
         this.excessTime = 0;
         this.msPrev = this.msNow - this.excessTime;

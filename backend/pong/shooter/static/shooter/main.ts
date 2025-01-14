@@ -15,8 +15,8 @@ function initThreeJS(): { scene: THREE.Scene,
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 200000 );
-    // camera.position.set(0, 100000, 0);
-    camera.position.set(20, 100000, -10);
+    camera.position.set(0, 100000, 0);
+    // camera.position.set(20, 100000, -10);
     camera.lookAt(0,0,0);
 
     const renderer = new THREE.WebGLRenderer();
@@ -104,7 +104,7 @@ var justRolledBack = false;
 
 let frameError = 0;
 
-function rollBack(startTime: number) {
+function rollBack(startTime: number, type: string) {
     // while (true) {
     //     let recievedData1 = connection.getRecievedDataOrdered();
     //     if (!recievedData1)
@@ -119,6 +119,7 @@ function rollBack(startTime: number) {
 
     if (connection.hasRecievedData() === false)
         return ;
+    console.log("initing roll back of type : ", type);
     // console.log('received data order ', connection.recievedDataOrder);
     let recievedData = connection.getRecievedDataOrdered();
     console.log(`received ${connection.recievedDataOrder} data: `, recievedData);
@@ -150,15 +151,26 @@ function rollBack(startTime: number) {
     // foe.findStateAtTime(lastFrameTime);
     // foe.actions.clear();
 
-    while (lastFrameIndex !== finalFrameIndex) {
+    while (lastFrameIndex !== (finalFrameIndex + 1) % 60) {
         let nextFrameTime = gClock.getFrameTime(lastFrameIndex + 1);
+        
+        if (lastFrameIndex === finalFrameIndex) {
+            if (type === "slow") {
+                console.log('slow roll back back off');
+                break ;
+            }
+            nextFrameTime = gClock.getLastRanderTime();
+        }
         // console.log(`rolling back from ${lastFrameTime} to ${nextFrameTime}`);
         let lastActionTime = lastFrameTime;
         const frameSpan = nextFrameTime - lastFrameTime;
         
         player._findPositonInFrame(lastFrameIndex);// underscore methods are unsafe
         
-        foe.savePlayerData(lastFrameIndex);
+        if (type === "slow")
+            foe.saveRollBackData(lastFrameIndex);
+        else
+            foe.savePlayerData(lastFrameIndex + 1);
         if (connection.hasRecievedData()) {
             foe.rollBack(recievedData as string, lastFrameTime, actionTime, lastFrameIndex);
             lastActionTime = actionTime;
@@ -209,6 +221,11 @@ function rollBack(startTime: number) {
         if (lastFrameIndex >= 60)
             lastFrameIndex = 0;
     }
+    // let lastRanderTime = gClock.getLastRanderTime();
+    // let finalFrameTime = gClock.getFrameTime(finalFrameIndex);
+    // if (lastRanderTime > finalFrameTime) {
+    //     foe.
+    // }
 
     // turretBulletM.batchUndestroyBullet();
     // turretBulletM.batchUndestroyBullet();
