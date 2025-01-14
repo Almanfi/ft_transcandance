@@ -116,24 +116,27 @@ function rollBack(startTime, type) {
     // console.log('after finding state in frame: ', foe.position);
     // foe.findStateAtTime(lastFrameTime);
     // foe.actions.clear();
-    while (lastFrameIndex !== (finalFrameIndex + 1) % 60) {
+    while (lastFrameIndex !== finalFrameIndex) {
         let nextFrameTime = gClock.getFrameTime(lastFrameIndex + 1);
-        if (lastFrameIndex === finalFrameIndex) {
-            if (type === "slow") {
-                // console.log('slow roll back back off');
-                break;
-            }
-            nextFrameTime = gClock.getLastRanderTime();
-        }
+        // if (lastFrameIndex === finalFrameIndex) {
+        //     if (type === "slow") {
+        //         // console.log('slow roll back back off');
+        //         break ;
+        //     }
+        //     nextFrameTime = gClock.getLastRanderTime();
+        // }
         // console.log(`rolling back from ${lastFrameTime} to ${nextFrameTime}`);
         let lastActionTime = lastFrameTime;
         const frameSpan = nextFrameTime - lastFrameTime;
-        // player._findPositonInFrame(lastFrameIndex);// underscore methods are unsafe
+        foe.savePlayerData(lastFrameIndex + 1);
+        player.restoreFrameInput(lastFrameIndex);
         player.savePlayerData(lastFrameIndex);
-        if (type === "slow")
-            foe.savePlayerData(lastFrameIndex);
-        else
-            foe.savePlayerData(lastFrameIndex + 1);
+        // player._findPositonInFrame(lastFrameIndex);// underscore methods are unsafe
+        // player.savePlayerData(lastFrameIndex);
+        // if (type === "slow")
+        // foe.savePlayerData(lastFrameIndex + 1);
+        // else
+        //     foe.savePlayerData(lastFrameIndex + 1);
         if (connection.hasRecievedData()) {
             foe.rollBack(recievedData, lastFrameTime, actionTime, lastFrameIndex);
             lastActionTime = actionTime;
@@ -159,15 +162,17 @@ function rollBack(startTime, type) {
         if (lastActionTime < nextFrameTime) {
             // console.log('fninishing action from time: ', lastActionTime, " to: ", nextFrameTime);
             let timeS = nextFrameTime - lastActionTime;
-            foe.saveRollBackData(lastFrameIndex);
+            if (type === "slow")
+                foe.saveRollBackData(lastFrameIndex);
+            else
+                foe.savePlayerData(lastFrameIndex + 1);
             // console.log('before frame update: ', JSON.stringify(foe.position));
             foe.update(timeS, lastActionTime, 0);
             // console.log('finish frame update: ', JSON.stringify(foe.position));
             // console.log("foe move vect ", JSON.stringify(foe.movementVector));
             // console.log(`after finishing action at time : ${nextFrameTime} position: ${JSON.stringify(foe.position)}`);
         }
-        player.update(frameSpan, lastFrameTime, nextFrameTime);
-        // foe.savePlayerData(lastFrameIndex)
+        player.update(frameSpan, lastFrameTime, 0);
         // turretBulletM.findPositionAtTime(lastFrameTime);
         // playerBulletM.findPositionAtTime(lastFrameTime);
         // foeBulletM.findPositionAtTime(lastFrameTime);

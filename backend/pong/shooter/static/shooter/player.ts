@@ -337,6 +337,13 @@ export class Player extends THREE.Object3D {
  
     }
 
+    UpdateRollbackVariables(frameIndex: number) {
+        let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
+        data.position.copy(this.position);
+        data.speed.copy(this.movementVector);
+        data.lastFire = this.lastFire;
+    }
+
     savePlayerData(frameIndex: number) {
         // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
         return this.rollback.saveFrame(frameIndex, this.position.clone(),
@@ -393,10 +400,16 @@ export class Player extends THREE.Object3D {
         // }
     }
 
+    restoreFrameInput(frameIndex: number) {
+        let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
+        let input = this.inputs;
+        input.deserialize(data.input[0]);
+    }
+
     _findStateInFrame(frameIndex : number) { // '_' for unsafe
         let data = this.rollback.rollbackFrame(frameIndex) as dataSaved;
         // let oldData = this.rollback.rollbackFrame(frameIndex - 1) as dataSaved;
-        let input = this.inputs
+        let input = this.inputs;
         input.deserialize(data.input[0]);
 
         // this.oldPosition.copy(oldData.position);

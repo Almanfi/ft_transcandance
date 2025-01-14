@@ -116,7 +116,7 @@ export class gameClock {
 		this.msPassed = this.msNow - this.msPrev;
 		this.msPrevTrue = this.msNow;
 		if (this.msPassed < this.msPerFrame) {
-			rollBack(this.startTime, "fast");
+			// rollBack(this.startTime, "fast");
 			return ;
 		}
 		

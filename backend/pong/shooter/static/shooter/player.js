@@ -251,6 +251,12 @@ export class Player extends THREE.Object3D {
             console.log(` -position of ${this.name} at time: ${timeStamp + timeS} is: `, JSON.stringify(this.position));
         }
     }
+    UpdateRollbackVariables(frameIndex) {
+        let data = this.rollback.rollbackFrame(frameIndex);
+        data.position.copy(this.position);
+        data.speed.copy(this.movementVector);
+        data.lastFire = this.lastFire;
+    }
     savePlayerData(frameIndex) {
         // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
         return this.rollback.saveFrame(frameIndex, this.position.clone(), this.movementVector, this.inputs.serialize(), this.lastFire);
@@ -300,6 +306,11 @@ export class Player extends THREE.Object3D {
         //     data.timeStamp = timeStamp;
         //     this.controls.sendActionToPeer(data);
         // }
+    }
+    restoreFrameInput(frameIndex) {
+        let data = this.rollback.rollbackFrame(frameIndex);
+        let input = this.inputs;
+        input.deserialize(data.input[0]);
     }
     _findStateInFrame(frameIndex) {
         let data = this.rollback.rollbackFrame(frameIndex);
