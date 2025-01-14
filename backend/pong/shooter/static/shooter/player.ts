@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Move, GameAction } from './keyControls.js';
-import { PlayersBulletManager } from './assets.js';
+import { PlayersBulletManager, Plane } from './assets.js';
 import { Rollback, dataSaved, RollData } from './rollback.js';
 
 
@@ -141,6 +141,9 @@ export class Player extends THREE.Object3D {
     bulletSound: THREE.Audio;
     bulletManager: PlayersBulletManager;
     rollback: Rollback;
+    
+    plane: Plane | undefined;
+    // planeRaycaster: THREE.Raycaster;
 
     constructor(position: THREE.Vector3,
         bulletManager: PlayersBulletManager) {
@@ -173,6 +176,8 @@ export class Player extends THREE.Object3D {
         
         this.setBulletManager(bulletManager);
         this.positionBackup = this.position.clone();
+
+        // this.planeRaycaster = new THREE.Raycaster();
     };
 
     reset() {
@@ -188,6 +193,10 @@ export class Player extends THREE.Object3D {
         this.scene = scene;
 		scene.add(this);
 	}
+
+    setPlane(plane: Plane) {
+        this.plane = plane;
+    }
 
     setPlaneVector(planeFacingVector: THREE.Vector3) {
         planeFacingVector.normalize();
@@ -305,6 +314,8 @@ export class Player extends THREE.Object3D {
         // console.log(`movement vector: `, JSON.stringify(this.movementVector));
 
         this.position.addScaledVector(this.movementVector, speed);
+
+        this.plane?.keepInside(this.position, this.radius);
         // this.floorPosition(this.position);
         // if (this.controls.sendActionToPeer && this.saveAction) {
             //     this.currInput = {};

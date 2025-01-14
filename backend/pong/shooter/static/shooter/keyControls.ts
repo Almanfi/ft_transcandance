@@ -217,7 +217,7 @@ export class KeyControls extends Controls {
     }
 
     onMouseMove( event ) {
-        // this.handled = false;
+        this.handled = false;
         event.preventDefault();
     
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;

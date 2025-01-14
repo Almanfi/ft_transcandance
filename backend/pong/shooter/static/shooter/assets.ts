@@ -2,15 +2,62 @@ import * as THREE from 'three';
 import { Player } from './player.js';
 
 
-export function initPlane(): THREE.Mesh {
-    const geometry = new THREE.PlaneGeometry( 190000, 120000 );
-    const material = new THREE.MeshBasicMaterial( {color: 0xcccccd, side: THREE.DoubleSide} );
-    const plane = new THREE.Mesh( geometry, material );
-    plane.receiveShadow = true;
-    plane.position.set(0, -3, 0);
-    plane.rotateX(Math.PI / 2);
+// export function initPlane(): THREE.Mesh {
+//     let length = 190000
+//     let width = 120000;
+//     const geometry = new THREE.PlaneGeometry( length, width );
+//     const material = new THREE.MeshBasicMaterial( {color: 0xcccccd, side: THREE.DoubleSide} );
+//     const plane = new THREE.Mesh( geometry, material );
+//     plane.receiveShadow = true;
+//     plane.position.set(0, -3, 0);
+//     plane.rotateX(Math.PI / 2);
+//     return plane;
+// }
 
-    return plane;
+export class Plane extends THREE.Mesh {
+    length: number;
+    width: number;
+    // isInside: (p: THREE.Vector3) => boolean;
+    east: number;
+    west: number;
+    north: number;
+    south: number;
+
+    constructor() {
+        let length = 190000;//x
+        let width = 120000;//z
+        const geometry = new THREE.PlaneGeometry( length, width );
+        const material = new THREE.MeshBasicMaterial( {color: 0xcccccd, side: THREE.DoubleSide} );
+        super(geometry, material);
+        this.receiveShadow = true;
+        this.position.set(0, -3, 0);
+        this.rotateX(Math.PI / 2);
+
+        this.north = - length / 2;
+        this.south = length / 2
+        this.east = - width / 2;
+        this.west = width / 2;
+    }
+
+    keepInside(p: THREE.Vector3, radius: number): void {
+        if (p.x < this.north + radius)
+            p.x = this.north + radius;
+        if (p.x > this.south - radius)
+            p.x = this.south - radius;
+
+        if (p.z < this.east + radius)
+            p.z = this.east + radius;
+        if (p.z > this.west - radius)
+            p.z = this.west - radius;
+    }
+
+    isInside(p: THREE.Vector3) {
+        if (p.x < this.north || p.x > this.south)
+            return false;
+        if (p.z < this.east || p.z > this.west)
+            return false;
+        return true;
+    }
 }
 
 function applyPlaneRotation(vect, angle) {
@@ -42,7 +89,8 @@ export class Turret extends THREE.Mesh {
     constructor(bulletManager: TurretBulletManager,
         props: TurretProps = { }) {
         let color = props.color  || 0x000000;
-        let radius = props.radius || 300;
+        let radius = props.radius || 2500;
+        console.log("^^^^^^^^^^^^^^^^^^radius : ", radius);
         console.log('Turret props: ', props);
         const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshPhysicalMaterial({ color });
@@ -390,12 +438,17 @@ class ABulletManager {
     bullets: Map<number, any>;
     bulletsPool: Map<number, any>;
     destroyedBullets: Map<number, any>;
+    plane: Plane | undefined;
 
     constructor(scene: THREE.Scene) {
         this.scene = scene;
         this.bullets = new Map();
         this.bulletsPool = new Map();
         this.destroyedBullets = new Map();
+    }
+
+    addPlane(plane: Plane) {
+        this.plane = plane;
     }
 
     reset() {
@@ -464,6 +517,9 @@ class ABulletManager {
         let dateNow = timeNow;
         this.bullets.forEach((elem) => {
             if (dateNow > elem.date + 10 * 1000) {
+                this.despawnBullet(elem);
+            }
+            else if (this.plane?.isInside(elem.position) === false) {
                 this.despawnBullet(elem);
             }
             else

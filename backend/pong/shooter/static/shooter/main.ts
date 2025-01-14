@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { initPlane, PlayersBulletManager, TurretBulletManager, Turret } from './assets.js';
+import { Plane, PlayersBulletManager, TurretBulletManager, Turret } from './assets.js';
 import { Player, Inputs } from './player.js';
 import { KeyControls, getCameraDir } from './keyControls.js';
 import { gameClock } from './gclock.js';
@@ -15,13 +15,13 @@ function initThreeJS(): { scene: THREE.Scene,
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 200000 );
-    camera.position.set(0, 100000, 0);
-    // camera.position.set(20, 100000, -10);
+    // camera.position.set(0, 100000, 0);
+    camera.position.set(20, 100000, -10);
     camera.lookAt(0,0,0);
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setPixelRatio( window.devicePixelRatio * 2);
+    renderer.setPixelRatio( window.devicePixelRatio * 1);
 
     document.body.appendChild( renderer.domElement );
 
@@ -74,26 +74,31 @@ const bulletSound = musicSyncer.loadNewSound('/static/shooter/assets/a6.mp3');
 // document.body.appendChild( labelRenderer.domElement );
 
 
-const plane = initPlane();
+const plane = new Plane();
 scene.add(plane);
 
 
 const turretBulletM = new TurretBulletManager(scene);
 const turret = new Turret(turretBulletM, {initPosition: new THREE.Vector3(15, 0, 0)});
 turret.addToScene(scene);
+turretBulletM.addPlane(plane);
 
 const playerBulletM = new PlayersBulletManager(scene);
-const player = new Player(new THREE.Vector3(0, 0, 0), playerBulletM);
+const player = new Player(new THREE.Vector3(12000, 0, 0), playerBulletM);
 player.addToScene(scene);
 player.add(camera);
 player.addBulletSound(bulletSound);
 player.name = "player";
+player.setPlane(plane);
+playerBulletM.addPlane(plane);
 
 const foeBulletM = new PlayersBulletManager(scene);
-const foe = new Player(new THREE.Vector3(0, 0, 0), foeBulletM);
+const foe = new Player(new THREE.Vector3(-12000, 0, 0), foeBulletM);
 foe.addToScene(scene);
 foe.addBulletSound(bulletSound);
 foe.name = "foe";
+foe.setPlane(plane);
+foeBulletM.addPlane(plane);
 
 const planeFacingVector = getCameraDir(camera);
 player.setPlaneVector(planeFacingVector);
@@ -184,7 +189,7 @@ function rollBack(startTime: number, type: string) {
         // else
         //     foe.savePlayerData(lastFrameIndex + 1);
 
-        if (connection.hasRecievedData() && lastFrameTime <= actionTime) {
+        if (connection.hasRecievedData() && lastFrameTime < actionTime) {
             foe.rollBack(recievedData as string, lastFrameTime, actionTime, lastFrameIndex);
             lastActionTime = actionTime;
             console.log('after rolling back: ', foe.position);
@@ -195,14 +200,14 @@ function rollBack(startTime: number, type: string) {
         while (connection.hasRecievedData()) {
             console.log('new data');
             recievedData = connection.getRecievedDataOrdered() as string;
-            actionTime = Inputs.findTimeStamp(recievedData);
-            if (actionTime >= nextFrameTime)
+            let newActionTime = Inputs.findTimeStamp(recievedData);
+            if (newActionTime >= nextFrameTime)
                 break;
             console.log('new data:  start handling')
-            foe.rollbackNextAction(recievedData, lastActionTime, actionTime);
+            foe.rollbackNextAction(recievedData, lastActionTime, newActionTime);
             foe.saveRollBackData(lastFrameIndex);
             // console.log('after rolling back: ', foe.position);
-            lastActionTime = actionTime;
+            lastActionTime = newActionTime;
             connection.next();
             // console.log('next received data order ', connection.recievedDataOrder);
             console.log('new data:  done handling')
@@ -225,14 +230,14 @@ function rollBack(startTime: number, type: string) {
 
         player.update(frameSpan, lastFrameTime, 0);
 
-        // turretBulletM.findPositionAtTime(lastFrameTime);
-        // playerBulletM.findPositionAtTime(lastFrameTime);
-        // foeBulletM.findPositionAtTime(lastFrameTime);
+        turretBulletM.findPositionAtTime(lastFrameTime);
+        playerBulletM.findPositionAtTime(lastFrameTime);
+        foeBulletM.findPositionAtTime(lastFrameTime);
 
-        // turretBulletM.checkRollbackCollision(player, frameSpan, lastFrameTime);
-        // turretBulletM.checkRollbackCollision(foe, frameSpan, lastFrameTime);
-        // playerBulletM.checkRollbackCollision(foe, frameSpan, lastFrameTime);
-        // foeBulletM.checkRollbackCollision(player, frameSpan, lastFrameTime);
+        turretBulletM.checkRollbackCollision(player, frameSpan, lastFrameTime);
+        turretBulletM.checkRollbackCollision(foe, frameSpan, lastFrameTime);
+        playerBulletM.checkRollbackCollision(foe, frameSpan, lastFrameTime);
+        foeBulletM.checkRollbackCollision(player, frameSpan, lastFrameTime);
 
         lastFrameTime = nextFrameTime;
         lastFrameIndex++;
@@ -245,10 +250,10 @@ function rollBack(startTime: number, type: string) {
     //     foe.
     // }
 
-    // turretBulletM.batchUndestroyBullet();
-    // turretBulletM.batchUndestroyBullet();
-    // playerBulletM.batchUndestroyBullet();
-    // foeBulletM.batchUndestroyBullet();
+    turretBulletM.batchUndestroyBullet();
+    turretBulletM.batchUndestroyBullet();
+    playerBulletM.batchUndestroyBullet();
+    foeBulletM.batchUndestroyBullet();
 
     // console.log('roll back time: ', new Date().valueOf() - startTime - currentTime);
     justRolledBack = true;
@@ -290,9 +295,9 @@ var animate = (span: number, timeStamp: number) => {
     // foe.update(span, planeFacingVector, timeStamp, timeStamp);
 
     let beat = musicSyncer.findCurrentBeat();
-    // if (beat)
-    //     turret.sync(beat);
-    // turretBulletM.update(timeStamp);
+    if (beat)
+        turret.sync(beat);
+    turretBulletM.update(timeStamp);
 
 
     if (justRolledBack) {

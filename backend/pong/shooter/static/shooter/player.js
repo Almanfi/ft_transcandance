@@ -87,6 +87,7 @@ export class Inputs {
     }
 }
 export class Player extends THREE.Object3D {
+    // planeRaycaster: THREE.Raycaster;
     constructor(position, bulletManager) {
         super();
         let size = 700;
@@ -112,6 +113,7 @@ export class Player extends THREE.Object3D {
         this.actions = new Map();
         this.setBulletManager(bulletManager);
         this.positionBackup = this.position.clone();
+        // this.planeRaycaster = new THREE.Raycaster();
     }
     ;
     reset() {
@@ -125,6 +127,9 @@ export class Player extends THREE.Object3D {
     addToScene(scene) {
         this.scene = scene;
         scene.add(this);
+    }
+    setPlane(plane) {
+        this.plane = plane;
     }
     setPlaneVector(planeFacingVector) {
         planeFacingVector.normalize();
@@ -209,6 +214,7 @@ export class Player extends THREE.Object3D {
         // this.position.y = this.position.y;// no chango for y
     }
     update(timeS, timeStamp, actionTime) {
+        var _a;
         let speed = this.speedRate * timeS;
         // let speed = timeS
         const projectionOnPlane = this.planeFacingVector;
@@ -222,6 +228,7 @@ export class Player extends THREE.Object3D {
         // this.movementVector.multiplyScalar(speed);
         // console.log(`movement vector: `, JSON.stringify(this.movementVector));
         this.position.addScaledVector(this.movementVector, speed);
+        (_a = this.plane) === null || _a === void 0 ? void 0 : _a.keepInside(this.position, this.radius);
         // this.floorPosition(this.position);
         // if (this.controls.sendActionToPeer && this.saveAction) {
         //     this.currInput = {};
