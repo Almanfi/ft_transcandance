@@ -172,7 +172,7 @@ export class Player extends THREE.Object3D {
     rollBack(receivedData, lastTime, actionTime, frameIndex) {
         let rollBackData = this.rollback.rollbackFrame(frameIndex);
         let rollBackInputs = rollBackData.input;
-        console.log(`rolling back from ${lastTime} to ${actionTime}`);
+        // console.log(`rolling back from ${lastTime} to ${actionTime}`);
         for (let i = 0; i < rollBackInputs.length - 1; i++) { // handle before last inputs
             console.log("handling in between inputs");
             let nextInput = rollBackInputs[i + 1];
@@ -247,7 +247,7 @@ export class Player extends THREE.Object3D {
         // }
         if (!this.position.equals(this.positionBackup)) {
             this.positionBackup.copy(this.position);
-            console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
+            // console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
             console.log(` -position of ${this.name} at time: ${timeStamp + timeS} is: `, JSON.stringify(this.position));
         }
     }
