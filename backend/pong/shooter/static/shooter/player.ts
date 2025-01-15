@@ -143,6 +143,9 @@ export class Player extends THREE.Object3D {
     rollback: Rollback;
     
     plane: Plane | undefined;
+    health: number ;
+    maxHealth: number;
+    alive: boolean;
     // planeRaycaster: THREE.Raycaster;
 
     constructor(position: THREE.Vector3,
@@ -176,6 +179,9 @@ export class Player extends THREE.Object3D {
         
         this.setBulletManager(bulletManager);
         this.positionBackup = this.position.clone();
+        this. maxHealth = 10;
+        this.health = this.maxHealth;
+        this.alive = true;
 
         // this.planeRaycaster = new THREE.Raycaster();
     };
@@ -187,6 +193,21 @@ export class Player extends THREE.Object3D {
         this.position.set(0, 0, 0);
         this.oldPosition.set(0, 0, 0);
         this.positionBackup.copy(this.position);
+        this.health = this.maxHealth;
+        this.alive = true;
+    }
+
+    takeDamage(damage: number) {
+        if (!this.alive)
+            return;
+        this.health -= damage;
+        if (this.health <= 0) {
+            this.alive = false;
+            console.log('player died: ', this.name);
+            // endGame();
+        }
+        console.log(`${this.name} health: `, this.health);
+        // updateHealthBar();
     }
 
     addToScene(scene: THREE.Scene) {
@@ -342,8 +363,8 @@ export class Player extends THREE.Object3D {
             // }
         if (!this.position.equals(this.positionBackup)) {
             this.positionBackup.copy(this.position);
-            console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
-            console.log(` -position of ${this.name} at time: ${timeStamp + timeS} is: `, JSON.stringify(this.position));
+            // console.log(`+position of ${this.name} at time: ${timeStamp} is: `, JSON.stringify(this.oldPosition));
+            // console.log(` -position of ${this.name} at time: ${timeStamp + timeS} is: `, JSON.stringify(this.position));
         }
  
     }

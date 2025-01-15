@@ -577,8 +577,10 @@ export class PlayersBulletManager extends ABulletManager {
             if (bullet.date > time)
                 continue;
             if (bullet.intersects(other, s, vex)) {
-                bullet.material.color.set(0x00ff00);
-                bullet.material.emissive.set(0x000000);
+                (other as Player).takeDamage(1);
+                this.despawnBullet(bullet);
+                // bullet.material.color.set(0x00ff00);
+                // bullet.material.emissive.set(0x000000);
                 return;
             }
             for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
@@ -605,9 +607,11 @@ export class PlayersBulletManager extends ABulletManager {
             if (bullet.date > time)
                 continue;
             if (bullet.intersects(other, s, vex)) {
-                this.undestroyBullet(bullet);
-                bullet.material.color.set(0x00ff00);
-                bullet.material.emissive.set(0x000000);
+                (other as Player).takeDamage(1);
+                this.returnDestroyedBullet(bullet);
+                // this.undestroyBullet(bullet);
+                // bullet.material.color.set(0x00ff00);
+                // bullet.material.emissive.set(0x000000);
                 return;
             }
             for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
@@ -635,8 +639,10 @@ export class PlayersBulletManager extends ABulletManager {
         let vex = new THREE.Vector3();
         for(var [key, bullet] of this.bullets) {
             if (bullet.intersects(other, s, vex)) {
-                bullet.material.color.set(0x000000);
-                bullet.material.emissive.set(0x000000);
+                other.takeDamage(1);
+                this.despawnBullet(bullet);
+                // bullet.material.color.set(0x000000);
+                // bullet.material.emissive.set(0x000000);
                 return;
             }
             for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
@@ -682,6 +688,7 @@ export class TurretBulletManager extends ABulletManager {
             if (bullet.date > time)
                 continue;
             if (bullet.intersects(player, s, vex)) {
+                player.takeDamage(1);
                 bullet.material.color.set(0x00ff00);
                 return;
             }
@@ -711,8 +718,10 @@ export class TurretBulletManager extends ABulletManager {
             if (bullet.date > time)
                 continue;
             if (bullet.intersects(player, s, vex)) {
-                this.undestroyBullet(bullet);
-                bullet.material.color.set(0x00ff00);
+                player.takeDamage(1);
+                this.returnDestroyedBullet(bullet);
+                // this.undestroyBullet(bullet);
+                // bullet.material.color.set(0x00ff00);
                 return;
             }
             // no destroyed bullet is red
@@ -743,7 +752,9 @@ export class TurretBulletManager extends ABulletManager {
         var vex = new THREE.Vector3();
         for(var [key, bullet] of this.bullets) {
             if (bullet.intersects(player, s, vex)) {
-                this.bullets.get(key).material.color.set(0x000000);
+                // this.bullets.get(key).material.color.set(0x000000);
+                player.takeDamage(1);
+                this.despawnBullet(bullet);
                 return;
             }
             if (this.bullets.get(key).material.color.getHex() === 0xff0000)

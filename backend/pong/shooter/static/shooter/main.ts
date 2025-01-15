@@ -7,6 +7,7 @@ import { MusicSync } from './sync.js';
 import { musicMap } from './assets/reolMap.js';
 import { Connection } from './connection.js';
 import { dataSaved } from './rollback.js';
+import { UIRanderer } from './UIRanderer.js';
 // import { CSS2DObject, CSS2DRenderer } from './node_modules/three/examples/jsm/renderers/CSS2DRenderer.js';
 
 function initThreeJS(): { scene: THREE.Scene,
@@ -23,7 +24,7 @@ function initThreeJS(): { scene: THREE.Scene,
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setPixelRatio( window.devicePixelRatio * 1);
 
-    document.body.appendChild( renderer.domElement );
+    let gameConvas =  document.body.appendChild( renderer.domElement );
 
     const light = new THREE.AmbientLight( 0xffffff );
     light.intensity = 0.5;
@@ -42,6 +43,13 @@ declare var users: any;
 
 let player2 = user.id === users[0].id ? users[1] : users[0];
 console.log('user: ', user, ' foe: ', player2);
+
+
+const UIRander = new UIRanderer();
+
+UIRander.createHealthBar();
+UIRander.render();
+
 
 const { scene, camera, renderer } = initThreeJS();
 const keyControls = new KeyControls(camera);
@@ -292,7 +300,6 @@ var animate = (span: number, timeStamp: number) => {
     foe.savePlayerData(frameIndex);
     foe.update(span, timeStamp, timeStamp);
     foeBulletM.update(timeStamp);
-    // foe.update(span, planeFacingVector, timeStamp, timeStamp);
 
     let beat = musicSyncer.findCurrentBeat();
     if (beat)
@@ -309,6 +316,8 @@ var animate = (span: number, timeStamp: number) => {
 
     turretBulletM.checkCollision(player, span);
     turretBulletM.checkCollision(foe, span);
+    playerBulletM.checkCollision(foe, span);
+    foeBulletM.checkCollision(player, span);
     // turretBulletManager.checkCollision(foe, span);
     // playerBulletManager.checkCollision(foe, span);
     // foeBulletManager.checkCollision(player, span);
@@ -345,7 +354,7 @@ function handleInputs(span: number, inputTimeStamp: number) {
     //     // console.log('-sent data: ', data);
     // }, 100);
     connection.send(JSON.stringify(data));
-    console.log('+sent data: ', data);
+    // console.log('+sent data: ', data);
 };
 
 function startGame(timeStamp) {
