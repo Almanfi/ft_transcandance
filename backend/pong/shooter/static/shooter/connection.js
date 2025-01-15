@@ -14,6 +14,8 @@ class WebSocketCnx {
             "friend_id": this.receiver,
             "message": msg
         };
+        if (!this.connected)
+            return;
         (_a = this.socket) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify(data));
     }
     setReciever(receiver) {
@@ -21,7 +23,8 @@ class WebSocketCnx {
     }
     connectToServer(socketMsgHandler) {
         let protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        let address = protocol + window.location.host + '/ws/roll/';
+        let socketPort = ":8000";
+        let address = protocol + window.location.hostname + socketPort + '/ws/roll/';
         this.initSocket(address, socketMsgHandler);
     }
     onSocketOpen(e) {

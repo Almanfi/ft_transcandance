@@ -1,6 +1,6 @@
-FROM alpine:3.20
+FROM alpine:3.21
 
-RUN apk update \
+RUN apk update  && apk upgrade \
     && apk add postgresql \
     && mkdir /run/postgresql \
     && chown postgres:postgres /run/postgresql \

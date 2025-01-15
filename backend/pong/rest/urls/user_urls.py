@@ -1,5 +1,6 @@
-from django.urls import path, include
+from django.urls import path
 from ..views.user_views import UserInfo
+from ..views.oauth_views import OauthViews
 
 urlpatterns = [
     path('', UserInfo.as_view({
@@ -10,7 +11,10 @@ urlpatterns = [
         }),
         name='user_crud'
     ),
+	path('search/', UserInfo.as_view({
+		'post': 'search_users'
+	})),
     path('login/', UserInfo.as_view({
         'post': 'login_user',
-    }))
+    })),
 ]

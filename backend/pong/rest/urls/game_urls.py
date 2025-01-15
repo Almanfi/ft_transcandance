@@ -3,7 +3,9 @@ from ..views.game_views import GameView
 
 urlpatterns = [
     path('', GameView.as_view({
-        'post': "create_game"
+        'post': "create_game",
+        'get': "get_invites",
+        "patch": "end_game"
         })
     ),
     path('invite/', GameView.as_view({
@@ -22,20 +24,4 @@ urlpatterns = [
         'patch': "refuse_invite"
         })
     ),
-    # path('move/', GameView.as_view({
-    #     'patch': "move_team"
-    #     })
-    # ),
-    # path('quit/', GameView.as_view({
-    #     'patch': "quit_game"
-    #     })
-    # ),
-    # path('start/', GameView.as_view({
-    #     'patch': "start_game"
-    #     })
-    # ),
-    # path('cancel/', GameView.as_view({
-    #     'delete': "cancel_game"
-    #     })
-    # )
 ]

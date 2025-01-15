@@ -29,6 +29,16 @@ class Invite(models.Model):
     def create_new_game_invite(inviter, invited, game):
         new_invitation = Invite.objects.create(type=INVITE_TYPE[0][0], game = game, inviter=inviter, invited=invited)
         return new_invitation
+    
+    @staticmethod
+    def create_matchmaking_invite(game, inviter, invited):
+        accepted_invitation = Invite.objects.create(type=INVITE_TYPE[0][0], game=game, inviter=inviter, invited=invited, accepted=True)
+        return accepted_invitation
+
+    @staticmethod
+    def create_tournament_invite(game, inviter, invited):
+        accepted_invitation = Invite.objects.create(type=INVITE_TYPE[1][0], game=game, inviter=inviter, invited=invited, accepted=True)
+        return accepted_invitation
 
     @staticmethod
     def fetch_invites_by_id(invites):
@@ -39,3 +49,13 @@ class Invite(models.Model):
     def fetch_user_game_invite(game, user):
         invite = Invite.objects.filter(game=game, invited=user)
         return list(invite)
+    
+    @staticmethod
+    def fetch_tournament_invite(games):
+        invites = Invite.objects.filter(game__in=games)
+        return list(invites)
+    
+    @staticmethod
+    def fetch_active_invites(user):
+        invites = Invite.objects.filter(invited = user, seen=False, type = INVITE_TYPE[0][0])
+        return list(invites)

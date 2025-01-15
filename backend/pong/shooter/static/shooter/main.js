@@ -27,7 +27,9 @@ function initThreeJS() {
     scene.add(light2);
     return { scene, camera, renderer };
 }
-let player2 = user.id === users[0].id ? users[1] : users[0];
+let player2 = { id: "0" };
+if (user)
+    player2 = user.id === users[0].id ? users[1] : users[0];
 console.log('user: ', user, ' foe: ', player2);
 const UIRander = new UIRanderer();
 UIRander.createHealthBar();

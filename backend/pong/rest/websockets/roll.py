@@ -36,11 +36,8 @@ class RollSocket(WebsocketConsumer):
         if len(friend) != 1:
             return {"error_code":36, "message": "No User With Such Id"}
         friend = UserSerializer(friend[0], context={"exclude": ['password', 'salt']})
-        print("creating message", file=sys.stderr)
         new_message:Message = Message.create_new_message(self.scope['user'].instance, data['message'], None, None)
-        print("async message start", file=sys.stderr)
         async_to_sync(self.channel_layer.group_send)(friend.data['username'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
-        print("async message end", file=sys.stderr)
         return {"status": MESSAGE_STATUS[0][0], "message": new_message.content}
 
     def retrieve_messages(self, data):

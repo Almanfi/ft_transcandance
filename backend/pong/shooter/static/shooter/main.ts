@@ -41,7 +41,9 @@ function initThreeJS(): { scene: THREE.Scene,
 declare var user: any;
 declare var users: any;
 
-let player2 = user.id === users[0].id ? users[1] : users[0];
+let player2 = {id: "0"};
+if (user)
+    player2 = user.id === users[0].id ? users[1] : users[0];
 console.log('user: ', user, ' foe: ', player2);
 
 

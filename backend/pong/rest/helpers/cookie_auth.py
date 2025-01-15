@@ -1,20 +1,19 @@
 from channels.middleware import BaseMiddleware
 from channels.sessions import CookieMiddleware, SessionMiddleware
 from channels.db import database_sync_to_async
-from channels.exceptions import DenyConnection
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.authentication import BaseAuthentication
 from ..serializers.user_serializers import UserSerializer
 from ..models.user_model import User
 from .parse_uuid import parse_uuid
 from jwt import decode
-from typing import Any
 import os
 
-
+JWT_PRIVATE_KEY = f"-----BEGIN PRIVATE KEY-----\n{os.getenv("JWT_SECRET")}\n-----END PRIVATE KEY-----"
+JWT_PUBLIC_KEY = f"-----BEGIN PUBLIC KEY-----\n{os.getenv("JWT_PUBLIC")}\n-----END PUBLIC KEY-----"
 
 def authenticate_user(token):
-    token = decode(token, os.getenv("JWT_SECRET"), algorithms=["EdDSA"])
+    token = decode(token, JWT_PRIVATE_KEY, algorithms=["EdDSA"])
     if "id" not in token:
         return None
     user_uuid = parse_uuid([token['id']])
@@ -35,10 +34,10 @@ class CookieAuth(BaseAuthentication):
     def authenticate(self, request):
         token = request.COOKIES.get("id_key")
         if not token:
-            raise AuthenticationFailed("No Cookie Was Given")
+            raise AuthenticationFailed({"message": "No Cookie Was Given", "error_code": 113})
         authentication_data = authenticate_user(token)
         if authentication_data == None:
-            raise AuthenticationFailed("Bad Authentication Cookie")
+            raise AuthenticationFailed({"message": "Bad Authentication Cookie", "error_code": 114})
         return authentication_data
 
 class WebSocketAuth(BaseMiddleware):
@@ -47,7 +46,7 @@ class WebSocketAuth(BaseMiddleware):
         super().__init__(inner)
 
     async def __call__(self, scope, receive, send):
-        scope['user'] = None
+        scope['user'] = None       
         if 'id_key' not in scope.get("cookies"):
             return await self.inner(scope, receive, send)
         id_key: str = scope.get("cookies")['id_key']
@@ -67,7 +66,7 @@ class ExceptionCatcher(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         try:
             return await super().__call__(scope, receive, send)
-        except ValueError as e:
+        except Exception as e:
             print(f"the error is {e}")
             return await send({
                 'type': "websocket.close",
@@ -77,4 +76,4 @@ class ExceptionCatcher(BaseMiddleware):
 
 
 def WebSocketAuthStack(app):
-    return CookieMiddleware(SessionMiddleware(WebSocketAuth(ExceptionCatcher(app))))
+    return CookieMiddleware(SessionMiddleware(ExceptionCatcher(WebSocketAuth(app))))
