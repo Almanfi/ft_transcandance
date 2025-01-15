@@ -30,6 +30,9 @@
     [ ] check all TODOS inside files
     [ ] when searching in users, don't show thoses that have some name as me
     [ ] add notifications page
+    [ ] test responsive for notification
+    [ ] enable update image in setting
+    [ ] if friend in blocked list go back to user page
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

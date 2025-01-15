@@ -1,12 +1,12 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar/Navbar.js';
-import Swords from '../../components/icons/Swords/Swords.js';
-import WinCup from '../../components/icons/WinCup/WinCup.js';
-import Award from '../../components/icons/Award/Award.js';
-import Settings from './settings/settings.js';
+import Navbar from '../../components/Navbar.jsx';
+import Swords from '../../components/icons/Swords.jsx';
+import WinCup from '../../components/icons/WinCup.jsx';
+import Award from '../../components/icons/Award.jsx';
+import Settings from './utils/settings.jsx';
 import api from '../../services/api.js';
-import Relations from './relations/relations.js';
-import OpenGame from './openGame/openGame.js';
+import Relations from './utils/relations.jsx';
+import OpenGame from './utils/openGame.jsx';
 
 function User() {
   const [render, State] = Ura.init();
@@ -32,6 +32,11 @@ function User() {
     }
   }
   fetchData();
+
+  // events.addChild("friendship_received", "update_navbar", () => {
+
+    
+  // })
 
   return render(() => (
     <root>

@@ -1,12 +1,13 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar/Navbar.js';
-import Swords from '../../components/icons/Swords/Swords.js';
-import WinCup from '../../components/icons/WinCup/WinCup.js';
-import Award from '../../components/icons/Award/Award.js';
-import Play from '../../components/icons/Play/Play.js';
-import Chat from '../../components/icons/Chat/Chat.js';
+import Navbar from '../../components/Navbar.jsx';
+import Swords from '../../components/icons/Swords.jsx';
+import WinCup from '../../components/icons/WinCup.jsx';
+import Award from '../../components/icons/Award.jsx';
+import Play from '../../components/icons/Play.jsx';
+import Chat from '../../components/icons/Chat.jsx';
 import api from '../../services/api.js';
-import Toast from '../../components/Toast/Toast.js';
+import Toast from '../../components/Toast.jsx';
+import events from '../../services/events.js';
 // import { GlobalUser } from '../../services/store.js';
 
 // const [getGlobalUser, setGlobalUser] = GlobalUser;
@@ -18,7 +19,6 @@ function Friend() {
     return Ura.navigate("/home");
   }
 
-
   const [render, State] = Ura.init();
   const [getList, setList] = State([]);
   const [getRelations, setRelations] = State({
@@ -29,9 +29,7 @@ function Friend() {
   });
 
 
-  const [getAction, setAction] = State("Add friend");
-
-  const [getUser, setUser] = State({
+  const [getUser, setFriendData] = State({
     id: "",
     firstname: "",
     lastname: "",
@@ -39,42 +37,84 @@ function Friend() {
     profile_picture: "/static/rest/images/users_profiles/profile.jpg"
   });
 
-  const fetchData = async () => {
-    console.log("search for id", id);
-    try {
 
+  const determineAction = async (id) => {
+    const [friends, invited, invites, blocks] = await Promise.all([
+      api.getFriends(),
+      api.getInvited(),
+      api.getInvites(),
+      api.getBlocks(),
+    ]);
+
+    const findUser = (users) => users.find(user => user.id === id);
+    const blockedUser = findUser(blocks);
+    if (blockedUser) return { invite_id: blockedUser.invite_id, action: "Blocked user" };
+    const friend = findUser(friends);
+    if (friend) return { invite_id: friend.invite_id, action: "Start conversation" };
+    const invitedUser = findUser(invited);
+    if (invitedUser) return { invite_id: invitedUser.invite_id, action: "Accept invitation" };
+    const invite = findUser(invites);
+    if (invite) return { invite_id: invite.invite_id, action: "Cancel invitation" };
+    return { invite_id: null, action: "Send invitation" };
+  };
+
+  const [getAction, setAction] = State({ invite_id: id, action: "Add friend" });
+
+  const fetchData = async () => {
+    try {
       const res = await api.getUsersById([id]);
       const user = await api.getUser();
 
-      if (user.id === id) {
-        Ura.create(<Toast message={"invalid page"} delay={0} />)
-        Ura.navigate("/home");
+      if (!res.length || user.id === id) {
+        Ura.create(<Toast message="Invalid user or page" delay={0} />);
+        return Ura.navigate("/home");
       }
-      else if (res.length === 0) {
-        Ura.create(<Toast message={"user not found"} />);
-        Ura.navigate("/home");
-      }
-      else {
-        const relations = await api.getRelations();
-        console.log("user infos:", res);
-        console.log("relations:", relations);
-        setUser(res[0]);
-      }
+      const action = await determineAction(id);
+      setAction(action);
+      setFriendData(res[0]);
     } catch (error) {
-      api.handleError(error)
+      api.handleError(error);
     }
-  }
+  };
 
-  const handleInvite = async (e) => {
+  events.addChild("friendship_received", "fetchData", fetchData);
+
+  const handleAction = async (e) => {
     e.preventDefault();
     try {
-      console.log("send invitation to ", getUser().id);
-      const res = await api.inviteFriend(getUser().id);
+      const name = getAction().action;
+      const id_ = getAction().invite_id;
+      switch (name) {
+        case "Send invitation":
+          await api.inviteFriend(getUser().id);
+          Ura.create(<Toast message="Invitation sent!" color='green' />);
+          break;
+        case "Accept invitation":
+          await api.acceptInvitation(id_);
+          Ura.create(<Toast message="Invitation accepted!" color='green' />);
+          break;
+        case "Cancel invitation":
+          await api.cancelInvitation(id_);
+          Ura.create(<Toast message="Invitation canceled!" color='green' />);
+          break;
+        case "Start conversation":
+          Ura.navigate(`/chat?user=${getUser().id}`);
+          break;
 
+        case "Blocked user":
+          Ura.create(<Toast message="User is blocked." />);
+          return Ura.navigate("/home");
+          break;
+        default:
+          console.log("unknown action");
+          // Ura.create(<Toast message="Unknown action." color='green' />);
+          break;
+      }
+      fetchData();
     } catch (error) {
-      api.handleError(error)
+      api.handleError(error);
     }
-  }
+  };
 
   fetchData()
   return render(() => (
@@ -93,8 +133,8 @@ function Friend() {
             </div>
           </div>
           <div className="user-btn">
-            <button onclick={handleInvite}>
-              Add friend
+            <button onclick={handleAction}>
+              {getAction().action}
             </button>
           </div>
         </div>

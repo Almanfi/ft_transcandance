@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar/Navbar.js";
+import Navbar from "../../components/Navbar.jsx";
 
 function Home() {
   const [render] = Ura.init();

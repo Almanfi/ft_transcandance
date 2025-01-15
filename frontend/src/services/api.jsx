@@ -1,15 +1,8 @@
 import Ura from "ura";
-import Toast from "../components/Toast/Toast.js";
-import { GameState } from "../pages/user/openGame/openGame.js";
+import Toast from "../components/Toast.jsx";
+import events from "./events.js";
 
 const endpoint = "https://localhost:8000";
-
-async function send(url, prams) {
-  return fetch(`${endpoint}${url}`, {
-    credentials: "include",
-    ...prams,
-  });
-}
 
 async function signup(user) {
   const response = await fetch(`${endpoint}/users/`, {
@@ -158,6 +151,7 @@ async function deleteUser() {
  * - Invited  : [] // Received invitations
  * - Invites  : [] // Sent invitations
  */
+
 async function getRelations() {
   const response = await fetch(`${endpoint}/relationships/`, {
     credentials: "include",
@@ -283,6 +277,7 @@ async function unblockUser(id) {
   }
 }
 
+// Received invitations
 async function getInvited() {
   const relations = await getRelations();
   const data = relations.invited.map((invite) => invite.from_user);
@@ -299,6 +294,7 @@ async function getInvited() {
   return ids;
 }
 
+// sent invitations
 async function getInvites() {
   const relations = await getRelations();
   const data = relations.invites.map((invite) => invite.to_user);
@@ -324,15 +320,11 @@ async function getBlocks() {
     if (user.id == invite.from_user) data.push(invite.to_user);
     else data.push(invite.from_user);
   }
-
   const ids = await getUsersById(data);
   for (const fetchedUser of ids) {
     for (const invite of relations.blocks) {
-      if (
-        invite.from_user == fetchedUser.id ||
-        invite.to_user == fetchedUser.id
-      ) {
-        console.warn("found");
+      if (invite.from_user == fetchedUser.id || invite.to_user == fetchedUser.id) {
+        // console.warn("found");
         fetchedUser["invite_id"] = invite["id"];
         break;
       }
@@ -354,10 +346,7 @@ async function getFriends() {
   const ids = await getUsersById(data);
   for (const fetchedUser of ids) {
     for (const invite of relations.friends) {
-      if (
-        invite.from_user == fetchedUser.id ||
-        invite.to_user == fetchedUser.id
-      ) {
+      if (invite.from_user == fetchedUser.id || invite.to_user == fetchedUser.id) {
         fetchedUser["invite_id"] = invite["id"];
         break;
       }
@@ -365,7 +354,6 @@ async function getFriends() {
   }
   return ids;
 }
-
 
 // Error handeling
 function handleError(err) {
@@ -393,11 +381,11 @@ function logout() {
 
 // Web Sockets
 let webSocket = null;
-let Events = {};
+// let Events = {};
 
-function setEvent(name, handler) {
-  Events[name] = handler;
-}
+// function setEvent(name, handler) {
+//   Events[name] = handler;
+// }
 
 const websocketApi = "http://localhost:8001";
 
@@ -415,31 +403,38 @@ function openSocket() {
 
       const data = JSON.parse(event.data);
 
-      switch (data.type) {
-        case "friendship_received": {
-          return Events[data.type](data);
-          break;
-        }
-        case "chat.message": {
-          if (Events[data.type]) return Events[data.type](data);
-          break;
-        }
-        case "chat.message.retrieve": {
-          if (Events[data.type]) return Events[data.type](data);
-          break
-        }
-        case "game_invite": {
-          if (Events[data.type]) return Events[data.type](data);
-          break
-        }
-        default:
-          break;
-      }
+
+      events.emit("friendship_received", data);
+
+
+      // switch (data.type) {
+      //   case "friendship_received": {
+
+      //     // return Events[data.type](data);
+      //     break;
+      //   }
+      //   case "chat.message": {
+      //     // if (Events[data.type]) return Events[data.type](data);
+      //     break;
+      //   }
+      //   case "chat.message.retrieve": {
+      //     // if (Events[data.type]) return Events[data.type](data);
+      //     break
+      //   }
+      //   case "game_invite": {
+      //     // if (Events[data.type]) return Events[data.type](data);
+      //     break
+      //   }
+      //   default:
+      //     break;
+      // }
     };
 
     webSocket.onclose = (event) => {
+      events.remove("")
+
       console.log("WebSocket connection closed. Reconnecting...");
-      Events = {};
+      // Events = {};
       webSocket = null;
       if (r < 3) {
         setTimeout(() => { r++; openSocket(); }, 3000);
@@ -477,8 +472,7 @@ const retrieveMessages = async (id) => {
   }
 };
 
-async function getGameInvites()
-{
+async function getGameInvites() {
   const response = await fetch(`${endpoint}/games/`, {
     method: "GET",
     credentials: "include",
@@ -604,17 +598,17 @@ function openGameSocket(game_id) {
 let matchmakingSocket = null
 export function openMatchMakingSocket() {
   matchmakingSocket = new WebSocket(`${websocketApi}/ws/matchmaking/`);
-  matchmakingSocket.onopen = (e) => {console.log("Connected to matchmaking socket")};
-  matchmakingSocket.onmessage = (e) => {console.log("Matchmaking Socket message", e.data)}
-  matchmakingSocket.onclose = (e) => { console.log("Matchmaking Socket Quit")} 
+  matchmakingSocket.onopen = (e) => { console.log("Connected to matchmaking socket") };
+  matchmakingSocket.onmessage = (e) => { console.log("Matchmaking Socket message", e.data) }
+  matchmakingSocket.onclose = (e) => { console.log("Matchmaking Socket Quit") }
 }
 
 let tournamentMakingSocket = null
 export function openTournamentMakingSocket() {
   tournamentMakingSocket = new WebSocket(`${websocketApi}/ws/tournamentmaking/`)
-  tournamentMakingSocket.onopen = (e) => {console.log("Connected to tournament making socket")};
-  tournamentMakingSocket.onmessage = (e) => {console.log("Tournament Making Socket Message", e.data)}
-  tournamentMakingSocket.onclose = (e) => {console.log("Matchmaking Socket Quit")} 
+  tournamentMakingSocket.onopen = (e) => { console.log("Connected to tournament making socket") };
+  tournamentMakingSocket.onmessage = (e) => { console.log("Tournament Making Socket Message", e.data) }
+  tournamentMakingSocket.onclose = (e) => { console.log("Matchmaking Socket Quit") }
 }
 
 const api = {
@@ -634,7 +628,7 @@ const api = {
   getBlocks,
   getFriends,
   getGameInvites,
-  setEvent,
+  // setEvent,
 
   inviteFriend,
   acceptInvitation,

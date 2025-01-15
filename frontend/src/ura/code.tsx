@@ -198,14 +198,7 @@ function createDOM(vdom): VDOM {
           }
         default:
           if (vdom.dom) {
-            // destroy(vdom);
-            console.error("e already has dom"); // TODO: to be removed
-            // let tmpVdom = deepcopy(vdom);
-            // tmpVdom.vdom = undefined;
-            // destroy(tmpVdom);
-            // execute(REPLACE, vdom, tmpVdom)
-            // destroy(vdom);
-            // execute(CREATE, vdom)
+            console.error("vdom already has dom"); // TODO: to be removed
           }
           else {
             if (svgElements.has(vdom.tag))
@@ -217,10 +210,8 @@ function createDOM(vdom): VDOM {
       break;
     }
     case FRAGMENT: {
-      // console.log("createDOM: found fr", vdom);
       if (vdom.dom) console.error("fr already has dom"); // TODO: to be removed
       vdom.dom = document.createElement("container");
-      // vdom.dom = document.createDocumentFragment()
       break;
     }
     case TEXT: {
@@ -237,8 +228,6 @@ function createDOM(vdom): VDOM {
     }
     case EXEC: {
       ExecStack.push(vdom.call);
-      // console.log("found exec", vdom);
-      // vdom.call();
       vdom.dom = document.createElement("exec");
       break;
     }
@@ -576,7 +565,7 @@ function refresh(params = null) {
   let path = window.location.pathname || "*";
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
-  console.log("view:", RouteConfig);
+  // console.log("view:", RouteConfig);
 
 
   return display(<RouteConfig props={params} />);
@@ -627,7 +616,7 @@ async function loadJSFiles(routes, base) {
 
 function setEventListeners() {
   window.addEventListener("DOMContentLoaded", () => {
-    console.error("load dom");
+    // console.error("load dom");
     Ura.refresh()
   });
   window.addEventListener("popstate", () => {

@@ -1,10 +1,10 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar/Navbar.js";
-import Arrow from "../../components/icons/Arrow/Arrow.js";
-import Input from "../../components/Input/Input.js";
-import Toast from "../../components/Toast/Toast.js";
+import Navbar from "../../components/Navbar.jsx";
+import Arrow from "../../components/icons/Arrow.jsx";
+import Input from "../../components/Input.jsx";
+// import Toast from "../../components/Toast.jsx";
 import api from "../../services/api.js";
-import Home from "../home/home.js";
+// import Home from "../home/home.js";
 
 
 function Login() {

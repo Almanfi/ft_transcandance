@@ -1,19 +1,6 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar/Navbar.js";
-import New from "../../components/create/create.js";
+import Navbar from "../../components/Navbar.jsx";
 import api from "../../services/api.js";
-// import { GlobalUser } from "../../services/store.js";
-
-/*
-+ TODO:
-  + request friends
-  + check id and find if it's in friends list
-  + get conversations
-  + listen on chat and update it using setConv
-  + send message and update it using setConv
-*/
-
-// const [getGlobalUser, setGlobalUser] = GlobalUser;
 
 function Chat(props = {}) {
   const [render, State] = Ura.init();
@@ -23,14 +10,14 @@ function Chat(props = {}) {
   const [getCurr, setCurr] = State({});
   const [getUser, setUser] = State({});
 
-  api.setEvent("chat.message.retrieve", (data) => {
-    console.log("chat.message.retrieve", data.messages);
-    data.messages.sort((a, b) => {
-      return new Date(a.timestamp) - new Date(b.timestamp);
-    });
-    const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
-    setConv(res);
-  });
+  // api.setEvent("chat.message.retrieve", (data) => {
+  //   console.log("chat.message.retrieve", data.messages);
+  //   data.messages.sort((a, b) => {
+  //     return new Date(a.timestamp) - new Date(b.timestamp);
+  //   });
+  //   const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
+  //   setConv(res);
+  // });
 
   const handleMessages = async () => {
     try {
@@ -56,25 +43,25 @@ function Chat(props = {}) {
   };
 
   // recieve messages
-  api.setEvent("chat.message", (data) => {
-    console.log("receive chat.message event with ", data);
-    if (data.from === getCurr().id) {
-      const res = {
-        id: getCurr().id,
-        username: getCurr().username,
-        content: data.message
-      }
-      console.log("set conversation to");
-      console.log(getConv());
-      console.log("add to it", res);
+  // api.setEvent("chat.message", (data) => {
+  //   console.log("receive chat.message event with ", data);
+  //   if (data.from === getCurr().id) {
+  //     const res = {
+  //       id: getCurr().id,
+  //       username: getCurr().username,
+  //       content: data.message
+  //     }
+  //     console.log("set conversation to");
+  //     console.log(getConv());
+  //     console.log("add to it", res);
 
-      setConv([
-        ...getConv(),
-        res,
-      ])
-      // const res = data.message.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
-    }
-  });
+  //     setConv([
+  //       ...getConv(),
+  //       res,
+  //     ])
+  //     // const res = data.message.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
+  //   }
+  // });
 
   const call = async () => {
     console.warn("before");
