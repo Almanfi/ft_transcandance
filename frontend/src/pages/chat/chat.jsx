@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.jsx";
+import Navbar from "../../components/Navbar.js";
 import api from "../../services/api.js";
 
 function Chat(props = {}) {
@@ -91,12 +91,12 @@ function Chat(props = {}) {
 
   return render(() => (
     <root>
+      <Navbar />
       <div className="chat">
-        <Navbar />
         {/* <New/> */}
         <div className="left">
           <div className="up">
-              <h4>Friends</h4>
+            <h4>Friends</h4>
           </div>
           <div className="down">
             {/* friends to start chat with */}
@@ -126,12 +126,12 @@ function Chat(props = {}) {
             )}
           </loop>
           {/* send message */}
-          <if cond={/*getIndex() != -1 || */true}>
+          <div if={/*getIndex() != -1 || */true} className="if">
             <div className="down">
               <textarea name="" id=""></textarea>
               <button onclick={sendMessage}>{">"}</button>
             </div>
-          </if>
+          </div>
         </div>
       </div>
     </root>

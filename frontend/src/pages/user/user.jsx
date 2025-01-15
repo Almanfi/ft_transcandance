@@ -1,12 +1,12 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar.jsx';
-import Swords from '../../components/icons/Swords.jsx';
-import WinCup from '../../components/icons/WinCup.jsx';
-import Award from '../../components/icons/Award.jsx';
-import Settings from './utils/settings.jsx';
+import Navbar from '../../components/Navbar.js';
+import Swords from '../../components/icons/Swords.js';
+import WinCup from '../../components/icons/WinCup.js';
+import Award from '../../components/icons/Award.js';
+import Settings from './utils/settings.js';
 import api from '../../services/api.js';
-import Relations from './utils/relations.jsx';
-import OpenGame from './utils/openGame.jsx';
+import Relations from './utils/relations.js';
+import OpenGame from './utils/openGame.js';
 
 function User() {
   const [render, State] = Ura.init();
@@ -35,20 +35,20 @@ function User() {
 
   // events.addChild("friendship_received", "update_navbar", () => {
 
-    
+
   // })
 
   return render(() => (
     <root>
-      <if className="user" cond={getLoading() === true}>
-        <Navbar />
+      <Navbar />
+      <div if={getLoading() === true} className="user" >
         <Settings Show={Show} userData={userData} />
         <div id="center" >
           <div className="user-card">
             <div className="img-container">
               <img
                 src={`${api.endpoint}${getUserData().profile_picture}`}
-                alt="" onclick={() => Show[1](true)} />
+                onclick={() => Show[1](true)} />
             </div>
             <div className="name">
               <h3>
@@ -76,9 +76,9 @@ function User() {
         </div>
 
         <div>
-          <OpenGame/>
+          <OpenGame />
         </div>
-      </if>
+      </div>
     </root>
   ));
 }

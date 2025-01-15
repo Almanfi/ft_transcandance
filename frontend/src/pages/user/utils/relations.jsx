@@ -1,16 +1,16 @@
-import Ura from 'ura';
-import api from '../../../services/api.jsx';
-import Chat from '../../../components/icons/Chat.jsx';
-import Play from '../../../components/icons/Play.jsx';
-import Accept from '../../../components/icons/Accept.jsx';
+import Ura, { navigate } from 'ura';
+import api from '../../../services/api.js';
+import Chat from '../../../components/icons/Chat.js';
+import Play from '../../../components/icons/Play.js';
+import Accept from '../../../components/icons/Accept.js';
 import events from '../../../services/events.js';
 
 const [render, State, ForceState] = Ura.init();
 const [getSelect, setSelect] = ForceState("friends")
 const [getData, setData] = State([])
+const [getEvents, setEvents] = State({})
 
 function Relations() {
-  const [getEvents, setEvents] = State({})
 
   const Icons = {
     accept: () => "accept",
@@ -26,27 +26,51 @@ function Relations() {
   const eventHandlers = {
     invited: {
       accept: async (e) => {
-        console.log("accept ", e.invite_id)
-        await api.acceptInvitation(e.invite_id);
-        setData(await api.getInvited());
+        try {
+          console.log("accept ", e.invite_id)
+          await api.acceptInvitation(e.invite_id);
+          setData(await api.getInvited());
+        } catch (error) {
+          api.handleError(error)
+        }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       },
       refuse: async (e) => {
-        console.log("refuse ", e.invite_id)
-        await api.refuseInvitation(e.invite_id);
-        setData(await api.getInvited());
+        try {
+          console.log("refuse ", e.invite_id)
+          await api.refuseInvitation(e.invite_id);
+          setData(await api.getInvited());
+        } catch (error) {
+          api.handleError(error)
+        }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       },
     },
     invites: {
       cancel: async (e) => {
-        await api.cancelInvitation(e.invite_id)
-        setData(await api.getInvites());
+        try {
+          await api.cancelInvitation(e.invite_id)
+          setData(await api.getInvites());
+        } catch (error) {
+          api.handleError(error)
+        }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       }
     },
     blocks: {
       unblock: async (e) => {
-        console.log("unblock", e)
-        await api.unblockUser(e.invite_id);
-        setData(await api.getBlocks())
+        try {
+          console.log("unblock", e)
+          await api.unblockUser(e.invite_id);
+          setData(await api.getBlocks())
+        } catch (error) {
+          api.handleError(error)
+        }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       }
     },
     friends: {
@@ -54,24 +78,38 @@ function Relations() {
         try {
           const game = await api.createGame();
           const res = await api.invitePlayer(game.id, e.id);
-          Ura.navigate(`/game?id=${game.id}`)
+          navigate(`/game?id=${game.id}`)
         } catch (error) {
           api.handleError(error)
         }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       },
       chat: (e) => {
         console.log("chat", e)
-        Ura.navigate(`/chat?id=${e.id}`);
+        navigate(`/chat?id=${e.id}`);
       },
       block: async (e) => {
-        console.log("block", e);
-        await api.blockUser(e.id);
-        setData(await api.getFriends())
+        try {
+          console.log("block", e);
+          await api.blockUser(e.id);
+          setData(await api.getFriends())
+        } catch (error) {
+          api.handleError(error)
+        }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       },
       unfriend: async (e) => {
-        console.log("accept ", e.invite_id)
-        await api.unFriend(e.invite_id);
-        setData(await api.getFriends())
+        try {
+          console.log("accept ", e.invite_id)
+          await api.unFriend(e.invite_id);
+          setData(await api.getFriends())
+        } catch (error) {
+          api.handleError(error)
+        }
+        fetchRelations(getSelect());
+        events.emitChildren("friendship_received")
       },
     },
   };
@@ -89,11 +127,11 @@ function Relations() {
   const fetchRelations = async (type) => {
     try {
       console.log("fetch for type", type);
-      
+
       const data = await fetchData(type);
       setData(data);
       console.log("new data:", getData());
-      
+
       setEvents(eventHandlers[type] || {});
     } catch (error) {
       api.handleError(error);
@@ -108,11 +146,7 @@ function Relations() {
   };
 
   const handlefetch = async () => {
-    try {
-      await fetchRelations(getSelect());
-    } catch (error) {
-      api.handleError(error);
-    }
+    await fetchRelations(getSelect());
   }
 
   handlefetch();
@@ -135,13 +169,20 @@ function Relations() {
               <div className="up">
                 <img
                   src={`${api.endpoint}${parent.profile_picture}`}
-                  onclick={() => Ura.navigate(`/friend?id=${parent.id}`)}
+                  onclick={() => navigate(`/friend?id=${parent.id}`)}
                 />
                 <h4>{parent.username}</h4>
               </div>
               <loop on={Object.keys(getEvents())} className="down">
                 {(key) => (
-                  <span onclick={() => getEvents()[key](parent)} name={key}>
+                  <span name={key} onclick={() => {
+                    try {
+                      getEvents()[key](parent)
+                    } catch (error) {
+                      api.handleError(error)
+                    }
+                    fetchRelations(getSelect());
+                  }}>
                     {Icons[key]()}
                   </span>
                 )}

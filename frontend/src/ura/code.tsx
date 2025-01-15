@@ -7,19 +7,19 @@ const { deepEqual, loadCSS, svgElements } = UTILS;
 let ifTag = null;
 // JSX
 function check(children: any): any {
-  //@ts-ignore
-  return children.map((child) => {
-
-    if (child === null || child === undefined || typeof child === "string" || typeof child === "number") {
-      return {
+  let result = [];
+  children.forEach(child => {
+    if (typeof child === "string" || typeof child === "number") {
+      result.push({
         type: TEXT,
         props: {
           value: child,
         }
-      };
+      })
     }
-    return child;
+    else if (child) result.push(child);
   });
+  return result;
 }
 
 function fr(props: Props = {}, ...children: any) {
@@ -128,7 +128,7 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
   if (props && props.if !== undefined) {
     // console.warn("tag has if");
     if (!props.if) {
-      return {};
+      return undefined;
     }
     else {
     }
@@ -184,6 +184,7 @@ function createDOM(vdom): VDOM {
 
   switch (vdom.type) {
     case ELEMENT: {
+      if (!vdom.tag) return vdom;
       switch (vdom.tag) {
         case "root":
           {
@@ -215,6 +216,9 @@ function createDOM(vdom): VDOM {
       break;
     }
     case TEXT: {
+      if (vdom.props.value === undefined || vdom.props.value === "undefined") {
+        console.error("TEXT: found undefiend");
+      }
       vdom.dom = document.createTextNode(vdom.props.value);
       break;
     }
@@ -271,32 +275,22 @@ function execute(mode: number, prev: VDOM, next: VDOM = null) {
       // console.log("prev", prev);
       prev.children?.map((child) => {
         if (!child.dom) child = execute(mode, child as VDOM);
+        if (child.dom === undefined && child.dom) console.error("CHILD 0: found undefiend",);
         if (child.dom) prev.dom.appendChild((child as VDOM).dom);
       });
       break;
     }
     case REPLACE: {
-      if (!next.dom) {
-        // console.log("Replace:", prev);
-        // console.log("with:", next);
-        // if (!next.dom || !deepEqual(next.dom, prev.dom)) 
-        {
-          // console.log("not equal");
+      removeProps(prev);
+      execute(CREATE, next);
+      if (prev.dom) prev.dom.replaceWith(next.dom);
+      prev.dom = next.dom;
+      prev.children = next.children;
+      // I commented it because it caused me an error
+      // in the slider
+      // removeProps(prev);
+      prev.props = next.props;
 
-          execute(CREATE, next);
-          prev.dom.replaceWith(next.dom);
-        }
-        // if(!deepEqual(next.dom, prev.dom))
-        {
-          prev.dom = next.dom;
-          // prev.children?.map(destroy)
-          prev.children = next.children;
-          // I commented it because it caused me an error
-          // in the slider
-          // removeProps(prev);
-          prev.props = next.props;
-        }
-      }
       break;
     }
     case REMOVE: {
@@ -311,61 +305,60 @@ function execute(mode: number, prev: VDOM, next: VDOM = null) {
 
 // RECONCILIATION
 function reconciliateProps(oldProps: Props = {}, newProps: Props = {}, vdom: VDOM) {
-  if (!vdom.dom) return false;
-  oldProps = oldProps || {};
-  newProps = newProps || {};
-  let diff = false;
-  Object.keys(oldProps || {}).forEach((key) => {
-    if (!newProps.hasOwnProperty(key) || !deepEqual(oldProps[key], newProps[key])) {
-      diff = true;
-      if (key.startsWith("on")) {
-        const eventType = key.slice(2).toLowerCase();
-        vdom.dom.removeEventListener(eventType.toLowerCase(), oldProps[key]);
-      } else if (key === "style") {
-        Object.keys(oldProps.style || {}).forEach((styleProp) => {
-          vdom.dom.style[styleProp] = "";
-        });
-      } else {
-        // console.log(vdom);
-        if (!vdom.dom) console.warn("undefined vdom");
-        else if (vdom.dom[key] !== undefined) delete vdom.dom[key];
-        else {
-          try {
-            vdom.dom.removeAttribute(key);
-          } catch (error) {
-            console.error("found error while removing", vdom);
-          }
-          // vdom.dom.removeAttribute(key);
-        }
-      }
-    }
-  });
-  Object.keys(newProps || {}).forEach((key) => {
-    if (!oldProps.hasOwnProperty(key) || !deepEqual(oldProps[key], newProps[key])) {
-      diff = true;
-      if (key.startsWith("on")) {
-        const eventType = key.slice(2).toLowerCase();
-        vdom.dom.addEventListener(eventType, newProps[key]);
-      } else if (key === "style") Object.assign(vdom.dom.style, newProps[key]);
-      else {
-        if (vdom.tag === "svg" || vdom.dom instanceof SVGElement)
-          vdom.dom.setAttribute(key, newProps[key]);
-        else vdom.dom[key] = newProps[key];
-      }
-    }
-  });
-  return diff;
+  // if (!vdom.dom) return true;
+  return !(!vdom.dom && deepEqual(oldProps, newProps) && deepEqual(oldProps.className, newProps.className));
+  // oldProps = oldProps || {};
+  // newProps = newProps || {};
+  // let diff = false;
+  // Object.keys(oldProps || {}).forEach((key) => {
+  //   if (!newProps.hasOwnProperty(key) || !deepEqual(oldProps[key], newProps[key])) {
+  //     diff = true;
+  //     if (key.startsWith("on")) {
+  //       const eventType = key.slice(2).toLowerCase();
+  //       vdom.dom.removeEventListener(eventType.toLowerCase(), oldProps[key]);
+  //     } else if (key === "style") {
+  //       Object.keys(oldProps.style || {}).forEach((styleProp) => {
+  //         vdom.dom.style[styleProp] = "";
+  //       });
+  //     } else {
+  //       // console.log(vdom);
+  //       if (!vdom.dom) console.warn("undefined vdom");
+  //       else if (vdom.dom[key] !== undefined) delete vdom.dom[key];
+  //       else {
+  //         try {
+  //           vdom.dom.removeAttribute(key);
+  //         } catch (error) {
+  //           console.error("found error while removing", vdom);
+  //         }
+  //         // vdom.dom.removeAttribute(key);
+  //       }
+  //     }
+  //   }
+  // });
+  // Object.keys(newProps || {}).forEach((key) => {
+  //   if (!oldProps.hasOwnProperty(key) || !deepEqual(oldProps[key], newProps[key])) {
+  //     diff = true;
+  //     if (key.startsWith("on")) {
+  //       const eventType = key.slice(2).toLowerCase();
+  //       vdom.dom.addEventListener(eventType, newProps[key]);
+  //     } else if (key === "style") Object.assign(vdom.dom.style, newProps[key]);
+  //     else {
+  //       if (vdom.tag === "svg" || vdom.dom instanceof SVGElement)
+  //         vdom.dom.setAttribute(key, newProps[key]);
+  //       else vdom.dom[key] = newProps[key];
+  //     }
+  //   }
+  // });
+  // return diff;
 }
 
 function reconciliate(prev: VDOM, next: VDOM) {
   if (prev.dom === undefined) {
     // console.error("this is error", prev)
   }
-  if (prev.type != next.type || prev.tag != next.tag)
+  if (prev.type != next.type || !deepEqual(prev.props, next.props))
     return execute(REPLACE, prev, next);
-  if ((prev.tag === next.tag || prev.type === TEXT) && reconciliateProps(prev.props, next.props, prev)) {
-    return execute(REPLACE, prev, next);
-  }
+
   if (next.type === EXEC) {
     console.log("replace exec");
     prev.call();
@@ -389,7 +382,8 @@ function reconciliate(prev: VDOM, next: VDOM) {
       execute(CREATE, child2 as VDOM);
       if (child2.dom && prev.dom) {
         prevs.push(child2);
-        prev.dom.appendChild((child2 as VDOM).dom);
+        if (child2.dom === undefined) console.error("CHILD 1: found undefiend");
+        prev.dom.appendChild(child2.dom);
       }
     } else if (child1 && !child2) {
       execute(REMOVE, child1 as VDOM);

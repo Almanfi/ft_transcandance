@@ -1,10 +1,8 @@
 import Ura, { getCookie, navigate } from "ura";
-import Menu from "./icons/Menu.jsx";
-import api from "../services/api.jsx";
+import Menu from "./icons/Menu.js";
+import api from "../services/api.js";
 import events from "../services/events.js";
-// import { handelNotif } from "../../pages/main.js";
 
-// import "./Navbar.css"
 
 function debounce(fn, delay) {
   let timer = null;
@@ -14,54 +12,53 @@ function debounce(fn, delay) {
   }
 }
 
-// export {
-//   Notif,
-// }
-
-
-
 const [render, State] = Ura.init();
-const [getNotif, setNotif] = State([
-  // {
-  //   type: "friendship",
-  //   content: "notification",
-  //   accept: () => { console.log("call accept") },
-  //   refuse: () => { console.log("call refuse") }
-  // }
-])
+const [getNotif, setNotif] = State([])
+// keep outside, used to show searches
+const [getList, setList] = State([]);
 
 function Navbar() {
-  const updateNavbar = async () => {
-    const friends = await api.getInvited();
-    console.log("call update handler", friends);
-    const res = friends.map(e => ({
-      type: "friendship",
-      content: `friendship request from ${e.display_name}`,
-      accept: async () => await api.acceptInvitation(e.invite_id),
-      refuse: async () => await api.refuseInvitation(e.invite_id),
-    }))
 
-    setNotif(res);
+  const updateNavbar = async () => {
+    try {
+      let res = [];
+      if (getCookie("id_key")) {
+        const friends = await api.getInvited();
+        console.log("call update handler", friends);
+        res = friends.map(e => ({
+          type: "friendship",
+          content: `friendship request from ${e.display_name}`,
+          accept: async () => {
+            try {
+              await api.acceptInvitation(e.invite_id)
+            } catch (error) {
+              api.handleError(error)
+            }
+            updateNavbar();
+            events.emitChildren("friendship_received")
+          },
+          refuse: async () => {
+            try {
+              await api.refuseInvitation(e.invite_id)
+            } catch (error) {
+              api.handleError(error)
+            }
+            updateNavbar();
+            events.emitChildren("friendship_received")
+          }
+        }))
+      }
+      setNotif(res);
+    } catch (error) {
+      api.handleError(error);
+    }
   }
+
   events.addChild("friendship_received", "update.notif", updateNavbar);
-  
   (async () => await updateNavbar())();
 
 
-  const [getShow, setShow] = State(false);
-  const [getList, setList] = State([]);
 
-  const handleClique = () => {
-    setNotif([
-      ...getNotif(),
-      {
-        type: "friendship",
-        content: "notification",
-        accept: () => { console.log("call accept") },
-        refuse: () => { console.log("call refuse") }
-      }
-    ])
-  }
 
   const search = async (e) => {
     e.preventDefault();
@@ -82,6 +79,8 @@ function Navbar() {
   const seeFriend = (data) => {
     console.log("go to /friend with ", data.id);
     Ura.navigate(`/friend?id=${data.id}`);
+    setList([]);
+    document.getElementById("search_input").value = "";
   }
 
   const handleLogout = (e) => {
@@ -109,16 +108,16 @@ function Navbar() {
         <div className="logo" onclick={() => navigate("/home")}>
           <img src="/assets/tr.png" />
         </div>
-        <div className="search">
-          <input if={Ura.getCookie("id_key")} type="text" placeholder="Search" oninput={handleInput} />
+        <div if={Ura.getCookie("id_key")} className="search"  >
+          <input type="text" placeholder="Search" id="search_input" oninput={handleInput} />
           <loop on={getList()} className="elems">
             {(e) => (<div onclick={() => seeFriend(e)} >{e.firstname} {e.lastname} ({e.display_name})</div>)}
           </loop>
         </div>
 
         <ul if={Ura.getCookie("id_key")} className="toggle-notif">
+          {/* <h3 >Notification</h3> */}
           <loop on={getNotif()} className="notifi-box" id="box">
-            <h3 onclick={handleClique}>Notification</h3>
             {(e) => (
               <div className="data">
                 <span className="title">
@@ -129,15 +128,14 @@ function Navbar() {
                   <h4 className="refuse" onclick={e.refuse}></h4>
                 </span>
               </div>
-            )
-            }
+            )}
           </loop>
         </ul>
 
         <li className="list">
           <ul className="menuList" >
             <a className="see-notif" onclick={handleShowNotif}>Notif ({getNotif().length})</a>
-            <a className="go-notif">Go to Notifications</a>
+            <a className="go-notif" >Go to Notifications</a>
             <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>
               Login
             </a>

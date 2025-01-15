@@ -1,12 +1,12 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.jsx";
+import Navbar from "../../components/Navbar.js";
 
 function Home() {
   const [render] = Ura.init();
   return render(() => (
     <root>
+      <Navbar />
       <div className="home" >
-        <Navbar />
         <div id="center">
           <h1>
             Join Your <b>Friends</b>

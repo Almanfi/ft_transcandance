@@ -33,6 +33,7 @@
     [ ] test responsive for notification
     [ ] enable update image in setting
     [ ] if friend in blocked list go back to user page
+    [ ] in chat, if the id no longer in friend go back to home
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

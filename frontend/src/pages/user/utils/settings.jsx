@@ -1,6 +1,6 @@
 import Ura from 'ura';
-import Input from '../../../components/Input.jsx';
-import api from '../../../services/api.jsx';
+import Input from '../../../components/Input.js';
+import api from '../../../services/api.js';
 
 function Settings(props = {}) {
   const { Show, userData } = props;
@@ -44,7 +44,7 @@ function Settings(props = {}) {
     }
   }
   return render(() => (
-    <if cond={getShow()} className={`settings ${getShow() ? "" : "hidden"}`}>
+    <div if={getShow()} className={`settings ${getShow() ? "" : "hidden"}`}>
       <span className="close" onclick={() => setShow(!getShow())}>X</span>
       <form className="content" onsubmit={update}>
         <div className="img">
@@ -63,7 +63,7 @@ function Settings(props = {}) {
         <button onclick={handleDelete}>Delete account</button>
         <button type="submit"><b>Save</b></button>
       </form>
-    </if>
+    </div>
   ));
 }
 

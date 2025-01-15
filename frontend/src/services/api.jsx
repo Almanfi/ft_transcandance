@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Toast from "../components/Toast.jsx";
+import Toast from "../components/Toast.js";
 import events from "./events.js";
 
 const endpoint = "https://localhost:8000";
@@ -370,13 +370,18 @@ function handleError(err) {
     });
   }
   Errors.forEach((e, i) => Ura.create(<Toast message={e} delay={i} />));
-  if (["9999", "9998"].includes(err.error_code)) Ura.rmCookie("id_key");
+  if (["9999", "9998"].includes(err.error_code)) {
+    Ura.rmCookie("id_key");
+    // Ura.navigate("/home");
+    window.location.reload();
+  }
   return err.status == 403;
 }
 
 function logout() {
   Ura.rmCookie("id_key");
   Ura.navigate("/home");
+  window.location.reload();
 }
 
 // Web Sockets
@@ -402,9 +407,21 @@ function openSocket() {
       console.log("data:", event.data);
 
       const data = JSON.parse(event.data);
-
-
-      events.emit("friendship_received", data);
+      if (data.type === "friendship_received")
+        switch (data.type) {
+          case "friendship_received":
+            {
+              events.emit("friendship_received", data);
+              break;
+            }
+          case "friendship_accepted":
+            {
+              events.emit("friendship_accepted", data);
+              break;
+            }
+          default:
+            break;
+        }
 
 
       // switch (data.type) {

@@ -30,9 +30,7 @@ import Ura from "ura";
 import api from "./api.js";
 import Toast from "../components/Toast.js";
 
-const Allowed = [
-  "friendship_received" /* api.jsx:403 */
-]
+const Allowed = ["friendship_received", "friendship_accepted"]
 
 const handlers = {
 
@@ -66,6 +64,18 @@ function emit(name, ...args) {
   });
 }
 
+function emitChildren(name, ...args) {
+  check(name)
+  Object.keys(handlers[name].children).forEach(key => {
+    console.log("emit child", key, "func:", handlers[name].children[key], "with arg", args);
+
+    const isAsyncFunction = (fn) => fn.constructor.name === "AsyncFunction";
+    if (isAsyncFunction(handlers[name].children[key]))
+      (async () => await handlers[name].children[key](args))();
+    else handlers[name].children[key](args)
+  });
+}
+
 function addChild(name, childname, child) {
   check(name)
   console.log(handlers[name]);
@@ -84,15 +94,27 @@ const events = {
   add,
   addChild,
   emit,
-  remove
+  emitChildren,
+  remove,
 }
 
 events.add("friendship_received", async (data) => {
   console.log("has:", data);
-  const res = await api.getUsersById([data[0].user_id]);
-  console.log(res);
-  Ura.create(<Toast message={`new invitation from ${res[0].display_name}`} color="green" />);
-  // Ura.refresh();
+  if (data.length) {
+    const res = await api.getUsersById([data[0].user_id]);
+    console.log(res);
+    Ura.create(<Toast message={`new invitation from ${res[0].display_name}`} color="green" />);
+  }
+})
+
+events.add("friendship_accepted", async (data) => {
+  console.log("has:", data);
+  if (data.length) {
+    const res = await api.getUsersById([data[0].user_id]);
+    console.log(res);
+    Ura.create(<Toast message={`${res[0].display_name} did accept invitation`} color="green" />);
+    events.emitChildren("friendship_received");
+  }
 })
 
 

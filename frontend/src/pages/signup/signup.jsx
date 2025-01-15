@@ -1,8 +1,8 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.jsx";
-import Arrow from "../../components/icons/Arrow.jsx";
-// import Toast from "../../components/Toast.jsx";
-import Input from "../../components/Input.jsx";
+import Navbar from "../../components/Navbar.js";
+import Arrow from "../../components/icons/Arrow.js";
+// import Toast from "../../components/Toast.js";
+import Input from "../../components/Input.js";
 import api from "../../services/api.js";
 // import Home from "../home/home.js";
 

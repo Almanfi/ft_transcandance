@@ -151,7 +151,7 @@
       }
     }
 
-    if {
+    .if {
       flex: 1;
       max-height: 160px;
     }

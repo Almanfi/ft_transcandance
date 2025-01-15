@@ -1,12 +1,12 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar.jsx';
-import Swords from '../../components/icons/Swords.jsx';
-import WinCup from '../../components/icons/WinCup.jsx';
-import Award from '../../components/icons/Award.jsx';
-import Play from '../../components/icons/Play.jsx';
-import Chat from '../../components/icons/Chat.jsx';
+import Navbar from '../../components/Navbar.js';
+import Swords from '../../components/icons/Swords.js';
+import WinCup from '../../components/icons/WinCup.js';
+import Award from '../../components/icons/Award.js';
+import Play from '../../components/icons/Play.js';
+import Chat from '../../components/icons/Chat.js';
 import api from '../../services/api.js';
-import Toast from '../../components/Toast.jsx';
+import Toast from '../../components/Toast.js';
 import events from '../../services/events.js';
 // import { GlobalUser } from '../../services/store.js';
 
@@ -66,8 +66,8 @@ function Friend() {
       const user = await api.getUser();
 
       if (!res.length || user.id === id) {
-        Ura.create(<Toast message="Invalid user or page" delay={0} />);
-        return Ura.navigate("/home");
+        // Ura.create(<Toast message="Invalid user or page" delay={0} />);
+        return Ura.navigate("/user");
       }
       const action = await determineAction(id);
       setAction(action);
@@ -84,6 +84,7 @@ function Friend() {
     try {
       const name = getAction().action;
       const id_ = getAction().invite_id;
+      //TODO: check if it's in friend 
       switch (name) {
         case "Send invitation":
           await api.inviteFriend(getUser().id);
@@ -113,14 +114,15 @@ function Friend() {
       fetchData();
     } catch (error) {
       api.handleError(error);
+      fetchData();
     }
   };
 
   fetchData()
   return render(() => (
     <root>
+      <Navbar />
       <div className="friend" id={id}>
-        <Navbar />
         <div id="center" >
           <div className="user-card">
             <div className="img-container">
