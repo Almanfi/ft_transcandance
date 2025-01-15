@@ -1,0 +1,121 @@
+<!-- shooter/templates/shooter/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shooter Index</title>
+    <script>
+        window.users = {{ users|safe }};
+        window.user = {{ user|safe}};
+    </script>
+    <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/" } } </script>
+    {% load static %}
+    <script type="module" src="{% static 'shooter/main.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('login-form');
+            if (!form) return;
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                const formData = new FormData(form);
+                const data = {
+                    username: formData.get('username'),
+                    password: formData.get('password')
+                };
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect_url; // Redirect on success
+                    } else {
+                        alert('Invalid username or password');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+        {% comment %} var socket;
+        function connect() {
+            console.log('connecting');
+            socket = new WebSocket('wss://' + window.location.host + '/ws/roll/');
+            socket.onopen = function(e) {
+                console.log('open', e);
+            };
+            socket.onmessage = function(e) {
+                console.log('message', e.data);
+                switch (e.data.move) {
+                    case 'left':
+                        moveLeft();
+                        break;
+                    case 'right':
+                        moveRight();
+                        break;
+                    case 'up':
+                        moveUp();
+                        break;
+                    case 'down':
+                        moveDown();
+                        break;
+                }
+            };
+            socket.onclose = function(e) {
+                console.log('close', e);
+            };
+            socket.onerror = function(e) {
+                console.log('error', e);
+            };
+        }
+        function send() {
+            console.log('sending');
+            let data = {
+                "type": "chat.message",
+                "friend_id": document.getElementById('reciever').value,
+                "message": document.getElementById('message').value
+            };
+            socket.send(JSON.stringify(data));
+        } {% endcomment %}
+    </script>
+</head>
+<body>
+    {% block user %}
+        {% if user != 'null' %}
+            {% comment %} <h1>Shooter : {{ user.username}} </h1>
+            <p> playerId : {{ user.id }} </p>
+            <button id="connector" > create socket </button>
+            <span id="socketStatus"> </span>
+            <div id="messageContainer">
+                <label for="reciever">reciever:</label>
+                <input id="reciever" name="reciever"><br><br>
+                <label for="message">message:</label>
+                <input id="message" name="message"><br><br>
+                <button id="msgSender"> send message </button>
+            </div>
+            <div id="WebRTC">
+                <button id="RTCconnect"> connect RTCweb </button>
+                <label for="RTCweb">RTCweb:</label>
+                <input id="RTCweb" name="RTCweb"><br><br>
+                <button id="RTCsender"> send RTCweb msg </button>
+            </div> {% endcomment %}
+
+        {% else %}
+            <h1>Login</h1>
+            <form id="login-form" method="post" action="/users/login/">
+                <label for="username">username:</label>
+                <input type="text" id="username" name="username"><br><br>
+                <label for="password">password:</label>
+                <input type="password" id="password" name="password"><br><br>
+                <input type="submit" value="Submit">
+            </form> 
+        {% endif %}
+    {% endblock %}
+</body>
+
+</html>

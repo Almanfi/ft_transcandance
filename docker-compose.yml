@@ -74,7 +74,6 @@ services:
     ports:
       - "3000:3000" # frontend
       - "8000:443" # backend api
-      - "8001:80" # backend websockets
     depends_on:
       - django
     container_name: nginx

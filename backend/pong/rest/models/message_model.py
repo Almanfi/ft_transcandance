@@ -22,6 +22,8 @@ class Message(models.Model):
             return Message.objects.create(sender=sender, content=content, read=False, relationship=relation, type=MESSAGE_TYPE[0][0])
         elif game != None:
             return Message.objects.create(sender=sender, content=content, read=True, game=game, type=MESSAGE_TYPE[1][0])
+        else :
+            return Message.objects.create(sender=sender, content=content, read=False, type=MESSAGE_TYPE[0][0])
         
     @staticmethod
     def retrieve_messages(relation=None, game=None):
