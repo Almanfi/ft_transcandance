@@ -115,7 +115,7 @@ Ura.onNavigate(() => {
         console.error("enter");
 
         const updateNotifications = async () => {
-          const res = await api.getGames();
+          const res = await api.getGameInvites();
           const gameInvites = res.map(e => ({
             type: "game invitation",
             content: `new game request from `,

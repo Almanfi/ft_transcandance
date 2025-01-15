@@ -272,3 +272,21 @@ create("Cancel Game Invite").onclick = async (e) => {
     api.handleError(error)
   }
 }
+
+create("Matchmaking Socket").onclick = async (e) => {
+  try {
+    const matchmakingSocket = api.openMatchMakingSocket()
+  } catch (error)
+  {
+    api.handleError(error)
+  }
+}
+
+create("Tournament Making Socket").onclick = async (e) => {
+  try {
+    const tournamentMakingSocket = api.openTournamentMakingSocket();
+  } catch (error)
+  {
+    api.handleError(error)
+  }
+}

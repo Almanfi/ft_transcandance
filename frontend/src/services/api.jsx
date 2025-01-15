@@ -366,10 +366,6 @@ async function getFriends() {
   return ids;
 }
 
-async function getGames()
-{
-
-}
 
 // Error handeling
 function handleError(err) {
@@ -481,6 +477,25 @@ const retrieveMessages = async (id) => {
   }
 };
 
+async function getGameInvites()
+{
+  const response = await fetch(`${endpoint}/games/`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (response.ok) {
+    const body = await response.json();
+    console.log("Game Invites Got: ", body);
+    return body;
+  }
+  else {
+    const body = await response.json();
+    console.log("Error Getting Game Invites: ", body);
+    throw body
+  }
+
+}
+
 async function createGame() {
   const response = await fetch(`${endpoint}/games/`, {
     method: "POST",
@@ -586,7 +601,21 @@ function openGameSocket(game_id) {
   gameSocket.onerror = (err) => handleError(err);
 }
 
+let matchmakingSocket = null
+export function openMatchMakingSocket() {
+  matchmakingSocket = new WebSocket(`${websocketApi}/ws/matchmaking/`);
+  matchmakingSocket.onopen = (e) => {console.log("Connected to matchmaking socket")};
+  matchmakingSocket.onmessage = (e) => {console.log("Matchmaking Socket message", e.data)}
+  matchmakingSocket.onclose = (e) => { console.log("Matchmaking Socket Quit")} 
+}
 
+let tournamentMakingSocket = null
+export function openTournamentMakingSocket() {
+  tournamentMakingSocket = new WebSocket(`${websocketApi}/ws/tournamentmaking/`)
+  tournamentMakingSocket.onopen = (e) => {console.log("Connected to tournament making socket")};
+  tournamentMakingSocket.onmessage = (e) => {console.log("Tournament Making Socket Message", e.data)}
+  tournamentMakingSocket.onclose = (e) => {console.log("Matchmaking Socket Quit")} 
+}
 
 const api = {
   endpoint,
@@ -604,7 +633,7 @@ const api = {
   getInvites,
   getBlocks,
   getFriends,
-  getGames,
+  getGameInvites,
   setEvent,
 
   inviteFriend,
@@ -625,7 +654,10 @@ const api = {
   invitePlayer,
   acceptGameInvite,
   refuseGameInvite,
-  cancelGameInvite
+  cancelGameInvite,
+
+  openMatchMakingSocket,
+  openTournamentMakingSocket
 };
 
 export default api;

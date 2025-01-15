@@ -17,8 +17,10 @@ class GameSocket(WebsocketConsumer):
 			self.scope['game_id'] = game_id
 			self.room_group_name = str( game.data['id'] )
 			self.groups.append(self.room_group_name)
+			super().connect()
+			response = {"type": "game.player.join", "player_id": str(self.scope['user'].data['id']), "broadcaster_id": str(self.scope['user'].data['id'])}
 			async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
-			return super().connect()
+			async_to_sync(self.channel_layer.group_send)(self.room_group_name, response)
 		except (InviteException, GameException, UserExceptions) as e:
 			return self.close(81, "Problem Connecting to game lobby")
 	
@@ -141,6 +143,10 @@ class GameSocket(WebsocketConsumer):
 		if self.scope['user'] != None and event["broadcaster_id"] != self.scope['user'].data['id']:
 			return self.send(text_data=json.dumps(event))
 	
+	def game_player_join(self, event):
+		if self.scope['user'] != None and event["broadcaster_id"] != self.scope['user'].data['id']:
+			return self.send(text_data=json.dumps(event))
+
 	def game_message(self, event):
 		if self.scope['user'] != None and event["broadcaster_id"] != self.scope['user'].data['id']:
 			return self.send(text_data=json.dumps(event))

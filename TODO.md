@@ -27,6 +27,9 @@
     [ ] test Toast for small screens
     [ ] user mut update image
     [ ] implement user game history
+    [ ] check all TODOS inside files
+    [ ] when searching in users, don't show thoses that have some name as me
+    [ ] add notifications page
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/
