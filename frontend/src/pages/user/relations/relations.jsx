@@ -22,7 +22,7 @@ function Relations() {
 
   const handleEvent = (type) => {
     switch (type) {
-      case "invited": {
+      case "invited": { // reiceived
         setEvents({
           accept: async (e) => {
             console.log("accept ", e.invite_id)

@@ -15,7 +15,6 @@ function OpenGame(props = {}) {
     } catch (error) {
       api.handleError(error)
     }
-
   }
 
   const refuse = async (id) => {

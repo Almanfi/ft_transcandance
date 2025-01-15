@@ -66,14 +66,21 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
     return functag;
   }
   if (tag === "if") {
+
+    let tag = "if";
+    let type = IF;
+    if (props.tag) {
+      tag = props.tag;
+      type = ELEMENT;
+    }
     let res = {
-      type: IF,
-      tag: "if",
+      type: type,
+      tag: tag,
       props: props,
       children: check(props.cond && children.length ? children : []),
     };
     ifTag = res;
-    return res;
+    return props.cond ? res : null;
   }
   else if (tag === "else") {
     // console.log("handle else");
@@ -117,6 +124,14 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
       children: check(loopChildren || []),
     };
     return res;
+  }
+  if (props && props.if !== undefined) {
+    // console.warn("tag has if");
+    if (!props.if) {
+      return {};
+    }
+    else {
+    }
   }
   return {
     tag: tag,
@@ -182,8 +197,16 @@ function createDOM(vdom): VDOM {
             break;
           }
         default:
-          if (vdom.dom)
+          if (vdom.dom) {
+            // destroy(vdom);
             console.error("e already has dom"); // TODO: to be removed
+            // let tmpVdom = deepcopy(vdom);
+            // tmpVdom.vdom = undefined;
+            // destroy(tmpVdom);
+            // execute(REPLACE, vdom, tmpVdom)
+            // destroy(vdom);
+            // execute(CREATE, vdom)
+          }
           else {
             if (svgElements.has(vdom.tag))
               vdom.dom = document.createElementNS("http://www.w3.org/2000/svg", vdom.tag);
@@ -236,7 +259,7 @@ function removeProps(vdom: VDOM) {
       Object.keys(props.style || {}).forEach((styleProp) => {
         vdom.dom.style[styleProp] = "";
       });
-    } else {
+    } else if (vdom.dom) {
       if (vdom.dom[key] !== undefined) delete vdom.dom[key];
       else vdom.dom.removeAttribute(key);
     }
@@ -258,21 +281,33 @@ function execute(mode: number, prev: VDOM, next: VDOM = null) {
       createDOM(prev);
       // console.log("prev", prev);
       prev.children?.map((child) => {
-        child = execute(mode, child as VDOM);
+        if (!child.dom) child = execute(mode, child as VDOM);
         if (child.dom) prev.dom.appendChild((child as VDOM).dom);
       });
       break;
     }
     case REPLACE: {
-      execute(CREATE, next);
-      prev.dom.replaceWith(next.dom);
-      prev.dom = next.dom;
-      // prev.children?.map(destroy)
-      prev.children = next.children;
-      // I commented it because it caused me an error
-      // in the slider
-      // removeProps(prev);
-      prev.props = next.props;
+      if (!next.dom) {
+        // console.log("Replace:", prev);
+        // console.log("with:", next);
+        // if (!next.dom || !deepEqual(next.dom, prev.dom)) 
+        {
+          // console.log("not equal");
+
+          execute(CREATE, next);
+          prev.dom.replaceWith(next.dom);
+        }
+        // if(!deepEqual(next.dom, prev.dom))
+        {
+          prev.dom = next.dom;
+          // prev.children?.map(destroy)
+          prev.children = next.children;
+          // I commented it because it caused me an error
+          // in the slider
+          // removeProps(prev);
+          prev.props = next.props;
+        }
+      }
       break;
     }
     case REMOVE: {
@@ -392,11 +427,11 @@ function display(vdom: VDOM) {
   // ExecStack = [];
 }
 
-function create(vdom: VDOM) {
+export function create(vdom: VDOM) {
   return execute(CREATE, vdom);
 }
 
-function init() {
+export function init() {
   let index = 1;
   let vdom = null;
   let states = {};
@@ -503,7 +538,7 @@ function setRoutes(currRoutes) {
 
 let navigate_handler = null;
 
-function onNavigate(callback) {
+export function onNavigate(callback) {
   navigate_handler = callback;
 }
 
@@ -516,7 +551,7 @@ function normalizePath(path) {
   return path;
 }
 
-function getQueries() {
+export function getQueries() {
   const res = {};
   const urlParams = new URLSearchParams(window.location.search);
   for (const [key, value] of urlParams) {
@@ -526,7 +561,7 @@ function getQueries() {
   return res;
 }
 
-function setQuery(key, value) {
+export function setQuery(key, value) {
   const url = new URL(window.location.href);
   const urlParams = url.searchParams;
   if (value === null || value === undefined) urlParams.delete(key);
@@ -542,12 +577,12 @@ function refresh(params = null) {
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
   console.log("view:", RouteConfig);
-  
+
 
   return display(<RouteConfig props={params} />);
 }
 
-function navigate(route, params = {}) {
+export function navigate(route, params = {}) {
   route = normalizePath(route);
   console.log("navigate to", route, "with", params);
 
@@ -672,16 +707,18 @@ async function start() {
   setEventListeners();
   console.log(Ura.Routes);
   //@ts-ignore
-  if (window.location.protocol == "http") sync();
+  if (window.location.protocol == "http:") sync();
+  else console.warn("protocol is not HTTP", window.location.protocol);
+
 }
 
-function getCookie(name) {
+export function getCookie(name) {
   const cookies = document.cookie.split("; ").map(cookie => cookie.split("="));
   const cookie = cookies.find(([key]) => key === name);
   return cookie ? decodeURIComponent(cookie[1]) : null;
 }
 
-function rmCookie(name, path = "/", domain) {
+export function rmCookie(name, path = "/", domain) {
   if (domain) {
     document.cookie = `${name}=; path=${path}; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   } else {

@@ -26,6 +26,13 @@ import Chat from "./chat/chat.js";
 import Friend from "./friend/friend.js";
 import api from "../services/api.js";
 import Game from "./game/game.js";
+import { GameState } from "./user/openGame/openGame.jsx";
+// import { Notif } from "../components/Navbar/Navbar.jsx";
+
+export const handelNotif = {
+  setter: null,
+  getter: null,
+}
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -56,15 +63,80 @@ function Toast({ message, delay }) {
   ));
 }
 
+// const [getNotif, setNotif] = Notif
+
 Ura.onNavigate(() => {
   if (Ura.getCookie("id_key")) {
     api.openSocket();
 
     api.setEvent("friendship_received", async (data) => {
+      console.log("data:", data);
       const res = await api.getUsersById([data.user_id]);
-      console.log("get user", res);
-      Ura.create(<Toast message={`new invitation from ${res[0].username}`} delay={1} />);
+      // console.log("get user", res);
+      Ura.create(<Toast message={`new invitation from ${res[0].display_name}`} delay={1} />);
       Ura.refresh();
+      if (handelNotif.setter) {
+        console.error("enter");
+
+        const updateNotifications = async () => {
+          const res = await api.getInvited();
+          const invites = res.map(e => ({
+            type: "friendship",
+            content: `new friend request from ${e.display_name}`,
+            accept: async () => {
+              await api.acceptInvitation(e.invite_id);
+              if (handelNotif.setter) updateNotifications();
+            },
+            refuse: async () => {
+              await api.refuseInvitation(e.invite_id);
+              if (handelNotif.setter) updateNotifications();
+            },
+          }))
+          handelNotif.setter(invites);
+        }
+        updateNotifications();
+        console.log("new value", handelNotif.getter());
+
+      }
+      else {
+        console.error("don't have setter");
+      }
+    })
+
+    api.setEvent("game_invite", (data) => {
+      setter([
+        ...getter(),
+        inviteId
+      ])
+      const [getter, setter] = GameState;
+      const inviteId = data.invite;
+
+      if (handelNotif.setter) {
+        console.error("enter");
+
+        const updateNotifications = async () => {
+          const res = await api.getGames();
+          const gameInvites = res.map(e => ({
+            type: "game invitation",
+            content: `new game request from `,
+            accept: async () => {
+              // await api.acceptInvitation(e.invite_id);
+              // if (handelNotif.setter) updateNotifications();
+            },
+            refuse: async () => {
+              // await api.refuseInvitation(e.invite_id);
+              // if (handelNotif.setter) updateNotifications();
+            },
+          }))
+          handelNotif.setter(gameInvites);
+        }
+        updateNotifications();
+        console.log("new value", handelNotif.getter());
+      }
+      else {
+        console.error("don't have setter");
+      }
+     
     })
 
     Ura.setRoutes({

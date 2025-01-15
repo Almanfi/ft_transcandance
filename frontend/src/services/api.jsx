@@ -366,6 +366,11 @@ async function getFriends() {
   return ids;
 }
 
+async function getGames()
+{
+
+}
+
 // Error handeling
 function handleError(err) {
   const Errors = [];
@@ -400,7 +405,6 @@ function setEvent(name, handler) {
 
 const websocketApi = "http://localhost:8001";
 
-
 let r = 0;
 function openSocket() {
   if (!webSocket || webSocket.readyState === WebSocket.CLOSED) {
@@ -429,12 +433,7 @@ function openSocket() {
           break
         }
         case "game_invite": {
-          const [getter, setter] = GameState;
-          const inviteId = data.invite;
-          setter([
-            ...getter(),
-            inviteId
-          ])
+          if (Events[data.type]) return Events[data.type](data);
           break
         }
         default:
@@ -605,6 +604,7 @@ const api = {
   getInvites,
   getBlocks,
   getFriends,
+  getGames,
   setEvent,
 
   inviteFriend,

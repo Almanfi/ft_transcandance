@@ -1,6 +1,7 @@
-import Ura from "ura";
+import Ura, { getCookie, navigate } from "ura";
 import Menu from "../icons/Menu/Menu.js";
 import api from "../../services/api.js";
+import { handelNotif } from "../../pages/main.js";
 
 // import "./Navbar.css"
 
@@ -12,8 +13,28 @@ function debounce(fn, delay) {
   }
 }
 
+// export {
+//   Notif,
+// }
+
+
+const [render, State] = Ura.init();
+
+const Notif = State([
+  // {
+  //   type: "friendship",
+  //   content: "notification",
+  //   accept: () => { console.log("call accept") },
+  //   refuse: () => { console.log("call refuse") }
+  // }
+]);
+
 function Navbar() {
-  const [render, State] = Ura.init();
+
+  const [getNotif, setNotif] = Notif;
+  handelNotif.setter = setNotif;
+  handelNotif.getter = getNotif;
+
   const [getShow, setShow] = State(false);
   const [getList, setList] = State([]);
 
@@ -44,32 +65,71 @@ function Navbar() {
     api.logout();
   }
 
+  let down = false;
+  const handleShowNotif = () => {
+    let box = document.getElementById("box");
+    if (box) {
+      if (down) box.classList.remove("show");
+      else box.classList.add("show");
+      down = !down;
+    }
+  }
+
+  function toggleMenu() {
+    let menuList = document.getElementsByClassName("menuList")[0];
+    menuList.classList.toggle("show");
+  }
+  
   return render(() => (
     <div className="navbar">
-      <div id="logo" onclick={() => { Ura.navigate("/home") }}>
-        <img src="/assets/tr.png" /><h4>Clashers</h4>
-      </div>
-      <input type="text" placeholder="Search.." oninput={handleInput} />
-      <button className="show-navbar" onclick={handleClique}><Menu /></button>
-      <loop on={getList()} className="search-loop">
-        {(e) => (<div onclick={() => seeFriend(e)} >{e.firstname} {e.lastname} ({e.display_name})</div>)}
-      </loop>
+      <nav>
+        <div className="logo" onclick={() => navigate("/home")}>
+          <img src="/assets/tr.png" />
+        </div>
+        <div className="search">
+          <input if={Ura.getCookie("id_key")} type="text" placeholder="Search" oninput={handleInput} />
+          <loop on={getList()} className="elems">
+            {(e) => (<div onclick={() => seeFriend(e)} >{e.firstname} {e.lastname} ({e.display_name})</div>)}
+          </loop>
+        </div>
 
-      <div className={`toogle-bar-${getShow() ? "show" : "hidden"}`}>
-        <button id="login-btn" onclick={() => Ura.navigate("/login")}
-          style={{ display: Ura.getCookie("id_key") ? "none" : "block" }}>
-          <h4>Login</h4>
-        </button>
-        <button id="signup-btn" onclick={() => Ura.navigate("/signup")}
-          style={{ display: Ura.getCookie("id_key") ? "none" : "block" }}>
-          <h4>Sign up</h4>
-        </button>
-        <button id="login-btn" onclick={handleLogout}
-          style={{ display: !Ura.getCookie("id_key") ? "none" : "block" }}>
-          <h4>Logout</h4>
-        </button>
-      </div>
+        <ul if={Ura.getCookie("id_key")} className="toggle-notif">
+          <loop on={getNotif()} className="notifi-box" id="box">
+            <h3>Notification</h3>
+            {(e) => (
+              <div className="data">
+                <span className="title">
+                  <h4>{e.content}</h4>
+                </span>
+                <span className="action">
+                  <h4 className="accept" onclick={e.accept} ></h4>
+                  <h4 className="refuse" onclick={e.refuse}></h4>
+                </span>
+              </div>
+            )
+            }
+          </loop>
+        </ul>
 
+        <li className="list">
+          <ul className="menuList" >
+            <a className="see-notif" onclick={handleShowNotif}>Notif ({getNotif().length})</a>
+            <a className="go-notif">Go to Notifications</a>
+            <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>
+              Login
+            </a>
+            <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>
+              Sign up
+            </a>
+            <a if={getCookie("id_key")} onclick={handleLogout} >
+              Logout
+            </a>
+          </ul>
+        </li>
+        <div className="menu-icon" onclick={toggleMenu}>
+          <i className="fa-solid fa-bars">+</i>
+        </div>
+      </nav>
     </div>
   ));
 }
