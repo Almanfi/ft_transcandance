@@ -709,6 +709,12 @@ export function rmCookie(name, path = "/", domain) {
   }
 }
 
+function getCurrentRoute() {
+  let path = window.location.pathname || "*";
+  path = normalizePath(path);;
+  return path
+}
+
 // @ts-ignore
 window.seeTree = function () {
   console.log(GlobalVDOM);
@@ -739,7 +745,8 @@ const Ura = {
   rmCookie,
   onNavigate,
   getQueries,
-  setQuery
+  setQuery,
+  getCurrentRoute
 };
 
 export default Ura;

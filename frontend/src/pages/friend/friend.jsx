@@ -12,6 +12,57 @@ import events from '../../services/events.js';
 
 // const [getGlobalUser, setGlobalUser] = GlobalUser;
 // TODO: check if id is not for current user
+const [render, State] = Ura.init();
+
+
+const [getUser, setFriendData] = State({
+  id: "",
+  firstname: "",
+  lastname: "",
+  display_name: "",
+  profile_picture: "/static/rest/images/users_profiles/profile.jpg"
+});
+
+
+const determineAction = async (id) => {
+  const [friends, invited, invites, blocks] = await Promise.all([
+    api.getFriends(),
+    api.getInvited(),
+    api.getInvites(),
+    api.getBlocks(),
+  ]);
+
+  const findUser = (users) => users.find(user => user.id === id);
+  const blockedUser = findUser(blocks);
+  if (blockedUser) return { invite_id: blockedUser.invite_id, action: "Blocked user" };
+  const friend = findUser(friends);
+  if (friend) return { invite_id: friend.invite_id, action: "Start conversation" };
+  const invitedUser = findUser(invited);
+  if (invitedUser) return { invite_id: invitedUser.invite_id, action: "Accept invitation" };
+  const invite = findUser(invites);
+  if (invite) return { invite_id: invite.invite_id, action: "Cancel invitation" };
+  return { invite_id: null, action: "Send invitation" };
+};
+
+const [getAction, setAction] = State({ invite_id: "", action: "" });
+
+const fetchData = async (id) => {
+  try {
+    const res = await api.getUsersById([id]);
+    const user = await api.getUser();
+
+    if (!res.length || user.id === id) {
+      // Ura.create(<Toast message="Invalid user or page" delay={0} />);
+      // return Ura.navigate("/user");
+    }
+    const action = await determineAction(id);
+    setAction(action);
+    setFriendData(res[0]);
+  } catch (error) {
+    api.handleError(error);
+  }
+};
+
 function Friend() {
   const { id } = Ura.getQueries() || {};
   if (!id) {
@@ -19,65 +70,7 @@ function Friend() {
     return Ura.navigate("/home");
   }
 
-  const [render, State] = Ura.init();
-  const [getList, setList] = State([]);
-  const [getRelations, setRelations] = State({
-    blocks: [],
-    friends: [],
-    invited: [],
-    invites: []
-  });
-
-
-  const [getUser, setFriendData] = State({
-    id: "",
-    firstname: "",
-    lastname: "",
-    display_name: "",
-    profile_picture: "/static/rest/images/users_profiles/profile.jpg"
-  });
-
-
-  const determineAction = async (id) => {
-    const [friends, invited, invites, blocks] = await Promise.all([
-      api.getFriends(),
-      api.getInvited(),
-      api.getInvites(),
-      api.getBlocks(),
-    ]);
-
-    const findUser = (users) => users.find(user => user.id === id);
-    const blockedUser = findUser(blocks);
-    if (blockedUser) return { invite_id: blockedUser.invite_id, action: "Blocked user" };
-    const friend = findUser(friends);
-    if (friend) return { invite_id: friend.invite_id, action: "Start conversation" };
-    const invitedUser = findUser(invited);
-    if (invitedUser) return { invite_id: invitedUser.invite_id, action: "Accept invitation" };
-    const invite = findUser(invites);
-    if (invite) return { invite_id: invite.invite_id, action: "Cancel invitation" };
-    return { invite_id: null, action: "Send invitation" };
-  };
-
-  const [getAction, setAction] = State({ invite_id: id, action: "Add friend" });
-
-  const fetchData = async () => {
-    try {
-      const res = await api.getUsersById([id]);
-      const user = await api.getUser();
-
-      if (!res.length || user.id === id) {
-        // Ura.create(<Toast message="Invalid user or page" delay={0} />);
-        return Ura.navigate("/user");
-      }
-      const action = await determineAction(id);
-      setAction(action);
-      setFriendData(res[0]);
-    } catch (error) {
-      api.handleError(error);
-    }
-  };
-
-  events.addChild("friendship_received", "fetchData", fetchData);
+  events.addChild("friendship", "Friend.fetchData", () => fetchData(id));
 
   const handleAction = async (e) => {
     e.preventDefault();
@@ -111,14 +104,14 @@ function Friend() {
           // Ura.create(<Toast message="Unknown action." color='green' />);
           break;
       }
-      fetchData();
+      fetchData(id);
     } catch (error) {
       api.handleError(error);
-      fetchData();
+      fetchData(id);
     }
   };
 
-  fetchData()
+  fetchData(id)
   return render(() => (
     <root>
       <Navbar />

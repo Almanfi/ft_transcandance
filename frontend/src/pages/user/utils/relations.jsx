@@ -34,7 +34,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       },
       refuse: async (e) => {
         try {
@@ -45,7 +45,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       },
     },
     invites: {
@@ -57,7 +57,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       }
     },
     blocks: {
@@ -70,7 +70,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       }
     },
     friends: {
@@ -83,7 +83,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       },
       chat: (e) => {
         console.log("chat", e)
@@ -98,7 +98,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       },
       unfriend: async (e) => {
         try {
@@ -109,7 +109,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship_received")
+        events.emitChildren("friendship")
       },
     },
   };
@@ -151,7 +151,7 @@ function Relations() {
 
   handlefetch();
 
-  events.addChild("friendship_received", "fetchRelations", handlefetch)
+  events.addChild("friendship", "Relations.fetchRelations", handlefetch)
 
   return render(() => (
     <div id="friends">

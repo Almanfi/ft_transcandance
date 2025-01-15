@@ -27,6 +27,7 @@ import Friend from "./friend/friend.js";
 import api from "../services/api.js";
 import Game from "./game/game.js";
 import Comp from "./comp/comp.js";
+import events from "../services/events.js";
 
 Ura.setStyles([
   "/pages/home/home.css",

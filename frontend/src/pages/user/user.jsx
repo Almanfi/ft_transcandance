@@ -33,11 +33,6 @@ function User() {
   }
   fetchData();
 
-  // events.addChild("friendship_received", "update_navbar", () => {
-
-
-  // })
-
   return render(() => (
     <root>
       <Navbar />

@@ -358,7 +358,7 @@ async function getFriends() {
 // Error handeling
 function handleError(err) {
   const Errors = [];
-  console.error("Error", err);
+  console.warn("Error", err);
   if (err.message) Errors.push(err.message);
   else if (err.status === 403) Errors.push("Internal Error");
   else if (typeof err == "object") {
@@ -399,7 +399,10 @@ function openSocket() {
   if (!webSocket || webSocket.readyState === WebSocket.CLOSED) {
     console.log("Creating a new WebSocket connection.");
     webSocket = new WebSocket(`${websocketApi}/ws/messaging/`);
-    webSocket.onopen = (event) => { r = 0, console.log("WebSocket connection established."); };
+    webSocket.onopen = (event) => {
+      r = 0;
+      console.log("WebSocket connection established.");
+    };
 
     webSocket.onmessage = (event) => {
       console.log("Message from server:");
@@ -407,21 +410,18 @@ function openSocket() {
       console.log("data:", event.data);
 
       const data = JSON.parse(event.data);
-      if (data.type === "friendship_received")
-        switch (data.type) {
-          case "friendship_received":
-            {
-              events.emit("friendship_received", data);
-              break;
-            }
-          case "friendship_accepted":
-            {
-              events.emit("friendship_accepted", data);
-              break;
-            }
-          default:
-            break;
+      switch (data.type) {
+        case "friendship_received": {
+          events.emit("friendship_received", data);
+          break;
         }
+        case "friendship_accepted": {
+          events.emit("friendship_accepted", data);
+          break;
+        }
+        default:
+          break;
+      }
 
 
       // switch (data.type) {
@@ -448,7 +448,7 @@ function openSocket() {
     };
 
     webSocket.onclose = (event) => {
-      events.remove("")
+      events.remove("frienship")
 
       console.log("WebSocket connection closed. Reconnecting...");
       // Events = {};

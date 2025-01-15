@@ -34,6 +34,7 @@
     [ ] enable update image in setting
     [ ] if friend in blocked list go back to user page
     [ ] in chat, if the id no longer in friend go back to home
+    [ ] test responsive navbar
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

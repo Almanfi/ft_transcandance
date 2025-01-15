@@ -34,8 +34,9 @@ function Navbar() {
             } catch (error) {
               api.handleError(error)
             }
-            updateNavbar();
-            events.emitChildren("friendship_received")
+            // updateNavbar();
+            // events.emitChildren("friendship_received")
+            Ura.refresh();
           },
           refuse: async () => {
             try {
@@ -43,8 +44,9 @@ function Navbar() {
             } catch (error) {
               api.handleError(error)
             }
-            updateNavbar();
-            events.emitChildren("friendship_received")
+            // updateNavbar();
+            // events.emitChildren("friendship_received")
+            Ura.refresh();
           }
         }))
       }
@@ -54,10 +56,8 @@ function Navbar() {
     }
   }
 
-  events.addChild("friendship_received", "update.notif", updateNavbar);
+  events.addChild("friendship", "Navbar.updateNavbar", updateNavbar);
   (async () => await updateNavbar())();
-
-
 
 
   const search = async (e) => {
@@ -134,8 +134,8 @@ function Navbar() {
 
         <li className="list">
           <ul className="menuList" >
-            <a className="see-notif" onclick={handleShowNotif}>Notif ({getNotif().length})</a>
-            <a className="go-notif" >Go to Notifications</a>
+            <a if={getCookie("id_key")} className="see-notif" onclick={handleShowNotif}>Notif ({getNotif().length})</a>
+            <a if={getCookie("id_key")} className="go-notif" >Go to Notifications</a>
             <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>
               Login
             </a>

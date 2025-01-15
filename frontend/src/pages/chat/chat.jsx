@@ -1,14 +1,52 @@
 import Ura from "ura";
 import Navbar from "../../components/Navbar.js";
 import api from "../../services/api.js";
+import events from "../../services/events.js";
+
+const [render, State] = Ura.init();
+
+const [getFriends, setFriends] = State([]);
+const [getConv, setConv] = State([]);
+const [getCurr, setCurr] = State({});
+const [getUser, setUser] = State({});
+
+
+
+
+
+// events.addChild("friendship_accepted", "Chat.handleMessages", () => {
+//   console.error("current route:", Ura.getCurrentRoute());
+  
+//   if (Ura.getCurrentRoute() === "/chat") {
+//     console.error("refresh");
+//     handleMessages();
+//     Ura.refresh();
+//   }
+// });
+
+const handleMessages = async () => {
+  try {
+    const friends = await api.getFriends();
+    setFriends(friends.map(({ id, profile_picture, status, username }) => ({ id, profile_picture, status, username })));
+
+    const { id } = Ura.getQueries() || {};
+    if (id) {
+      const friend_id = id;
+      const index = getFriends().findIndex(e => e.id === friend_id);
+      if (index >= 0) {
+        setCurr(friends[index]);
+        await api.retrieveMessages(friend_id);
+      }
+    }
+  } catch (err) {
+    api.handleError(err);
+  }
+};
+
+
 
 function Chat(props = {}) {
-  const [render, State] = Ura.init();
 
-  const [getFriends, setFriends] = State([]);
-  const [getConv, setConv] = State([]);
-  const [getCurr, setCurr] = State({});
-  const [getUser, setUser] = State({});
 
   // api.setEvent("chat.message.retrieve", (data) => {
   //   console.log("chat.message.retrieve", data.messages);
@@ -19,21 +57,14 @@ function Chat(props = {}) {
   //   setConv(res);
   // });
 
-  const handleMessages = async () => {
-    try {
-      const { id: friend_id } = Ura.getQueries() || {};
-      const friends = await api.getFriends();
-      setFriends(friends.map(({ id, profile_picture, status, username }) => ({ id, profile_picture, status, username })));
-      const index = getFriends().findIndex(e => e.id === friend_id);
-      if (index >= 0) {
-        setCurr(friends[index]);
-        await api.retrieveMessages(friend_id);
-      }
-    } catch (err) {
-      api.handleError(err);
-    }
-  };
   handleMessages();
+  const call = async () => {
+    console.warn("before");
+    const user = { ...await api.getUser() }
+    console.warn("after", user);
+    setUser(user);
+  }
+  call()
 
   // retrieve messages
   const SelectConv = (e, i) => {
@@ -43,6 +74,7 @@ function Chat(props = {}) {
   };
 
   // recieve messages
+
   // api.setEvent("chat.message", (data) => {
   //   console.log("receive chat.message event with ", data);
   //   if (data.from === getCurr().id) {
@@ -63,13 +95,7 @@ function Chat(props = {}) {
   //   }
   // });
 
-  const call = async () => {
-    console.warn("before");
-    const user = { ...await api.getUser() }
-    console.warn("after", user);
-    setUser(user);
-  }
-  call()
+ 
 
   const sendMessage = () => {
     const textarea = document.querySelector(".right .down textarea");
