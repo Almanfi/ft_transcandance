@@ -19,7 +19,8 @@ import {
   invitePlayer,
   acceptGameInvite,
   refuseGameInvite,
-  cancelGameInvite
+  cancelGameInvite,
+  getGame
 } from "./utils.js";
 
 let users = [
@@ -238,7 +239,7 @@ create("Refuse Game Invite").onclick = async () => {
 
 breaker("Events and Messaging Socket /ws/messaging");
 
-const websocketApi = "http://localhost:8001"
+const websocketApi = "wss://localhost:8000"
 
 const socket_messager = document.createElement("input");
 socket_messager.type = "number";
@@ -311,12 +312,23 @@ game_message.type = "text";
 game_message.defaultValue = "Hello Game";
 parent.append(game_message)
 
+const game_id = document.createElement("input");
+game_id.type = "text";
+game_id.defaultValue = "game_id";
+parent.append(game_id)
+
+let player_id = document.createElement("input");
+player_id.type = "number";
+player_id.defaultValue = 0;
+parent.append(player_id)
+
 create("Connect to Game Lobby").onclick = async () =>
 {
 	await Login(users[0])
 	if (new_game === undefined)
 		return console.error("No game to conect to")
-	game_socket = new WebSocket(`${websocketApi}/ws/game/${new_game.id}/`);
+  await Login(users[player_id.value])
+	game_socket = new WebSocket(`${websocketApi}/ws/game/${game_id.value}/`);
 	game_socket.addEventListener('open', (e) => {
 		console.log("Connected to game Lobby");
 	});
@@ -359,6 +371,12 @@ create("Game Lobby message").onclick = async () => {
 create("Game Lobby Retrieve Messages").onclick = async () => {
 	if (socketIsDead(game_socket)) return console.error("Not connected to a game lobby");
 	game_socket.send(JSON.stringify({type: "game.retrieve_messages"}))
+}
+
+
+
+create("Fetch game").onclick = async () => {
+  const game = await getGame(game_id.value);
 }
 
 breaker("Matchmaking /ws/matchmaking/")

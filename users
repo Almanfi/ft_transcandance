@@ -1,9 +1,37 @@
-{
-    "firstname": "me",
-    "lastname": "me",
-    "username": "mee",
-    "display_name": "me",
-    "profile_picture": "/static/rest/images/users_profiles/profile.jpg",
-    "id": "5f8e541f-67e4-43c4-a291-8c76d12bb362",
-    "password": "Actually1!"
-}
+[
+    {
+      "firstname": "mohammed",
+      "lastname": "hrima",
+      "username": "mhrima",
+      "password": "Mhrima123@@",
+      "display_name": "yuliy",
+      "id": "5ac0c5ea-d511-4873-8fe8-12e23071387d"
+    },
+    {
+      "firstname": "emily",
+      "lastname": "brown",
+      "username": "ebrown",
+      "password": "EmilyBrown101!!",
+      "display_name": "em_brown",
+      "id": "5ac0c5ea-d511-4873-8fe8-12e23071387d"
+    },
+    {
+      "firstname": "sara",
+      "lastname": "smith",
+      "username": "ssmith",
+      "password": "SaraSmith456##",
+      "display_name": "sara_s",
+      "id": "a97d23cd-9784-4c2a-a896-3aedc0eec10a"
+    },
+    {
+      "firstname": "john",
+      "lastname": "doe",
+      "username": "jdoe",
+      "password": "JohnDoe789**",
+      "display_name": "johnny",
+      "id": "bcb3798c-2cd8-452c-9dc4-de8a65817714"
+    }
+]
+
+
+game = 13c05ac4-d626-445b-87b9-3ddc2d55f179

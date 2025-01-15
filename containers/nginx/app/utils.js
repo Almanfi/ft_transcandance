@@ -507,3 +507,28 @@ export async function refuseGameInvite(invite_id) {
 		console.log("error", error);
 	}
 }
+
+export async function getGame(game_id) {
+  try {
+    console.log("THe game id is", game_id)
+    const res = await fetch(`${endpoint}/games/played/`, {
+      method: "POST",
+      credentials : "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([game_id])
+    })
+    if (res.ok)
+    {
+      const body = await res.json();
+      console.log("get game: ", body)
+      return body
+    }
+    else {
+      const body = await res.json();
+      console.log("Error getting game : ", body);
+    }
+  }
+  catch (error) {
+    console.log("error", error);
+  }
+}
