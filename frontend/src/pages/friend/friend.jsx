@@ -92,7 +92,7 @@ function Friend() {
           Ura.create(<Toast message="Invitation canceled!" color='green' />);
           break;
         case "Start conversation":
-          Ura.navigate(`/chat?user=${getUser().id}`);
+          Ura.navigate(`/chat?id=${getUser().id}`);
           break;
 
         case "Blocked user":

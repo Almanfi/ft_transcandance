@@ -17,47 +17,90 @@ const [getNotif, setNotif] = State([])
 // keep outside, used to show searches
 const [getList, setList] = State([]);
 
-function Navbar() {
-
-  const updateNavbar = async () => {
-    try {
-      let res = [];
-      if (getCookie("id_key")) {
-        const friends = await api.getInvited();
-        console.log("call update handler", friends);
-        res = friends.map(e => ({
-          type: "friendship",
-          content: `friendship request from ${e.display_name}`,
-          accept: async () => {
-            try {
-              await api.acceptInvitation(e.invite_id)
-            } catch (error) {
-              api.handleError(error)
-            }
-            // updateNavbar();
-            // events.emitChildren("friendship_received")
-            Ura.refresh();
-          },
-          refuse: async () => {
-            try {
-              await api.refuseInvitation(e.invite_id)
-            } catch (error) {
-              api.handleError(error)
-            }
-            // updateNavbar();
-            // events.emitChildren("friendship_received")
-            Ura.refresh();
+const updateNavbar = async () => {
+  try {
+    let res = [];
+    if (getCookie("id_key")) {
+      const friends = await api.getInvited();
+      console.log("call update handler", friends);
+      res = friends.map(e => ({
+        type: "friendship",
+        content: `friendship request from ${e.display_name}`,
+        accept: async () => {
+          try {
+            await api.acceptInvitation(e.invite_id)
+          } catch (error) {
+            api.handleError(error)
           }
-        }))
+          // updateNavbar();
+          // events.emitChildren("friendship_received")
+          Ura.refresh();
+        },
+        refuse: async () => {
+          try {
+            await api.refuseInvitation(e.invite_id)
+          } catch (error) {
+            api.handleError(error)
+          }
+          // updateNavbar();
+          // events.emitChildren("friendship_received")
+          Ura.refresh();
+        }
+      }))
+    }
+    setNotif(res);
+  } catch (error) {
+    api.handleError(error);
+  }
+}
+
+const addMessageNotification = async (data) => {
+  data = data[0];
+  const curr = await api.getUser();
+  const { id } = Ura.getQueries()
+  console.log("current id:", id);
+  console.log("current route", Ura.getCurrentRoute());
+  console.log("from:", data);
+  console.log("curr:", curr.id);
+
+  if (data.status !== 'sent') {
+    try {
+      const user = await api.getUsersById([data.from]);
+      let res = {
+        type: "message",
+        content: `New message from ${user[0].display_name}`,
+        accept: () => navigate(`/chat?id=${user[0].id}`),
+        refuse: () => { },
       }
-      setNotif(res);
+      setNotif([
+        ...getNotif(),
+        res
+      ])
+      // Ura.refresh();
+
     } catch (error) {
-      api.handleError(error);
+      api.handleError(error)
+    }
+    console.error("received message");
+  }
+}
+let down = true;
+const handleShowNotif = () => {
+  let box = document.getElementById("box");
+  if (box) {
+    if (box.classList.contains("show")) {
+      box.classList.remove("show");
+    } else {
+      box.classList.add("show");
     }
   }
+};
 
+function Navbar() {
   events.addChild("friendship", "Navbar.updateNavbar", updateNavbar);
-  (async () => await updateNavbar())();
+  events.addChild("chat.message", "Navbar.updateNavbar", addMessageNotification);
+  // (async () => await updateNavbar())();
+  // handleShowNotif();
 
 
   const search = async (e) => {
@@ -87,15 +130,7 @@ function Navbar() {
     api.logout();
   }
 
-  let down = false;
-  const handleShowNotif = () => {
-    let box = document.getElementById("box");
-    if (box) {
-      if (down) box.classList.remove("show");
-      else box.classList.add("show");
-      down = !down;
-    }
-  }
+
 
   function toggleMenu() {
     let menuList = document.getElementsByClassName("menuList")[0];

@@ -11,12 +11,9 @@ const [getCurr, setCurr] = State({});
 const [getUser, setUser] = State({});
 
 
-
-
-
 // events.addChild("friendship_accepted", "Chat.handleMessages", () => {
 //   console.error("current route:", Ura.getCurrentRoute());
-  
+
 //   if (Ura.getCurrentRoute() === "/chat") {
 //     console.error("refresh");
 //     handleMessages();
@@ -43,21 +40,46 @@ const handleMessages = async () => {
   }
 };
 
+events.add("chat.message.retrieve", (data) => {
+  if (Ura.getCurrentRoute() === "/chat") {
+    data = data[0];
+    console.log("chat.message.retrieve", data);
+    data.messages.sort((a, b) => {
+      return new Date(a.timestamp) - new Date(b.timestamp);
+    });
+    const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
+    setConv(res);
+  }
+});
+
+events.add("chat.message", (data) => {
+  if (Ura.getCurrentRoute() === "/chat") {
+    data = data[0];
+    console.log("receive chat.message event with ", data);
+    if (data.from === getCurr().id) {
+      const res = {
+        id: getCurr().id,
+        username: getCurr().username,
+        content: data.message
+      }
+      console.log("set conversation to");
+      console.log(getConv());
+      console.log("add to it", res);
+
+      setConv([
+        ...getConv(),
+        res,
+      ])
+      // const res = data.message.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
+    }
+  }
+});
 
 
-function Chat(props = {}) {
-
-
-  // api.setEvent("chat.message.retrieve", (data) => {
-  //   console.log("chat.message.retrieve", data.messages);
-  //   data.messages.sort((a, b) => {
-  //     return new Date(a.timestamp) - new Date(b.timestamp);
-  //   });
-  //   const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
-  //   setConv(res);
-  // });
-
+function Chat() {
+  api.openSocket();
   handleMessages();
+
   const call = async () => {
     console.warn("before");
     const user = { ...await api.getUser() }
@@ -74,29 +96,6 @@ function Chat(props = {}) {
   };
 
   // recieve messages
-
-  // api.setEvent("chat.message", (data) => {
-  //   console.log("receive chat.message event with ", data);
-  //   if (data.from === getCurr().id) {
-  //     const res = {
-  //       id: getCurr().id,
-  //       username: getCurr().username,
-  //       content: data.message
-  //     }
-  //     console.log("set conversation to");
-  //     console.log(getConv());
-  //     console.log("add to it", res);
-
-  //     setConv([
-  //       ...getConv(),
-  //       res,
-  //     ])
-  //     // const res = data.message.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
-  //   }
-  // });
-
- 
-
   const sendMessage = () => {
     const textarea = document.querySelector(".right .down textarea");
     if (textarea.value.length) {

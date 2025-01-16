@@ -34,7 +34,9 @@ const Allowed = [
   "friendship",
   "friendship_received",
   "friendship_accepted",
-  "chat"
+  // "chat",
+  "chat.message.retrieve",
+  "chat.message",
 ]
 
 const handlers = {

@@ -35,6 +35,7 @@
     [ ] if friend in blocked list go back to user page
     [ ] in chat, if the id no longer in friend go back to home
     [ ] test responsive navbar
+    [ ] modify chat scroll bar so it always be in the end of conversation
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

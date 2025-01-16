@@ -419,7 +419,16 @@ function openSocket() {
           events.emit("friendship_accepted", data);
           break;
         }
+        case "chat.message.retrieve": {
+          events.emit("chat.message.retrieve", data);
+          break;
+        }
+        case "chat.message": {
+          events.emit("chat.message", data);
+          break;
+        }
         default:
+          console.error("unhanled event:", data.type);
           break;
       }
 
