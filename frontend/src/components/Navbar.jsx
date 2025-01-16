@@ -1,5 +1,5 @@
 import Ura, { getCookie, navigate } from "ura";
-import Menu from "./icons/Menu.jsx";
+import Menu from "./icons/Menu.js";
 import api from "../services/api.js";
 import events from "../services/events.js";
 

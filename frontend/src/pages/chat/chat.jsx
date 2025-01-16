@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.jsx";
+import Navbar from "../../components/Navbar.js";
 import api from "../../services/api.js";
 import events from "../../services/events.js";
 import { navigate } from "../../ura/code.js";

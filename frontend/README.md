@@ -288,7 +288,7 @@ Once the `Navbar` component is created, you can include it in your `home` page c
 In the `pages/home/home.jsx` file, import and render the Navbar component as follows:
 ```js
     import Ura from 'ura';
-    import Navbar from './utils/Navbar/Navbar.jsx';
+    import Navbar from './utils/Navbar/Navbar.js';
     
     function Home() {
       const [render, State] = Ura.init();

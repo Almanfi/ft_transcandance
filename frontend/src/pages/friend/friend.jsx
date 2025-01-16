@@ -1,12 +1,12 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar.jsx';
-import Swords from '../../components/icons/Swords.jsx';
-import WinCup from '../../components/icons/WinCup.jsx';
-import Award from '../../components/icons/Award.jsx';
-import Play from '../../components/icons/Play.jsx';
-import Chat from '../../components/icons/Chat.jsx';
+import Navbar from '../../components/Navbar.js';
+import Swords from '../../components/icons/Swords.js';
+import WinCup from '../../components/icons/WinCup.js';
+import Award from '../../components/icons/Award.js';
+import Play from '../../components/icons/Play.js';
+import Chat from '../../components/icons/Chat.js';
 import api from '../../services/api.js';
-import Toast from '../../components/Toast.jsx';
+import Toast from '../../components/Toast.js';
 import events from '../../services/events.js';
 // import { GlobalUser } from '../../services/store.js';
 
