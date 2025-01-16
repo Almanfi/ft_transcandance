@@ -34,7 +34,6 @@ export class Pong {
     }
 
     constructor() {
-        console.log("Pong game init");
         this.p1_y = 0;
         this.p2_y = 0;
         this.p1_x = -GAME_WIDTH / 2 + PADDLE_XOFFSET + PADDLE_XRADIUS;
