@@ -56,5 +56,6 @@ class GameSocket(WebsocketConsumer):
 		return response
 
 	def game_start(self, event):
-		self.send(text_data=json.dumps(event))
+		game_data = {"type": event['type'], "game_id": self.scope['game_id'], "user_id": self.scope['user'].data['id']}
+		self.send(text_data=json.dumps(game_data))
 		return self.close()
