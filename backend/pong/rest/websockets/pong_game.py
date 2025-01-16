@@ -89,6 +89,8 @@ class Pong:
 
 class PongSocket(AsyncWebsocketConsumer):
     async def connect(self):
+        if not self.scope['user']:
+            return self.close(79, "No User Given in Cookie")
         game_id = self.scope['url_route']['kwargs']['game_id']
         await self.accept()
         self.input = 0

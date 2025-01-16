@@ -12,7 +12,7 @@ function Game() {
   const [getValue, setValue] = State("Play game");
 
   //const [getStart, setStart] = State(false);
-  const websocketApi = "http://localhost:8001";
+
 
   let user = undefined;
 
@@ -46,8 +46,8 @@ function Game() {
 
 
     // button.style.backgroundColor = "red";
-
-    const socket = new WebSocket(`${websocketApi}/ws/matchmaking/`);
+    
+    const socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/`);
     let in_matchmaking = false;
     let game_id = "";
 
@@ -72,6 +72,7 @@ function Game() {
     };
 
     socket.onclose = (e) => {
+      //TODO: reconnect?
       if (game_id.length === 0) {
         // TODO: try again?
         console.log("[MATCHMAKING SOCKET] FAILED MATCHMAKING!");
@@ -97,7 +98,7 @@ function Game() {
       }
       if (game_id.length !== 0) {
         if (lobby_socket === undefined) {
-          lobby_socket = new WebSocket(`${websocketApi}/ws/game/${game_id}/`);
+          lobby_socket = new WebSocket(`${api.websocketApi}/ws/game/${game_id}/`);
           lobby_socket.onopen = (e) => {
             console.log("[LOBBY SOCKET] CONNECTED!");
           };

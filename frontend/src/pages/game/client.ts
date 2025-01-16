@@ -3,6 +3,8 @@ import {
   GAME_WIDTH, GAME_HEIGHT, BALL_RADIUS, PADDLE_XOFFSET, PADDLE_XRADIUS, PADDLE_YRADIUS
 } from './pong.js';
 
+import api from '../../services/api.js';
+
 function resizeCanvas(canvas: HTMLCanvasElement) {
   const dpr = window.devicePixelRatio;
   const { width, height } = canvas.getBoundingClientRect();
@@ -91,7 +93,7 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
 
     game_started = false;
 
-    socket = new WebSocket(`http://localhost:8001/ws/game_pong/${game_data.id}/`);
+    socket = new WebSocket(`${api.websocketApi}/ws/game_pong/${game_data.id}/`);
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
 

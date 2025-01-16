@@ -672,7 +672,9 @@ const api = {
   cancelGameInvite,
 
   openMatchMakingSocket,
-  openTournamentMakingSocket
+  openTournamentMakingSocket,
+
+  websocketApi,
 };
 
 export default api;
