@@ -27,7 +27,7 @@
 */
 
 import Ura from "ura";
-import api from "./api.jsx";
+import api from "./api.js";
 import Toast from "../components/Toast.jsx";
 
 const Allowed = [

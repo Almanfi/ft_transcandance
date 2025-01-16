@@ -1,7 +1,8 @@
-import Ura, { navigate } from 'ura';
+import Ura from 'ura';
 import Navbar from '../../components/Navbar.js';
 import api from '../../services/api.js';
 import events from '../../services/events.js';
+import Toast from '../../components/Toast.js';
 
 const [render, State] = Ura.init();
 const [getList, setList] = State([]);
@@ -33,27 +34,35 @@ const NewFriendInvitation = async () => {
 };
 
 const NewMessage = async (param) => {
-  if (!Ura.In("/notifications")) return
   let data = param[0];
-  if (data.status !== 'sent') {
+  if (data.status === 'sent') { }
+  else {
     try {
       const user = await api.getUsersById([data.from]);
-      const existingNotification = getList().
-        some((e) => e.type === "message" && e.content === `New message from ${user[0].display_name}`);
 
-      if (!existingNotification) {
-        setList([...getList(),
-        {
-          type: "message", content: `New message from ${user[0].display_name}`, accept: () => {
-            navigate(`/chat?id=${user[0].id}`)
-            Ura.refresh()
-          }
-        },
-        ]);
+      if (Ura.In("/notifications")) {
+        const isTrue = getList().some((e) => e.type === "message" && e.content === `New message from ${user[0].display_name}`);
+        if (!isTrue) {
+          setList([...getList(),
+          {
+            type: "message",
+            content: `New message from ${user[0].display_name}`,
+            accept: () => {
+              Ura.navigate(`/chat?id=${user[0].id}`)
+              window.location.reload();
+            },
+            refuse: null,
+          },
+          ]);
+        }
+      }
+      else if (!Ura.In("/chat")) {
+        Ura.create(<Toast message={`${user[0].display_name} did send a message`} color="green" />);
       }
     } catch (error) {
       api.handleError(error)
     }
+
   }
 }
 const NewGameInvitation = async () => { };

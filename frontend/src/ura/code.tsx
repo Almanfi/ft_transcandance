@@ -556,7 +556,7 @@ export function getQueries() {
   const res = {};
   const urlParams = new URLSearchParams(window.location.search);
   for (const [key, value] of urlParams) {
-    console.log(key, ":", value);
+    // console.log(key, ":", value);
     res[key] = value;
   }
   return res;
@@ -585,6 +585,7 @@ export function navigate(route, params = {}) {
   console.log("navigate to", route, "with", params);
 
   window.history.pushState({}, "", `${route}`);
+  
   return refresh(params);
 }
 

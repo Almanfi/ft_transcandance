@@ -386,12 +386,6 @@ function logout() {
 
 // Web Sockets
 let webSocket = null;
-// let Events = {};
-
-// function setEvent(name, handler) {
-//   Events[name] = handler;
-// }
-
 const websocketApi = "http://localhost:8001";
 
 let conRetries = 0;
@@ -474,18 +468,20 @@ function openSocket() {
 }
 
 function sendMessage(dest, message) {
-  openSocket()
-  if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-    console.warn("Sending message");
-    webSocket.send(JSON.stringify({ type: "chat.message", friend_id: dest, message }));
-  } else {
-    console.error("WebSocket is not open. Cannot send message.");
+  try {
+    if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+      console.warn("Sending message");
+      webSocket.send(JSON.stringify({ type: "chat.message", friend_id: dest, message }));
+    } else {
+      console.error("WebSocket is not open. Cannot send message.");
+    }
+  } catch (error) {
+    console.error("Failed to send message:", error);
   }
 }
 
 const retrieveMessages = async (id) => {
   try {
-    openSocket()
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
       console.log("Getting messages from", id);
       webSocket.send(JSON.stringify({ type: "chat.message.retrieve", friend_id: id }));

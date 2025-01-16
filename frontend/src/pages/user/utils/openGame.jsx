@@ -1,5 +1,5 @@
 import Ura from 'ura';
-import api from '../../../services/api.jsx';
+import api from '../../../services/api.js';
 
 
 function OpenGame(props = {}) {

@@ -1,5 +1,5 @@
 // Array of items
-import api from "./api.jsx";
+import api from "./api.js";
 import users from "./users.js";
 const Selected = new Set();
 
@@ -142,7 +142,7 @@ create("get user by id").onclick = async () => {
 create("init soket").onclick = (e) => {
   try {
     console.log("click init socket");
-    api.getSocket()
+    api.openSocket()
   } catch (error) {
     api.handleError(error)
   }

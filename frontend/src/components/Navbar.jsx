@@ -1,6 +1,6 @@
 import Ura, { getCookie, navigate } from "ura";
 import Menu from "./icons/Menu.jsx";
-import api from "../services/api.jsx";
+import api from "../services/api.js";
 import events from "../services/events.js";
 
 
@@ -128,7 +128,7 @@ function Navbar() {
 
   return render(() => (
     <div className="navbar">
-      
+
       <nav>
         <div className="logo" onclick={() => navigate("/home")}>
           <img src="/assets/clasher.png" />
@@ -139,7 +139,7 @@ function Navbar() {
             {(e) => (<div onclick={() => seeFriend(e)} >{e.firstname} {e.lastname} ({e.display_name})</div>)}
           </div>
         </div>
-{/* 
+        {/* 
         <ul if={Ura.getCookie("id_key")} className="toggle-notif">
           <loop on={getNotif()} className="notifi-box" id="box">
             {(e) => (

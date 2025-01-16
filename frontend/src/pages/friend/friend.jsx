@@ -5,7 +5,7 @@ import WinCup from '../../components/icons/WinCup.jsx';
 import Award from '../../components/icons/Award.jsx';
 import Play from '../../components/icons/Play.jsx';
 import Chat from '../../components/icons/Chat.jsx';
-import api from '../../services/api.jsx';
+import api from '../../services/api.js';
 import Toast from '../../components/Toast.jsx';
 import events from '../../services/events.js';
 // import { GlobalUser } from '../../services/store.js';
@@ -59,7 +59,7 @@ const fetchData = async (id) => {
       Ura.create(<Toast message="Invalid user" delay={0} />);
       return Ura.navigate("/home");
     }
-    
+
     const action = await determineAction(id);
     setAction(action);
     setFriendData(res[0]);

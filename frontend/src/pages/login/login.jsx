@@ -3,7 +3,7 @@ import Navbar from "../../components/Navbar.jsx";
 import Arrow from "../../components/icons/Arrow.jsx";
 import Input from "../../components/Input.jsx";
 // import Toast from "../../components/Toast.js";
-import api from "../../services/api.jsx";
+import api from "../../services/api.js";
 // import Home from "../home/home.js";
 
 

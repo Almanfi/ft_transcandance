@@ -1,12 +1,12 @@
 import Ura from 'ura';
-import Navbar from '../../components/Navbar.jsx';
-import Swords from '../../components/icons/Swords.jsx';
-import WinCup from '../../components/icons/WinCup.jsx';
-import Award from '../../components/icons/Award.jsx';
-import Settings from './utils/settings.jsx';
-import api from '../../services/api.jsx';
-import Relations from './utils/relations.jsx';
-import OpenGame from './utils/openGame.jsx';
+import Navbar from '../../components/Navbar.js';
+import Swords from '../../components/icons/Swords.js';
+import WinCup from '../../components/icons/WinCup.js';
+import Award from '../../components/icons/Award.js';
+import Settings from './utils/settings.js';
+import api from '../../services/api.js';
+import Relations from './utils/relations.js';
+import OpenGame from './utils/openGame.js';
 
 function User() {
   const [render, State] = Ura.init();
