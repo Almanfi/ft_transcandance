@@ -28,7 +28,6 @@ class GameSocket(WebsocketConsumer):
 		if self.scope['user'] != None:
 			self.scope['user'].connect()
 			self.scope['user'] = None
-
 		return super().close(None, None)
 
 	def disconnect(self, code = None):
@@ -49,7 +48,7 @@ class GameSocket(WebsocketConsumer):
 		game = self.get_game()
 		response = None
 		try:
-			started_game = game.start_game(self.scope['user'])
+			started_game = game.start_game()
 			response = {"type": "game.start", "game": started_game.data}
 			async_to_sync(self.channel_layer.group_send)(self.room_group_name, response)
 		except GameException as e:
