@@ -96,7 +96,6 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
     socket = new WebSocket(`${api.websocketApi}/ws/game_pong/${game_data.id}/`);
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
-
       if (data.message === "game_starting") {
         game_started = true;
 
@@ -115,6 +114,9 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
             }
           });
         }
+      }
+      else if (data.message == "game_end") {
+        console.log("GAME ENDED!")
       }
       
     };
@@ -338,6 +340,14 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
 
   function tick(timestamp: number) {
     resizeCanvas(canvas);
+    if (game_started && socket !== undefined && socket.readyState != WebSocket.OPEN) {
+      canvas.style.display = 'none';
+      {
+        const menu = document.getElementById("menu") as HTMLDivElement;
+        menu.style.display = 'block';
+      }
+      return ;
+    }
     window.requestAnimationFrame(tick);
 
     let dt = 1.0 / 60;
@@ -354,10 +364,7 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
     else if (gameInput.s && !gameInput.w) player1_input = INPUT_MOVE_DOWN;
     if (gameInput.arrow_up && !gameInput.arrow_down) player2_input = INPUT_MOVE_UP;
     else if (gameInput.arrow_down && !gameInput.arrow_up) player2_input = INPUT_MOVE_DOWN;
-
-    if (game_started && socket !== undefined && socket.readyState != WebSocket.OPEN) {
-      game_started = false;
-    }
+    
     if (!local && socket.readyState === WebSocket.OPEN
       && (last_ping_time === undefined || Date.now() - last_ping_time > 1000)
     ) {

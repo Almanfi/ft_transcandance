@@ -31,14 +31,14 @@ class GameSocket(WebsocketConsumer):
 		return super().close(None, None)
 
 	def disconnect(self, code = None):
-		self.handle_game_quit()
+		#self.handle_game_quit()
 		if self.scope['user'] != None:
 			self.scope['user'].connect()
 			self.scope['user'] = None
 		return super().disconnect(code)
 	
 	def get_game(self):
-		game: Game = Game.fetch_games_by_id([self.scope['game_id']])
+		game: list[Game] = Game.fetch_games_by_id([self.scope['game_id']])
 		if len(game) != 1:
 			return self.close(82, "No game with such id anymore")
 		game : GameSerializer = GameSerializer(game[0])

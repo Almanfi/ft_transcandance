@@ -5,7 +5,8 @@ import asyncio
 import time
 import random
 import math
-
+from ..serializers.game_seralizers import GameSerializer, Game
+import sys
 #TODO: maybe just retrieve game and modify it?
 #TODO: right now I wait for both players to connect to start the game...
 
@@ -27,6 +28,15 @@ PADDLE_XOFFSET = 0.2
 PADDLE_SPEED = 15
 BALL_SPEED = 8
 
+from channels.db import database_sync_to_async
+
+@database_sync_to_async
+def fetch_game_async(game_id):
+    game_db = Game.fetch_games_by_id([game_id])
+    if len(game_db) != 1:
+        return None
+    game_db = GameSerializer(game_db[0])
+    return [game_db, game_db.data['team_a'], game_db.data['team_b']]
 
 class Pong:
     def __init__(self):
@@ -89,9 +99,11 @@ class Pong:
 
 class PongSocket(AsyncWebsocketConsumer):
     async def connect(self):
-        if not self.scope['user']:
-            return self.close(79, "No User Given in Cookie")
         game_id = self.scope['url_route']['kwargs']['game_id']
+        if not self.scope['user']:
+            await self.close(code=79, reason="No User Given in Cookie")
+            return
+        
         await self.accept()
         self.input = 0
         if game_id not in games:
@@ -105,9 +117,6 @@ class PongSocket(AsyncWebsocketConsumer):
             await games[game_id]['players'][1].send(json.dumps(message))
             asyncio.create_task(game_loop(game_id))
 
-    async def disconnect(self, close_code):
-        pass
-
     async def receive(self, text_data):
         data = json.loads(text_data)
         if 'message' in data:
@@ -117,42 +126,88 @@ class PongSocket(AsyncWebsocketConsumer):
             elif data['message'] == "game_ping":
                 if 'id' in data:
                     await self.send(json.dumps({'message': 'game_pong', 'id': data['id']}))
+                    
+    async def disconnect(self, close_code):
+        pass
 
 async def game_loop(game_id):
-     
-    player1 = games[game_id]['players'][0]
-    player2 = games[game_id]['players'][1]
-    game = games[game_id]['game']
-     
-    game_time = 0
-    while True:
-        start_time = time.time()
-        dt = 1.0 / 60
+    try:
+        [game_db, team_a, team_b] = await fetch_game_async(game_id)
 
-        game.update(player1.input, player2.input, dt)
-        game_time += dt
+        if game_db == None:
+            #this should never happen
+            return 
+
+        game = games[game_id]['game']
+        player1 = games[game_id]['players'][0]
+        player2 = games[game_id]['players'][1]
         
-        state = {
-            'message': 'game_state',
-            'ball': {'x': game.ball_x, 'y': game.ball_y, 'vx': game.ball_vx, 'vy': game.ball_vy},
-            'p1': game.p1_y,
-            'p2': game.p2_y,
-            'score1': game.score1,
-            'score2': game.score2,
-            'time': time.time()
-        }
-        await player1.send(text_data=json.dumps(state))
-        state['p1'] = game.p2_y
-        state['p2'] = game.p1_y
-        state['ball']['x'] *= -1
-        state['ball']['vx'] *= -1
+        
+        
+        # print(team_a[0]['id'])
+        # print(team_b[0]['id'])
+        # print(type(team_a[0]['id']))
+        # print(type(player1.scope['user'].data['id']))
 
-        state['score1'] = game.score2
-        state['score2'] = game.score1
 
-        await player2.send(text_data=json.dumps(state))
+        #sys.stdout.flush()
 
-        elapsed_time = time.time() - start_time
-        time_to_sleep = dt - elapsed_time
-        if time_to_sleep > 0:
-            await asyncio.sleep(time_to_sleep)
+        #print(game_db["team_b"])
+
+
+        game_time = 0
+        
+        while True:
+            start_time = time.time()
+            dt = 1.0 / 60
+
+            game.update(player1.input, player2.input, dt)
+            if (game.score1 >= 1 or game.score2 >= 1):
+                break 
+            game_time += dt
+            
+            state = {
+                'message': 'game_state',
+                'ball': {'x': game.ball_x, 'y': game.ball_y, 'vx': game.ball_vx, 'vy': game.ball_vy},
+                'p1': game.p1_y,
+                'p2': game.p2_y,
+                'score1': game.score1,
+                'score2': game.score2,
+                'time': time.time()
+            }
+            await player1.send(text_data=json.dumps(state))
+            state['p1'] = game.p2_y
+            state['p2'] = game.p1_y
+            state['ball']['x'] *= -1
+            state['ball']['vx'] *= -1
+
+            state['score1'] = game.score2
+            state['score2'] = game.score1
+
+            await player2.send(text_data=json.dumps(state))
+
+            elapsed_time = time.time() - start_time
+            time_to_sleep = dt - elapsed_time
+            if time_to_sleep > 0:
+                await asyncio.sleep(time_to_sleep)
+
+        msg = {'message': 'game_end'}
+        await player1.send(text_data=json.dumps(msg))
+        await player2.send(text_data=json.dumps(msg))
+        
+        await player1.close(code=1000)
+        await player2.close(code=1000)
+
+        team_a_score = 0
+        team_b_score = 0
+       
+
+        #game_db.end_game(player1.score, player2.score)
+        if game_id in games:
+            del games[game_id]
+            
+    except Exception as e:
+        if game_id in games:
+            for player in games[game_id]['players']:
+                await player.close(code=1000)
+            del games[game_id]

@@ -146,9 +146,9 @@ class GameSerializer(serializers.Serializer):
 		db_game:Game = self.instance
 		db_game.delete()
 
-	def end_game(self, user:UserSerializer, team_a_score: int, team_b_score:int):
-		if user.data['id'] != self.data['owner']['id'] or self.data['game_started'] == False  or self.data['game_ended'] == True:
-			raise GameException("Can't End the game", 107, status.HTTP_401_UNAUTHORIZED)
+	def end_game(self, team_a_score: int, team_b_score:int):
+		# if user.data['id'] != self.data['owner']['id'] or self.data['game_started'] == False  or self.data['game_ended'] == True:
+		# 	raise GameException("Can't End the game", 107, status.HTTP_401_UNAUTHORIZED)
 		try:
 			db_game:Game = self.instance
 			db_game.end_game(team_a_score, team_b_score)

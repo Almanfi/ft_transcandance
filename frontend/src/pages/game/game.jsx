@@ -108,7 +108,7 @@ function Game() {
             const data = JSON.parse(e.data);
             if (data.type === "game.start") {
               playGame(user.id, JSON.stringify(data.game), false, false);
-              return;
+              cancel_search = true;
             }
 
           };
@@ -128,6 +128,55 @@ function Game() {
     //button.style.backgroundColor = prev_style;
   }
 
+  function playTournament() {
+    const socket = new WebSocket(`${api.websocketApi}/ws/tournamentmaking/`);
+    let tournament_id = undefined;
+
+    socket.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type === "tournament.found" && typeof data.tournament_id === "string") {
+        tournament_id = data.tournament_id;
+      }
+      console.log("[TOURNAMENTMAKING SOCKET] RECEVIED: ", e.data);
+    };
+
+    socket.onopen = (e) => {
+      console.log("[TOURNAMENTMAKING SOCKET] CONNECTED");
+      //socket.send(JSON.stringify({ message: "hello!" }));
+    };
+
+    socket.onclose = (e) => {
+      console.log("[TOURNAMENTMAKING SOCKET] DISCONNECTED ", e);
+    };
+    let lobby_socket = undefined;
+
+    function tick(time) {
+      if (tournament_id !== undefined) {
+        if (lobby_socket === undefined) {
+          lobby_socket = new WebSocket(`${api.websocketApi}/ws/tournament/${tournament_id}/`);
+          lobby_socket.onopen = (e) => {
+            console.log("[TOURNAMENT_LOBBY SOCKET] CONNECTED!");
+          };
+
+          lobby_socket.onmessage = (e) => {
+            console.log("[TOURNAMENT_LOBBY SOCKET] RECEIVED ", e);
+            const data = JSON.parse(e.data);
+            console.log("[TOURNAMENT_LOBBY SOCKET] MATCHES ", (data.matches.length));
+            for (let i = 0; i < data.matches.length; i++) {
+              console.log(`[MATCH ${i}] ${JSON.stringify(data.matches[i])}`);
+            }
+          };
+          lobby_socket.onclose = (e) => {
+            console.log("[TOURNAMENT_LOBBY SOCKET] DISCONNECTED ", e);
+          };
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+  }
+
   return render(() => (
     <root>
       {/* <Navbar /> */}
@@ -136,6 +185,8 @@ function Game() {
           <button id="play-local" onclick={() => playGame(user.id, undefined, true, false)}>Play Locally</button>
           <button id="play-local-ai" onclick={() => playGame(user.id, undefined, true, true)}>Play vs AI</button>
           <button id="play-remote" style={{ backgroundColor: getColor() }} onclick={() => playRemote()}>{getValue()}</button>
+          <button id="play-tournament" onclick={() => playTournament()}>Play Tournament</button>
+
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
       </div>
