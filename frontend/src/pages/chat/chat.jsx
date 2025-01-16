@@ -31,37 +31,36 @@ const handleMessages = async () => {
 };
 
 events.add("chat.message.retrieve", (data) => {
-  if (Ura.getCurrentRoute() === "/chat") {
-    data = data[0];
-    console.log("chat.message.retrieve", data);
-    data.messages.sort((a, b) => {
-      return new Date(a.timestamp) - new Date(b.timestamp);
-    });
-    const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
-    setConv(res);
-  }
+  if (!Ura.In("/chat")) return
+
+  data = data[0];
+  console.log("chat.message.retrieve", data);
+  data.messages.sort((a, b) => {
+    return new Date(a.timestamp) - new Date(b.timestamp);
+  });
+  const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
+  setConv(res);
 });
 
-events.add("chat.message", (data) => {
-  if (Ura.getCurrentRoute() === "/chat") {
-    data = data[0];
-    console.log("receive chat.message event with ", data);
-    if (data.from === getCurr().id) {
-      const res = {
-        id: getCurr().id,
-        username: getCurr().username,
-        content: data.message
-      }
-      console.log("set conversation to");
-      console.log(getConv());
-      console.log("add to it", res);
+events.add("chat.message", (param) => {
+  if (!Ura.In("/chat")) return
 
-      setConv([
-        ...getConv(),
-        res,
-      ])
-      // const res = data.message.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
+  let data = param[0];
+  console.log("receive chat.message event with ", data);
+  if (data.from === getCurr().id) {
+    const res = {
+      id: getCurr().id,
+      username: getCurr().username,
+      content: data.message
     }
+    console.log("set conversation to");
+    console.log(getConv());
+    console.log("add to it", res);
+
+    setConv([
+      ...getConv(),
+      res,
+    ])
   }
 });
 
@@ -113,15 +112,13 @@ function Chat() {
           <div className="up">
             <h4>Friends</h4>
           </div>
-          <div className="down">
+          <div className="down" loop={getFriends()}>
             {/* friends to start chat with */}
-            <loop on={getFriends()}>
-              {(e, i) => (
-                <div onclick={() => SelectConv(e, i)} className={`${e.id === getCurr().id ? "selected" : ""}`}>
-                  <h4>{e.username}</h4>
-                </div>
-              )}
-            </loop>
+            {(e, i) => (
+              <div onclick={() => SelectConv(e, i)} className={`${e.id === getCurr().id ? "selected" : ""}`}>
+                <h4>{e.username}</h4>
+              </div>
+            )}
           </div>
         </div>
 
@@ -131,7 +128,7 @@ function Chat() {
             <h4>Play game</h4>
             <h4>Block</h4>
           </div>
-          <loop on={getConv()} className="up">
+          <div className="up" loop={getConv()}>
             {(e) => (
               <div className={e.id === getUser().id ? "mine" : "other"}>
                 <p>
@@ -139,7 +136,7 @@ function Chat() {
                 </p>
               </div>
             )}
-          </loop>
+          </div>
           {/* send message */}
           <div if={/*getIndex() != -1 || */true} className="if">
             <div className="down">

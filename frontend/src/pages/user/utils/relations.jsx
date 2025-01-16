@@ -162,7 +162,7 @@ function Relations() {
         <option value="blocks">Blocked Users</option>
       </select>
 
-      <loop className="inner" on={getData()}>
+      <div className="inner" loop={getData()}>
         {(parent, i) => (
           <div className="card" key={i}>
             <div className="content">
@@ -173,7 +173,7 @@ function Relations() {
                 />
                 <h4>{parent.username}</h4>
               </div>
-              <loop on={Object.keys(getEvents())} className="down">
+              <div loop={Object.keys(getEvents())} className="down">
                 {(key) => (
                   <span name={key} onclick={() => {
                     try {
@@ -186,11 +186,11 @@ function Relations() {
                     {Icons[key]()}
                   </span>
                 )}
-              </loop>
+              </div>
             </div>
           </div>
         )}
-      </loop>
+      </div>
     </div>
   ));
 }

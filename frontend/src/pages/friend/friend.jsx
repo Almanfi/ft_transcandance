@@ -134,7 +134,7 @@ function Friend() {
           </div>
         </div>
         <div id="bottom">
-          <loop on={[Swords, Award, WinCup]} id="games">
+          <div loop={[Swords, Award, WinCup]} id="games">
             {(Elem) => (
               <div id="history">
                 <h4 id="title"><Elem />Games</h4>
@@ -144,7 +144,7 @@ function Friend() {
                 </div>
               </div>
             )}
-          </loop>
+          </div>
           <div id="friends">
             {/* <loop className="inner" on={getList()}>
             {(e, i) => (

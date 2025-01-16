@@ -36,6 +36,9 @@
     [ ] in chat, if the id no longer in friend go back to home
     [ ] test responsive navbar
     [ ] modify chat scroll bar so it always be in the end of conversation
+    [ ] remove all if/else/loop tags
+    [ ] fix when searching form my profile to redirect me to user page
+    [ ] replace all jsx imports with .js
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

@@ -18,15 +18,15 @@
 
 import Ura from "ura";
 
-import Home from "./home/home.jsx";
-import Login from "./login/login.jsx";
-import Signup from "./signup/signup.jsx";
-import User from "./user/user.jsx";
-import Chat from "./chat/chat.jsx";
-import Friend from "./friend/friend.jsx";
-import api from "../services/api.jsx";
-import Game from "./game/game.jsx";
-import Notifications from "./notifications/notifications.jsx";
+import Home from "./home/home.js";
+import Login from "./login/login.js";
+import Signup from "./signup/signup.js";
+import User from "./user/user.js";
+import Chat from "./chat/chat.js";
+import Friend from "./friend/friend.js";
+import api from "../services/api.js";
+import Game from "./game/game.js";
+import Notifications from "./notifications/notifications.js";
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -38,7 +38,7 @@ Ura.setStyles([
   "/pages/chat/chat.css",
   "/pages/friend/friend.css",
   "/pages/game/game.css",
-  "/pages/Notifications/Notifications.css",
+  "/pages/notifications/notifications.css",
   /* components */
   "/components/Toast.css",
   "/components/Navbar.css",

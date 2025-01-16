@@ -97,8 +97,8 @@ const handleShowNotif = () => {
 };
 
 function Navbar() {
-  events.addChild("friendship", "Navbar.updateNavbar", updateNavbar);
-  events.addChild("chat.message", "Navbar.updateNavbar", addMessageNotification);
+  // events.addChild("friendship", "Navbar.updateNavbar", updateNavbar);
+  // events.addChild("chat.message", "Navbar.updateNavbar", addMessageNotification);
   // (async () => await updateNavbar())();
   // handleShowNotif();
 
@@ -130,8 +130,6 @@ function Navbar() {
     api.logout();
   }
 
-
-
   function toggleMenu() {
     let menuList = document.getElementsByClassName("menuList")[0];
     menuList.classList.toggle("show");
@@ -139,19 +137,19 @@ function Navbar() {
 
   return render(() => (
     <div className="navbar">
+      
       <nav>
         <div className="logo" onclick={() => navigate("/home")}>
-          <img src="/assets/tr.png" />
+          <img src="/assets/clasher.png" />
         </div>
         <div if={Ura.getCookie("id_key")} className="search"  >
           <input type="text" placeholder="Search" id="search_input" oninput={handleInput} />
-          <loop on={getList()} className="elems">
+          <div loop={getList()} className="elems">
             {(e) => (<div onclick={() => seeFriend(e)} >{e.firstname} {e.lastname} ({e.display_name})</div>)}
-          </loop>
+          </div>
         </div>
-
+{/* 
         <ul if={Ura.getCookie("id_key")} className="toggle-notif">
-          {/* <h3 >Notification</h3> */}
           <loop on={getNotif()} className="notifi-box" id="box">
             {(e) => (
               <div className="data">
@@ -165,7 +163,7 @@ function Navbar() {
               </div>
             )}
           </loop>
-        </ul>
+        </ul> */}
 
         <li className="list">
           <ul className="menuList" >

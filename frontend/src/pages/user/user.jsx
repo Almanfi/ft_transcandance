@@ -56,7 +56,7 @@ function User() {
         </div>
 
         <div id="bottom">
-          <loop on={[Swords, Award, WinCup]} id="games">
+          <div loop={[Swords, Award, WinCup]} id="games">
             {(Elem) => (
               <div id="history">
                 <h4 id="title"><Elem />Games</h4>
@@ -66,7 +66,7 @@ function User() {
                 </div>
               </div>
             )}
-          </loop>
+          </div>
           <Relations />
         </div>
 

@@ -5,6 +5,7 @@ const { ELEMENT, FRAGMENT, TEXT } = UTILS;
 const { deepEqual, loadCSS, svgElements } = UTILS;
 
 let ifTag = null;
+let cond = false;
 // JSX
 function check(children: any): any {
   let result = [];
@@ -66,7 +67,7 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
     return functag;
   }
   if (tag === "if") {
-
+    console.warn("if tag is depricated");
     let tag = "if";
     let type = IF;
     if (props.tag) {
@@ -83,6 +84,7 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
     return props.cond ? res : null;
   }
   else if (tag === "else") {
+    console.warn("else tag is depricated");
     // console.log("handle else");
     // console.log("this is if tag", ifTag);
     let res = {
@@ -102,6 +104,8 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
     }
   }
   else if (tag === "loop" || tag === "dloop") {
+    console.warn("loop / dloop tags are depricated");
+
     let loopChildren = (props.on || []).flatMap((elem, id) =>
       (children || []).map((child) => {
         const evaluatedChild =
@@ -126,12 +130,28 @@ function e(tag: Tag, props: Props = {}, ...children: any) {
     return res;
   }
   if (props && props.if !== undefined) {
+    cond = props.if;
     // console.warn("tag has if");
-    if (!props.if) {
+    if (!props.if) return undefined;
+    else { }
+  }
+  if (props && props.elif !== undefined) {
+    if (cond) return undefined;
+    cond = props.elif;
+    if (!props.elif) return undefined
+  }
+  if (props && props.else !== undefined) {
+    if (cond) {
+      cond = false;
       return undefined;
     }
-    else {
-    }
+    else { }
+  }
+  if (props && props.loop) {
+    let loopChildren = (props.loop || []).flatMap((elem, id) =>
+      (children || []).map((child) => deepcopy(typeof child === "function" ? child(elem, id) : child))
+    );
+    children = loopChildren;
   }
   return {
     tag: tag,
@@ -715,6 +735,10 @@ function getCurrentRoute() {
   return path
 }
 
+function In(path) {
+  return normalizePath(path) === getCurrentRoute();
+}
+
 // @ts-ignore
 window.seeTree = function () {
   console.log(GlobalVDOM);
@@ -738,6 +762,7 @@ const Ura = {
   navigate,
   setRoutes,
   setStyles,
+  In,
   // send: HTTP_Request,
   // activate,
   start,

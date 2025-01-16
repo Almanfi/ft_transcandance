@@ -1,14 +1,14 @@
 import Ura from 'ura';
 import { playGame } from './client.js';
 import api from '../../services/api.jsx';
-import Navbar from '../../components/Navbar.jsx';
+import Navbar from '../../components/Navbar.js';
 
 // TODO: check query if is in friend and exsits etc ...
 function Game() {
   const { id } = Ura.getQueries();
   api.openGameSocket(id);
   const [render, State] = Ura.init();
-  const [getStart, setStart] = State(false);
+  const [getStart, setStart] = State(true);
 
   return render(() => (
     <root>
@@ -21,11 +21,12 @@ function Game() {
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
       </div>
-      <else>
+      <div else>
         <h1>Loading ...</h1>
-      </else>
+      </div>
     </root>
   ));
 }
 
 export default Game;
+

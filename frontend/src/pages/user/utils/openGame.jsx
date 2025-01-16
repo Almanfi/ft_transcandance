@@ -25,7 +25,7 @@ function OpenGame(props = {}) {
   return render(() => (
     <div className="opengame">
       <h3>Game states</h3>
-      <loop on={getter()}>
+      <div loop={getter()}>
         {(e) => (
           <>
             <button onclick={() => accept(e)}> accept ({e})</button>
@@ -36,7 +36,7 @@ function OpenGame(props = {}) {
             <br />
           </>
         )}
-      </loop>
+      </div>
     </div>
   ));
 }
