@@ -1,0 +1,30 @@
+{
+  "name": "urajs",
+  "version": "1.0.0",
+  "description": "frontend framework",
+  "type": "module",
+  "scripts": {
+    "start": "node ./scripts/server.js",
+    "gen": "node ./scripts/new-route.js",
+    "clear": "rm -rf ./out/*",
+    "build": "node ./scripts/build.js"
+  },
+  "bin": {
+    "uragen": "./scripts/gen.js",
+    "urastart": "./scripts/server.js",
+    "urabuild": "./scripts/build.js"
+  },
+  "author": "Hrima Mohammed",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "chokidar": "^4.0.1",
+    "postcss": "^8.4.49",
+    "sass": "^1.80.6",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "ws": "^8.18.0"
+  }
+}

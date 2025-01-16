@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hamburger Menu | Code Mentor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="navbar">
+    <nav>
+      <div class="logo">
+        <h5>Logo</h5>
+      </div>
+      <div class="search">
+        <input type="text" placeholder="Search" oninput="search(event)" />
+        <div class="elems">
+          <div>user1 </div>
+          <div>user1 </div>
+          <div>user1 </div>
+          <div>user1 </div>
+        </div>
+      </div>
+
+      <li class="toggle-notif">
+        <a class="icon" onclick="toggleNotifi()">Notif</a>
+        <div class="notifi-box" id="box">
+          <h1>Notifications</h1>
+        </div>
+      </li>
+      <li class="list">
+        <ul class="menuList">
+          <a class="go-to-notif">Go to Notifications</a>
+          <a href="#">Log in</a>
+          <a href="#">Sign Up</a>
+        </ul>
+      </li>
+
+      <div class="menu-icon" onclick="toggleMenu()">
+        <i class="fa-solid fa-bars">+</i>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    /*
+      logo: 15%
+      input: 
+      notif: 15%
+      login: 15%
+      signup: 15%
+    */
+    let box = document.getElementById("box");
+    let down = false;
+
+    function toggleNotifi() {
+      if (down) {
+        box.classList.remove("show"); // Hide the notification bar
+      } else {
+        box.classList.add("show"); // Show the notification bar
+      }
+      down = !down;
+    }
+
+    let menuList =  document.getElementsByClassName("menuList")[0];
+
+    function toggleMenu() {
+      menuList.classList.toggle("show");
+    }
+
+    function search(event) {
+      const elems = document.getElementsByClassName("elems")[0];
+      console.log("input:", event.target.value);
+      
+      if (event.target.value.length) {
+        elems.style.display = "flex";
+      } else {
+        elems.style.display = "none";
+      }
+    }
+  </script>
+</body>
+
+</html>

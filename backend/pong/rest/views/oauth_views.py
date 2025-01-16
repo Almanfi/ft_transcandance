@@ -13,6 +13,8 @@ import requests
 import jwt
 from uuid import uuid4
 
+oauth_callback = "https://localhost:8000/api/oauth/42/callback/"
+
 def bearer_header(token:str):
     return f"Bearer {token}"
 
@@ -23,7 +25,7 @@ class OauthViews(GenericViewSet):
 		base_42_url = "https://api.intra.42.fr/oauth/authorize"
 		params = {
 			"client_id": settings.OAUTH_42_PUBLIC,
-			"redirect_uri": "https://localhost:8000/oauth/42/callback/",
+			"redirect_uri": oauth_callback,
 			"scope": "public",
 			"state": _get_new_csrf_string(),
 			"response_type": "code",
@@ -82,7 +84,7 @@ class OauthViews(GenericViewSet):
 			"client_id": settings.OAUTH_42_PUBLIC,
 			"client_secret": settings.OAUTH_42_SECRET,
 			"code": request.query_params.get("code"),
-			"redirect_uri": "https://localhost:8000/oauth/42/callback/",
+			"redirect_uri": oauth_callback,
 			"state": request.query_params.get("state")
 		}
 		try:

@@ -1,0 +1,56 @@
+.notifications {
+  .data {
+    display: flex;
+    align-items: center;
+    background-color: var(--red1);
+    color: var(--black4);
+
+    .title {
+      flex: 5;
+      text-align: center;
+    }
+
+    .action {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 60px;
+
+      .accept,
+      .refuse {
+        width: 100%;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .accept {
+        flex: 1;
+        background-color: green;
+        border: 1px solid green;
+        color: var(--red0);
+
+        &:hover {
+          background-color: var(--red0);
+          color: green;
+        }
+      }
+
+      .refuse {
+        flex: 1;
+        background-color: red;
+        border: 1px solid red;
+        color: var(--red0);
+
+        &:hover {
+          background-color: var(--red0);
+          color: red;
+        }
+      }
+    }
+  }
+}
