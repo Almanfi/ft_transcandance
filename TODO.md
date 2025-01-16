@@ -25,7 +25,7 @@
     [ ] friend
     [ ] in friend page if something failed go to home page
     [ ] test Toast for small screens
-    [ ] user mut update image
+    [ ] user must update image
     [ ] implement user game history
     [ ] check all TODOS inside files
     [ ] when searching in users, don't show thoses that have some name as me
