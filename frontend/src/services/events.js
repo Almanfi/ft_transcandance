@@ -102,7 +102,7 @@ const events = {
 }
 
 events.add("friendship_received", async (data) => {
-  if (data.length) {
+  if (data.length && !Ura.In("/notifications")) {
     const res = await api.getUsersById([data[0].user_id]);
     Ura.create(<Toast message={`new invitation from ${res[0].display_name}`} color="green" />);
   }

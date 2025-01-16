@@ -39,6 +39,8 @@
     [ ] remove all if/else/loop tags
     [ ] fix when searching form my profile to redirect me to user page
     [ ] replace all jsx imports with .js
+    [ ] update user statistic
+    [ ] login with intra 42                             
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/
