@@ -87,8 +87,8 @@ $black4: var(--black4);
             fill: $black4;
           }
           svg {
-            width: 100%;
-            height: 100%;
+            width: 100px;
+            // height: 100%;
           }
           &:hover {
             svg path {

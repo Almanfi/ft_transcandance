@@ -2,7 +2,7 @@ import Ura from "ura";
 import Toast from "../components/Toast.jsx";
 import events from "./events.js";
 
-const endpoint = "https://localhost:8000";
+const endpoint = "https://" + window.location.hostname + ":8000";
 
 async function signup(user) {
   const response = await fetch(`${endpoint}/users/`, {
@@ -386,7 +386,7 @@ function logout() {
 
 // Web Sockets
 let webSocket = null;
-const websocketApi = "wss://localhost:8000";
+const websocketApi = "wss://" + window.location.hostname + ":8000";
 
 let conRetries = 0;
 function openSocket() {
