@@ -57,7 +57,8 @@ export class Inputs {
         let x = this.numberEncode(this.move.x);
         let y = this.numberEncode(this.move.y);
         let info = `${x}${y}${actionComb}`;
-        info += `${this.angle}|${this.direction.toArray()}|${this.timeStamp}`;
+        info += `${this.angle}|${this.direction.toArray()}|`;
+        info += this.timeStamp.toString(36);
         this.serializedData = info;
 
         return this.serializedData;
@@ -74,12 +75,12 @@ export class Inputs {
         this.angle = Number(others[0]);
         let directionArray = others[1].split(',').map(parseFloat);
         this.direction.fromArray(directionArray);
-        this.timeStamp = Number(others[2]);
+        this.timeStamp = parseInt(others[2], 36);
     }
 
     static findTimeStamp(data: string): number {
         let others = data.slice(3).split('|');
-        let timeStamp = Number(others[2]);
+        let timeStamp = parseInt(others[2], 36);
         return timeStamp;
     }
 
