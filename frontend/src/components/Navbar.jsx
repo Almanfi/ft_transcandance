@@ -1,6 +1,6 @@
 import Ura, { getCookie, navigate } from "ura";
-import Menu from "./icons/Menu.js";
-import api from "../services/api.js";
+import Menu from "./icons/Menu.jsx";
+import api from "../services/api.jsx";
 import events from "../services/events.js";
 
 
@@ -169,9 +169,13 @@ function Navbar() {
 
         <li className="list">
           <ul className="menuList" >
-            <a if={getCookie("id_key")} className="see-notif" onclick={handleShowNotif}>Notif ({getNotif().length})</a>
-            <a if={getCookie("id_key")} className="go-notif" >Go to Notifications</a>
-            <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>
+            <a if={getCookie("id_key")}
+              className="see-notif"
+              onclick={handleShowNotif}>Notif ({getNotif().length})</a>
+            <a if={getCookie("id_key")}
+              className="go-notif" >Go to Notifications</a>
+            <a if={!getCookie("id_key")}
+              onclick={() => navigate("/login")}>
               Login
             </a>
             <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>

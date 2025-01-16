@@ -1,6 +1,6 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.js";
-import api from "../../services/api.js";
+import Navbar from "../../components/Navbar.jsx";
+import api from "../../services/api.jsx";
 import events from "../../services/events.js";
 
 const [render, State] = Ura.init();
@@ -10,16 +10,6 @@ const [getConv, setConv] = State([]);
 const [getCurr, setCurr] = State({});
 const [getUser, setUser] = State({});
 
-
-// events.addChild("friendship_accepted", "Chat.handleMessages", () => {
-//   console.error("current route:", Ura.getCurrentRoute());
-
-//   if (Ura.getCurrentRoute() === "/chat") {
-//     console.error("refresh");
-//     handleMessages();
-//     Ura.refresh();
-//   }
-// });
 
 const handleMessages = async () => {
   try {

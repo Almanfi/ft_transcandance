@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Toast from "../components/Toast.js";
+import Toast from "../components/Toast.jsx";
 import events from "./events.js";
 
 const endpoint = "https://localhost:8000";

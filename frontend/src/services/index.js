@@ -1,5 +1,5 @@
 // Array of items
-import api from "./api.js";
+import api from "./api.jsx";
 import users from "./users.js";
 const Selected = new Set();
 

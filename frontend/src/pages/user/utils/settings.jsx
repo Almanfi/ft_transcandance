@@ -1,6 +1,6 @@
 import Ura from 'ura';
-import Input from '../../../components/Input.js';
-import api from '../../../services/api.js';
+import Input from '../../../components/Input.jsx';
+import api from '../../../services/api.jsx';
 
 function Settings(props = {}) {
   const { Show, userData } = props;

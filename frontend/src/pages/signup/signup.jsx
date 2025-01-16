@@ -1,9 +1,9 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.js";
-import Arrow from "../../components/icons/Arrow.js";
+import Navbar from "../../components/Navbar.jsx";
+import Arrow from "../../components/icons/Arrow.jsx";
 // import Toast from "../../components/Toast.js";
-import Input from "../../components/Input.js";
-import api from "../../services/api.js";
+import Input from "../../components/Input.jsx";
+import api from "../../services/api.jsx";
 // import Home from "../home/home.js";
 
 function truncateString(str) {

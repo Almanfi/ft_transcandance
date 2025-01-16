@@ -1,7 +1,7 @@
 import Ura from 'ura';
 import { playGame } from './client.js';
-import api from '../../services/api.js';
-import Navbar from '../../components/Navbar.js';
+import api from '../../services/api.jsx';
+import Navbar from '../../components/Navbar.jsx';
 
 // TODO: check query if is in friend and exsits etc ...
 function Game() {

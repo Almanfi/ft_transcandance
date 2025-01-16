@@ -27,8 +27,8 @@
 */
 
 import Ura from "ura";
-import api from "./api.js";
-import Toast from "../components/Toast.js";
+import api from "./api.jsx";
+import Toast from "../components/Toast.jsx";
 
 const Allowed = [
   "friendship",
@@ -126,6 +126,7 @@ events.add("friendship_accepted", async (data) => {
   }
   Ura.refresh();
 })
+
 
 
 export default events

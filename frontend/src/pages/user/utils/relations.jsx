@@ -1,8 +1,8 @@
 import Ura, { navigate } from 'ura';
-import api from '../../../services/api.js';
-import Chat from '../../../components/icons/Chat.js';
-import Play from '../../../components/icons/Play.js';
-import Accept from '../../../components/icons/Accept.js';
+import api from '../../../services/api.jsx';
+import Chat from '../../../components/icons/Chat.jsx';
+import Play from '../../../components/icons/Play.jsx';
+import Accept from '../../../components/icons/Accept.jsx';
 import events from '../../../services/events.js';
 
 const [render, State, ForceState] = Ura.init();
