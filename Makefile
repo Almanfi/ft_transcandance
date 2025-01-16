@@ -16,6 +16,9 @@ down:
 clean :
 	-docker-compose -f ${COMPOSE_FILE} --env-file ${ENV_PATH} down --rmi all
 
+logs :
+	-docker-compose -f ${COMPOSE_FILE} logs
+
 fclean: clean
 	@docker system prune -a -f
 	@docker volume prune -f

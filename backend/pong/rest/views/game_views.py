@@ -20,6 +20,16 @@ class GameView(ViewSet):
 		return Response(invites.data, status=status.HTTP_200_OK)
 
 	@action(methods=['post'], detail=False)
+	def get_games(self, request):
+		if (len(request.data) == 0):
+			return Response({"message": "The data should contain ['game_id'...]", "error_code": 118}, status=status.HTTP_400_BAD_REQUEST)
+		game_ids = parse_uuid(request.data)
+		if len(game_ids) != 1:
+			return Response({"message": "No valid game ids", "error_code": 119}, status=status.HTTP_400_BAD_REQUEST)
+		played_games = GameSerializer.fetch_played_games(game_ids)
+		return Response(played_games.data, status=status.HTTP_200_OK)
+
+	@action(methods=['post'], detail=False)
 	def create_game(self, request):
 		auth_user: UserSerializer = request.user
 		created_game = GameSerializer.create_new_game(auth_user,  GAME_TYPES[0][0])

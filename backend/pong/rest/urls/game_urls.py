@@ -8,6 +8,10 @@ urlpatterns = [
         "patch": "end_game"
         })
     ),
+    path("played/", GameView.as_view({
+        'post': "get_games"
+        })
+    ),
     path('invite/', GameView.as_view({
         'post': "invite_player"
         })

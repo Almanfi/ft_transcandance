@@ -386,7 +386,7 @@ function logout() {
 
 // Web Sockets
 let webSocket = null;
-const websocketApi = "http://localhost:8001";
+const websocketApi = "wss://localhost:8000";
 
 let conRetries = 0;
 function openSocket() {

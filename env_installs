@@ -1,0 +1,11 @@
+
+install venv 
+pip install venv
+
+install pg-16
+https://www.postgresql.org/download/linux/ubuntu/
+
+
+python3 -m venv venv && \
+    source venv/bin/activate && \
+    pip install -r ./backend/requirements.txt

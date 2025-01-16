@@ -127,9 +127,9 @@ class GameSerializer(serializers.Serializer):
 			quited_game = None
 		return quited_game
 		
-	def start_game(self, user:UserSerializer):
-		if user.data['id'] != self.data['owner']['id']:
-			raise GameException("User is not the game owner", 85, status.HTTP_401_UNAUTHORIZED)
+	def start_game(self):
+		# if user.data['id'] != self.data['owner']['id']:
+		# 	raise GameException("User is not the game owner", 85, status.HTTP_401_UNAUTHORIZED)
 		team_a_len = len(self.data['team_a'])
 		team_b_len = len(self.data['team_b'])
 		if team_a_len <= 0 or team_a_len != team_b_len:

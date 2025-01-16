@@ -79,7 +79,7 @@ ROOT_URLCONF = 'pong.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'shooter/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -144,10 +144,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    ('rest', f"{BASE_DIR}/rest/static/rest")
+    ('rest', f"{BASE_DIR}/rest/static/rest"),
+    ('shooter', f"{BASE_DIR}/shooter/static/shooter"),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 OAUTH_42_PUBLIC=os.getenv("CLIENT_ID_42")
 OAUTH_42_SECRET=os.getenv("CLIENT_SECRET_42")
