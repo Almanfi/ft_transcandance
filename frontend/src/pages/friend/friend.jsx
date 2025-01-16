@@ -14,7 +14,6 @@ import events from '../../services/events.js';
 // TODO: check if id is not for current user
 const [render, State] = Ura.init();
 
-
 const [getUser, setFriendData] = State({
   id: "",
   firstname: "",
@@ -48,13 +47,19 @@ const [getAction, setAction] = State({ invite_id: "", action: "" });
 
 const fetchData = async (id) => {
   try {
-    const res = await api.getUsersById([id]);
     const user = await api.getUser();
-
-    if (!res.length || user.id === id) {
-      // Ura.create(<Toast message="Invalid user or page" delay={0} />);
-      // return Ura.navigate("/user");
+    
+    if (user.id === id) {
+      Ura.create(<Toast message="Invalid page" delay={0} />);
+      return Ura.navigate("/user");
     }
+
+    const res = await api.getUsersById([id]);
+    if (!res.length) {
+      Ura.create(<Toast message="Invalid user" delay={0} />);
+      return Ura.navigate("/home");
+    }
+    
     const action = await determineAction(id);
     setAction(action);
     setFriendData(res[0]);
@@ -70,7 +75,9 @@ function Friend() {
     return Ura.navigate("/home");
   }
 
-  events.addChild("friendship", "Friend.fetchData", () => fetchData(id));
+  events.addChild("friendship_received", "Friend.fetchData", () => fetchData(id));
+  events.addChild("friendship_accepted", "Friend.fetchData", () => fetchData(id));
+
 
   const handleAction = async (e) => {
     e.preventDefault();

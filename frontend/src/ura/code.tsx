@@ -28,7 +28,6 @@ function fr(props: Props = {}, ...children: any) {
     type: FRAGMENT,
     children: children || [],
   };
-  throw "Fragments (<></>) are not supported please use <fr></fr> tag instead";
 }
 
 function deepcopy(value) {
@@ -252,7 +251,6 @@ function createDOM(vdom): VDOM {
     }
     case EXEC: {
       ExecStack.push(vdom.call);
-      vdom.dom = document.createElement("exec");
       break;
     }
     default:
@@ -481,7 +479,7 @@ export function init() {
 }
 
 // ROUTING
-function Error(props: Props | null) {
+function ErrorPage(props: Props | null) {
   const [render, State] = init();
   return render(() => {
     return e(
@@ -510,7 +508,7 @@ function resetRoutes() {
   Object.keys(Routes).forEach(key => {
     delete Routes[key];
   })
-  Routes["*"] = () => Error({ message: window.location.pathname });
+  Routes["*"] = () => ErrorPage({ message: window.location.pathname });
 }
 
 resetRoutes();
@@ -579,9 +577,6 @@ function refresh(params = null) {
   let path = window.location.pathname || "*";
   path = normalizePath(path);
   const RouteConfig = getRoute(path);
-  // console.log("view:", RouteConfig);
-
-
   return display(<RouteConfig props={params} />);
 }
 
@@ -616,7 +611,7 @@ async function loadJSFiles(routes, base) {
     try {
       const module = await import(routes[route]);
       if (!module.default) {
-        throw `${route}: ${routes[route]} must have a default export`;
+        throw new Error(`${route}: ${routes[route]} must have a default export`);
       }
       Ura.setRoute(Ura.normalizePath(route), module.default);
       if (base && route === base) {

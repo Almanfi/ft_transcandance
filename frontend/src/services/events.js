@@ -31,7 +31,6 @@ import api from "./api.jsx";
 import Toast from "../components/Toast.jsx";
 
 const Allowed = [
-  "friendship",
   "friendship_received",
   "friendship_accepted",
   // "chat",
@@ -45,13 +44,13 @@ const handlers = {
 
 function check(name) {
   if (Allowed.includes(name)) return
-  throw `Error: Unknown event ${name} add it to allowed events`;
+  throw new Error(`Unknown event ${name} add it to allowed events`);
 }
 
 function add(name, handler) {
   console.warn("add event", name);
   check(name)
-  if (handlers[name]) throw `Error: ${name} already exists`
+  if (handlers[name]) throw new Error(`${name} already exists`)
   handlers[name] = {
     handler: handler,
     children: {}
@@ -87,9 +86,6 @@ function addChild(name, childname, child) {
   check(name)
   console.log(handlers[name]);
   handlers[name].children[childname] = child;
-
-  // if (Object.keys(handlers[name].children).includes(childname))
-  // throw `${name} alread has ${childname} child`
 }
 
 function remove(name) {
@@ -105,24 +101,18 @@ const events = {
   remove,
 }
 
-events.add("friendship", () => { console.log("friendship event") })
-
 events.add("friendship_received", async (data) => {
-  // console.log("has:", data);
   if (data.length) {
     const res = await api.getUsersById([data[0].user_id]);
     Ura.create(<Toast message={`new invitation from ${res[0].display_name}`} color="green" />);
-    // events.emitChildren("friendship");
   }
   Ura.refresh();
 })
 
 events.add("friendship_accepted", async (data) => {
-  // console.log("has:", data);
   if (data.length) {
     const res = await api.getUsersById([data[0].user_id]);
     Ura.create(<Toast message={`${res[0].display_name} did accept invitation`} color="green" />);
-    // events.emitChildren("friendship");
   }
   Ura.refresh();
 })

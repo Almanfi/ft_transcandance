@@ -84,22 +84,13 @@ const addMessageNotification = async (data) => {
     console.error("received message");
   }
 }
-let down = true;
+
 const handleShowNotif = () => {
-  let box = document.getElementById("box");
-  if (box) {
-    if (box.classList.contains("show")) {
-      box.classList.remove("show");
-    } else {
-      box.classList.add("show");
-    }
-  }
+  navigate("/notifications")
 };
 
 function Navbar() {
   // events.addChild("friendship", "Navbar.updateNavbar", updateNavbar);
-  // events.addChild("chat.message", "Navbar.updateNavbar", addMessageNotification);
-  // (async () => await updateNavbar())();
   // handleShowNotif();
 
 
@@ -169,7 +160,7 @@ function Navbar() {
           <ul className="menuList" >
             <a if={getCookie("id_key")}
               className="see-notif"
-              onclick={handleShowNotif}>Notif ({getNotif().length})</a>
+              onclick={handleShowNotif}>Notifications</a>
             <a if={getCookie("id_key")}
               className="go-notif" >Go to Notifications</a>
             <a if={!getCookie("id_key")}

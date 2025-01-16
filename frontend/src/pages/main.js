@@ -60,8 +60,6 @@ Ura.onNavigate(() => {
     });
   }
   else {
-    // const [getGlobal, setGlobal] = GlobalUser;
-    // setGlobal(undefined);
 
     Ura.rmCookie("id_key");
 

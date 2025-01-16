@@ -2,14 +2,14 @@ import Ura from "ura";
 import Navbar from "../../components/Navbar.jsx";
 import api from "../../services/api.jsx";
 import events from "../../services/events.js";
+import { navigate } from "../../ura/code.js";
 
 const [render, State] = Ura.init();
 
 const [getFriends, setFriends] = State([]);
 const [getConv, setConv] = State([]);
-const [getCurr, setCurr] = State({});
+const [getCurr, setCurr] = State({ id: -1 });
 const [getUser, setUser] = State({});
-
 
 const handleMessages = async () => {
   try {
@@ -30,14 +30,12 @@ const handleMessages = async () => {
   }
 };
 
-events.add("chat.message.retrieve", (data) => {
+events.add("chat.message.retrieve", (param) => {
   if (!Ura.In("/chat")) return
 
-  data = data[0];
-  console.log("chat.message.retrieve", data);
-  data.messages.sort((a, b) => {
-    return new Date(a.timestamp) - new Date(b.timestamp);
-  });
+  console.error("chat.message.retrieve: ", param);
+  let data = param[0];
+  data.messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   const res = data.messages.map((e) => ({ id: e.sender.id, username: e.sender.username, content: e.content }))
   setConv(res);
 });
@@ -45,50 +43,47 @@ events.add("chat.message.retrieve", (data) => {
 events.add("chat.message", (param) => {
   if (!Ura.In("/chat")) return
 
-  let data = param[0];
-  console.log("receive chat.message event with ", data);
-  if (data.from === getCurr().id) {
-    const res = {
-      id: getCurr().id,
-      username: getCurr().username,
-      content: data.message
-    }
-    console.log("set conversation to");
-    console.log(getConv());
-    console.log("add to it", res);
+  console.error("chat.message: ", param);
+  // let data = param[0];
+  // if (data.from === getCurr().id) {
+  //   // const res = {
+  //   //   id: getCurr().id,
+  //   //   username: getCurr().username,
+  //   //   content: data.message
+  //   // }
+  //   // console.log("set conversation to");
+  //   // console.log(getConv());
+  //   // console.log("add to it", res);
 
-    setConv([
-      ...getConv(),
-      res,
-    ])
-  }
+  //   // setConv([
+  //   //   ...getConv(),
+  //   //   res,
+  //   // ])
+  // }
+  handleMessages()
 });
 
 
 function Chat() {
-  api.openSocket();
+  setCurr({ ...getCurr(), id: -1 })
   handleMessages();
+  api.openSocket();
 
-  const call = async () => {
-    console.warn("before");
+  (async () => {
     const user = { ...await api.getUser() }
-    console.warn("after", user);
     setUser(user);
-  }
-  call()
+  })()
 
   // retrieve messages
   const SelectConv = (e, i) => {
-    console.log("select", i, "has id", e.id);
     Ura.setQuery("id", e.id)
     handleMessages();
   };
 
-  // recieve messages
   const sendMessage = () => {
     const textarea = document.querySelector(".right .down textarea");
     if (textarea.value.length) {
-      console.log("send", textarea.value, "to:", getCurr());
+      // console.log("send", textarea.value, "to:", getCurr());
       api.sendMessage(getCurr().id, textarea.value);
       const res = {
         id: getUser().id,
@@ -107,7 +102,6 @@ function Chat() {
     <root>
       <Navbar />
       <div className="chat">
-        {/* <New/> */}
         <div className="left">
           <div className="up">
             <h4>Friends</h4>
@@ -128,17 +122,20 @@ function Chat() {
             <h4>Play game</h4>
             <h4>Block</h4>
           </div>
-          <div className="up" loop={getConv()}>
+          <div className="up" loop={getConv()} id="conversation">
             {(e) => (
-              <div className={e.id === getUser().id ? "mine" : "other"}>
+              <div className={e.id === getUser().id ? "mine" : "other"} onclick={() => {
+                if (e.id === getUser().id) navigate(`/user`)
+                else navigate(`/friend?id=${e.id}`)
+              }}>
                 <p>
-                  <l>{e.username}</l>: {e.content}
+                  <l>{e.id === getUser().id ? "me" : e.username}</l>: {e.content}
                 </p>
               </div>
             )}
           </div>
           {/* send message */}
-          <div if={/*getIndex() != -1 || */true} className="if">
+          <div if={getUser().id} className="if">
             <div className="down">
               <textarea name="" id=""></textarea>
               <button onclick={sendMessage}>{">"}</button>
@@ -146,6 +143,10 @@ function Chat() {
           </div>
         </div>
       </div>
+      <exec call={() => {
+        const conversation = document.getElementById("conversation");
+        if (conversation) conversation.scrollTop = conversation.scrollHeight;
+      }} />
     </root>
   ));
 }

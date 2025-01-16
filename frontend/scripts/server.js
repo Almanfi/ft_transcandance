@@ -15,14 +15,13 @@ import updateStyles from "./load-css.js";
 await import("../ura.config.js");
 
 // CLEAR out Directory
-// if (existsSync(output)) readdirSync(output).forEach(sub => {
-//   let _path = join(output, sub);
-//   if (statSync(_path).isDirectory()) rmSync(_path, { recursive: true, force: true })
-//   else rmSync(_path)
-// });
+if (existsSync(output)) readdirSync(output).forEach(sub => {
+  let _path = join(output, sub);
+  if (statSync(_path).isDirectory()) rmSync(_path, { recursive: true, force: true })
+  else rmSync(_path)
+});
 
-if (config.style !== "tailwind" && existsSync(join(source, "./pages/tailwind.css")))
-  rmSync(join(source, "./pages/tailwind.css"))
+if (config.style !== "tailwind" && existsSync(join(source, "./pages/tailwind.css"))) rmSync(join(source, "./pages/tailwind.css"))
 updateRoutes()
 
 async function getAvailablePort(port) {

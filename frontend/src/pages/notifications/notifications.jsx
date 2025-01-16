@@ -38,14 +38,19 @@ const NewMessage = async (param) => {
   if (data.status !== 'sent') {
     try {
       const user = await api.getUsersById([data.from]);
-      setList([
-        ...getList(),
+      const existingNotification = getList().
+        some((e) => e.type === "message" && e.content === `New message from ${user[0].display_name}`);
+
+      if (!existingNotification) {
+        setList([...getList(),
         {
-          type: "message",
-          content: `New message from ${user[0].display_name}`,
-          accept: () => navigate(`/chat?id=${user[0].id}`),
-        }
-      ])
+          type: "message", content: `New message from ${user[0].display_name}`, accept: () => {
+            navigate(`/chat?id=${user[0].id}`)
+            Ura.refresh()
+          }
+        },
+        ]);
+      }
     } catch (error) {
       api.handleError(error)
     }
@@ -53,7 +58,7 @@ const NewMessage = async (param) => {
 }
 const NewGameInvitation = async () => { };
 
-events.addChild("friendship", "Notifications.NewFriendInvitation", NewFriendInvitation);
+events.addChild("friendship_received", "Notifications.NewFriendInvitation", NewFriendInvitation);
 events.addChild("chat.message", "Notifications.NewMessage", NewMessage);
 
 function Notifications() {

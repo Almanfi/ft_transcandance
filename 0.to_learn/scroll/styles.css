@@ -1,0 +1,47 @@
+.up {
+    flex: 1;
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    overflow-x: hidden;
+    max-height: 400px;
+    /* Set a max height for the container */
+    display: flex;
+    flex-direction: column;
+    margin: 0 5px;
+
+    scrollbar-width: none;
+    /* Hide scrollbar in Firefox */
+    -ms-overflow-style: none;
+    /* Hide scrollbar in IE/Edge */
+}
+
+.up::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar in Chrome, Edge, and Safari */
+}
+
+.mine,
+.other {
+    display: flex;
+}
+
+.mine p,
+.other p {
+    text-align: left;
+    margin: 1px 0px;
+    padding: 6px 10px;
+}
+
+.mine {
+    flex-direction: row-reverse;
+}
+
+.mine p {
+    background-color: var(--red2);
+    border-radius: 8px;
+}
+
+.other p {
+    background-color: var(--blue2);
+    border-radius: 8px;
+}

@@ -394,13 +394,13 @@ let webSocket = null;
 
 const websocketApi = "http://localhost:8001";
 
-let r = 0;
+let conRetries = 0;
 function openSocket() {
   if (!webSocket || webSocket.readyState === WebSocket.CLOSED) {
     console.log("Creating a new WebSocket connection.");
     webSocket = new WebSocket(`${websocketApi}/ws/messaging/`);
     webSocket.onopen = (event) => {
-      r = 0;
+      conRetries = 0;
       console.log("WebSocket connection established.");
     };
 
@@ -457,18 +457,15 @@ function openSocket() {
     };
 
     webSocket.onclose = (event) => {
-      events.remove("frienship")
-
-      console.log("WebSocket connection closed. Reconnecting...");
+      console.error("WebSocket connection closed. Reconnecting...");
       // Events = {};
       webSocket = null;
-      if (r < 3) {
-        setTimeout(() => { r++; openSocket(); }, 3000);
+      if (conRetries < 3) {
+        setTimeout(() => { conRetries++; openSocket(); }, 3000);
       } else {
         console.error("Maximum reconnection attempts reached.");
       }
     };
-
     webSocket.onerror = (err) => { handleError(err); };
   } else {
     console.log("WebSocket already exists.");
@@ -477,8 +474,9 @@ function openSocket() {
 }
 
 function sendMessage(dest, message) {
+  openSocket()
   if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-    console.log("Sending message");
+    console.warn("Sending message");
     webSocket.send(JSON.stringify({ type: "chat.message", friend_id: dest, message }));
   } else {
     console.error("WebSocket is not open. Cannot send message.");
@@ -487,6 +485,7 @@ function sendMessage(dest, message) {
 
 const retrieveMessages = async (id) => {
   try {
+    openSocket()
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
       console.log("Getting messages from", id);
       webSocket.send(JSON.stringify({ type: "chat.message.retrieve", friend_id: id }));

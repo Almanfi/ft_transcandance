@@ -151,7 +151,8 @@ function Relations() {
 
   handlefetch();
 
-  events.addChild("friendship", "Relations.fetchRelations", handlefetch)
+  events.addChild("friendship_received", "Relations.fetchRelations", handlefetch)
+  events.addChild("friendship_accepted", "Relations.fetchRelations", handlefetch)
 
   return render(() => (
     <div id="friends">
