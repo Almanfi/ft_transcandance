@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 export class UIRanderer {
+    scene;
+    camera;
+    renderer;
     constructor() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);

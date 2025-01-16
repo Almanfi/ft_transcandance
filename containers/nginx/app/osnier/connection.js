@@ -1,4 +1,7 @@
 class WebSocketCnx {
+    socket;
+    receiver;
+    connected;
     constructor() {
         this.receiver = "";
         this.connected = false;
@@ -8,7 +11,6 @@ class WebSocketCnx {
         this.defaultEventHandler = handler;
     }
     send(msg) {
-        var _a;
         let data = {
             "type": "chat.message",
             "friend_id": this.receiver,
@@ -16,7 +18,7 @@ class WebSocketCnx {
         };
         if (!this.connected)
             return;
-        (_a = this.socket) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify(data));
+        this.socket?.send(JSON.stringify(data));
     }
     setReciever(receiver) {
         this.receiver = receiver;
@@ -50,6 +52,13 @@ class WebSocketCnx {
     }
 }
 class WebRtcCnx {
+    localConnection;
+    remoteConnection;
+    sendChannel;
+    RTCConnected;
+    setupRemoteConnectionCallback;
+    onIceCandidateCallback;
+    onRtcChannelMsgCallback;
     constructor(onIceCandidateCallback, onRtcChannelMsg) {
         this.RTCConnected = false;
         let iceConfiguration = this.createIceConfiguration(null);
@@ -62,8 +71,7 @@ class WebRtcCnx {
         this.defaultEventHandler = handler;
     }
     send(msg) {
-        var _a;
-        (_a = this.sendChannel) === null || _a === void 0 ? void 0 : _a.send(msg);
+        this.sendChannel?.send(msg);
     }
     startRtcConnection() {
         let remoteConnection = this.remoteConnection;
@@ -216,6 +224,19 @@ class WebRtcCnx {
     }
 }
 export class Connection {
+    socket;
+    webRTC;
+    activeProtocol;
+    recievedData;
+    recievedDataOrder;
+    pingInterval;
+    ping;
+    pingSize;
+    pingAvrg;
+    timeDiff;
+    timeDiffAvrg;
+    peerTimeDiff;
+    gameStart;
     constructor() {
         this.socket = new WebSocketCnx();
         this.webRTC = null;
@@ -262,7 +283,7 @@ export class Connection {
         if (this.webRTC.RTCConnected)
             return;
         let sessionDescriptionPromise = this.webRTC.setupConnection(data);
-        sessionDescriptionPromise === null || sessionDescriptionPromise === void 0 ? void 0 : sessionDescriptionPromise.then(a => {
+        sessionDescriptionPromise?.then(a => {
             if (a)
                 this.send({ rtc: true, answer: a });
         });
@@ -307,7 +328,7 @@ export class Connection {
         this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this), this.handleRtcMessage.bind(this));
         this.webRTC.changeDefaultEventHandler(this.recheckConnection.bind(this));
         let offerPromise = this.webRTC.startRtcConnection();
-        offerPromise === null || offerPromise === void 0 ? void 0 : offerPromise.then(offer => {
+        offerPromise?.then(offer => {
             this.activeProtocol.send({ rtc: true, offer: offer });
         });
     }

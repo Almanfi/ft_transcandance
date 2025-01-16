@@ -1,4 +1,21 @@
 export class gameClock {
+    scene;
+    camera;
+    renderer;
+    msPrev;
+    msNow;
+    excessTime;
+    msPrevTrue;
+    fps;
+    msPerFrame;
+    msPassed;
+    frameTimes;
+    frame;
+    full;
+    frameCount;
+    startTime;
+    saveTime;
+    lastRanderTime;
     constructor(scene, camera, renderer) {
         this.setFps(60);
         this.msPrev = 0;
