@@ -236,6 +236,9 @@ export class Connection {
     timeDiff;
     timeDiffAvrg;
     peerTimeDiff;
+    isRecieverConnected;
+    isHost;
+    // checkRecieverInterval: number;
     gameStart;
     constructor() {
         this.socket = new WebSocketCnx();
@@ -250,6 +253,22 @@ export class Connection {
         this.timeDiff = new Array();
         this.timeDiffAvrg = 0;
         this.peerTimeDiff = 0;
+        this.isRecieverConnected = false;
+        this.isHost = false;
+    }
+    checkReciever() {
+        if (this.isRecieverConnected) {
+            if (this.isHost) {
+                console.log("I am starting rtc connection");
+                this.startRtcConnection();
+            }
+            // this.initSync();
+            return;
+        }
+        this.send({ sync: "ready" });
+        setTimeout(() => {
+            this.checkReciever();
+        }, 400);
     }
     reset() {
         this.recievedData.clear();
@@ -260,8 +279,10 @@ export class Connection {
             this.activeProtocol = this.webRTC;
             this.initSync();
         }
-        else if (this.socket.connected)
+        else if (this.socket.connected) {
             this.activeProtocol = this.socket;
+            this.checkReciever();
+        }
         else {
             let receiver = this.socket.receiver;
             this.socket = new WebSocketCnx();
@@ -301,9 +322,15 @@ export class Connection {
         this.handleData(data);
     }
     handleRtcMessage(e) {
-        let data = JSON.parse(e.data);
-        // console.log("rtc msg: ", data)
-        this.handleData(data);
+        try {
+            let data = JSON.parse(e.data);
+            this.handleData(data);
+        }
+        catch (e) {
+            console.error("error parsing rtc message: ", e);
+        }
+        // let data = JSON.parse(e.data);
+        // this.handleData(data);
     }
     handleRtcIceCandidate(e) {
         let iceCandidate = e.candidate;
@@ -320,10 +347,7 @@ export class Connection {
             console.log("game started");
         }, timeStamp - new Date().valueOf());
     }
-    send(msg) {
-        this.activeProtocol.send(msg);
-        if (this.webRTC)
-            return;
+    startRtcConnection() {
         console.log("init rtc");
         this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this), this.handleRtcMessage.bind(this));
         this.webRTC.changeDefaultEventHandler(this.recheckConnection.bind(this));
@@ -331,6 +355,19 @@ export class Connection {
         offerPromise?.then(offer => {
             this.activeProtocol.send({ rtc: true, offer: offer });
         });
+    }
+    send(msg) {
+        this.activeProtocol.send(msg);
+        // if (this.webRTC)
+        //     return;
+        // console.log("init rtc");
+        // this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this),
+        //                 this.handleRtcMessage.bind(this));
+        // this.webRTC.changeDefaultEventHandler(this.recheckConnection.bind(this))
+        // let offerPromise = this.webRTC.startRtcConnection();
+        // offerPromise?.then(offer => {
+        //     this.activeProtocol.send({rtc: true, offer: offer});
+        // });
     }
     handleData(data) {
         if (data.sync) {
@@ -383,8 +420,19 @@ export class Connection {
         return true;
     }
     handleSyncWithPeer(data) {
-        let samplesize = 200;
-        if (data.sync === "sync")
+        if (data.sync === "ready") {
+            this.isRecieverConnected = true;
+            console.log("reciever connected");
+            if (data.isHost) {
+                this.isHost = true;
+                this.send({ sync: "ready" });
+            }
+            else {
+                this.send({ sync: "ready", isHost: true });
+            }
+            return;
+        }
+        else if (data.sync === "sync")
             this.syncWithPeer(data);
         else if (data.sync === "ping") {
             this.send(JSON.stringify({ sync: "pong", timestamp: data.timestamp, peerClock: new Date().valueOf() }));

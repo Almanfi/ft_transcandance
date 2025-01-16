@@ -239,7 +239,7 @@ create("Refuse Game Invite").onclick = async () => {
 
 breaker("Events and Messaging Socket /ws/messaging");
 
-const websocketApi = "wss://localhost:8000"
+const websocketApi = "wss://" + window.location.hostname + ":8000";
 
 const socket_messager = document.createElement("input");
 socket_messager.type = "number";

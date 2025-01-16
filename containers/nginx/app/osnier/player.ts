@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Move, GameAction } from './keyControls.js';
 import { PlayersBulletManager, Plane } from './assets.js';
 import { Rollback, dataSaved, RollData } from './rollback.js';
+import { UIRanderer } from './UIRanderer.js';
 
 
 export class Inputs {
@@ -121,6 +122,7 @@ export class Player extends THREE.Object3D {
     core: THREE.Mesh;
     cannon: CannonObject;
 
+    initPosition: THREE.Vector3;
     speedRate: number;
 
     fireRate: number;
@@ -147,6 +149,7 @@ export class Player extends THREE.Object3D {
     health: number ;
     maxHealth: number;
     alive: boolean;
+    UiRenderer: UIRanderer;
     // planeRaycaster: THREE.Raycaster;
 
     constructor(position: THREE.Vector3,
@@ -162,6 +165,7 @@ export class Player extends THREE.Object3D {
         this.add(cannon);
 
         this.position.set(position.x, position.y, position.z);
+        this.initPosition = this.position.clone();
         let scale = 2;
         this.scale.set(scale, scale, scale);
         this.speedRate = 2;
@@ -191,11 +195,16 @@ export class Player extends THREE.Object3D {
         this.inputs.reset();
         // this.actions.clear();
         this.lastFire = 0;
-        this.position.set(0, 0, 0);
+        this.position.copy(this.initPosition);
         this.oldPosition.set(0, 0, 0);
         this.positionBackup.copy(this.position);
         this.health = this.maxHealth;
         this.alive = true;
+    }
+
+    addUIRenderer(uiRenderer: UIRanderer) {
+        this.UiRenderer = uiRenderer;
+        // this.UiRenderer.createHealthBar(this.name, new THREE.Vector3());
     }
 
     takeDamage(damage: number) {
@@ -208,6 +217,8 @@ export class Player extends THREE.Object3D {
             // endGame();
         }
         console.log(`${this.name} health: `, this.health);
+        if (this.name === 'player')
+            this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
         // updateHealthBar();
     }
 

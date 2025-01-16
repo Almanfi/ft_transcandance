@@ -98,6 +98,7 @@ export class Player extends THREE.Object3D {
     radius;
     core;
     cannon;
+    initPosition;
     speedRate;
     fireRate;
     bulletDelay;
@@ -118,6 +119,7 @@ export class Player extends THREE.Object3D {
     health;
     maxHealth;
     alive;
+    UiRenderer;
     // planeRaycaster: THREE.Raycaster;
     constructor(position, bulletManager) {
         super();
@@ -130,6 +132,7 @@ export class Player extends THREE.Object3D {
         this.add(core);
         this.add(cannon);
         this.position.set(position.x, position.y, position.z);
+        this.initPosition = this.position.clone();
         let scale = 2;
         this.scale.set(scale, scale, scale);
         this.speedRate = 2;
@@ -154,11 +157,15 @@ export class Player extends THREE.Object3D {
         this.inputs.reset();
         // this.actions.clear();
         this.lastFire = 0;
-        this.position.set(0, 0, 0);
+        this.position.copy(this.initPosition);
         this.oldPosition.set(0, 0, 0);
         this.positionBackup.copy(this.position);
         this.health = this.maxHealth;
         this.alive = true;
+    }
+    addUIRenderer(uiRenderer) {
+        this.UiRenderer = uiRenderer;
+        // this.UiRenderer.createHealthBar(this.name, new THREE.Vector3());
     }
     takeDamage(damage) {
         if (!this.alive)
@@ -170,6 +177,8 @@ export class Player extends THREE.Object3D {
             // endGame();
         }
         console.log(`${this.name} health: `, this.health);
+        if (this.name === 'player')
+            this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
         // updateHealthBar();
     }
     addToScene(scene) {

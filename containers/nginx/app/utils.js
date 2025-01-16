@@ -1,5 +1,5 @@
 
-const endpoint = "https://localhost:8000";
+const endpoint = "https://" + window.location.hostname + ":8000";
 
 export async function Signup(user) {
   try {

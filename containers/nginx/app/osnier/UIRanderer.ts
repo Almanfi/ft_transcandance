@@ -1,9 +1,59 @@
 import * as THREE from 'three';
 
+
+class HealthBar {
+    bar: THREE.Mesh[];
+    size: number;
+    scene: THREE.Scene;
+    camera: THREE.Camera;
+    renderer: THREE.WebGLRenderer;
+
+    constructor(position: THREE.Vector3, camera: THREE.Camera,
+                scene: THREE.Scene, renderer: THREE.WebGLRenderer) {
+        this.scene = scene;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.bar = [];
+        this.size = 10;
+        this.createHealthBar(position);
+    }
+
+    createHealthBar(position: THREE.Vector3) {
+        let length = 3;
+        let width = 3;
+        const geometry = new THREE.BoxGeometry( length, 1, width );
+        const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+        const healthBar = new THREE.Mesh( geometry, material );
+        healthBar.position.copy(position);
+        healthBar.position.y = 0;
+        healthBar.position.x += length  / 2;
+        healthBar.position.z += width / 2;
+        this.bar.push(healthBar);
+        for (let i = 1; i < 10; i++) {
+            this.bar.push(healthBar.clone());
+            this.bar[i].position.x += length * i;
+            this.scene.add(this.bar[i]);
+        }
+        return this;
+    }
+
+    update(percentage: number) {
+        let index = Math.floor(percentage * 10);
+        for (let i = 0; i < index; i++) {
+            this.bar[i].visible = true;
+        }
+        for (let i = index; i < 10; i++) {
+            this.bar[i].visible = false;
+        }
+        this.renderer.render( this.scene, this.camera );
+    }
+}
+
 export class UIRanderer {
     scene: THREE.Scene;
     camera: THREE.Camera;
     renderer: THREE.WebGLRenderer;
+    healthBars: {[key: string]: HealthBar};
 
     constructor() {
         this.scene = new THREE.Scene();
@@ -21,6 +71,9 @@ export class UIRanderer {
         UIConvas.style.position = 'absolute';
         UIConvas.style.top = '0px';
         UIConvas.style.left = '0px';
+        this.healthBars = {};
+        this.createPlayer1HealthBar();
+        this.createPlayer2HealthBar();
     }
 
     render() {
@@ -35,49 +88,67 @@ export class UIRanderer {
         this.scene.remove(mesh);
     }
 
-    createHealthBar() {
-        let length = 30;
-        let width = 3;
-        const geometry = new THREE.BoxGeometry( length, 1, width );
-        const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-        const healthBar = new THREE.Mesh( geometry, material );
-        // healthBar.position.set(-55, 0, -39);
+    // createHealthBar(name: string, position: THREE.Vector3) {
+    //     const ndcCoordinates = new THREE.Vector3( -2.427644815339166, -6.190291185572039, 0.995869729736663 );
+    //     ndcCoordinates.unproject( this.camera );
 
-        // let leftPoint = new THREE.Vector3();
-        // leftPoint.copy(healthBar.position);
-        // healthBar.updateWorldMatrix(true, false);
-        // const vector = new THREE.Vector3();
-        // vector.setFromMatrixPosition( healthBar.matrixWorld ); // Get world position
-        // vector.project( this.camera ); // Project to normalized screen coordinates
+    //     this.healthBars[name] = new HealthBar(ndcCoordinates);
+    //     this.healthBars[name].bar.forEach((bar) => {
+    //         console.log("##############", bar.position);
+    //         this.addMesh(bar);
+    //     });
+    //     this.render();
+    //     console.log("##############", this.healthBars);
+    // }
 
-        // console.log("##############", vector);
+    // updateHealthBar(name: string, percentage: number) {
+    //     console.log("##############", name, percentage);
+    //     if (!this.healthBars[name]) {
+    //         return;
+    //     }
+    //     this.healthBars[name].update(percentage);
+    //     this.render();
+    // }
 
-        // const ndcCoordinates = new THREE.Vector3( -2.4, -6.1, 0.8 );
+    createHealthBar(position: THREE.Vector3) {
+        // // let leftPoint = new THREE.Vector3();
+        // // leftPoint.copy(healthBar.position);
+        // // healthBar.updateWorldMatrix(true, false);
+        // // const vector = new THREE.Vector3();
+        // // vector.setFromMatrixPosition( healthBar.matrixWorld ); // Get world position
+        // // vector.project( this.camera ); // Project to normalized screen coordinates
+
+
         const ndcCoordinates = new THREE.Vector3( -2.427644815339166, -6.190291185572039, 0.995869729736663 );
-        // ndcCoordinates.normalize();
         ndcCoordinates.unproject( this.camera );
         console.log("##############", ndcCoordinates);
-        healthBar.position.copy(ndcCoordinates);
-        healthBar.position.y = 0;
-        healthBar.position.x += length / 2;
-        healthBar.position.z += width / 2;
-        // healthBar.add(this.camera);
-
-        // this.camera.updateMatrixWorld();
-        // this.camera.updateProjectionMatrix();
-        // this.camera.updateWorldMatrix();
-        // this.camera.updateMatrix();
-        // healthBar.updateMatrixWorld();
-
-        // const width2 = window.innerWidth;
-        // const height = window.innerHeight;
-
-        // let pos = new THREE.Vector3();
-        // pos = pos.setFromMatrixPosition(healthBar.matrixWorld);
-        // pos.project(this.camera);
-        // pos.x = (pos.x + 1) * width2 / 2;
-        // pos.y = -(pos.y - 1) * height / 2;
-        
-        this.addMesh(healthBar);
+        let bar = new HealthBar(ndcCoordinates, this.camera, this.scene, this.renderer);
+        this.healthBars['player'] = bar;
     }
+
+    createPlayer1HealthBar() {
+        const ndcCoordinates = new THREE.Vector3( -2.427644815339166, -6.190291185572039, 0.995869729736663 );
+        ndcCoordinates.unproject( this.camera );
+        console.log("##############", ndcCoordinates);
+        let bar = new HealthBar(ndcCoordinates, this.camera, this.scene, this.renderer);
+        this.healthBars['player'] = bar;
+    }
+
+    updatePlayer1Health(HealthPercent: number) {
+        this.healthBars['player'].update(HealthPercent);
+    }
+
+    createPlayer2HealthBar() {
+        const ndcCoordinates = new THREE.Vector3( -2.427644815339166, -6.190291185572039, 0.995869729736663 );
+        ndcCoordinates.unproject( this.camera );
+        console.log("##############", ndcCoordinates);
+        ndcCoordinates.x += 100;
+        let bar = new HealthBar(ndcCoordinates, this.camera, this.scene, this.renderer);
+        this.healthBars['player2'] = bar;
+    }
+
+    updatePlayer2Health(HealthPercent: number) {
+        this.healthBars['player2'].update(HealthPercent);
+    }
+
 }

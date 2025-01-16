@@ -10,7 +10,8 @@
                 event.preventDefault(); 
 
             try {
-                const endpoint = "https://localhost:8000";
+                
+                const endpoint = "https://" + window.location.hostname + ":8000";
                 const response = await fetch(`${endpoint}/users/login/`, {
                 method: "POST",
                 headers: {

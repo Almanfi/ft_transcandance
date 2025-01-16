@@ -34,4 +34,6 @@
 ]
 
 
-game = 13c05ac4-d626-445b-87b9-3ddc2d55f179
+game = 5218f936-7934-42b3-b08b-9d013c4cdf91
+
+Game Lobby message:  {"type": "game.start", "game": {"id": "5218f936-7934-42b3-b08b-9d013c4cdf91", "owner": {"id": "2f7d82d0-4383-476e-b446-611872ddba77", "firstname": "mohammed", "lastname": "hrima", "username": "mhrima", "display_name": "yuliy", "created_at": "2025-01-16T18:34:01.910355Z", "profile_picture": "profile.jpg", "oauth_user": false, "oauth_username": null, "status": "in_lobby"}, "team_a": [{"id": "2f7d82d0-4383-476e-b446-611872ddba77", "firstname": "mohammed", "lastname": "hrima", "username": "mhrima", "display_name": "yuliy", "created_at": "2025-01-16T18:34:01.910355Z", "profile_picture": "profile.jpg", "oauth_user": false, "oauth_username": null, "status": "in_lobby"}], "team_b": [{"id": "97f628a0-8d4c-4bcf-b30c-65ca2b8e6b75", "firstname": "sara", "lastname": "smith", "username": "ssmith", "display_name": "sara_s", "created_at": "2025-01-16T18:34:01.911916Z", "profile_picture": "profile.jpg", "oauth_user": false, "oauth_username": null, "status": "in_lobby"}], "team_a_score": 0, "team_b_score": 0, "winner": "none", "game_started": true, "game_ended": false, "tournament_phase": "None", "tournament": null}}
