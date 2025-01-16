@@ -1,3 +1,3 @@
 
 all: 
-	tsc main.ts  --lib es6,dom --target es2015
+	tsc main.ts  --lib es2022,dom -m es2022 --target es2022

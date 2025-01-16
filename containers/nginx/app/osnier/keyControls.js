@@ -18,6 +18,22 @@ export class Controls {
     ;
 }
 export class KeyControls extends Controls {
+    mouse;
+    camera;
+    Wkey;
+    Akey;
+    Skey;
+    Dkey;
+    shift;
+    Jkey;
+    Lclick;
+    raycaster;
+    plane;
+    angle;
+    direction;
+    move;
+    action;
+    handled;
     constructor(camera, props = {}) {
         super();
         Object.assign(this, {

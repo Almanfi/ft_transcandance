@@ -7,6 +7,7 @@ import { MusicSync } from './sync.js';
 import { musicMap } from './assets/reolMap.js';
 import { Connection } from './connection.js';
 import { UIRanderer } from './UIRanderer.js';
+import { getGame, getUser } from './utils.js';
 // import { CSS2DObject, CSS2DRenderer } from './node_modules/three/examples/jsm/renderers/CSS2DRenderer.js';
 function initThreeJS() {
     const scene = new THREE.Scene();
@@ -27,9 +28,20 @@ function initThreeJS() {
     scene.add(light2);
     return { scene, camera, renderer };
 }
-let player2 = { id: "0" };
-if (user)
-    player2 = user.id === users[0].id ? users[1] : users[0];
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const gameId = urlParams.get('id');
+if (!gameId)
+    throw Error('no game id'); // this should never happen
+let port = 8000;
+let endPoint = "https://" + window.location.hostname + port;
+let gameData = await getGame(endPoint, gameId);
+let user = await getUser(endPoint);
+console.log('game data: ', gameData);
+console.log('user: ', user);
+let users = [...gameData.team_a, ...gameData.team_b];
+console.log('users: ', users);
+let player2 = user.id === users[0].id ? users[1] : users[0];
 console.log('user: ', user, ' foe: ', player2);
 const UIRander = new UIRanderer();
 UIRander.createHealthBar();

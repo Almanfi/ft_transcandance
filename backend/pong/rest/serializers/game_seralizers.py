@@ -166,6 +166,11 @@ class GameSerializer(serializers.Serializer):
 		return winning_users
 
 	@staticmethod
+	def fetch_played_games(games_ids):
+		db_games = Game.fetch_games_by_id(games_ids)
+		return GameSerializer(db_games, many=True)
+
+	@staticmethod
 	def create_new_game(user:UserSerializer, type = GAME_TYPES[0][0]):
 		new_game =  Game.new_game(user.instance, type)
 		new_game = GameSerializer(new_game)

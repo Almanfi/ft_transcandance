@@ -1,5 +1,19 @@
 import * as THREE from 'three';
 export class MusicSync {
+    listener;
+    music;
+    analyser;
+    dataArray;
+    audioLoader;
+    startTime;
+    beat;
+    musicMap;
+    simpleMusicMap;
+    mapIterator;
+    entry;
+    currBeat;
+    nextBeat;
+    currBeatIdx;
     // musicPlaying: boolean;
     // frequancies: Map<number, Uint8Array>;
     // chosenFreq: number;

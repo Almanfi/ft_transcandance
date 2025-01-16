@@ -1,6 +1,13 @@
 import * as THREE from 'three';
 import { Rollback } from './rollback.js';
 export class Inputs {
+    move;
+    angle;
+    direction;
+    action;
+    timeStamp;
+    serializedData;
+    sendOrder;
     constructor() {
         this.move = { x: 0, y: 0 };
         this.action = { f: false, d: false };
@@ -88,6 +95,29 @@ export class Inputs {
     }
 }
 export class Player extends THREE.Object3D {
+    radius;
+    core;
+    cannon;
+    speedRate;
+    fireRate;
+    bulletDelay;
+    lastFire;
+    fired;
+    inputs;
+    actions;
+    oldPosition;
+    movementVector;
+    positionBackup;
+    scene;
+    planeFacingVector;
+    // uncomment for bullet sound
+    bulletSound;
+    bulletManager;
+    rollback;
+    plane;
+    health;
+    maxHealth;
+    alive;
     // planeRaycaster: THREE.Raycaster;
     constructor(position, bulletManager) {
         super();
@@ -232,7 +262,6 @@ export class Player extends THREE.Object3D {
         // this.position.y = this.position.y;// no chango for y
     }
     update(timeS, timeStamp, actionTime) {
-        var _a;
         let speed = this.speedRate * timeS;
         // let speed = timeS
         const projectionOnPlane = this.planeFacingVector;
@@ -246,7 +275,7 @@ export class Player extends THREE.Object3D {
         // this.movementVector.multiplyScalar(speed);
         // console.log(`movement vector: `, JSON.stringify(this.movementVector));
         this.position.addScaledVector(this.movementVector, speed);
-        (_a = this.plane) === null || _a === void 0 ? void 0 : _a.keepInside(this.position, this.radius);
+        this.plane?.keepInside(this.position, this.radius);
         // this.floorPosition(this.position);
         // if (this.controls.sendActionToPeer && this.saveAction) {
         //     this.currInput = {};
@@ -475,6 +504,7 @@ function createCore(scale) {
     return core;
 }
 class CannonObject extends THREE.Object3D {
+    head;
     constructor(scale = 70) {
         super();
         const invisibleCore = createCore(70);

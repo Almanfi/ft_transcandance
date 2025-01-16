@@ -1,4 +1,8 @@
 export class RollData {
+    position;
+    speed;
+    lastFire;
+    input;
     constructor(position, speed, lastFire, input) {
         this.position = position;
         this.speed = speed;
@@ -10,6 +14,7 @@ export class RollData {
     }
 }
 export class Rollback {
+    savedData;
     // savedData: Map<frameIndex, dataSaved>;
     constructor() {
         this.savedData = new Map();

@@ -1,8 +1,9 @@
 from django.urls import path
-from ..websockets import MessagingSocket, GameSocket, PongSocket, MatchmakingSocket, TournamentMakingSocket, TournamentSocket
+from ..websockets import MessagingSocket, GameSocket, PongSocket, MatchmakingSocket, TournamentMakingSocket, TournamentSocket, RollSocket
 
 
 urlpatterns = [
+    path("ws/roll/", RollSocket.as_asgi()),
     path("ws/messaging/", MessagingSocket.as_asgi()),
     path("ws/game/<uuid:game_id>/", GameSocket.as_asgi()),
     path("ws/game_pong/<uuid:game_id>/", PongSocket.as_asgi()),

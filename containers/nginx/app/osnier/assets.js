@@ -11,6 +11,13 @@ import * as THREE from 'three';
 //     return plane;
 // }
 export class Plane extends THREE.Mesh {
+    length;
+    width;
+    // isInside: (p: THREE.Vector3) => boolean;
+    east;
+    west;
+    north;
+    south;
     constructor() {
         let length = 190000; //x
         let width = 120000; //z
@@ -49,6 +56,15 @@ function applyPlaneRotation(vect, angle) {
     vect.applyMatrix3(new THREE.Matrix3(cosA, 0, sinA, 0, 1, 0, -sinA, 0, cosA));
 }
 export class Turret extends THREE.Mesh {
+    radius;
+    color;
+    initPosition;
+    speed;
+    rotationSpeed;
+    fireAngle;
+    bulletManager;
+    timeStamp;
+    timeout;
     constructor(bulletManager, props = {}) {
         let color = props.color || 0x000000;
         let radius = props.radius || 2500;
@@ -143,6 +159,12 @@ export class Turret extends THREE.Mesh {
     }
 }
 class ABullet extends THREE.Mesh {
+    radius;
+    speedRate;
+    initPosition;
+    date;
+    speed;
+    destructionTime;
     constructor(geometry, material) {
         super(geometry, material);
         // this.oldPosition = new THREE.Vector3();
@@ -342,6 +364,11 @@ function lineIntersectsCircle(lineStart, lineEnd, circleCenter, radius) {
     }
 }
 class ABulletManager {
+    scene;
+    bullets;
+    bulletsPool;
+    destroyedBullets;
+    plane;
     constructor(scene) {
         this.scene = scene;
         this.bullets = new Map();
@@ -407,11 +434,10 @@ class ABulletManager {
     update(timeNow) {
         let dateNow = timeNow;
         this.bullets.forEach((elem) => {
-            var _a;
             if (dateNow > elem.date + 10 * 1000) {
                 this.despawnBullet(elem);
             }
-            else if (((_a = this.plane) === null || _a === void 0 ? void 0 : _a.isInside(elem.position)) === false) {
+            else if (this.plane?.isInside(elem.position) === false) {
                 this.despawnBullet(elem);
             }
             else
