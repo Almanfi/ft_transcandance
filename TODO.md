@@ -27,6 +27,7 @@
     [ ] fix when searching form my profile to redirect me to user page
     [ ] replace all jsx imports with .js
     [ ] update user statistic
+    [ ] test tarting game from user page, in friends
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/
