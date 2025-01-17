@@ -67,6 +67,7 @@ function Navbar() {
 
         <li className="list">
           <ul className={`menuList`} >
+            <a if={getCookie("id_key")} onclick={() => navigate("/user")}>Profile</a>
             <a if={getCookie("id_key")} className="see-notif" onclick={() => handleNavigate("/notifications")}>Notifications</a>
             <a if={!getCookie("id_key")} onclick={() => handleNavigate("/login")}> Login </a>
             <a if={!getCookie("id_key")} onclick={() => handleNavigate("/signup")}>Sign up</a>

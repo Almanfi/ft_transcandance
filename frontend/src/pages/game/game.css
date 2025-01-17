@@ -34,8 +34,41 @@
   }
 }
 
-.loading {
+.start {
   /* position: absolute; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100% - 80px);
+
+  gap: 10px;
+  padding: 10px;
+
+  .type{
+    cursor: pointer;
+    border-radius: 10px;
+    flex: 1;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-height: 400px;
+    
+    height: 100%;
+
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
+    color: var(--red0);
+
+    &:hover{
+      background-color: var(--red0);
+      color: var(--red2);
+    }
+  }
+}
+
+.loading{
   display: flex;
   justify-content: center;
   align-items: center;

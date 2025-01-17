@@ -5,10 +5,10 @@ function Accept() {
 
   return render(() => (
     <svg
-      width="24"
-      height="24"
-      viewBox="0 0 28 28"
-      fill="none"
+      width="44px"
+      height="44px"
+      viewBox="0 0 10 10"
+      fill="green"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path

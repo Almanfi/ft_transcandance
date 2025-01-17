@@ -2,9 +2,7 @@ import Ura, { navigate } from 'ura';
 import api from '../../../services/api.js';
 import Chat from '../../../components/icons/Chat.js';
 import Play from '../../../components/icons/Play.js';
-import Accept from '../../../components/icons/Accept.js';
 import events from '../../../services/events.js';
-import Refuse from '../../../components/icons/Refuse.js';
 
 const [render, State, ForceState] = Ura.init();
 const [getSelect, setSelect] = ForceState("friends")

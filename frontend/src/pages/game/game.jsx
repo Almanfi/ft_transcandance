@@ -16,6 +16,8 @@ function Game() {
   const [getColor, setColor] = State("#4CAF50");
   const [getValue, setValue] = State("Play game");
   const [getStart, setStart] = State(false);
+  const [getMatchLoading, setMatchLoading] = State(false);
+  const [getTournLoading, setTournLoading] = State(false);
 
   //const [getStart, setStart] = State(false);
 
@@ -145,12 +147,22 @@ function Game() {
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
       </div>
-      <div if={!getStart()} className="loading">
-        <h1>Loading ...</h1>
+      <div className="start">
+        <div className="type" onclick={() => { if (!getTournLoading()) setMatchLoading(!getMatchLoading()) }}>
+          <h3 if={!getMatchLoading()}>Match making </h3>
+          <h1 if={getMatchLoading()}>Match making loading ... (clique to cancel)</h1>
+        </div>
+
+        <div className="type" onclick={() => { if (!getMatchLoading()) setTournLoading(!getTournLoading()) }}>
+          <h3 if={!getTournLoading()}>Tournament </h3>
+          <h1 if={getTournLoading()}>Tournament  loading ... (clique to cancel)</h1>
+        </div>
       </div>
-      <button onclick={() => setStart(true)}>
-        clique me
-      </button>
+      {/* <div if={getLoading() && !getStart()} className="loading">
+        <button onclick={() => setStart(true)}>
+          clique me
+        </button>
+      </div> */}
     </root>
   ));
 }
