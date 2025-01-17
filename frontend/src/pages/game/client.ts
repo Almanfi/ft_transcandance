@@ -24,20 +24,109 @@ function resizeCanvas(canvas: HTMLCanvasElement) {
 
 let game_ping = -1;
 
+// store last second input and maybe say something like
+// changing direction can only happen every let's say 200ms
+
+let last_ai_input_time: number;
+let last_ai_input: number;
+
+function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
+  let game: Pong = new Pong()
+  {
+    game.ball_x = ai_pong.ball_x;
+    game.ball_y = ai_pong.ball_y;
+    game.ball_vx = ai_pong.ball_vx;
+    game.ball_vy = ai_pong.ball_vy;
+
+    game.p1_x = ai_pong.p1_x;
+    game.p2_x = ai_pong.p2_x;
+    game.p1_y = ai_pong.p1_y;
+    game.p2_y = ai_pong.p2_y;
+
+    game.score1 = ai_pong.score1;
+    game.score2 = ai_pong.score2;
+  }
+ 
+  let target_y = 0;
+
+  if (ai_pong.ball_vx > 0) {
+    // find final y!
+
+    // do intersection with up, down, right, then update,
+    // and keep doing it until we get a collision with right wall that's the final y!
+
+    let curr_x = ai_pong.ball_x;
+    let curr_y = ai_pong.ball_y;
+    let curr_vx = ai_pong.ball_vx;
+    let curr_vy = ai_pong.ball_vy;
+    for (let itr = 0; itr < 16; itr++) {
+      let collision = -1;
+      let t = 100000;
+      
+      // up
+      if (curr_vy > 0) {
+        // curr_y + t * curr_vy = GAME_HEIGHT/2
+        let T = (GAME_HEIGHT / 2 - curr_y) / curr_vy;
+        if (T >= 0 && T < t) {
+          t = T;
+          collision = 0;
+        }
+      }
+      // down
+      if (curr_vy < 0) {
+        let T = (-GAME_HEIGHT/2 - curr_y) / curr_vy;
+        if (T >= 0 && T < t) {
+          t = T;
+          collision = 1;
+        }
+      }
+      // right
+      if (curr_vx > 0) {
+        // curr_x + t * curr_vx = GAME_WIDTH / 2
+        let T = (GAME_WIDTH/2 - curr_x) / curr_vx;
+        if (T >= 0 && T < t) {
+          target_y = curr_y + curr_vx * T;
+          console.log("PREDICTING ", target_y);
+          break ;
+        }
+      }
+      if (collision != -1) {
+        curr_x += curr_vx * t;
+        curr_y += curr_vy * t;
+        curr_vy *= -1;
+      }
+    }
+    
+  }
+
+  //TODO: shouldn't check my y!
+  let y = pong.ball_y;
+
+  const time = Date.now();
+
+  
 
 
-function getAIMove(pong: Pong, player: number) {
-  let x = pong.p1_x;
-  let y = pong.p1_y;
-  if (player == 2) (x = pong.p2_x), (y = pong.p2_y);
+  // let x = pong.p1_x;
+  // let y = pong.p1_y;
+  // if (player == 2) (x = pong.p2_x), (y = pong.p2_y);
 
   let input = INPUT_MOVE_NONE;
-  if ((pong.ball_vx < 0 && x < 0) || (pong.ball_vx > 0 && x > 0)) {
-    if (pong.ball_y >= y - PADDLE_YRADIUS && pong.ball_y <= y + PADDLE_YRADIUS)
-      input = INPUT_MOVE_NONE;
-    else if (y < pong.ball_y) input = INPUT_MOVE_UP;
-    else input = INPUT_MOVE_DOWN;
-  }
+  if (y < target_y - 0.2 * PADDLE_YRADIUS)
+      input = INPUT_MOVE_UP;
+  else if (y > target_y + 0.2 * PADDLE_YRADIUS)
+      input = INPUT_MOVE_DOWN;
+  
+  // if (Date.now() - last_ai_input_time < 300) {
+  //   if (input == INPUT_MOVE_NONE)
+  //     last_ai_input = input;
+  //   return last_ai_input;
+  // }
+  // else
+  //   last_ai_input_time = Date.now();
+
+  last_ai_input = input;
+
   return input;
 }
 
@@ -45,6 +134,10 @@ export let game_over: boolean = true;
 export let game_cancel: boolean = false;
 
 export function playGame(my_id: string, game_data: any, local: boolean, against_ai: boolean) {
+  
+  last_ai_input_time = Date.now();
+  last_ai_input = INPUT_MOVE_NONE;
+
   game_over = false;
   game_cancel = false;
 
@@ -73,6 +166,8 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
   let me: any = undefined;
   let opp: any = undefined;
   let pong_connection_time:any = undefined;
+  let game_ending = false;
+  let game_ending_time:any = undefined;
 
   function connectToServer() {
     console.log(`game data: ${game_data}`)
@@ -107,8 +202,8 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
         showGame();
 
       } else if (data.message === "game_state") {
-        last_game_state = data;
-      } else if (data.message == "game_over") {
+        if (!game_ending)
+          last_game_state = data;
       }
       else if (data.message == "game_pong") {
         if (data.id !== undefined) {
@@ -123,6 +218,10 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
       }
       else if (data.message == "game_end") {
         console.log("[PONG SOCKET] GAME ENDED");
+        game_ending = true;
+        game_ending_time = Date.now();
+        pong.score1 = last_game_state.score1 = data.my_score;
+        pong.score2 = last_game_state.score2 = data.opp_score;
       }
       
     };
@@ -184,6 +283,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
  
 
   function renderGame() {
+ 
     const windowWidth = ctx.canvas.width;
     const windowHeight = ctx.canvas.height;
   
@@ -205,6 +305,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
     ctx.fillRect(xOffset, yOffset, targetWidth, targetHeight);
   
     // Render Ball
+    if (!game_ending)
     {
       const bx = screenCenterX + meterToPixel * (+pong.ball_x);
       const by = screenCenterY + meterToPixel * (-pong.ball_y);
@@ -260,6 +361,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
     // }
   
     // Render Vertical Center Line
+    if (!game_ending)
     {
       ctx.strokeStyle = "rgb(200, 200, 200)";
       ctx.lineWidth = meterToPixel * 0.1;
@@ -298,6 +400,21 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
         const opp_x = screenCenterX + meterToPixel * 4;
         ctx.drawImage(my_image, my_x, y, width, height);
         ctx.drawImage(opp_image, opp_x, y, width, height);
+      }
+
+      if (game_ending) {
+        const x = screenCenterX;
+        const y = screenCenterY;
+        ctx.fillStyle = "rgb(200, 200, 200)";
+        ctx.font = `${Math.floor(meterToPixel * 1.5)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText("Game Over", x, y);
+        ctx.font = `${Math.floor(meterToPixel * 1.2)}px Arial`;
+        let username = me.display_name;
+        if (pong.score1 < pong.score2)
+            username = opp.display_name;
+        ctx.fillText(username + " Won!", x, y + meterToPixel*1.5);
       }
 
     }
@@ -356,7 +473,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
     if (!local) {
       if ((pong_connection_time !== undefined && !game_started && Date.now() - pong_connection_time > 1500)
         || (!game_started && socket !== undefined && socket.readyState == WebSocket.CLOSED)
-        || (game_started && socket !== undefined && socket.readyState != WebSocket.OPEN)
+        || (game_ending && Date.now() - game_ending_time > 3000)
         ) {
         if (socket !== undefined)
             socket.close();
@@ -398,21 +515,21 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
       next_ping_id++;
       socket.send(JSON.stringify({ 'message': "game_ping", 'id': ping.id }));
     }
-    if (game_started) {
+    if (game_started && !game_ending) {
       if (Date.now() - ai_pong_state_time > 1000) {
         ai_pong_state = pong;
         ai_pong_state_time = Date.now();
       }
       if (local) {
         if (against_ai)
-          player2_input = getAIMove(pong, 2);
+          player2_input = getAIMove(pong, ai_pong_state, 2);
         pong.update(player1_input, player2_input, dt);
       }
       else {
 
 
         if (!document.hasFocus()) {
-          player1_input = getAIMove(pong, 1);
+          //player1_input = getAIMove(pong, ai_pong_state, 1);
         }
         if (last_game_state !== undefined) {
           // TODO: some kinda of interpolation here instead of just snapping to place!

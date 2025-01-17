@@ -212,7 +212,12 @@ async def game_loop(game_id):
         await end_game_async(game_id, team_a_score, team_b_score)
 
         msg = {'message': 'game_end'}
+        msg["my_score"] = game.score1
+        msg["opp_score"] = game.score2
         await player1.send(text_data=json.dumps(msg))
+        msg["my_score"] = game.score2
+        msg["opp_score"] = game.score1
+        
         await player2.send(text_data=json.dumps(msg))
         
         #TODO: check these codes

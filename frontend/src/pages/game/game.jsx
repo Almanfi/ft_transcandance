@@ -177,10 +177,13 @@ function Game() {
 
           lobby_socket.onmessage = (e) => {
             console.log("[TOURNAMENT_LOBBY SOCKET] RECEIVED ", e);
+
             const data = JSON.parse(e.data);
-            console.log("[TOURNAMENT_LOBBY SOCKET] MATCHES ", (data.matches.length));
-            for (let i = 0; i < data.matches.length; i++) {
-              console.log(`[MATCH ${i}] ${JSON.stringify(data.matches[i])}`);
+            if (data.type === "lobby.matches") {
+              console.log("[TOURNAMENT_LOBBY SOCKET] MATCHES ", (data.matches.length));
+              for (let i = 0; i < data.matches.length; i++) {
+                console.log(`[MATCH ${i}] ${JSON.stringify(data.matches[i])}`);
+              }
             }
           };
           lobby_socket.onclose = (e) => {
