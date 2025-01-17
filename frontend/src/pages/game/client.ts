@@ -49,16 +49,16 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
  
   let target_y = 0;
 
-  if (ai_pong.ball_vx > 0) {
+  if (pong.ball_vx > 0) {
     // find final y!
 
     // do intersection with up, down, right, then update,
     // and keep doing it until we get a collision with right wall that's the final y!
 
-    let curr_x = ai_pong.ball_x;
-    let curr_y = ai_pong.ball_y;
-    let curr_vx = ai_pong.ball_vx;
-    let curr_vy = ai_pong.ball_vy;
+    let curr_x = pong.ball_x;
+    let curr_y = pong.ball_y;
+    let curr_vx = pong.ball_vx;
+    let curr_vy = pong.ball_vy;
     for (let itr = 0; itr < 16; itr++) {
       let collision = -1;
       let t = 100000;
@@ -85,7 +85,7 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
         // curr_x + t * curr_vx = GAME_WIDTH / 2
         let T = (GAME_WIDTH/2 - curr_x) / curr_vx;
         if (T >= 0 && T < t) {
-          target_y = curr_y + curr_vx * T;
+          target_y = curr_y + curr_vy * T;
           console.log("PREDICTING ", target_y);
           break ;
         }
@@ -93,6 +93,7 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
       if (collision != -1) {
         curr_x += curr_vx * t;
         curr_y += curr_vy * t;
+        console.log("EXPECTED WALL ", collision, curr_x, curr_y);
         curr_vy *= -1;
       }
     }
@@ -100,7 +101,8 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
   }
 
   //TODO: shouldn't check my y!
-  let y = pong.ball_y;
+  let y = pong.p2_y;
+  
 
   const time = Date.now();
 
@@ -117,13 +119,13 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
   else if (y > target_y + 0.2 * PADDLE_YRADIUS)
       input = INPUT_MOVE_DOWN;
   
-  // if (Date.now() - last_ai_input_time < 300) {
-  //   if (input == INPUT_MOVE_NONE)
-  //     last_ai_input = input;
-  //   return last_ai_input;
-  // }
-  // else
-  //   last_ai_input_time = Date.now();
+  if (Date.now() - last_ai_input_time < 30) {
+    //if (input == INPUT_MOVE_NONE)
+    //  last_ai_input = input;
+    return last_ai_input;
+  }
+  else
+    last_ai_input_time = Date.now();
 
   last_ai_input = input;
 
