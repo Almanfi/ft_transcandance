@@ -8,12 +8,18 @@ const [render, State] = Ura.init();
 const [getNotif, setNotif] = State([])
 // keep outside, used to show searches
 const [getList, setList] = State([]);
+const [getUserName, setUserName] = State("user");
 
 
 function Navbar() {
 
   const hide = () => document.getElementsByClassName("menuList")[0]?.classList.remove("show");
   const show = () => document.getElementsByClassName("menuList")[0]?.classList.add("show");
+
+  (async () => {
+    const res = await api.getUser()
+    setUserName(res.username)
+  })()
 
   const search = async (e) => {
     hide()
@@ -67,7 +73,7 @@ function Navbar() {
 
         <li className="list">
           <ul className={`menuList`} >
-            <a if={getCookie("id_key")} onclick={() => navigate("/user")}>Profile</a>
+            <a if={getCookie("id_key")} onclick={() => navigate("/user")}>{getUserName()}</a>
             <a if={getCookie("id_key")} className="see-notif" onclick={() => handleNavigate("/notifications")}>Notifications</a>
             <a if={!getCookie("id_key")} onclick={() => handleNavigate("/login")}> Login </a>
             <a if={!getCookie("id_key")} onclick={() => handleNavigate("/signup")}>Sign up</a>

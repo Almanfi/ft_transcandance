@@ -200,21 +200,32 @@ function Game() {
     }
   }
 
+  function handleGoToGameLobby(game_id)
+  {
+    const game_socket = api.openGameSocket(game_id );
+    game_socket.onmessage = handleGoToPongGame;
+  }
+
   function handleOpenMatchMaking() {
     if (!getTournLoading()) {
       setMatchLoading(!getMatchLoading())
       const matchmaking = api.openPongMatchMakingSocket();
       matchmaking.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        if (data['type'] === "game.launch") {
-          const game_socket = api.openGameSocket(data['game_id']);
-          game_socket.onmessage = handleGoToPongGame;
-        }
+        if (data['type'] === "game.launch")
+          handleGoToGameLobby(data['game_id']);
       }
     }
     else {
       api.closePongMatchMakingSocket();
     }
+  }
+
+  function handleTournamentLobby(e)
+  {
+    const data = JSON.parse(e.data);
+    if (data['type'] === "game.lobby.start")
+      handleGoToGameLobby(data['game_id']);
   }
 
   function handleTournament() {
@@ -223,49 +234,52 @@ function Game() {
       const Tourmaking = api.openPongTournamentMakingSocket();
       Tourmaking.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        if (data['type'] === "game.launch") {
-          const game_socket = api.openGameSocket(data['game_id']);
-          game_socket.onmessage = handleGoToPongGame;
+        console.log("Tournament loging", data);
+        if (data['type'] === "tournament.found") {
+          const tournament_socket = api.openTournamentSocket(data['tournament_id']);
+          tournament_socket.onmessage = handleTournamentLobby;
         }
       }
     }
-    else{
+    else {
       api.closePongTournamentSocket()
     }
   }
+  return render(() => (
+    <root>
+      <Navbar />
+      {/* <h3>Game: {name}</h3> */}
+      <div if={getStart()} className="game" id="game-play">
+        <div id="menu">
+          <button id="play-local" onclick={() => playGame("", undefined, true, false)}>Play Locally</button>
+          <button id="play-local-ai" onclick={() => playGame("", undefined, true, true)}>Play vs AI</button>
+          <button id="play-remote" style={{ backgroundColor: getColor() }} onclick={() => playRemote()}>{getValue()}</button>
+          <button id="play-tournament" onclick={() => playTournament()}>Play Tournament</button>
+  
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+      </div>
+      <div className="start">
+        <div className="type" onclick={handleOpenMatchMaking}>
+          <h3 if={!getMatchLoading()}>Match making </h3>
+          <h1 if={getMatchLoading()}>Match making loading ... (clique to cancel)</h1>
+        </div>
+  
+        <div className="type" onclick={handleTournament}>
+          <h3 if={!getTournLoading()}>Tournament </h3>
+          <h1 if={getTournLoading()}>Tournament  loading ... (clique to cancel)</h1>
+        </div>
+      </div>
+
+      {/* <div if={getLoading() && !getStart()} className="loading">
+          <button onclick={() => setStart(true)}>
+            clique me
+          </button>
+        </div> */}
+    </root>
+  ));
 }
 
-return render(() => (
-  <root>
-    <Navbar />
-    <div if={getStart()} className="game" id="game-play">
-      <div id="menu">
-        <button id="play-local" onclick={() => playGame("", undefined, true, false)}>Play Locally</button>
-        <button id="play-local-ai" onclick={() => playGame("", undefined, true, true)}>Play vs AI</button>
-        <button id="play-remote" style={{ backgroundColor: getColor() }} onclick={() => playRemote()}>{getValue()}</button>
-        <button id="play-tournament" onclick={() => playTournament()}>Play Tournament</button>
 
-      </div>
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
-    </div>
-    <div className="start">
-      <div className="type" onclick={handleOpenMatchMaking}>
-        <h3 if={!getMatchLoading()}>Match making </h3>
-        <h1 if={getMatchLoading()}>Match making loading ... (clique to cancel)</h1>
-      </div>
-
-      <div className="type" onclick={handleTournament}>
-        <h3 if={!getTournLoading()}>Tournament </h3>
-        <h1 if={getTournLoading()}>Tournament  loading ... (clique to cancel)</h1>
-      </div>
-    </div>
-    {/* <div if={getLoading() && !getStart()} className="loading">
-        <button onclick={() => setStart(true)}>
-          clique me
-        </button>
-      </div> */}
-  </root>
-));
-}
 
 export default Game;
