@@ -5,3 +5,5 @@ from .matchmaking import MatchmakingSocket
 from .tournamentmaking import TournamentMakingSocket
 from .tournament import TournamentSocket
 from .pong_game import PongSocket
+from .osnier_matchmaking import OsnierMatchmakingSocket
+from .osnier_tournament_making import OsnierTournamentMakingSocket

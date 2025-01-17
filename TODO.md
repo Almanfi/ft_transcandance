@@ -1,33 +1,12 @@
 + Trancedence:
-    [ ] user page
-    [ ] friend page
-    [ ] game page
-    [ ] matches page
-    [*] user setting page
-    [ ] messages Page
-    [*] search bar
-    [ ] add friends
-    [ ] 2 players in same keyboard
-    [ ] access token / refresh token
-    [ ] remove search bar if user not logged in
-    [ ] in all functions check if is forbiden logout user
-    [ ] match making
-    [ ] friend
-    [ ] in friend page if something failed go to home page
     [ ] test Toast for small screens
-    [ ] user must update image
     [ ] implement user game history
     [ ] check all TODOS inside files
-    [ ] enable update image in setting
     [ ] if friend in blocked list go back to user page
     [ ] in chat, if the id no longer in friend go back to home
-    [ ] test responsive navbar
-    [ ] modify chat scroll bar so it always be in the end of conversation
-    [ ] remove all if/else/loop tags
-    [ ] fix when searching form my profile to redirect me to user page
     [ ] replace all jsx imports with .js
     [ ] update user statistic
-    [ ] test tarting game from user page, in friends
+    [ ] test starting game from user page, in friends
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

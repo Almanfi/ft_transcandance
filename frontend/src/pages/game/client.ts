@@ -15,35 +15,132 @@ function resizeCanvas(canvas: HTMLCanvasElement) {
   if (canvas.width != displayWidth || canvas.height != displayHeight) {
     canvas.width = displayWidth;
     canvas.height = displayHeight;
-    console.log(`resizing canvas ${canvas.width} ${canvas.height} (devicePixelRatio = ${dpr}),
-                    window innerDim: ${window.innerWidth} ${window.innerHeight},
-                    boundingClientRect: ${width} ${height},
-                    clientDim: ${canvas.clientWidth} ${canvas.clientHeight}`);
+    // console.log(`resizing canvas ${canvas.width} ${canvas.height} (devicePixelRatio = ${dpr}),
+    //                 window innerDim: ${window.innerWidth} ${window.innerHeight},
+    //                 boundingClientRect: ${width} ${height},
+    //                 clientDim: ${canvas.clientWidth} ${canvas.clientHeight}`);
   }
 }
 
 let game_ping = -1;
 
+// store last second input and maybe say something like
+// changing direction can only happen every let's say 200ms
+
+let last_ai_input_time: number;
+let last_ai_input: number;
+
+function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
+  let game: Pong = new Pong()
+  {
+    game.ball_x = ai_pong.ball_x;
+    game.ball_y = ai_pong.ball_y;
+    game.ball_vx = ai_pong.ball_vx;
+    game.ball_vy = ai_pong.ball_vy;
+
+    game.p1_x = ai_pong.p1_x;
+    game.p2_x = ai_pong.p2_x;
+    game.p1_y = ai_pong.p1_y;
+    game.p2_y = ai_pong.p2_y;
+
+    game.score1 = ai_pong.score1;
+    game.score2 = ai_pong.score2;
+  }
+ 
+  let target_y = 0;
+
+  if (ai_pong.ball_vx > 0) {
+    // find final y!
+
+    // do intersection with up, down, right, then update,
+    // and keep doing it until we get a collision with right wall that's the final y!
+
+    let curr_x = ai_pong.ball_x;
+    let curr_y = ai_pong.ball_y;
+    let curr_vx = ai_pong.ball_vx;
+    let curr_vy = ai_pong.ball_vy;
+    for (let itr = 0; itr < 16; itr++) {
+      let collision = -1;
+      let t = 100000;
+      
+      // up
+      if (curr_vy > 0) {
+        // curr_y + t * curr_vy = GAME_HEIGHT/2
+        let T = (GAME_HEIGHT / 2 - curr_y) / curr_vy;
+        if (T >= 0 && T < t) {
+          t = T;
+          collision = 0;
+        }
+      }
+      // down
+      if (curr_vy < 0) {
+        let T = (-GAME_HEIGHT/2 - curr_y) / curr_vy;
+        if (T >= 0 && T < t) {
+          t = T;
+          collision = 1;
+        }
+      }
+      // right
+      if (curr_vx > 0) {
+        // curr_x + t * curr_vx = GAME_WIDTH / 2
+        let T = (GAME_WIDTH/2 - curr_x) / curr_vx;
+        if (T >= 0 && T < t) {
+          target_y = curr_y + curr_vx * T;
+          console.log("PREDICTING ", target_y);
+          break ;
+        }
+      }
+      if (collision != -1) {
+        curr_x += curr_vx * t;
+        curr_y += curr_vy * t;
+        curr_vy *= -1;
+      }
+    }
+    
+  }
+
+  //TODO: shouldn't check my y!
+  let y = pong.ball_y;
+
+  const time = Date.now();
+
+  
 
 
-function getAIMove(pong: Pong, player: number) {
-  let x = pong.p1_x;
-  let y = pong.p1_y;
-  if (player == 2) (x = pong.p2_x), (y = pong.p2_y);
+  // let x = pong.p1_x;
+  // let y = pong.p1_y;
+  // if (player == 2) (x = pong.p2_x), (y = pong.p2_y);
 
   let input = INPUT_MOVE_NONE;
-  if ((pong.ball_vx < 0 && x < 0) || (pong.ball_vx > 0 && x > 0)) {
-    if (pong.ball_y >= y - PADDLE_YRADIUS && pong.ball_y <= y + PADDLE_YRADIUS)
-      input = INPUT_MOVE_NONE;
-    else if (y < pong.ball_y) input = INPUT_MOVE_UP;
-    else input = INPUT_MOVE_DOWN;
-  }
+  if (y < target_y - 0.2 * PADDLE_YRADIUS)
+      input = INPUT_MOVE_UP;
+  else if (y > target_y + 0.2 * PADDLE_YRADIUS)
+      input = INPUT_MOVE_DOWN;
+  
+  // if (Date.now() - last_ai_input_time < 300) {
+  //   if (input == INPUT_MOVE_NONE)
+  //     last_ai_input = input;
+  //   return last_ai_input;
+  // }
+  // else
+  //   last_ai_input_time = Date.now();
+
+  last_ai_input = input;
+
   return input;
 }
 
+export let game_over: boolean = true;
+export let game_cancel: boolean = false;
 
+export function playGame(my_id: string, game_data: any, local: boolean, against_ai: boolean) {
+  
+  last_ai_input_time = Date.now();
+  last_ai_input = INPUT_MOVE_NONE;
 
-export async function playGame(my_id: string, game_data: any, local: boolean, against_ai: boolean) {
+  game_over = false;
+  game_cancel = false;
+
   let socket: WebSocket;
   let game_started: boolean = true;
   let last_game_state: any = undefined;
@@ -68,7 +165,10 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
   let ai_pong_state_time = Date.now();
   let me: any = undefined;
   let opp: any = undefined;
-  
+  let pong_connection_time:any = undefined;
+  let game_ending = false;
+  let game_ending_time:any = undefined;
+
   function connectToServer() {
     console.log(`game data: ${game_data}`)
     game_data = JSON.parse(game_data);
@@ -96,14 +196,14 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
     socket = new WebSocket(`${api.websocketApi}/ws/game_pong/${game_data.id}/`);
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
-
       if (data.message === "game_starting") {
+        console.log("[PONG SOCKET] GAME STARTING");
         game_started = true;
+        showGame();
 
-        console.log("STARTING GAME!", data);
       } else if (data.message === "game_state") {
-        last_game_state = data;
-      } else if (data.message == "game_over") {
+        if (!game_ending)
+          last_game_state = data;
       }
       else if (data.message == "game_pong") {
         if (data.id !== undefined) {
@@ -116,16 +216,23 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
           });
         }
       }
+      else if (data.message == "game_end") {
+        console.log("[PONG SOCKET] GAME ENDED");
+        game_ending = true;
+        game_ending_time = Date.now();
+        pong.score1 = last_game_state.score1 = data.my_score;
+        pong.score2 = last_game_state.score2 = data.opp_score;
+      }
       
     };
 
     socket.onopen = (e) => {
-      console.log("CONNECTED");
-      socket.send(JSON.stringify({ message: "hello!" }));
+      console.log("[PONG SOCKET] CONNECTED");
+      pong_connection_time = Date.now();
     };
 
     socket.onclose = (e) => {
-      console.log("DISCONNECTED ", e);
+      console.log("[PONG SOCKET] DISCONNECTED ", e);
     };
   }
 
@@ -135,16 +242,23 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
   const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-  canvas.style.display = 'block';
-  {
-    const menu = document.getElementById("menu") as HTMLDivElement;
-    menu.style.display = 'none';
-  }
+  
 
   if (ctx == null) {
     // TODO:!!
-    return;
+    return true;
   }
+
+  function showGame() {
+    canvas.style.display = 'block';
+    {
+      const menu = document.getElementById("menu") as HTMLDivElement;
+      menu.style.display = 'none';
+    }
+  }
+  if (local)
+      showGame();
+
   let pong = new Pong();
   let last_timestamp: number | undefined = undefined;
 
@@ -169,6 +283,7 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
  
 
   function renderGame() {
+ 
     const windowWidth = ctx.canvas.width;
     const windowHeight = ctx.canvas.height;
   
@@ -190,6 +305,7 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
     ctx.fillRect(xOffset, yOffset, targetWidth, targetHeight);
   
     // Render Ball
+    if (!game_ending)
     {
       const bx = screenCenterX + meterToPixel * (+pong.ball_x);
       const by = screenCenterY + meterToPixel * (-pong.ball_y);
@@ -245,6 +361,7 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
     // }
   
     // Render Vertical Center Line
+    if (!game_ending)
     {
       ctx.strokeStyle = "rgb(200, 200, 200)";
       ctx.lineWidth = meterToPixel * 0.1;
@@ -270,8 +387,8 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
         ctx.font = `${Math.floor(meterToPixel * 0.8)}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        ctx.fillText(me.username,  my_x, y);
-        ctx.fillText(opp.username, opp_x, y);
+        ctx.fillText(me.display_name,  my_x, y);
+        ctx.fillText(opp.display_name, opp_x, y);
       }
       //Draw images
       {
@@ -283,6 +400,21 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
         const opp_x = screenCenterX + meterToPixel * 4;
         ctx.drawImage(my_image, my_x, y, width, height);
         ctx.drawImage(opp_image, opp_x, y, width, height);
+      }
+
+      if (game_ending) {
+        const x = screenCenterX;
+        const y = screenCenterY;
+        ctx.fillStyle = "rgb(200, 200, 200)";
+        ctx.font = `${Math.floor(meterToPixel * 1.5)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText("Game Over", x, y);
+        ctx.font = `${Math.floor(meterToPixel * 1.2)}px Arial`;
+        let username = me.display_name;
+        if (pong.score1 < pong.score2)
+            username = opp.display_name;
+        ctx.fillText(username + " Won!", x, y + meterToPixel*1.5);
       }
 
     }
@@ -338,7 +470,24 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
 
   function tick(timestamp: number) {
     resizeCanvas(canvas);
-    window.requestAnimationFrame(tick);
+    if (!local) {
+      if ((pong_connection_time !== undefined && !game_started && Date.now() - pong_connection_time > 1500)
+        || (!game_started && socket !== undefined && socket.readyState == WebSocket.CLOSED)
+        || (game_ending && Date.now() - game_ending_time > 3000)
+        ) {
+        if (socket !== undefined)
+            socket.close();
+        canvas.style.display = 'none';
+        {
+          const menu = document.getElementById("menu") as HTMLDivElement;
+          menu.style.display = 'block';
+        }
+        game_over = true;
+        if (!game_started)
+          game_cancel = true;
+        return ;
+      }
+    }
 
     let dt = 1.0 / 60;
     if (last_timestamp !== undefined)
@@ -354,10 +503,7 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
     else if (gameInput.s && !gameInput.w) player1_input = INPUT_MOVE_DOWN;
     if (gameInput.arrow_up && !gameInput.arrow_down) player2_input = INPUT_MOVE_UP;
     else if (gameInput.arrow_down && !gameInput.arrow_up) player2_input = INPUT_MOVE_DOWN;
-
-    if (game_started && socket !== undefined && socket.readyState != WebSocket.OPEN) {
-      game_started = false;
-    }
+    
     if (!local && socket.readyState === WebSocket.OPEN
       && (last_ping_time === undefined || Date.now() - last_ping_time > 1000)
     ) {
@@ -369,21 +515,21 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
       next_ping_id++;
       socket.send(JSON.stringify({ 'message': "game_ping", 'id': ping.id }));
     }
-    if (game_started) {
+    if (game_started && !game_ending) {
       if (Date.now() - ai_pong_state_time > 1000) {
         ai_pong_state = pong;
         ai_pong_state_time = Date.now();
       }
       if (local) {
         if (against_ai)
-          player2_input = getAIMove(pong, 2);
+          player2_input = getAIMove(pong, ai_pong_state, 2);
         pong.update(player1_input, player2_input, dt);
       }
       else {
 
 
         if (!document.hasFocus()) {
-          player1_input = getAIMove(pong, 1);
+          //player1_input = getAIMove(pong, ai_pong_state, 1);
         }
         if (last_game_state !== undefined) {
           // TODO: some kinda of interpolation here instead of just snapping to place!
@@ -411,33 +557,8 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
           if (last_game_state.time === undefined)
             last_game_state.time = Date.now() / 1000;
 
-          let time_now = Date.now() / 1000;
-
-          let time_passed = time_now - last_game_state.time;
-          if (time_passed < 0)
-            time_passed = 0;
-          if (game_ping !== -1 && time_passed > game_ping * 3)
-            time_passed = 0;
-
-          // N^2 but I don't care
-          while (inputs_sent.length > 0 && inputs_sent[0].time < last_game_state.time)
-            inputs_sent.splice(0, 1);
-          // if (time_passed) {
-          //     //console.log("FIXING ", time_passed, inputs_sent.length);
-          //     if (inputs_sent.length) {
-          //         // TODO: cap length
-          //         pong.update(inputs_sent[0].input, INPUT_MOVE_NONE, inputs_sent[0].time - last_game_state.time);
-          //         for (let i = 1; i < inputs_sent.length; i++)
-          //             pong.update(inputs_sent[i - 1].input, INPUT_MOVE_NONE, inputs_sent[i].time - inputs_sent[i - 1].time);
-          //         pong.update(inputs_sent[inputs_sent.length - 1].input, INPUT_MOVE_NONE, 
-
-          //             time_now - inputs_sent[inputs_sent.length - 1].time);
-          //     }
-          //     else
-          //         pong.update(INPUT_MOVE_NONE, INPUT_MOVE_NONE, time_passed);
-          // }
+          //TODO: check if game is over here and quit
         }
-        inputs_sent.push({ input: player1_input, time: Date.now() / 1000 });
         socket.send(JSON.stringify({
           'message': "game_input",
           'input': player1_input
@@ -447,28 +568,30 @@ export async function playGame(my_id: string, game_data: any, local: boolean, ag
 
       game_time += dt;
     }
-
     if (game_started)
       renderGame();
     else {
-      let state: string = "CONNECTED!";
-      if (socket.readyState === WebSocket.CONNECTING)
-        state = "CONNECTING...";
-      else if (socket.readyState === WebSocket.CLOSING)
-        state = "CLOSING...";
-      else if (socket.readyState === WebSocket.CLOSED)
-        state = "CLOSED";
-      ctx.fillStyle = "rgb(80, 80, 80)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = '30px Arial';  // Set the font and size
-      ctx.fillStyle = 'blue';   // Set the fill color
-      ctx.textAlign = 'center'; // Center the text horizontally
-      ctx.textBaseline = 'middle'; // Center the text vertically
+      // let state: string = "CONNECTED!";
+      // if (socket.readyState === WebSocket.CONNECTING)
+      //   state = "CONNECTING...";
+      // else if (socket.readyState === WebSocket.CLOSING)
+      //   state = "CLOSING...";
+      // else if (socket.readyState === WebSocket.CLOSED)
+      //   state = "CLOSED";
+      // ctx.fillStyle = "rgb(80, 80, 80)";
+      // ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // ctx.font = '30px Arial';  // Set the font and size
+      // ctx.fillStyle = 'blue';   // Set the fill color
+      // ctx.textAlign = 'center'; // Center the text horizontally
+      // ctx.textBaseline = 'middle'; // Center the text vertically
 
-      // Render text on the canvas
-      ctx.fillText(state, 100, 100);
-      ctx.fillText("Ping: " + game_ping.toString(), 100, 400);
+      // // Render text on the canvas
+      // ctx.fillText(state, 100, 100);
+      // ctx.fillText("Ping: " + game_ping.toString(), 100, 400);
     }
+    window.requestAnimationFrame(tick);
+
   }
   window.requestAnimationFrame(tick);
+
 }
