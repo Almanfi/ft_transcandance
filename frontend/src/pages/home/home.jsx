@@ -17,7 +17,7 @@ function Home() {
           </h1>
         </div>
         <div id="bottom">
-          <button onclick={() => Ura.navigate("/user")}>
+          <button onclick={() => Ura.navigate("/choosegame")}>
             <h3>Enter the Arena</h3>
           </button>
         </div>

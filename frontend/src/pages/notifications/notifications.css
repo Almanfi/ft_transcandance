@@ -34,9 +34,17 @@
         border: 1px solid green;
         color: var(--red0);
 
+        svg {
+          fill: var(--red0);
+        }
+
         &:hover {
           background-color: var(--red0);
           color: green;
+
+          svg {
+            fill: green;
+          }
         }
       }
 
@@ -46,9 +54,17 @@
         border: 1px solid red;
         color: var(--red0);
 
+        svg {
+          fill: var(--red0);
+        }
+
         &:hover {
           background-color: var(--red0);
           color: red;
+
+          svg {
+            fill: red;
+          }
         }
       }
     }

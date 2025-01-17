@@ -4,6 +4,7 @@ import Chat from '../../../components/icons/Chat.js';
 import Play from '../../../components/icons/Play.js';
 import Accept from '../../../components/icons/Accept.js';
 import events from '../../../services/events.js';
+import Refuse from '../../../components/icons/Refuse.js';
 
 const [render, State, ForceState] = Ura.init();
 const [getSelect, setSelect] = ForceState("friends")
@@ -13,14 +14,14 @@ const [getEvents, setEvents] = State({})
 function Relations() {
 
   const Icons = {
-    accept: () => "accept",
-    refuse: () => "refuse",
-    cancel: () => "cancel",
-    unblock: () => "unblock",
-    block: () => "block",
-    chat: () => "chat",
-    play: () => "play",
-    unfriend: () => "unfriend",
+    accept: "accept",
+    refuse: "refuse",
+    cancel: "cancel",
+    unblock: "unblock",
+    block: "block",
+    chat: "chat",
+    play: "play",
+    unfriend: "unfriend",
   }
 
   const eventHandlers = {
@@ -184,7 +185,7 @@ function Relations() {
                     }
                     fetchRelations(getSelect());
                   }}>
-                    {Icons[key]()}
+                    {typeof Icons[key] === "string" ? Icons[key] : Icons[key]()}
                   </span>
                 )}
               </div>

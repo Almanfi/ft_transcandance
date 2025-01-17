@@ -2,14 +2,20 @@ import Ura from 'ura';
 import { playGame } from './client.js';
 import api from '../../services/api.js';
 import Navbar from '../../components/Navbar.js';
+import Toast from '../../components/Toast.jsx';
 
 // TODO: check query if is in friend and exsits etc ...
 function Game() {
-  const { id } = Ura.getQueries();
+  const { id, name } = Ura.getQueries();
+  if (!["pong", "osnier"].includes(name)) {
+    Ura.create(<Toast message={`Invalid game ${name}`} />);
+    return Ura.navigate("/choosegame")
+  }
   // api.openGameSocket(id);
   const [render, State] = Ura.init();
   const [getColor, setColor] = State("#4CAF50");
   const [getValue, setValue] = State("Play game");
+  const [getStart, setStart] = State(false);
 
   //const [getStart, setStart] = State(false);
 
@@ -46,7 +52,7 @@ function Game() {
 
 
     // button.style.backgroundColor = "red";
-    
+
     const socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/`);
     let in_matchmaking = false;
     let game_id = "";
@@ -123,15 +129,15 @@ function Game() {
     }
     requestAnimationFrame(tick);
     //console.error("set color gree");
-    
-   
+
+
     //button.style.backgroundColor = prev_style;
   }
 
   return render(() => (
     <root>
-      {/* <Navbar /> */}
-      <div className="game" id="game-play">
+      <Navbar />
+      <div if={getStart()} className="game" id="game-play">
         <div id="menu">
           <button id="play-local" onclick={() => playGame(user.id, undefined, true, false)}>Play Locally</button>
           <button id="play-local-ai" onclick={() => playGame(user.id, undefined, true, true)}>Play vs AI</button>
@@ -139,9 +145,12 @@ function Game() {
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
       </div>
-      <else>
+      <div if={!getStart()} className="loading">
         <h1>Loading ...</h1>
-      </else>
+      </div>
+      <button onclick={() => setStart(true)}>
+        clique me
+      </button>
     </root>
   ));
 }

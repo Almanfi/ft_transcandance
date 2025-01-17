@@ -28,6 +28,8 @@ import api from "../services/api.js";
 import Game from "./game/game.js";
 import Notifications from "./notifications/notifications.js";
 import Settings from "./settings/settings.js";
+import History from "./history/history.js";
+import ChooseGame from "./chooseGame/chooseGame.js";
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -41,6 +43,8 @@ Ura.setStyles([
   "/pages/game/game.css",
   "/pages/notifications/notifications.css",
   "/pages/settings/settings.css",
+  "/pages/history/history.css",
+  "/pages/chooseGame/chooseGame.css",
   /* components */
   "/components/Toast.css",
   "/components/Navbar.css",
@@ -61,7 +65,9 @@ Ura.onNavigate(() => {
       "/game": Game,
       "/friend": Friend,
       "/notifications": Notifications,
-      "/settings": Settings
+      "/settings": Settings,
+      "/history": History,
+      "/choosegame": ChooseGame
     });
   }
   else {

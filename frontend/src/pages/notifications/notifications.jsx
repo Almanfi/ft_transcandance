@@ -3,6 +3,8 @@ import Navbar from '../../components/Navbar.js';
 import api from '../../services/api.js';
 import events from '../../services/events.js';
 import Toast from '../../components/Toast.js';
+import Accept from '../../components/icons/Accept.js';
+import Refuse from '../../components/icons/Refuse.js';
 
 const [render, State] = Ura.init();
 const [getList, setList] = State([]);
@@ -86,9 +88,9 @@ function Notifications() {
               <h4>{e.content}</h4>
             </span>
             <span className="action">
-              <h4 if={e.accept} className="accept" onclick={e.accept}> {">"}
+              <h4 if={e.accept} className="accept" onclick={e.accept}> <Accept/>
               </h4>
-              <h4 if={e.refuse} className="refuse" onclick={e.refuse}> {"x"}
+              <h4 if={e.refuse} className="refuse" onclick={e.refuse}> <Refuse/>
               </h4>
             </span>
           </div>

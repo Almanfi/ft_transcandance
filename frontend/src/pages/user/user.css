@@ -29,12 +29,14 @@
         justify-content: center;
         align-items: center;
       }
+
       .name {
         flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
       }
+
       /* For screens 620px and up */
       @media (min-width: 620px) {
         img {
@@ -71,6 +73,26 @@
       .user-card {
         flex-direction: row;
       }
+    }
+  }
+
+  #btn-history {
+    display: flex;
+    height: 40px;
+    width: 40%;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+
+    background-color:var(--red2);
+    color: var(--red0);
+    border: 1px solid var(--red2);
+    font-size: 16px;
+
+    &:hover{
+      background-color:var(--red0);
+      color: var(--red2);
     }
   }
 
@@ -153,6 +175,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+
       h3 {
         padding: 20px;
         text-align: left;
@@ -200,7 +223,7 @@
         }
       }
 
-      .select{
+      .select {
         cursor: pointer;
         padding: 5px;
         border: none;
@@ -212,7 +235,7 @@
         padding: 10px;
         border-radius: 5px;
         margin: 10px;
-        
+
       }
 
       .inner {
@@ -224,6 +247,7 @@
           display: flex;
           justify-content: center;
           max-height: 150px;
+
           .content {
             .up {
               img {
@@ -240,6 +264,7 @@
 
               span {
                 cursor: pointer;
+
                 svg {
                   width: 20%;
                 }

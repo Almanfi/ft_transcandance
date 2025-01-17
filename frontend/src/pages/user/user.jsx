@@ -52,6 +52,9 @@ function User() {
             </div>
           </div>
         </div>
+        <button id="btn-history" onclick={() => Ura.navigate("/history")}>
+          see games history
+        </button>
 
         <div id="bottom">
           <div loop={[Swords, Award, WinCup]} id="games">

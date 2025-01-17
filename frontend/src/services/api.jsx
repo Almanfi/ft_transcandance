@@ -436,9 +436,9 @@ function openSocket() {
     };
 
     webSocket.onclose = (event) => {
-      console.error("WebSocket connection closed. Reconnecting...");
-      // Events = {};
       webSocket = null;
+      // console.error("WebSocket connection closed. Reconnecting...");
+      // Events = {};
       // if (conRetries < 3) {
       //   setTimeout(() => { conRetries++; openSocket(); }, 3000);
       // } else {
