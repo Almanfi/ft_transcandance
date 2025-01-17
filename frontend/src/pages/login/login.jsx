@@ -4,6 +4,7 @@ import Arrow from "../../components/icons/Arrow.jsx";
 import Input from "../../components/Input.jsx";
 // import Toast from "../../components/Toast.js";
 import api from "../../services/api.js";
+import Ft from "../../components/ft/ft.js";
 // import Home from "../home/home.js";
 
 
@@ -43,6 +44,10 @@ function Login() {
             <div id={"button-section"}>
               <button id="btn" type="submit">
                 <Arrow />
+              </button>
+              <button>
+                <Ft/>
+                {/* 42 login */}
               </button>
             </div>
             <h4 id="signin" onclick={() => Ura.navigate("/signup")}>Don't have an account?</h4>

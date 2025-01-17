@@ -1,6 +1,6 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
-from ..models.tournament_model import Tournament
+from ..models.tournament_model import Tournament, GAME_GENRE
 from ..models.game_model import Game, TOURNAMENT_PHASE
 from .user_serializers import User
 from ..helpers import parse_uuid
@@ -26,6 +26,7 @@ class TournamentSerializer(serializers.Serializer):
 	created_at = serializers.DateTimeField(required = False)
 	done_at = serializers.DateTimeField(required = False)
 	tournament_phase = serializers.ChoiceField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[2][0] , required = False)
+	genre = serializers.ChoiceField(choices=GAME_GENRE, required = False)
 
 	def create(self, validated_data):
 		return Tournament.objects.create(**validated_data)
@@ -55,11 +56,11 @@ class TournamentSerializer(serializers.Serializer):
 		return participation_info
 
 	@staticmethod
-	def create_tournament(users):
-		tourney = Tournament.objects.create()
+	def create_tournament(users, genre = GAME_GENRE[0][0]):
+		tourney = Tournament.objects.create(genre = genre)
 		users = parse_uuid(users)
 		users = User.fetch_users_by_id(users)
-		Game.create_tournament_games(users, tourney, TOURNAMENT_PHASE[2][0])
+		Game.create_tournament_games(users, tourney, TOURNAMENT_PHASE[2][0], genre)
 		return TournamentSerializer(tourney)
 
 	@staticmethod

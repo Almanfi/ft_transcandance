@@ -14,19 +14,6 @@ function Game() {
   //const [getStart, setStart] = State(false);
 
 
-  let user = undefined;
-
-  // TODO: remove this!!
-  const fetchData = async () => {
-    try {
-      user = await api.getUser();
-    } catch (error) {
-      //console.log("it went through here:", error)
-      api.handleError(error)
-    }
-  }
-  fetchData();
-
   let waiting = false;
   let cancel_search = false;
 
@@ -97,7 +84,7 @@ function Game() {
           && (last_match_time === undefined 
             || Date.now() - last_match_time > 1000)) {
           last_match_time = Date.now();
-          match_socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/`);
+          match_socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/pong/`);
 
           match_socket.onmessage = (e) => {
             const data = JSON.parse(e.data);
@@ -131,7 +118,8 @@ function Game() {
             const data = JSON.parse(e.data);
             if (data.type === "game.start") {
               started_game = true;
-              playGame(user.id, JSON.stringify(data.game), false, false);
+
+              playGame(data.user_id, JSON.stringify(data.game), false, false);
             }
           };
           lobby_socket.onclose = (e) => {
@@ -202,8 +190,8 @@ function Game() {
       {/* <Navbar /> */}
       <div className="game" id="game-play">
         <div id="menu">
-          <button id="play-local" onclick={() => playGame(user.id, undefined, true, false)}>Play Locally</button>
-          <button id="play-local-ai" onclick={() => playGame(user.id, undefined, true, true)}>Play vs AI</button>
+          <button id="play-local" onclick={() => playGame("", undefined, true, false)}>Play Locally</button>
+          <button id="play-local-ai" onclick={() => playGame("", undefined, true, true)}>Play vs AI</button>
           <button id="play-remote" style={{ backgroundColor: getColor() }} onclick={() => playRemote()}>{getValue()}</button>
           <button id="play-tournament" onclick={() => playTournament()}>Play Tournament</button>
 
