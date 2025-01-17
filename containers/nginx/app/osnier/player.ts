@@ -26,6 +26,12 @@ export class Inputs {
 
     reset() {
         this.sendOrder = 1;
+        this.action = {f: false, d: false};
+        this.move = {x: 0, y: 0};
+        this.angle = 0;
+        this.direction = new THREE.Vector3(1, 0, 0);
+        this.timeStamp = 0;
+        this.serializedData = '';
     }
 
     serializeForSend(): {order: number, info: string} {
@@ -152,6 +158,8 @@ export class Player extends THREE.Object3D {
     UiRenderer: UIRanderer;
     // planeRaycaster: THREE.Raycaster;
 
+    signalEndGame: (timeStamp: number) => void;
+
     constructor(position: THREE.Vector3,
         bulletManager: PlayersBulletManager) {
         super();
@@ -193,33 +201,44 @@ export class Player extends THREE.Object3D {
 
     reset() {
         this.inputs.reset();
-        // this.actions.clear();
         this.lastFire = 0;
         this.position.copy(this.initPosition);
         this.oldPosition.set(0, 0, 0);
         this.positionBackup.copy(this.position);
         this.health = this.maxHealth;
         this.alive = true;
+        if (this.name === 'player')
+            this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
+        else if (this.name === 'foe')
+            this.UiRenderer.updatePlayer2Health(this.health / this.maxHealth);
+    }
+
+    stop() {
+        this.inputs.reset();
+    }
+
+    attachEndGameSignal(signal: (timeStamp: number) => void) {
+        this.signalEndGame = signal;
     }
 
     addUIRenderer(uiRenderer: UIRanderer) {
         this.UiRenderer = uiRenderer;
-        // this.UiRenderer.createHealthBar(this.name, new THREE.Vector3());
     }
 
-    takeDamage(damage: number) {
+    takeDamage(damage: number, timeStamp: number) {
         if (!this.alive)
             return;
         this.health -= damage;
         if (this.health <= 0) {
             this.alive = false;
             console.log('player died: ', this.name);
-            // endGame();
+            this.signalEndGame(timeStamp);
         }
         console.log(`${this.name} health: `, this.health);
         if (this.name === 'player')
             this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
-        // updateHealthBar();
+        else if (this.name === 'foe')
+            this.UiRenderer.updatePlayer2Health(this.health / this.maxHealth);
     }
 
     addToScene(scene: THREE.Scene) {
@@ -260,13 +279,13 @@ export class Player extends THREE.Object3D {
         // console.log('despawning bullets after time: ', time);
         this.bulletManager.bullets.forEach(bullet => {
             if (bullet.date > time) {
-                console.log('despawning bullet fired last at: ', bullet.date);
+                // console.log('despawning bullet fired last at: ', bullet.date);
                 this.bulletManager.despawnBullet(bullet);
             }
         });
         this.bulletManager.destroyedBullets.forEach(bullet => {
             if (bullet.date > time) {
-                console.log('despawning bullet');
+                // console.log('despawning bullet');
                 this.bulletManager.returnDestroyedBullet(bullet);
             }
         });
@@ -288,13 +307,13 @@ export class Player extends THREE.Object3D {
         // console.log(`rolling back from ${lastTime} to ${actionTime}`);
 
         for (let i = 0; i < rollBackInputs.length - 1; i++) { // handle before last inputs
-            console.log("handling in between inputs");
+            // console.log("handling in between inputs");
             let nextInput = rollBackInputs[i + 1];
             let nextActionTime = Inputs.findTimeStamp(nextInput);
 
             this.rollbackNextAction(nextInput, lastTime, nextActionTime);
             lastTime = nextActionTime;
-            console.log("done handling in between inputs");
+            // console.log("done handling in between inputs");
         }
 
         this.rollbackNextAction(receivedData, lastTime, actionTime);
@@ -386,13 +405,14 @@ export class Player extends THREE.Object3D {
         data.position.copy(this.position);
         data.speed.copy(this.movementVector);
         data.lastFire = this.lastFire;
+        data.health = this.health;
     }
 
     savePlayerData(frameIndex: number) {
         // let currMoveVect = this.inputs.calcMovementVector(this.planeFacingVector).clone();
         return this.rollback.saveFrame(frameIndex, this.position.clone(),
                 this.movementVector, this.inputs.serialize(),
-                this.lastFire);
+                this.lastFire, this.health);
     }
 
     saveRollBackData(frameIndex: number) {
@@ -461,6 +481,7 @@ export class Player extends THREE.Object3D {
         this.position.copy(data.position);
         // .addScaledVector(this.movementVector, 1);
         this.lastFire = data.lastFire;
+        this.health = data.health;
     }
 
     findStateAtTime(time: number) {
@@ -509,6 +530,7 @@ export class Player extends THREE.Object3D {
         this.movementVector.copy(data.speed);
         this.position.copy(this.oldPosition)
         .addScaledVector(this.movementVector, 1);
+        this.health = data.health;
     }
 
     findPositionAtTime(time: number) {

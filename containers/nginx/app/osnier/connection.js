@@ -1,3 +1,4 @@
+import { Inputs } from "./player.js";
 class WebSocketCnx {
     socket;
     receiver;
@@ -69,6 +70,10 @@ class WebRtcCnx {
     defaultEventHandler() { }
     changeDefaultEventHandler(handler) {
         this.defaultEventHandler = handler;
+    }
+    close() {
+        this.remoteConnection.close();
+        this.RTCConnected = false;
     }
     send(msg) {
         this.sendChannel?.send(msg);
@@ -223,6 +228,12 @@ class WebRtcCnx {
         channel.onclose = this.onDataChannelClose.bind(this);
     }
 }
+var PeerType;
+(function (PeerType) {
+    PeerType[PeerType["none"] = 0] = "none";
+    PeerType[PeerType["host"] = 1] = "host";
+    PeerType[PeerType["client"] = 2] = "client";
+})(PeerType || (PeerType = {}));
 export class Connection {
     socket;
     webRTC;
@@ -238,8 +249,13 @@ export class Connection {
     peerTimeDiff;
     isRecieverConnected;
     isHost;
+    type;
     // checkRecieverInterval: number;
     gameStart;
+    gameEnded;
+    gameEndedHere;
+    winner;
+    initRtcStarted;
     constructor() {
         this.socket = new WebSocketCnx();
         this.webRTC = null;
@@ -255,24 +271,46 @@ export class Connection {
         this.peerTimeDiff = 0;
         this.isRecieverConnected = false;
         this.isHost = false;
+        this.type = PeerType.none;
+        this.gameEnded = false;
+        this.gameEndedHere = false;
+        this.winner = "";
+        this.initRtcStarted = false;
     }
     checkReciever() {
-        if (this.isRecieverConnected) {
-            if (this.isHost) {
+        if (this.type !== PeerType.none) {
+            if (this.type === PeerType.host && !this.initRtcStarted) {
                 console.log("I am starting rtc connection");
                 this.startRtcConnection();
+                this.initRtcStarted = true;
+                setTimeout(() => {
+                    if (this.webRTC && !this.webRTC.RTCConnected) {
+                        this.webRTC.close();
+                        this.activeProtocol = this.socket;
+                        this.initSync();
+                    }
+                }, 2000);
             }
             // this.initSync();
             return;
         }
-        this.send({ sync: "ready" });
+        if (this.type === PeerType.none)
+            this.send({ sync: "ready", reset: true });
+        else
+            this.send({ sync: "ready" });
         setTimeout(() => {
             this.checkReciever();
         }, 400);
     }
+    setGameAsDone() {
+        this.gameEndedHere = true;
+        this.socket.send(JSON.stringify({ done: "end", winner: this.winner }));
+    }
     reset() {
         this.recievedData.clear();
         this.recievedDataOrder = 1;
+        this.gameEnded = false;
+        this.gameEndedHere = false;
     }
     recheckConnection() {
         if (this.webRTC && this.webRTC.RTCConnected) {
@@ -349,6 +387,8 @@ export class Connection {
     }
     startRtcConnection() {
         console.log("init rtc");
+        if (this.webRTC && this.webRTC.RTCConnected)
+            return;
         this.webRTC = new WebRtcCnx(this.handleRtcIceCandidate.bind(this), this.handleRtcMessage.bind(this));
         this.webRTC.changeDefaultEventHandler(this.recheckConnection.bind(this));
         let offerPromise = this.webRTC.startRtcConnection();
@@ -357,6 +397,8 @@ export class Connection {
         });
     }
     send(msg) {
+        if (this.gameEndedHere)
+            return;
         this.activeProtocol.send(msg);
         // if (this.webRTC)
         //     return;
@@ -391,6 +433,15 @@ export class Connection {
     hasRecievedData() {
         return (this.recievedData.has(this.recievedDataOrder));
     }
+    getLastReceiveTime() {
+        let lastRecieved = this.recievedDataOrder - 1;
+        if (lastRecieved < 0)
+            lastRecieved = 0;
+        let data = this.recievedData.get(lastRecieved);
+        if (!data)
+            return 0;
+        return Inputs.findTimeStamp(data);
+    }
     getRecievedDataOrdered() {
         let data = this.recievedData.get(this.recievedDataOrder);
         // if (data)
@@ -408,7 +459,7 @@ export class Connection {
         }
     }
     isPingDone() {
-        let samplesize = 200;
+        let samplesize = 50;
         if (this.pingSize !== samplesize)
             return false;
         this.pingAvrg = this.ping.reduce((a, b) => a + b) / samplesize;
@@ -420,14 +471,28 @@ export class Connection {
         return true;
     }
     handleSyncWithPeer(data) {
+        if (data.sync === "end") {
+            this.gameEnded = true;
+            this.winner = data.winner;
+            console.log("recieved game end");
+            // console.log("winner is: ",  data.winner);
+            return;
+        }
         if (data.sync === "ready") {
             this.isRecieverConnected = true;
-            console.log("reciever connected");
+            console.log("client connected");
+            if (data.reset) {
+                this.type = PeerType.none;
+                this.webRTC = null;
+                // this.isHost = false;
+            }
             if (data.isHost) {
                 this.isHost = true;
+                this.type = PeerType.host;
                 this.send({ sync: "ready" });
             }
             else {
+                this.type = PeerType.client;
                 this.send({ sync: "ready", isHost: true });
             }
             return;

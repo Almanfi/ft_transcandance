@@ -3,10 +3,12 @@ export class RollData {
     speed;
     lastFire;
     input;
-    constructor(position, speed, lastFire, input) {
+    health;
+    constructor(position, speed, lastFire, health, input) {
         this.position = position;
         this.speed = speed;
         this.lastFire = lastFire;
+        this.health = health;
         this.input = input;
     }
     addInput(input) {
@@ -19,8 +21,8 @@ export class Rollback {
     constructor() {
         this.savedData = new Map();
     }
-    saveFrame(frameIndex, position, speed, input, lastFire) {
-        let data = new RollData(position, speed, lastFire, [input]);
+    saveFrame(frameIndex, position, speed, input, lastFire, health) {
+        let data = new RollData(position, speed, lastFire, health, [input]);
         this.savedData.set(frameIndex, data);
         return data;
     }

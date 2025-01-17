@@ -6,6 +6,7 @@ export type dataSaved = {
     speed: THREE.Vector3;
     lastFire: number;
     input: string[];
+    health: number;
 }
 
 export class RollData {
@@ -13,11 +14,14 @@ export class RollData {
     speed: THREE.Vector3;
     lastFire: number;
     input: string[];
+    health: number;
 
-    constructor(position: THREE.Vector3, speed: THREE.Vector3, lastFire: number, input: string[]) {
+    constructor(position: THREE.Vector3, speed: THREE.Vector3,
+                lastFire: number, health: number, input: string[]) {
         this.position = position;
         this.speed = speed;
         this.lastFire = lastFire;
+        this.health = health;
         this.input = input;
     }
 
@@ -38,8 +42,8 @@ export class Rollback {
     }
 
     saveFrame(frameIndex: frameIndex, position: THREE.Vector3,
-        speed: THREE.Vector3, input: string, lastFire: number) {
-        let data = new RollData(position, speed, lastFire, [input]);
+        speed: THREE.Vector3, input: string, lastFire: number, health: number) {
+        let data = new RollData(position, speed, lastFire, health, [input]);
         this.savedData.set(frameIndex, data);
         return data;
     }
