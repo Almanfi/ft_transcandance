@@ -38,6 +38,14 @@ def fetch_game_async(game_id):
     game_db = GameSerializer(game_db[0])
     return [game_db, game_db.data['team_a'], game_db.data['team_b']]
 
+@database_sync_to_async
+def end_game_async(game_id, team_a_score, team_b_score):
+    game_db = Game.fetch_games_by_id([game_id])
+    if len(game_db) != 1:
+        return None
+    game_db = GameSerializer(game_db[0])
+    game_db.end_game(team_a_score, team_b_score)
+
 class Pong:
     def __init__(self):
         #print("Pong game init")
@@ -99,17 +107,30 @@ class Pong:
 
 class PongSocket(AsyncWebsocketConsumer):
     async def connect(self):
+        #TODO: do a try over here...
+        #TODO: if one of the users didn't connect correctly then cancel the game?
+
         game_id = self.scope['url_route']['kwargs']['game_id']
+        
+        [game_db, team_a, team_b] = await fetch_game_async(game_id)
+        if game_db == None:
+            await self.close(79, "Game Not Found")
+            return 
+        
         if not self.scope['user']:
             await self.close(code=79, reason="No User Given in Cookie")
+            return
+
+        if self.scope['user'].data['id'] != team_a[0]['id'] and self.scope['user'].data['id'] != team_b[0]['id']:
+            await self.close(79, "Invalid User for Game")
             return
         
         await self.accept()
         self.input = 0
         if game_id not in games:
             games[game_id] = {'players': [], 'game': Pong()}
-        games[game_id]['players'].append(self)
-        self.game_id = game_id
+        if self not in games[game_id]['players']:
+            games[game_id]['players'].append(self)
 
         if len(games[game_id]['players']) == 2:
             message = {'message': 'game_starting'}
@@ -136,25 +157,13 @@ async def game_loop(game_id):
 
         if game_db == None:
             #this should never happen
+            #TODO: close connection with players...
             return 
 
         game = games[game_id]['game']
         player1 = games[game_id]['players'][0]
         player2 = games[game_id]['players'][1]
         
-        
-        
-        # print(team_a[0]['id'])
-        # print(team_b[0]['id'])
-        # print(type(team_a[0]['id']))
-        # print(type(player1.scope['user'].data['id']))
-
-
-        #sys.stdout.flush()
-
-        #print(game_db["team_b"])
-
-
         game_time = 0
         
         while True:
@@ -191,22 +200,34 @@ async def game_loop(game_id):
             if time_to_sleep > 0:
                 await asyncio.sleep(time_to_sleep)
 
+        team_a_score = team_b_score = 0
+        if team_a[0]['id'] == player1.scope['user'].data['id']:
+            team_a_score = game.score1
+            team_b_score = game.score2
+        else:
+            team_a_score = game.score2
+            team_b_score = game.score1
+
+        #game_db.end_game(game_id, team_a_score, team_b_score)
+        await end_game_async(game_id, team_a_score, team_b_score)
+
         msg = {'message': 'game_end'}
         await player1.send(text_data=json.dumps(msg))
         await player2.send(text_data=json.dumps(msg))
         
+        #TODO: check these codes
         await player1.close(code=1000)
         await player2.close(code=1000)
 
-        team_a_score = 0
-        team_b_score = 0
-       
-
-        #game_db.end_game(player1.score, player2.score)
         if game_id in games:
             del games[game_id]
             
     except Exception as e:
+        print("GAME LOOP EXCEPTION:")
+        print(e)
+        sys.stdout.flush()
+
+        #TODO: cancel game? also send game_end message to players...
         if game_id in games:
             for player in games[game_id]['players']:
                 await player.close(code=1000)

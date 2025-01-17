@@ -1,5 +1,5 @@
 import Ura from 'ura';
-import { playGame } from './client.js';
+import { playGame, game_over, game_cancel } from './client.js';
 import api from '../../services/api.jsx';
 import Navbar from '../../components/Navbar.jsx';
 
@@ -36,96 +36,113 @@ function Game() {
       //waiting = false;
       return;
     }
-    console.error("set color red");
+    cancel_search = false;
+
     setColor("red");
     setValue("Cancel game")
     waiting = true;
 
-    // const button = document.getElementById("play-remote");
-    // let prev_style = button.style.backgroundColor;
+    let game_id = undefined;
 
-
-    // button.style.backgroundColor = "red";
-    
-    const socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/`);
-    let in_matchmaking = false;
-    let game_id = "";
-
-
-    socket.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      if (data.message === "Entered Game Matchmaking") {
-        in_matchmaking = true;
-      }
-      else if (data.type === "game.launch") {
-        if (typeof data.type === "string") {
-          game_id = data.game_id;
-          console.log(`[MATCHMAKING SOCKET] JOINED GAME ${game_id}`);
-        }
-      }
-      console.log("[MATCHMAKING SOCKET] RECEVIED: ", e.data);
-    };
-
-    socket.onopen = (e) => {
-      console.log("[MATCHMAKING SOCKET] CONNECTED");
-      //socket.send(JSON.stringify({ message: "hello!" }));
-    };
-
-    socket.onclose = (e) => {
-      //TODO: reconnect?
-      if (game_id.length === 0) {
-        // TODO: try again?
-        console.log("[MATCHMAKING SOCKET] FAILED MATCHMAKING!");
-      }
-      console.log("[MATCHMAKING SOCKET] DISCONNECTED ", e);
-    };
+    let last_match_time = undefined;
+    let match_socket = undefined;
     let lobby_socket = undefined;
-    let game_started = false;
-    let game_socket = undefined;
+    let lobby_enter_time = undefined;
+    let started_game = false;
 
-
-
-    // TODO: remove this trash code
+    
+    function reset() {
+      if (match_socket !== undefined && match_socket.readyState != WebSocket.CLOSED)
+          match_socket.close();
+      if (lobby_socket !== undefined && lobby_socket.readyState != WebSocket.CLOSED)
+          lobby_socket.close();
+      match_socket = lobby_socket = undefined;
+      game_id = undefined;
+      last_match_time = undefined;
+      started_game = false;
+      lobby_enter_time = undefined;
+    }
+    reset();
     function tick(time) {
+      if (started_game && game_over) {
+        if (!game_cancel)
+          cancel_search = true;
+        reset();
+      }
+      if (started_game) {
+        requestAnimationFrame(tick);
+        return ;
+      }
+      if (game_id === undefined && lobby_socket !== undefined) {
+        lobby_socket.close();
+        lobby_socket = undefined;
+        lobby_enter_time = undefined;
+      }
+      if (lobby_enter_time !== undefined
+        && Date.now() - lobby_enter_time > 3000) {
+        reset();
+      }
       if (cancel_search) {
         console.log("CANCELLING SEARCH!");
-        socket.close();
+        reset();
         cancel_search = false;
         waiting = false;
         setColor("#4CAF50");
         setValue("Play game")
         return;
       }
-      if (game_id.length !== 0) {
-        if (lobby_socket === undefined) {
+
+      if (game_id === undefined) {
+        if ((match_socket === undefined || match_socket.readyState === WebSocket.CLOSED)
+          && (last_match_time === undefined 
+            || Date.now() - last_match_time > 1000)) {
+          last_match_time = Date.now();
+          match_socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/`);
+
+          match_socket.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === "game.launch") {
+                game_id = data.game_id;
+            }
+            console.log("[MATCHMAKING SOCKET] RECEVIED: ", e.data);
+          };
+
+          match_socket.onopen = (e) => {
+            console.log("[MATCHMAKING SOCKET] CONNECTED");
+          };
+
+          match_socket.onclose = (e) => {
+            console.log("[MATCHMAKING SOCKET] DISCONNECTED ");
+          };
+        }
+      }
+      else {
+        if (lobby_socket === undefined || 
+          (lobby_socket.readyState === WebSocket.CLOSED && !started_game)) {
           lobby_socket = new WebSocket(`${api.websocketApi}/ws/game/${game_id}/`);
           lobby_socket.onopen = (e) => {
             console.log("[LOBBY SOCKET] CONNECTED!");
+            lobby_enter_time = Date.now();
           };
 
           lobby_socket.onmessage = (e) => {
             console.log("[LOBBY SOCKET] RECEIVED ", e);
             const data = JSON.parse(e.data);
             if (data.type === "game.start") {
+              started_game = true;
               playGame(user.id, JSON.stringify(data.game), false, false);
-              cancel_search = true;
             }
-
           };
           lobby_socket.onclose = (e) => {
             console.log("[LOBBY SOCKET] DISCONNECTED ", e);
           };
         }
-
       }
-
+    
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
-    //console.error("set color gree");
-    
-   
-    //button.style.backgroundColor = prev_style;
   }
 
   function playTournament() {
