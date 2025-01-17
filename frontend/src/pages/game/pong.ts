@@ -20,11 +20,13 @@ export class Pong {
     ball_y: number;
     ball_vx: number;
     ball_vy: number;
+    ball_speed: number;
 
     score1: number;
     score2: number;
 
     resetBall() {
+        this.ball_speed = BALL_SPEED;
         this.ball_x = this.ball_y = 0;
         this.ball_vx = Math.random() > 0.5 ? 1 : -1;
         this.ball_vy = (Math.random() - 0.5) * 2;
@@ -58,8 +60,8 @@ export class Pong {
         }
 
         // Update ball position
-        this.ball_x += BALL_SPEED * this.ball_vx * dt;
-        this.ball_y += BALL_SPEED * this.ball_vy * dt;
+        this.ball_x += this.ball_speed * this.ball_vx * dt;
+        this.ball_y += this.ball_speed * this.ball_vy * dt;
 
         // Ball collision with top and bottom walls
         if (this.ball_y + BALL_RADIUS > GAME_HEIGHT / 2 || this.ball_y - BALL_RADIUS < -GAME_HEIGHT / 2) {
@@ -67,6 +69,7 @@ export class Pong {
         }
 
         // Ball collision with paddles
+        let hit = false;
         if (
             this.ball_x - BALL_RADIUS < this.p1_x + PADDLE_XRADIUS &&
             this.ball_x + BALL_RADIUS > this.p1_x - PADDLE_XRADIUS &&
@@ -74,6 +77,8 @@ export class Pong {
             this.ball_y < this.p1_y + PADDLE_YRADIUS
         ) {
             this.ball_vx = Math.abs(this.ball_vx);
+            hit = true;
+            
         } else if (
             this.ball_x + BALL_RADIUS > this.p2_x - PADDLE_XRADIUS &&
             this.ball_x - BALL_RADIUS < this.p2_x + PADDLE_XRADIUS &&
@@ -81,7 +86,20 @@ export class Pong {
             this.ball_y < this.p2_y + PADDLE_YRADIUS
         ) {
             this.ball_vx = -Math.abs(this.ball_vx);
+            hit = true;
         }
+        if (hit) {
+            this.ball_speed *= 1.1
+            this.ball_vx += (Math.random()-0.5)*0.1
+            this.ball_vy += (Math.random()-0.5)*0.1
+            const norm = Math.sqrt(this.ball_vx ** 2 + this.ball_vy ** 2)
+            this.ball_vx /= norm
+            this.ball_vy /= norm
+        }
+        if (this.ball_speed > 40)
+            this.ball_speed = 40;
+
+        
 
         // Check for game over
         if (this.ball_x + BALL_RADIUS > GAME_WIDTH / 2 || this.ball_x - BALL_RADIUS < -GAME_WIDTH / 2) {

@@ -4,7 +4,7 @@ setConfig({
   dirRouting: false,
   defaultRoute: "/home", /* will be used only if dirRouting is true */
   port: 17000,
-  serverTiming: 2,
+  serverTiming: 1,
   style: "css",
   ext: "jsx"
 })

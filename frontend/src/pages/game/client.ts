@@ -29,40 +29,38 @@ let game_ping = -1;
 
 let last_ai_input_time: number;
 let last_ai_input: number;
+let ai_base = 0;
+
+function deepCopyGame(pong: Pong) {
+  let game = new Pong();
+  game.ball_x = pong.ball_x;
+  game.ball_y = pong.ball_y;
+  game.ball_vx = pong.ball_vx;
+  game.ball_vy = pong.ball_vy;
+
+  game.p1_x = pong.p1_x;
+  game.p2_x = pong.p2_x;
+  game.p1_y = pong.p1_y;
+  game.p2_y = pong.p2_y;
+
+  game.score1 = pong.score1;
+  game.score2 = pong.score2;
+  return game;
+}
 
 function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
-  let game: Pong = new Pong()
+  let target_y = ai_base;
+  if (ai_pong.ball_vx > 0)
   {
-    game.ball_x = ai_pong.ball_x;
-    game.ball_y = ai_pong.ball_y;
-    game.ball_vx = ai_pong.ball_vx;
-    game.ball_vy = ai_pong.ball_vy;
-
-    game.p1_x = ai_pong.p1_x;
-    game.p2_x = ai_pong.p2_x;
-    game.p1_y = ai_pong.p1_y;
-    game.p2_y = ai_pong.p2_y;
-
-    game.score1 = ai_pong.score1;
-    game.score2 = ai_pong.score2;
-  }
- 
-  let target_y = 0;
-
-  if (ai_pong.ball_vx > 0) {
-    // find final y!
-
-    // do intersection with up, down, right, then update,
-    // and keep doing it until we get a collision with right wall that's the final y!
-
-    let curr_x = ai_pong.ball_x;
-    let curr_y = ai_pong.ball_y;
-    let curr_vx = ai_pong.ball_vx;
-    let curr_vy = ai_pong.ball_vy;
+    let curr_x = pong.ball_x;
+    let curr_y = pong.ball_y;
+    let curr_vx = pong.ball_vx;
+    let curr_vy = pong.ball_vy;
     for (let itr = 0; itr < 16; itr++) {
       let collision = -1;
       let t = 100000;
       
+
       // up
       if (curr_vy > 0) {
         // curr_y + t * curr_vy = GAME_HEIGHT/2
@@ -80,36 +78,38 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
           collision = 1;
         }
       }
+      // left
+      if (curr_vx < 0) {
+        let T = (ai_pong.p1_x + PADDLE_XRADIUS - curr_x) / curr_vx;
+        if (T >= 0 && T < t) {
+          t = T;
+          collision = 2;
+        }
+      }
       // right
       if (curr_vx > 0) {
         // curr_x + t * curr_vx = GAME_WIDTH / 2
         let T = (GAME_WIDTH/2 - curr_x) / curr_vx;
         if (T >= 0 && T < t) {
-          target_y = curr_y + curr_vx * T;
-          console.log("PREDICTING ", target_y);
+          target_y = curr_y + curr_vy * T;
           break ;
         }
       }
+
       if (collision != -1) {
         curr_x += curr_vx * t;
         curr_y += curr_vy * t;
-        curr_vy *= -1;
+        if (collision == 2)
+          curr_vx *= -1;
+        else
+          curr_vy *= -1;
       }
     }
-    
   }
 
   //TODO: shouldn't check my y!
-  let y = pong.ball_y;
-
-  const time = Date.now();
-
+  let y = pong.p2_y;
   
-
-
-  // let x = pong.p1_x;
-  // let y = pong.p1_y;
-  // if (player == 2) (x = pong.p2_x), (y = pong.p2_y);
 
   let input = INPUT_MOVE_NONE;
   if (y < target_y - 0.2 * PADDLE_YRADIUS)
@@ -117,13 +117,13 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
   else if (y > target_y + 0.2 * PADDLE_YRADIUS)
       input = INPUT_MOVE_DOWN;
   
-  // if (Date.now() - last_ai_input_time < 300) {
-  //   if (input == INPUT_MOVE_NONE)
-  //     last_ai_input = input;
-  //   return last_ai_input;
-  // }
-  // else
-  //   last_ai_input_time = Date.now();
+  if (Date.now() - last_ai_input_time < 10) {
+    //if (input == INPUT_MOVE_NONE)
+    //  last_ai_input = input;
+    return last_ai_input;
+  }
+  else
+    last_ai_input_time = Date.now();
 
   last_ai_input = input;
 
@@ -161,8 +161,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
   let last_ping_time: number | undefined = undefined;
   let next_ping_id = 0;
 
-  let ai_pong_state: Pong = new Pong();
-  let ai_pong_state_time = Date.now();
+
   let me: any = undefined;
   let opp: any = undefined;
   let pong_connection_time:any = undefined;
@@ -260,6 +259,8 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
       showGame();
 
   let pong = new Pong();
+  let ai_pong_state = deepCopyGame(pong);
+  let ai_pong_state_time = Date.now();
   let last_timestamp: number | undefined = undefined;
 
   const default_image_path = "/";
@@ -328,10 +329,11 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
       ctx.fillRect(x - w * 0.5, y - h * 0.5, w, h);
       ctx.closePath();
     }
-  
-    renderPaddle(pong.p1_x, pong.p1_y);
-    renderPaddle(pong.p2_x, pong.p2_y);
-  
+    
+    if (!game_ending) {
+      renderPaddle(pong.p1_x, pong.p1_y);
+      renderPaddle(pong.p2_x, pong.p2_y);
+    }
     // Render Scores
     {
       ctx.fillStyle = "rgb(200, 200, 200)";
@@ -470,6 +472,8 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
 
   function tick(timestamp: number) {
     resizeCanvas(canvas);
+    if (socket !== undefined && game_started && socket.readyState == WebSocket.CLOSED)
+        game_ending = true
     if (!local) {
       if ((pong_connection_time !== undefined && !game_started && Date.now() - pong_connection_time > 1500)
         || (!game_started && socket !== undefined && socket.readyState == WebSocket.CLOSED)
@@ -559,10 +563,11 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
 
           //TODO: check if game is over here and quit
         }
-        socket.send(JSON.stringify({
-          'message': "game_input",
-          'input': player1_input
-        }));
+        if (socket.readyState === WebSocket.OPEN)
+          socket.send(JSON.stringify({
+            'message': "game_input",
+            'input': player1_input
+          }));
 
       }
 
