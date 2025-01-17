@@ -56,7 +56,7 @@ class Pong:
         self.ball_x = self.ball_y = self.ball_vx = self.ball_vy = 0
         self.reset_ball()
         self.score1 = self.score2 = 0
-
+        
     def reset_ball(self):
         self.ball_x = self.ball_y = 0
         self.ball_vx = 1 if random.random() > 0.5 else -1
@@ -64,7 +64,7 @@ class Pong:
         norm = math.sqrt(self.ball_vx ** 2 + self.ball_vy ** 2)
         self.ball_vx /= norm
         self.ball_vy /= norm
-
+        self.ball_speed = BALL_SPEED
     def update(self, p1_input, p2_input, dt):
         # Update paddles
         if p1_input == INPUT_MOVE_UP:
@@ -78,25 +78,38 @@ class Pong:
             self.p2_y = max(self.p2_y - PADDLE_SPEED * dt, -GAME_HEIGHT / 2 + PADDLE_YRADIUS)
 
         # Update ball position
-        self.ball_x += BALL_SPEED * self.ball_vx * dt
-        self.ball_y += BALL_SPEED * self.ball_vy * dt
+        self.ball_x += self.ball_speed * self.ball_vx * dt
+        self.ball_y += self.ball_speed * self.ball_vy * dt
 
         # Ball collision with top and bottom walls
         if self.ball_y + BALL_RADIUS > GAME_HEIGHT / 2 or self.ball_y - BALL_RADIUS < -GAME_HEIGHT / 2:
             self.ball_vy = -self.ball_vy
 
         # Ball collision with paddles
+        hit = False
         if (self.ball_x - BALL_RADIUS < self.p1_x + PADDLE_XRADIUS and
             self.ball_x + BALL_RADIUS > self.p1_x - PADDLE_XRADIUS and
             self.ball_y > self.p1_y - PADDLE_YRADIUS and
             self.ball_y < self.p1_y + PADDLE_YRADIUS):
             self.ball_vx = abs(self.ball_vx)
+            hit = True
         elif (self.ball_x + BALL_RADIUS > self.p2_x - PADDLE_XRADIUS and
               self.ball_x - BALL_RADIUS < self.p2_x + PADDLE_XRADIUS and
               self.ball_y > self.p2_y - PADDLE_YRADIUS and
               self.ball_y < self.p2_y + PADDLE_YRADIUS):
             self.ball_vx = -abs(self.ball_vx)
+            hit = True
 
+        if hit:
+            self.ball_speed *= 1.1
+            self.ball_vx += (random.random()-0.5)*0.1
+            self.ball_vy += (random.random()-0.5)*0.1
+            norm = math.sqrt(self.ball_vx ** 2 + self.ball_vy ** 2)
+            self.ball_vx /= norm
+            self.ball_vy /= norm
+
+        if self.ball_speed > 40:
+            self.ball_speed = 40
         # Check for game over
         if self.ball_x + BALL_RADIUS > GAME_WIDTH / 2 or self.ball_x - BALL_RADIUS < -GAME_WIDTH / 2:
             if self.ball_x < 0:
