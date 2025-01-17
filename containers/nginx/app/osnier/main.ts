@@ -8,7 +8,8 @@ import { musicMap } from './assets/reolMap.js';
 import { Connection } from './connection.js';
 import { dataSaved } from './rollback.js';
 import { UIRanderer } from './UIRanderer.js';
-import { getGame, getUser } from './utils.js'
+import { getGame, getUser } from './utils.js';
+
 // import { CSS2DObject, CSS2DRenderer } from './node_modules/three/examples/jsm/renderers/CSS2DRenderer.js';
 
 function initThreeJS(gameConvas: HTMLElement): { scene: THREE.Scene,
@@ -68,11 +69,25 @@ if (user.id === users[1].id)
 const gameConvas = document.getElementById('osnier') as HTMLElement;
 const { scene, camera, renderer } = initThreeJS(gameConvas);
 const UIRander = new UIRanderer(gameConvas);
-
-// UIRander.createHealthBar();
+UIRander.loadPlayer1Text("player1");
+UIRander.loadPlayer2Text("player2333flkdfdsf");
+UIRander.loadPlayer1Image("assets/image.png");
+UIRander.loadPlayer2Image("assets/image.png")
 UIRander.render();
-
 const keyControls = new KeyControls(camera, gameConvas);
+window.addEventListener('resize', () => {
+    console.log('resize');
+    let convasSize = gameConvas.getBoundingClientRect();
+    const width = convasSize.width;
+    const height = convasSize.height;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    UIRander.resize(width, height);
+    UIRander.render();
+    keyControls.recalibrateMouse();
+});
+
 const gClock = new gameClock(scene, camera, renderer);
 const connection = new Connection();
 connection.init(player2.id);

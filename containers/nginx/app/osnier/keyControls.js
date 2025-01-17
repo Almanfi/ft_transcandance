@@ -107,6 +107,9 @@ export class KeyControls extends Controls {
         }
         return { angle: this.angle, direction: this.direction.clone() };
     }
+    recalibrateMouse() {
+        this.convasRect = this.gameConvas.getBoundingClientRect();
+    }
     onMouseMove(event) {
         this.handled = false;
         event.preventDefault();
