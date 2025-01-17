@@ -18,9 +18,6 @@
     [ ] user must update image
     [ ] implement user game history
     [ ] check all TODOS inside files
-    [ ] when searching in users, don't show thoses that have some name as me
-    [ ] add notifications page
-    [ ] test responsive for notification
     [ ] enable update image in setting
     [ ] if friend in blocked list go back to user page
     [ ] in chat, if the id no longer in friend go back to home
@@ -30,7 +27,6 @@
     [ ] fix when searching form my profile to redirect me to user page
     [ ] replace all jsx imports with .js
     [ ] update user statistic
-    [ ] login with intra 42                             
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

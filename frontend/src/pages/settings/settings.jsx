@@ -45,7 +45,7 @@ function Settings() {
         console.log("settings response", res);
         // res = await api.getUser();
         console.table(res);
-        setShow(false);
+        Ura.navigate("/user");
       }
     } catch (err) {
       api.handleError(err)

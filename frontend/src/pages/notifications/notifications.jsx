@@ -76,6 +76,9 @@ function Notifications() {
   return render(() => (
     <root>
       <Navbar />
+      <h3>
+        Notifications [{getList().length}]
+      </h3>
       <div loop={getList()} className="notifications">
         {(e) => (
           <div className="data">
