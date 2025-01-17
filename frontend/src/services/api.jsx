@@ -445,7 +445,7 @@ function openSocket() {
       //   console.error("Maximum reconnection attempts reached.");
       // }
     };
-    webSocket.onerror = (err) => { handleError(err); };
+    webSocket.onerror = (err) => { };
   } else {
     console.log("WebSocket already exists.");
   }
@@ -650,7 +650,7 @@ export function openTournamentSocket(tournament_id)
 
 export function closeTournamentSocket()
 {
-  if (ppongTournamentSocket && pongTournamentSocket.readyState === WebSocket.OPEN) {
+  if (pongTournamentSocket && pongTournamentSocket.readyState === WebSocket.OPEN) {
     pongTournamentSocket.close()
     pongTournamentSocket= null
   }

@@ -1,8 +1,9 @@
 import Ura from 'ura';
-import { playGame, game_over, game_cancel } from './client.js';
+import { playGame, game_over, game_cancel } from '../pong/utils/client.js';
 import api from '../../services/api.jsx';
 import Navbar from '../../components/Navbar.jsx';
 import Toast from '../../components/Toast.jsx';
+import events from '../../services/events.js';
 
 // TODO: check query if is in friend and exsits etc ...
 function Game() {
@@ -196,13 +197,13 @@ function Game() {
   function handleGoToPongGame(e) {
     const data = JSON.parse(e.data);
     if (data['type'] === 'game.start') {
-      console.log("Both Players are in Lobby");
+      Ura.navigate("/pong");
+      events.emit("setPongData", data);
     }
   }
 
-  function handleGoToGameLobby(game_id)
-  {
-    const game_socket = api.openGameSocket(game_id );
+  function handleGoToGameLobby(game_id) {
+    const game_socket = api.openGameSocket(game_id);
     game_socket.onmessage = handleGoToPongGame;
   }
 
@@ -221,8 +222,7 @@ function Game() {
     }
   }
 
-  function handleTournamentLobby(e)
-  {
+  function handleTournamentLobby(e) {
     const data = JSON.parse(e.data);
     if (data['type'] === "game.lobby.start")
       handleGoToGameLobby(data['game_id']);
@@ -242,14 +242,14 @@ function Game() {
       }
     }
     else {
-      api.closePongTournamentSocket()
+      api.closePongTournamentMakingSocket()
     }
   }
   return render(() => (
     <root>
       <Navbar />
       {/* <h3>Game: {name}</h3> */}
-      <div if={getStart()} className="game" id="game-play">
+      {/* <div if={getStart()} className="game" id="game-play">
         <div id="menu">
           <button id="play-local" onclick={() => playGame("", undefined, true, false)}>Play Locally</button>
           <button id="play-local-ai" onclick={() => playGame("", undefined, true, true)}>Play vs AI</button>
@@ -258,13 +258,13 @@ function Game() {
   
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
-      </div>
+      </div> */}
       <div className="start">
         <div className="type" onclick={handleOpenMatchMaking}>
           <h3 if={!getMatchLoading()}>Match making </h3>
           <h1 if={getMatchLoading()}>Match making loading ... (clique to cancel)</h1>
         </div>
-  
+
         <div className="type" onclick={handleTournament}>
           <h3 if={!getTournLoading()}>Tournament </h3>
           <h1 if={getTournLoading()}>Tournament  loading ... (clique to cancel)</h1>

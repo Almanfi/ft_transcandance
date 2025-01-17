@@ -1,9 +1,12 @@
+// @ts-ignore
+import Ura from 'ura';
+
 import {
   Pong, INPUT_MOVE_UP, INPUT_MOVE_DOWN, INPUT_MOVE_NONE,
   GAME_WIDTH, GAME_HEIGHT, BALL_RADIUS, PADDLE_XOFFSET, PADDLE_XRADIUS, PADDLE_YRADIUS
 } from './pong.js';
 
-import api from '../../services/api.js';
+import api from '../../../services/api.js';
 
 function resizeCanvas(canvas: HTMLCanvasElement) {
   const dpr = window.devicePixelRatio;
@@ -231,6 +234,14 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
     };
 
     socket.onclose = (e) => {
+      if (game_started && !game_ending) {
+        game_ending = true;
+        game_ending_time = Date.now();
+        if (pong.ball_x < 0)
+            pong.score2++;
+        else
+          pong.score1++;
+      }
       console.log("[PONG SOCKET] DISCONNECTED ", e);
     };
   }
@@ -250,10 +261,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
 
   function showGame() {
     canvas.style.display = 'block';
-    {
-      const menu = document.getElementById("menu") as HTMLDivElement;
-      menu.style.display = 'none';
-    }
+
   }
   if (local)
       showGame();
@@ -472,6 +480,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
 
   function tick(timestamp: number) {
     resizeCanvas(canvas);
+    console.log("TICKING ", game_ending_time);
     if (socket !== undefined && game_started && socket.readyState == WebSocket.CLOSED)
         game_ending = true
     if (!local) {
@@ -482,13 +491,12 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
         if (socket !== undefined)
             socket.close();
         canvas.style.display = 'none';
-        {
-          const menu = document.getElementById("menu") as HTMLDivElement;
-          menu.style.display = 'block';
-        }
+
         game_over = true;
         if (!game_started)
           game_cancel = true;
+        console.log("EXITING!");
+        Ura.navigate("/game?name=pong")
         return ;
       }
     }

@@ -50,7 +50,7 @@ const fetchData = async (id) => {
     const user = await api.getUser();
     
     if (user.id === id) {
-      Ura.create(<Toast message="Invalid page" delay={0} />);
+      // Ura.create(<Toast message="Invalid page" delay={0} />);
       return Ura.navigate("/user");
     }
 

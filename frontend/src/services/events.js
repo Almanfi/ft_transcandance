@@ -36,6 +36,7 @@ const Allowed = [
   // "chat",
   "chat.message.retrieve",
   "chat.message",
+  "setPongData"
 ]
 
 const handlers = {

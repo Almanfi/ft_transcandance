@@ -30,6 +30,7 @@ import Notifications from "./notifications/notifications.js";
 import Settings from "./settings/settings.js";
 import History from "./history/history.js";
 import ChooseGame from "./chooseGame/chooseGame.js";
+import Pong from "./pong/pong.js";
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -45,6 +46,7 @@ Ura.setStyles([
   "/pages/settings/settings.css",
   "/pages/history/history.css",
   "/pages/chooseGame/chooseGame.css",
+  "/pages/pong/pong.css",
   /* components */
   "/components/Toast.css",
   "/components/Navbar.css",
@@ -67,6 +69,7 @@ Ura.onNavigate(() => {
       "/notifications": Notifications,
       "/settings": Settings,
       "/history": History,
+      "/pong": Pong,
       "/choosegame": ChooseGame
     });
   }

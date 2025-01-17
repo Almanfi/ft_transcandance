@@ -43,7 +43,7 @@ class TournamentSerializer(serializers.Serializer):
 	def create_tournament_finals(self, users):
 		users = parse_uuid(users)
 		users = User.fetch_users_by_id(users)
-		Game.create_tournament_games(users, self.instance, TOURNAMENT_PHASE[3][0])
+		Game.create_tournament_games(users, self.instance, TOURNAMENT_PHASE[3][0], self.data['genre'])
 		tournament :Tournament = self.instance
 		tournament.switch_phase(TOURNAMENT_PHASE[3][0])
 
