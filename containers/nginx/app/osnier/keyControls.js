@@ -20,6 +20,8 @@ export class Controls {
 export class KeyControls extends Controls {
     mouse;
     camera;
+    gameConvas;
+    convasRect;
     Wkey;
     Akey;
     Skey;
@@ -34,7 +36,7 @@ export class KeyControls extends Controls {
     move;
     action;
     handled;
-    constructor(camera, props = {}) {
+    constructor(camera, gameConvas, props = {}) {
         super();
         Object.assign(this, {
             Wkey: { press: null, pressVal: false, hold: false, release: null, releaseVal: false },
@@ -51,6 +53,8 @@ export class KeyControls extends Controls {
         if (!camera)
             throw new Error('KeyControls: camera is required');
         this.camera = camera;
+        this.gameConvas = gameConvas;
+        this.convasRect = this.gameConvas.getBoundingClientRect();
         this.angle = 0;
         this.direction = new THREE.Vector3(0, 0, 0);
         this.move = { x: 0, y: 0 };
@@ -106,8 +110,9 @@ export class KeyControls extends Controls {
     onMouseMove(event) {
         this.handled = false;
         event.preventDefault();
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        const rect = this.convasRect;
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     }
     speedVector(frontVector) {
         var speedVect = new THREE.Vector3(0, 0, 0);
@@ -130,8 +135,8 @@ export class KeyControls extends Controls {
         return value;
     }
     keydownListener() {
-        window.addEventListener('mousemove', this.onMouseMove.bind(this));
-        window.addEventListener('mousedown', (e) => {
+        this.gameConvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.gameConvas.addEventListener('mousedown', (e) => {
             if (!this.Lclick.hold)
                 this.handled = false;
             this.Lclick.pressVal = true;
@@ -188,7 +193,7 @@ export class KeyControls extends Controls {
         });
     }
     keyupListener() {
-        window.addEventListener('mouseup', (e) => {
+        this.gameConvas.addEventListener('mouseup', (e) => {
             this.handled = false;
             this.Lclick.releaseVal = true;
             this.Lclick.hold = false;

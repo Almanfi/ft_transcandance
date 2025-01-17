@@ -9,7 +9,7 @@ import { Connection } from './connection.js';
 import { UIRanderer } from './UIRanderer.js';
 import { getGame, getUser } from './utils.js';
 // import { CSS2DObject, CSS2DRenderer } from './node_modules/three/examples/jsm/renderers/CSS2DRenderer.js';
-function initThreeJS() {
+function initThreeJS(gameConvas) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200000);
     // camera.position.set(0, 100000, 0);
@@ -18,7 +18,7 @@ function initThreeJS() {
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio * 1);
-    let gameConvas = document.body.appendChild(renderer.domElement);
+    let Convas = gameConvas.appendChild(renderer.domElement);
     const light = new THREE.AmbientLight(0xffffff);
     light.intensity = 0.5;
     scene.add(light);
@@ -49,11 +49,12 @@ console.log('user: ', user, ' foe: ', player2);
 let playersPos = [new THREE.Vector3(12000, 0, 0), new THREE.Vector3(-12000, 0, 0)];
 if (user.id === users[1].id)
     playersPos = [new THREE.Vector3(-12000, 0, 0), new THREE.Vector3(12000, 0, 0)];
-const UIRander = new UIRanderer();
+const gameConvas = document.getElementById('osnier');
+const { scene, camera, renderer } = initThreeJS(gameConvas);
+const UIRander = new UIRanderer(gameConvas);
 // UIRander.createHealthBar();
 UIRander.render();
-const { scene, camera, renderer } = initThreeJS();
-const keyControls = new KeyControls(camera);
+const keyControls = new KeyControls(camera, gameConvas);
 const gClock = new gameClock(scene, camera, renderer);
 const connection = new Connection();
 connection.init(player2.id);
