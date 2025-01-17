@@ -19,12 +19,12 @@ const NewFriendInvitation = async () => {
       accept: async () => {
         try { await api.acceptInvitation(e.invite_id) }
         catch (error) { api.handleError(error) }
-        // Ura.refresh();
+        Ura.refresh();
       },
       refuse: async () => {
         try { await api.refuseInvitation(e.invite_id) }
         catch (error) { api.handleError(error) }
-        // Ura.refresh();
+        Ura.refresh();
       }
     })))
 

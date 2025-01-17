@@ -16,83 +16,17 @@ const [render, State] = Ura.init();
 const [getNotif, setNotif] = State([])
 // keep outside, used to show searches
 const [getList, setList] = State([]);
+const [getShow, setShow] = State(false);
 
-const updateNavbar = async () => {
-  try {
-    let res = [];
-    if (getCookie("id_key")) {
-      const friends = await api.getInvited();
-      console.log("call update handler", friends);
-      res = friends.map(e => ({
-        type: "friendship",
-        content: `friendship request from ${e.display_name}`,
-        accept: async () => {
-          try {
-            await api.acceptInvitation(e.invite_id)
-          } catch (error) {
-            api.handleError(error)
-          }
-          // updateNavbar();
-          // events.emitChildren("friendship_received")
-          Ura.refresh();
-        },
-        refuse: async () => {
-          try {
-            await api.refuseInvitation(e.invite_id)
-          } catch (error) {
-            api.handleError(error)
-          }
-          // updateNavbar();
-          // events.emitChildren("friendship_received")
-          Ura.refresh();
-        }
-      }))
-    }
-    setNotif(res);
-  } catch (error) {
-    api.handleError(error);
-  }
-}
 
-const addMessageNotification = async (data) => {
-  data = data[0];
-  const curr = await api.getUser();
-  const { id } = Ura.getQueries()
-  console.log("current id:", id);
-  console.log("current route", Ura.getCurrentRoute());
-  console.log("from:", data);
-  console.log("curr:", curr.id);
-
-  if (data.status !== 'sent') {
-    try {
-      const user = await api.getUsersById([data.from]);
-      let res = {
-        type: "message",
-        content: `New message from ${user[0].display_name}`,
-        accept: () => navigate(`/chat?id=${user[0].id}`),
-        refuse: () => { },
-      }
-      setNotif([
-        ...getNotif(),
-        res
-      ])
-      // Ura.refresh();
-
-    } catch (error) {
-      api.handleError(error)
-    }
-    console.error("received message");
-  }
-}
 
 const handleShowNotif = () => {
   navigate("/notifications")
+  setShow(false)
 };
 
-function Navbar() {
-  // events.addChild("friendship", "Navbar.updateNavbar", updateNavbar);
-  // handleShowNotif();
 
+function Navbar() {
 
   const search = async (e) => {
     e.preventDefault();
@@ -121,10 +55,6 @@ function Navbar() {
     api.logout();
   }
 
-  function toggleMenu() {
-    let menuList = document.getElementsByClassName("menuList")[0];
-    menuList.classList.toggle("show");
-  }
 
   return render(() => (
     <div className="navbar">
@@ -157,26 +87,21 @@ function Navbar() {
         </ul> */}
 
         <li className="list">
-          <ul className="menuList" >
-            <a if={getCookie("id_key")}
-              className="see-notif"
-              onclick={handleShowNotif}>Notifications</a>
-            <a if={getCookie("id_key")}
-              className="go-notif" >Go to Notifications</a>
-            <a if={!getCookie("id_key")}
-              onclick={() => navigate("/login")}>
+          <ul className={`menuList ${getShow() ? "show" : ""}`} >
+            <a if={getCookie("id_key")} className="see-notif" onclick={handleShowNotif}>Notifications</a>
+            <a if={!getCookie("id_key")} onclick={() => { setShow(!getShow()), navigate("/login") }}>
               Login
             </a>
-            <a if={!getCookie("id_key")} onclick={() => navigate("/login")}>
+            <a if={!getCookie("id_key")} onclick={() => { setShow(!getShow()), navigate("/signup") }}>
               Sign up
             </a>
-            <a if={getCookie("id_key")} onclick={handleLogout} >
+            <a if={getCookie("id_key")} onclick={() => { setShow(!getShow()), handleLogout() }} >
               Logout
             </a>
           </ul>
         </li>
-        <div className="menu-icon" onclick={toggleMenu}>
-          <i className="fa-solid fa-bars">+</i>
+        <div className="menu-icon" onclick={()=>setShow(!getShow())}>
+          <i >+</i>
         </div>
       </nav>
     </div>

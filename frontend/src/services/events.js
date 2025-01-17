@@ -28,7 +28,7 @@
 
 import Ura from "ura";
 import api from "./api.js";
-import Toast from "../components/Toast.jsx";
+import Toast from "../components/Toast.js";
 
 const Allowed = [
   "friendship_received",

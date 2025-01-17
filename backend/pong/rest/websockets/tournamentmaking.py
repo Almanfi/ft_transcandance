@@ -12,7 +12,7 @@ class TournamentMakingSocket(WebsocketConsumer):
 			return self.close(93, "No User given")
 		try:
 			user: UserSerializer  = self.scope['user']
-			user.enter_lobby()
+			# user.enter_lobby()
 			super().connect()
 			self.join_tournament_making()
 		except UserExceptions as e:
@@ -44,7 +44,7 @@ class TournamentMakingSocket(WebsocketConsumer):
 
 	def close(self, code=None, reason=None):
 		if self.scope['user'] != None:
-			self.scope['user'].connect()
+			# self.scope['user'].connect()
 			self.scope['user'] = None
 		response = {}
 		if code != None:

@@ -1,14 +1,4 @@
 + Trancedence:
-    [*] Landing Page
-    [ ] sign in:
-        [*] normal auth
-        [ ] use intra
-        [ ] Google auth
-    [ ] Sign up:
-        [*] uplaod images
-        [ ] choose avatar
-        [ ] use intra
-        [ ] Google auth
     [ ] user page
     [ ] friend page
     [ ] game page

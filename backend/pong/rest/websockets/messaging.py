@@ -15,18 +15,18 @@ class MessagingSocket(WebsocketConsumer):
 		self.room_group_name = self.scope['user'].data['id']
 		self.groups.append(self.room_group_name)
 		async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
-		self.scope['user'] = self.scope['user'].connect()
+		# self.scope['user'] = self.scope['user'].connect()
 		return super().connect()
 	
 	def close(self, code=None, reason=None):
 		if self.scope['user'] != None:
-			self.scope['user'].disconnect()
+			# self.scope['user'].disconnect()
 			self.scope['user'] = None
 		return super().close(10, reason)
 
 	def disconnect(self, code = None):
 		if self.scope['user'] != None:
-			self.scope['user'].disconnect()
+			# self.scope['user'].disconnect()
 			self.scope['user'] = None
 		return super().disconnect(code)
 	

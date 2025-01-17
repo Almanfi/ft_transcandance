@@ -263,17 +263,21 @@ function createDOM(vdom): VDOM {
 function removeProps(vdom: VDOM) {
   const props = vdom.props;
   Object.keys(props || {}).forEach((key) => {
-    if (key.startsWith("on")) {
-      const eventType = key.slice(2).toLowerCase();
-      vdom.dom.removeEventListener(eventType, props[key]);
-    } else if (key === "style") {
-      Object.keys(props.style || {}).forEach((styleProp) => {
-        vdom.dom.style[styleProp] = "";
-      });
-    } else if (vdom.dom) {
-      if (vdom.dom[key] !== undefined) delete vdom.dom[key];
-      else vdom.dom.removeAttribute(key);
+    if (vdom.dom) {
+      if (key.startsWith("on")) {
+        const eventType = key.slice(2).toLowerCase();
+        vdom.dom.removeEventListener(eventType, props[key]);
+      } else if (key === "style") {
+        Object.keys(props.style || {}).forEach((styleProp) => {
+          vdom.dom.style[styleProp] = "";
+        });
+      } else if (vdom.dom) {
+        if (vdom.dom[key] !== undefined) delete vdom.dom[key];
+        else vdom.dom.removeAttribute(key);
+      }
     }
+    else
+      delete props[key];
   });
   vdom.props = {};
 }
@@ -585,7 +589,7 @@ export function navigate(route, params = {}) {
   console.log("navigate to", route, "with", params);
 
   window.history.pushState({}, "", `${route}`);
-  
+
   return refresh(params);
 }
 

@@ -9,8 +9,6 @@ $blue4: var(--blue4);
 
 $black4: var(--black4);
 
-
-
 .login {
   width: 100%;
   height: 100%;
@@ -79,15 +77,32 @@ $black4: var(--black4);
         display: flex;
         justify-content: center;
         align-items: center;
+        gap: 20px;
         button {
-          @include global.button-styles($red4, transparent);
+          color: $red4;
+          background-color: transparent;
+          border: 1px solid $red4;
+          &:hover {
+            color: transparent;
+            background-color: $red4;
+            border: 1px solid $red4;
+            text {
+              color: blue;
+            }
+          }
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+
           padding: 15px;
           border-radius: 10px;
           svg path {
             fill: $black4;
           }
           svg {
-            width: 100px;
+            // width: 100px;
             // height: 100%;
           }
           &:hover {

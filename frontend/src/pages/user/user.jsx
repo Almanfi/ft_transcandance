@@ -3,7 +3,6 @@ import Navbar from '../../components/Navbar.js';
 import Swords from '../../components/icons/Swords.js';
 import WinCup from '../../components/icons/WinCup.js';
 import Award from '../../components/icons/Award.js';
-import Settings from './utils/settings.js';
 import api from '../../services/api.js';
 import Relations from './utils/relations.js';
 import OpenGame from './utils/openGame.js';
@@ -37,13 +36,12 @@ function User() {
     <root>
       <Navbar />
       <div if={getLoading() === true} className="user" >
-        <Settings Show={Show} userData={userData} />
         <div id="center" >
           <div className="user-card">
             <div className="img-container">
               <img
                 src={`${api.endpoint}${getUserData().profile_picture}`}
-                onclick={() => Show[1](true)} />
+                onclick={() => Ura.navigate("/settings")} />
             </div>
             <div className="name">
               <h3>

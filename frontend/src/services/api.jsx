@@ -1,5 +1,5 @@
 import Ura from "ura";
-import Toast from "../components/Toast.jsx";
+import Toast from "../components/Toast.js";
 import events from "./events.js";
 
 const endpoint = "https://" + window.location.hostname + ":8000";
@@ -120,16 +120,17 @@ async function getPicture(pathname) {
 async function updateUser(data) {
   const response = await fetch(`${endpoint}/users/`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(data),
+    body: data,
   });
   if (response.ok) {
   } else {
     const body = await response.json();
+    console.error(body);
     throw body;
   }
 }
+// a1d00901-1b8e-4d62-9a48-13c1a318a8d1
 
 async function deleteUser() {
   const response = await fetch(`${endpoint}/users/`, {
@@ -137,8 +138,13 @@ async function deleteUser() {
     credentials: "include",
   });
   if (response.ok) {
+    const out = await response.json();
+    console.log("success deleting", out);
+    Ura.rmCookie("id_key");
+    logout();
   } else {
     const body = await response.json();
+    console.error("error deleting", body);
     throw body;
   }
 }
@@ -379,6 +385,7 @@ function handleError(err) {
 }
 
 function logout() {
+  closeSockets();
   Ura.rmCookie("id_key");
   Ura.navigate("/home");
   window.location.reload();
@@ -426,39 +433,17 @@ function openSocket() {
           break;
       }
 
-
-      // switch (data.type) {
-      //   case "friendship_received": {
-
-      //     // return Events[data.type](data);
-      //     break;
-      //   }
-      //   case "chat.message": {
-      //     // if (Events[data.type]) return Events[data.type](data);
-      //     break;
-      //   }
-      //   case "chat.message.retrieve": {
-      //     // if (Events[data.type]) return Events[data.type](data);
-      //     break
-      //   }
-      //   case "game_invite": {
-      //     // if (Events[data.type]) return Events[data.type](data);
-      //     break
-      //   }
-      //   default:
-      //     break;
-      // }
     };
 
     webSocket.onclose = (event) => {
       console.error("WebSocket connection closed. Reconnecting...");
       // Events = {};
       webSocket = null;
-      if (conRetries < 3) {
-        setTimeout(() => { conRetries++; openSocket(); }, 3000);
-      } else {
-        console.error("Maximum reconnection attempts reached.");
-      }
+      // if (conRetries < 3) {
+      //   setTimeout(() => { conRetries++; openSocket(); }, 3000);
+      // } else {
+      //   console.error("Maximum reconnection attempts reached.");
+      // }
     };
     webSocket.onerror = (err) => { handleError(err); };
   } else {
@@ -632,6 +617,18 @@ export function openTournamentMakingSocket() {
   tournamentMakingSocket.onclose = (e) => { console.log("Matchmaking Socket Quit") }
 }
 
+function closeSockets() {
+  webSocket?.close();
+  gameSocket?.close();
+  matchmakingSocket?.close();
+  tournamentMakingSocket?.close();
+
+  webSocket = null;
+  gameSocket = null;
+  matchmakingSocket = null;
+  tournamentMakingSocket = null;
+}
+
 const api = {
   endpoint,
   signup,
@@ -675,6 +672,7 @@ const api = {
   openTournamentMakingSocket,
 
   websocketApi,
+  closeSockets
 };
 
 export default api;

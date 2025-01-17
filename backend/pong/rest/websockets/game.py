@@ -13,7 +13,7 @@ class GameSocket(WebsocketConsumer):
 			return self.close(82, "No Valid connection cookie given")
 		try:
 			game:GameSerializer = InviteSerializer.connect_to_game([game_id], self.scope['user'])
-			self.scope['user'] = self.scope['user'].enter_lobby()
+			# self.scope['user'] = self.scope['user'].enter_lobby()
 			self.scope['game_id'] = game_id
 			self.room_group_name = str( game.data['id'] )
 			self.groups.append(self.room_group_name)
@@ -26,14 +26,14 @@ class GameSocket(WebsocketConsumer):
 	
 	def close(self, code=None, reason=None):
 		if self.scope['user'] != None:
-			self.scope['user'].connect()
+			# self.scope['user'].connect()
 			self.scope['user'] = None
 		return super().close(None, None)
 
 	def disconnect(self, code = None):
 		self.handle_game_quit()
 		if self.scope['user'] != None:
-			self.scope['user'].connect()
+			# self.scope['user'].connect()
 			self.scope['user'] = None
 		return super().disconnect(code)
 	

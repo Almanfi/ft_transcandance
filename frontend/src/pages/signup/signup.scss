@@ -1,4 +1,3 @@
-
 @mixin button-styles($color0, $color1) {
   color: $color0;
   background-color: $color1;
@@ -43,6 +42,7 @@ $black4: var(--black4);
       min-width: 300px;
       display: flex;
       flex-direction: column;
+      gap: 10px;
       // justify-content: space-between;
 
       border: 1px solid $blue2;
@@ -62,7 +62,6 @@ $black4: var(--black4);
       }
 
       .file-input-label {
-  
         display: flex;
         align-items: center;
         justify-content: left;
@@ -74,7 +73,7 @@ $black4: var(--black4);
         // width: 100px;
 
         // display: inline-block;
-        background-color:var(--red2);  /* Green background */
+        background-color: var(--red2); /* Green background */
         border: 1px solid var(--red2);
         color: var(--red0);
         font-weight: bold;
@@ -82,19 +81,19 @@ $black4: var(--black4);
         transition: background-color 0.3s ease, transform 0.2s ease;
         border-radius: 6px;
 
-        &:hover{
+        &:hover {
           background-color: var(--red0);
           color: var(--red2);
         }
       }
-      
+
       #input-section {
         flex: 4;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         gap: 12px;
-      
+
         input[type="text"],
         input[type="password"] {
           font-size: 14px;
@@ -110,8 +109,20 @@ $black4: var(--black4);
         display: flex;
         justify-content: center;
         align-items: center;
+        gap: 20px;
+
         button {
-          @include button-styles($red4, transparent);
+          color: $red4;
+          background-color: transparent;
+          border: 1px solid $red4;
+          &:hover {
+            color: transparent;
+            background-color: $red4;
+            border: 1px solid $red4;
+            text {
+              color: blue;
+            }
+          }
           padding: 15px;
           border-radius: 10px;
           svg path {

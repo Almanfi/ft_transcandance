@@ -1,15 +1,13 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.jsx";
-import Arrow from "../../components/icons/Arrow.jsx";
+import Navbar from "../../components/Navbar.js";
+import Arrow from "../../components/icons/Arrow.js";
 // import Toast from "../../components/Toast.js";
-import Input from "../../components/Input.jsx";
+import Input from "../../components/Input.js";
 import api from "../../services/api.js";
+import Ft from "../../components/icons/ft.js";
+import { truncateString } from "../../services/utils.js";
 // import Home from "../home/home.js";
 
-function truncateString(str) {
-  if (str.length > 17) return str.substring(0, 14) + '...';
-  return str;
-}
 
 function Signup() {
   const [render, State] = Ura.init();
@@ -29,12 +27,12 @@ function Signup() {
     const section = document.querySelector(".signup #center #input-section");
     const inputs = section.querySelectorAll("input");
     const data = {};
-    inputs.forEach((input) => {
-      if (input.value.length) data[input.name] = input.value
-      else throw ({ message: `empty ${input.name} field` });
-    });
 
     try {
+      inputs.forEach((input) => {
+        if (input.value.length) data[input.name] = input.value
+        else throw ({ message: `empty ${input.name} field` });
+      });
       if (data.password !== data.confirm_password)
         throw ({ message: "password and confirm password are incompatibe" })
       else {
@@ -45,7 +43,7 @@ function Signup() {
         });
         const image = getImage();
         if (image && image instanceof File) {
-          formData.append("profile_picture", image, "random.png");
+          formData.append("profile_picture", image, getPath());
         }
         await api.signup(formData);
         Ura.navigate("/login");
@@ -77,6 +75,9 @@ function Signup() {
             <div id={"button-section"}>
               <button id="btn" type="submit">
                 <Arrow />
+              </button>
+              <button onclick={() => window.location.href = "https://localhost:8000/oauth/42/"} type="button">
+                <Ft />
               </button>
             </div>
             <h4 id="signin" onclick={() => Ura.navigate("/login")}>

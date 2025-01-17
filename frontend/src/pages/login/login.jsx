@@ -1,10 +1,10 @@
 import Ura from "ura";
-import Navbar from "../../components/Navbar.jsx";
-import Arrow from "../../components/icons/Arrow.jsx";
-import Input from "../../components/Input.jsx";
+import Navbar from "../../components/Navbar.js";
+import Arrow from "../../components/icons/Arrow.js";
+import Input from "../../components/Input.js";
 // import Toast from "../../components/Toast.js";
 import api from "../../services/api.js";
-import Ft from "../../components/ft/ft.js";
+import Ft from "../../components/icons/ft.js";
 // import Home from "../home/home.js";
 
 
@@ -21,7 +21,7 @@ function Login() {
       const data = {};
       inputs.forEach((input) => {
         if (input.value.length) data[input.name] = input.value
-        else throw `empty ${input.name} field`;
+        else throw ({message:`empty ${input.name} field`})
       });
       await api.login(data);
       Ura.navigate("/home");
@@ -41,13 +41,12 @@ function Login() {
               <Input value="username" />
               <Input value="password" />
             </div>
-            <div id={"button-section"}>
-              <button id="btn" type="submit">
+            <div id="button-section">
+              <button type="submit">
                 <Arrow />
               </button>
-              <button>
-                <Ft/>
-                {/* 42 login */}
+              <button onclick={() => window.location.href = "https://localhost:8000/oauth/42/"} type="button">
+                <Ft />
               </button>
             </div>
             <h4 id="signin" onclick={() => Ura.navigate("/signup")}>Don't have an account?</h4>

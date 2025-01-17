@@ -36,7 +36,7 @@ class TournamentSocket(WebsocketConsumer):
 			self.tournament_id = str(tournament_id)
 			self.room_group_name = self.tournament_id
 			TournamentLobby().connect_user_to_lobby(self.tournament_id, user.data['id'])
-			user.enter_lobby()
+			# user.enter_lobby()
 			super().connect()
 			async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
 			self.send(text_data=json.dumps({"type": "lobby.matches", "matches": invites.data}))
@@ -47,7 +47,7 @@ class TournamentSocket(WebsocketConsumer):
 	def close(self, code=None, reason=None):
 		async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.quit", "player": self.scope['user'].data})
 		if self.scope['user'] != None:
-			self.scope['user'].connect()
+			# self.scope['user'].connect()
 			self.scope['user'] = None
 		response = {}
 		if code != None:

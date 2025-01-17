@@ -27,6 +27,7 @@ import Friend from "./friend/friend.js";
 import api from "../services/api.js";
 import Game from "./game/game.js";
 import Notifications from "./notifications/notifications.js";
+import Settings from "./settings/settings.js";
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -39,13 +40,16 @@ Ura.setStyles([
   "/pages/friend/friend.css",
   "/pages/game/game.css",
   "/pages/notifications/notifications.css",
+  "/pages/settings/settings.css",
   /* components */
   "/components/Toast.css",
   "/components/Navbar.css",
 ]);
 
 Ura.onNavigate(() => {
+  // console.error("exists:", Ura.getCookie("id_key"));
   if (Ura.getCookie("id_key")) {
+
     api.openSocket();
 
     Ura.setRoutes({
@@ -56,12 +60,13 @@ Ura.onNavigate(() => {
       "/friend": Friend,
       "/game": Game,
       "/friend": Friend,
-      "/notifications": Notifications
+      "/notifications": Notifications,
+      "/settings": Settings
     });
   }
   else {
-
     Ura.rmCookie("id_key");
+    api.closeSockets();
 
     Ura.setRoutes({
       "*": Login,

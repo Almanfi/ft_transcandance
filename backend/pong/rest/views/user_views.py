@@ -179,10 +179,10 @@ class UserInfo(ViewSet):
 		(deletion_info, deleted_users)= User.remove_users(users_ids)
 		if (deletion_info[0] <= 0):
 			return Response({"message": "No user to be deleted", "error_code": 116}, status=status.HTTP_400_BAD_REQUEST)
-		deleted_users = UserSerializer(deleted_users, many=True)
-		for user in deleted_users.data:
-			if 'profile_picture' in user and not user['profile_picture'] == "profile.jpg":
-				os.remove(f"{users_images_path()}/{user["profile_picture"]}")
+		# deleted_users = UserSerializer(deleted_users, many=True)
+		# for user in deleted_users.data:
+		# 	if 'profile_picture' in user and not user['profile_picture'] == "profile.jpg":
+		# 		os.remove(f"{users_images_path()}/{user["profile_picture"]}")
 		return Response({"message": "User deleted sucessfully"} ,status=status.HTTP_200_OK)
 
 # Create your views here.
