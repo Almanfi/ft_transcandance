@@ -48,7 +48,7 @@ const [getAction, setAction] = State({ invite_id: "", action: "" });
 const fetchData = async (id) => {
   try {
     const user = await api.getUser();
-    
+
     if (user.id === id) {
       // Ura.create(<Toast message="Invalid page" delay={0} />);
       return Ura.navigate("/user");
@@ -59,6 +59,9 @@ const fetchData = async (id) => {
       Ura.create(<Toast message="Invalid user" delay={0} />);
       return Ura.navigate("/home");
     }
+
+    const stats = await api.getStats();
+    res[0].stats = [{ title: "Played Games", pong: stats.stats[0], osnier: stats.stats[1] }, { title: "Winrate", pong: stats.stats[2], osnier: stats.stats[3] }]
 
     const action = await determineAction(id);
     setAction(action);
@@ -141,34 +144,16 @@ function Friend() {
           </div>
         </div>
         <div id="bottom">
-          <div loop={[Swords, Award, WinCup]} id="games">
-            {(Elem) => (
+          <div loop={getUser().stats} id="games">
+            {(e) => (
               <div id="history">
-                <h4 id="title"><Elem />Games</h4>
+                <h4 id="title">{e.title}</h4>
                 <div className="children">
-                  <div className="child"><o>42%</o><h4>Pongers</h4></div>
-                  <div className="child"><o>42%</o><h4>Pongers</h4></div>
+                  <div className="child"><o>{e.pong}</o><h4>Pongers</h4></div>
+                  <div className="child"><o>{e.osnier}</o><h4>Osnier</h4></div>
                 </div>
               </div>
             )}
-          </div>
-          <div id="friends">
-            {/* <loop className="inner" on={getList()}>
-            {(e, i) => (
-              <div className="card" key={i}>
-                <div className="content">
-                  <div className="up">
-                    <img src={e.src} onclick={() => Ura.navigate("/friend")} />
-                    <h4>{e.title}</h4>
-                  </div>
-                  <div className="down">
-                    <span onclick={() => Ura.navigate("/chat")} ><Chat /></span>
-                    <span><Play /></span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </loop> */}
           </div>
         </div>
       </div>

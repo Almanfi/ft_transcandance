@@ -1,11 +1,7 @@
 import Ura from 'ura';
 import Navbar from '../../components/Navbar.js';
-import Swords from '../../components/icons/Swords.js';
-import WinCup from '../../components/icons/WinCup.js';
-import Award from '../../components/icons/Award.js';
 import api from '../../services/api.js';
 import Relations from './utils/relations.js';
-import OpenGame from './utils/openGame.js';
 
 function User() {
   const [render, State] = Ura.init();
@@ -73,10 +69,6 @@ function User() {
           </div>
           <Relations />
         </div>
-{/* 
-        <div>
-          <OpenGame />
-        </div> */}
       </div>
     </root>
   ));
