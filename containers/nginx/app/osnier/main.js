@@ -75,7 +75,7 @@ const gClock = new gameClock(scene, camera, renderer);
 const connection = new Connection();
 connection.init(player2.id);
 connection.attatchGameStart(startGame);
-const musicSyncer = new MusicSync(camera);
+const musicSyncer = new MusicSync(camera, signalEndGame);
 musicSyncer.loadMusic('assets/No_title.mp3');
 musicSyncer.addMusicMap(musicMap);
 const bulletSound = musicSyncer.loadNewSound('assets/a6.mp3');
@@ -283,9 +283,9 @@ var animate = (span, timeStamp) => {
     foe.update(span, timeStamp, timeStamp);
     foeBulletM.update(timeStamp);
     let beat = musicSyncer.findCurrentBeat();
-    if (beat)
-        turret.sync(beat);
-    turretBulletM.update(timeStamp);
+    // if (beat)
+    //     turret.sync(beat);
+    // turretBulletM.update(timeStamp);
     if (justRolledBack) {
         // console.log('(just rolled back) after animete at time', timeStamp + span, ' postion: ', foe.position);
         // console.log("plane vector: ", JSON.stringify(foe.planeFacingVector));
@@ -377,8 +377,6 @@ function signalEndGame(timeStamp) {
     }
     else
         setTimeout(() => {
-            if (player.health > 0 && foe.health > 0)
-                return;
             stopRoutine();
         }, 100);
 }

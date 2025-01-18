@@ -448,11 +448,8 @@ function signalEndGame(timeStamp: number) {
         stopRoutine();
     }
     else setTimeout(() => {
-        if (player.health > 0 && foe.health > 0)
-            return ;
         stopRoutine();
     }, 100);
-    
 }
 
 function setPlaneVector(camera: THREE.Camera, player: Player, foe: Player) {

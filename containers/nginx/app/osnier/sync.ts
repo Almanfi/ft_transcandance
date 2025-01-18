@@ -141,6 +141,7 @@ export class MusicSync {
             this.music.setBuffer( buffer );
             // this.music.setLoop( true );
             this.music.setVolume( 0.5 );
+            this.music.loop = true;
             this.music.play();
             this.startTime = new Date().valueOf();
             // this.musicPlaying = true;
@@ -148,10 +149,6 @@ export class MusicSync {
             if (this.music.source) {
                 this.music.source.connect(this.analyser);
                 this.music.source.onended = (e) => {
-                    console.log("music ended");
-                    // this.musicPlaying = false;
-                    console.log(this.beat);
-                    // this.keepFiring = false;
                 }
             }
                 

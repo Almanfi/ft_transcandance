@@ -201,6 +201,7 @@ export class Player extends THREE.Object3D {
     };
 
     reset() {
+        this.hits.clear();
         this.inputs.reset();
         this.lastFire = 0;
         this.position.copy(this.initPosition);

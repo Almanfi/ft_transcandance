@@ -162,6 +162,7 @@ export class Player extends THREE.Object3D {
     }
     ;
     reset() {
+        this.hits.clear();
         this.inputs.reset();
         this.lastFire = 0;
         this.position.copy(this.initPosition);
@@ -198,8 +199,6 @@ export class Player extends THREE.Object3D {
         this.UiRenderer = uiRenderer;
     }
     takeDamage(damage, timeStamp, scope = "animate") {
-        // if (!this.alive)
-        //     return;
         if (scope === "animate")
             this.gotHit(timeStamp);
         else if (scope === "rollback")
@@ -212,7 +211,6 @@ export class Player extends THREE.Object3D {
             console.log('player died: ', this.name);
             this.signalEndGame(timeStamp);
         }
-        console.log(`${scope},${this.name} health: `, this.health, "got hit at time: ", timeStamp);
         if (this.name === 'player')
             this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
         else if (this.name === 'foe')
