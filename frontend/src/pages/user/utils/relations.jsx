@@ -178,7 +178,7 @@ function Relations() {
                   src={`${api.endpoint}${parent.profile_picture}`}
                   onclick={() => navigate(`/friend?id=${parent.id}`)}
                 />
-                <h4>{parent.username}</h4>
+                <h4>{parent.display_name}</h4>
               </div>
               <div loop={Object.keys(getEvents())} className="down">
                 {(key) => (

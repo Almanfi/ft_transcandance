@@ -241,6 +241,7 @@
       }
 
       .inner {
+        gap: 5px;
         flex: 1;
         /* background-color: red; */
         display: grid;
