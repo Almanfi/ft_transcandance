@@ -7,6 +7,14 @@ urlpatterns = [
         # "patch": "end_game"
         })
     ),
+    path("stats/", GameView.as_view({
+        'get': "game_stats"
+        })
+    ),
+    path("history/", GameView.as_view({
+        'get': "games_history"
+        })
+    ),
 	path('pong/', GameView.as_view({
 		'post': "create_pong_game",
 		})

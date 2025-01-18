@@ -1,9 +1,6 @@
 import Ura from 'ura';
 import Navbar from '../../components/Navbar.js';
-import list from './games.js';
-import api from '../../services/api.jsx';
-
-
+import api from '../../services/api.js';
 
 function History(props = {}) {
   const [render, State] = Ura.init();

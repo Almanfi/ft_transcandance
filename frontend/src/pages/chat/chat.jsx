@@ -16,7 +16,7 @@ const handleMessages = async () => {
     setMe(await api.getUser());
 
     const friends = await api.getFriends();
-    setFriends(friends.map(({ id, profile_picture, status, username }) => ({ id, profile_picture, status, username })));
+    setFriends(friends.map(({ id, profile_picture, status, display_name }) => ({ id, profile_picture, status, display_name })));
 
     const { id } = Ura.getQueries() || {};
     if (id) {
@@ -40,7 +40,7 @@ events.add("chat.message.retrieve", (param) => {
   let data = param[0];
   data.messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   setConv(data.messages.map((e) =>
-    ({ id: e.sender.id, username: e.sender.username, content: e.content })));
+    ({ id: e.sender.id, display_name: e.sender.display_name, content: e.content })));
 });
 
 events.add("chat.message", (param) => {
@@ -49,7 +49,7 @@ events.add("chat.message", (param) => {
   if (data.status === "sent") { // sent
     const res = {
       id: getMe().id,
-      username: getMe().username,
+      display_name: getMe().display_name,
       content: data.message
     }
     setConv([...getConv(), res])
@@ -57,7 +57,7 @@ events.add("chat.message", (param) => {
   else { // received
     const res = {
       id: getUser().id,
-      username: getUser().username,
+      display_name: getUser().display_name,
       content: data.message
     }
     setConv([...getConv(), res])
@@ -120,7 +120,7 @@ function Chat() {
             {/* friends to start chat with */}
             {(e, i) => (
               <div onclick={() => SelectConv(e, i)} className={`${e.id === getUser().id ? "selected" : ""}`}>
-                <h4>{e.username}</h4>
+                <h4>{e.display_name}</h4>
               </div>
             )}
           </div>
@@ -139,7 +139,7 @@ function Chat() {
                 else navigate(`/friend?id=${e.id}`)
               }}>
                 <p>
-                  <l>{e.id === getMe().id ? `me` : e.username}</l>: {e.content}
+                  <l>{e.id === getMe().id ? `me` : e.display_name}</l>: {e.content}
                 </p>
               </div>
             )}

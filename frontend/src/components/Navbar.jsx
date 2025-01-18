@@ -18,7 +18,9 @@ function Navbar() {
 
   (async () => {
     const res = await api.getUser()
-    setUserName(res.username)
+    console.log("response is:", res);
+    
+    setUserName(res.display_name)
   })()
 
   const search = async (e) => {
