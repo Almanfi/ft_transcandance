@@ -17,6 +17,11 @@ GAME_TYPES = [
 	('tournament', 'Tournament')
 ]
 
+GAME_GENRE = [
+	('pong', "Pong"),
+	('osnier', 'Osnier')
+]
+
 TOURNAMENT_PHASE = [
 	('None', 'None'),
 	('quarters', 'quarters'),
@@ -35,6 +40,7 @@ class Game(models.Model):
 	game_started = models.BooleanField(default=False)
 	game_ended = models.BooleanField(default=False)
 	type = models.CharField(choices=GAME_TYPES, default=GAME_TYPES[0][0])
+	genre = models.CharField(choices=GAME_GENRE, default=GAME_GENRE[0][0])
 	tournament_phase = models.CharField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0])
 	tournament = models.ForeignKey('Tournament', on_delete=models.CASCADE, null=True)
 
@@ -79,7 +85,7 @@ class Game(models.Model):
 		self.save()
 
 	@staticmethod
-	def create_tournament_games(users, tournament, phase):
+	def create_tournament_games(users, tournament, phase, genre):
 		games = []
 		matches = 0
 		if phase == TOURNAMENT_PHASE[1][0]:
@@ -90,14 +96,14 @@ class Game(models.Model):
 			matches = 1
 		while len(games) < matches:
 			idx = 0 if len(games) == 0 else (len(games) * 2)
-			game = Game.objects.create(owner = users[idx], type = GAME_TYPES[2][0], tournament_phase = phase, tournament = tournament)
+			game = Game.objects.create(owner = users[idx], type = GAME_TYPES[2][0], tournament_phase = phase, tournament = tournament, genre=genre)
 			Invite.create_tournament_invite(game, users[idx],  users[idx + 1])
 			games.append(game)
 		return games
 
 	@staticmethod
-	def new_game(user, type):
-		game = Game.objects.create(owner=user, type=type)
+	def new_game(user, type, genre):
+		game = Game.objects.create(owner=user, type=type, genre=genre)
 		game.save()
 		return game
 	

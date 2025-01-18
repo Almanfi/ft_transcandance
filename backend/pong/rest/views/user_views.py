@@ -12,21 +12,12 @@ import argon2
 import binascii
 import jwt
 
-class UserInfo(ViewSet):
+class FetchUsers(ViewSet):
+	authentication_classes = [CookieAuth]
 
-	def get_authenticators(self):
-		if self.request.method in ["GET", "PATCH", "DELETE"]:
-			return [CookieAuth()]
-		return super().get_authenticators()
-	"""
-		Get Users Info Request
-	"""
-	@action(['get'], True)
 	def get_users(self, request):
-		if len(request.data) == 0:
-			user_data = request.user.data.copy()
-			user_data['profile_picture'] = user_image_route(user_data["profile_picture"])
-			return Response(user_data, status=status.HTTP_200_OK)
+		if len(request.data) == 0 :
+			return Response([], status=status.HTTP_200_OK)
 		users_ids = parse_uuid(request.data)
 		users = User.fetch_users_by_id(users_ids)
 		if users == None:
@@ -41,6 +32,22 @@ class UserInfo(ViewSet):
 		for user in serialized_users.data:
 			user["profile_picture"] = user_image_route(user["profile_picture"])
 		return Response(serialized_users.data, status=status.HTTP_200_OK)
+
+class UserInfo(ViewSet):
+
+	def get_authenticators(self):
+		if self.request.method in ["GET", "PATCH", "DELETE"]:
+			return [CookieAuth()]
+		return super().get_authenticators()
+
+	"""
+		Get Users Info Request
+	"""
+	def get_user(self, request):
+		user_data = request.user.data.copy()
+		user_data['profile_picture'] = user_image_route(user_data["profile_picture"])
+		return Response(user_data, status=status.HTTP_200_OK)
+		
 
 	@action(['post'], True)
 	def search_users(self, request):
@@ -172,10 +179,10 @@ class UserInfo(ViewSet):
 		(deletion_info, deleted_users)= User.remove_users(users_ids)
 		if (deletion_info[0] <= 0):
 			return Response({"message": "No user to be deleted", "error_code": 116}, status=status.HTTP_400_BAD_REQUEST)
-		deleted_users = UserSerializer(deleted_users, many=True)
-		for user in deleted_users.data:
-			if 'profile_picture' in user and not user['profile_picture'] == "profile.jpg":
-				os.remove(f"{users_images_path()}/{user["profile_picture"]}")
+		# deleted_users = UserSerializer(deleted_users, many=True)
+		# for user in deleted_users.data:
+		# 	if 'profile_picture' in user and not user['profile_picture'] == "profile.jpg":
+		# 		os.remove(f"{users_images_path()}/{user["profile_picture"]}")
 		return Response({"message": "User deleted sucessfully"} ,status=status.HTTP_200_OK)
 
 # Create your views here.

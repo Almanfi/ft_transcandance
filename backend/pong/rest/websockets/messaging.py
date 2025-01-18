@@ -15,18 +15,18 @@ class MessagingSocket(WebsocketConsumer):
 		self.room_group_name = self.scope['user'].data['id']
 		self.groups.append(self.room_group_name)
 		async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
-		self.scope['user'] = self.scope['user'].connect()
+		# self.scope['user'] = self.scope['user'].connect()
 		return super().connect()
 	
 	def close(self, code=None, reason=None):
 		if self.scope['user'] != None:
-			self.scope['user'].disconnect()
+			# self.scope['user'].disconnect()
 			self.scope['user'] = None
 		return super().close(10, reason)
 
 	def disconnect(self, code = None):
 		if self.scope['user'] != None:
-			self.scope['user'].disconnect()
+			# self.scope['user'].disconnect()
 			self.scope['user'] = None
 		return super().disconnect(code)
 	
@@ -40,7 +40,7 @@ class MessagingSocket(WebsocketConsumer):
 			return {"error_code": 37, "message": "No Friendship With the given user"}
 		new_message:Message = Message.create_new_message(self.scope['user'].instance, data['message'], friendship[0], None)
 		async_to_sync(self.channel_layer.group_send)(friend.data['id'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
-		return {"status": MESSAGE_STATUS[0][0], "message": new_message.content}
+		return {"type": data["type"], "status": MESSAGE_STATUS[0][0], "message": new_message.content}
 
 	def retrieve_messages(self, data):
 		source = User.fetch_users_by_id(data['friend_id'])
@@ -73,7 +73,9 @@ class MessagingSocket(WebsocketConsumer):
 				return self.send(text_data=json.dumps({"error_code":39, "message":"Wrong Source UUID"}))
 			payload_json['friend_id'] = source_uuid
 			messages_load = self.retrieve_messages(payload_json)
-			return self.send(text_data=json.dumps(messages_load))
+			
+			print("The retrieving is working")
+			return self.send(text_data=json.dumps({"type": payload_json['type'], "messages": messages_load}))
 		else:
 			return self.send(text_data=json.dumps({"error_code":38, "message": "Wrong Socket Event"}))
 	

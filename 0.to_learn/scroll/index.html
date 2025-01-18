@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="up" id="conversation"></div>
+  <button id="addMessage">Add Message</button>
+  <script>
+    // Reference to the conversation container
+    const conversation = document.getElementById("conversation");
+
+    // Function to add a message to the container
+    function addMessage(content, isMine) {
+      const message = document.createElement("div");
+      message.className = isMine ? "mine" : "other";
+
+      const paragraph = document.createElement("p");
+      paragraph.innerHTML = content;
+
+      message.appendChild(paragraph);
+      conversation.appendChild(message);
+
+      // Scroll to the bottom
+      conversation.scrollTop = conversation.scrollHeight;
+    }
+
+    // Example: Simulate adding messages
+    document.getElementById("addMessage").addEventListener("click", () => {
+      const isMine = Math.random() > 0.5; // Randomly decide message type
+      addMessage(
+        isMine ? "This is my message" : "This is another user's message",isMine
+      );
+    });
+
+    // Initial messages
+    addMessage("Hello, this is the first message!", false);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", false);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", false);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", false);
+    addMessage("Hi there! How are you?", false);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", false);
+    addMessage("Hi there! How are you?", true);
+    addMessage("Hi there! How are you?", false);
+
+  </script>
+</body>
+</html>

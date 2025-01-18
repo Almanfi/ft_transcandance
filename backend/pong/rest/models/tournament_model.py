@@ -1,6 +1,6 @@
 from django.db import models
 from .invite_model import Invite
-from .game_model import Game, TOURNAMENT_PHASE
+from .game_model import Game, TOURNAMENT_PHASE, GAME_GENRE
 from datetime import datetime
 import uuid
 
@@ -10,7 +10,8 @@ class Tournament(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True, editable=False)
 	done_at = models.DateTimeField(null= True)
 	tournament_phase = models.CharField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[2][0])
-	
+	genre = models.CharField(choices=GAME_GENRE, default=GAME_GENRE[0][0])
+
 	def save_end_time(self):
 		self.done_at = datetime.now()
 		self.save()

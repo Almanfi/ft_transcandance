@@ -72,7 +72,7 @@ services:
     networks:
       - pong
     ports:
-      - "3000:3000" # frontend
+      - "5000:5000" # frontend
       - "8000:443" # backend api
     depends_on:
       - django

@@ -2,24 +2,50 @@ from asgiref.sync import async_to_sync
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import WebsocketConsumer
 from ..serializers.user_serializers import UserSerializer, UserExceptions
-from ..serializers.tournament_serializers import TournamentSerializer
-from ..serializers.game_seralizers import GameSerializer, Game, GameException
+from ..serializers.tournament_serializers import TournamentSerializer, TOURNAMENT_PHASE
+from ..serializers.game_seralizers import GameSerializer, Game, GameException, WINNER_CHOICES
 from ..serializers.invite_seralizers import InviteSerializer
 from ..helpers import TournamentLobby, parse_uuid
 import json
+import sys
 
 class TournamentSocket(WebsocketConsumer):
 
-	def user_invited(self, user:UserSerializer, invites:InviteSerializer):
+	def user_won(self, game, user: UserSerializer):
+		if game['game_ended']:
+			if game['winner'] == WINNER_CHOICES[2][0]:
+				if game['team_a'][0]['id'] == user.data['id']:
+					return True
+			else:
+				if game['team_b'][0]['id'] == user.data['id']:
+					return True		
+		return False
+
+	def set_final_game(self, invites):
 		for invite in invites.data:
+			print("Through invites")
+			if invite['game']['tournament_phase'] == TOURNAMENT_PHASE[3][0]:
+				print("found the final game")
+				self.game_id = invite['game']['id']
+				return
+
+	def user_invited(self, user:UserSerializer, invites:InviteSerializer, desired_phase):
+		for invite in invites.data:
+			if self.user_won(invite['game'], user):
+				self.waiting_for = None
+				self.game_id = None
+				self.set_final_game(invites)
+				print("Her the game id is: ", self.game_id)
+				return True
+			if invite['game']['tournament']['tournament_phase'] != desired_phase or invite['game']['game_ended']:
+				continue
 			if invite['inviter']['id'] == user.data['id']:
 				self.game_id = invite['game']['id']
-				self.is_host = True
 				self.waiting_for = invite['invited']['id']
 				return True
 			elif invite['invited']['id'] == user.data['id']:
 				self.game_id = invite['game']['id']
-				self.is_host = False
+				self.waiting_for = invite['inviter']['id']
 				return True
 		return False
 
@@ -30,25 +56,24 @@ class TournamentSocket(WebsocketConsumer):
 			tournament_id = self.scope['url_route']['kwargs']['tournament_id']
 			user:UserSerializer = self.scope['user']
 			participation_data = TournamentSerializer.join_tournament_lobby(tournament_id, user)
-			invites = InviteSerializer(participation_data[1], many=True)
-			if len(invites.data) == 0 or not self.user_invited(user, invites):
-				return self.close(96, "Not a Tournament participant")
 			self.tournament_id = str(tournament_id)
 			self.room_group_name = self.tournament_id
+			invites = InviteSerializer(participation_data[1], many=True)
+			if len(invites.data) == 0 or invites.data[0]["game"]["tournament"]["done_at"] != None:
+				return self.close(120, "Not a valid Tournament")
+			tournament_phase = invites.data[0]['game']['tournament']['tournament_phase']
+			if not self.user_invited(user, invites, tournament_phase):
+				return self.close(96, "Not a Tournament participant")
 			TournamentLobby().connect_user_to_lobby(self.tournament_id, user.data['id'])
-			user.enter_lobby()
 			super().connect()
+			lobby = TournamentLobby().ready_user(self.tournament_id, self.scope['user'].data['id'])
 			async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
-			self.send(text_data=json.dumps({"type": "lobby.matches", "matches": invites.data}))
-			async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.join", "player": user.data})
+			async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.ready", "player_id": user.data['id'], "broadcaster_id": user.data['id']})
 		except Exception as e:
 			raise DenyConnection()
 	
 	def close(self, code=None, reason=None):
-		async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.quit", "player": self.scope['user'].data})
-		if self.scope['user'] != None:
-			self.scope['user'].connect()
-			self.scope['user'] = None
+		TournamentLobby().disconect_user_from_lobby(self.tournament_id, self.scope['user'].data['id'])
 		response = {}
 		if code != None:
 			response['error_code'] = code
@@ -59,45 +84,18 @@ class TournamentSocket(WebsocketConsumer):
 		return super().close(None, None)
 
 	def receive(self, text_data=None, bytes_data=None):
-		payload = json.loads(text_data)
-		lobby = None
-		user : UserSerializer = self.scope['user']
-		if payload['type'] == 'tournament.lobby':
-			lobby = TournamentLobby().get_lobby(self.tournament_id)
-			return self.send(text_data=json.dumps(lobby))
-		elif payload['type'] == "tournament.ready":
-			lobby = TournamentLobby().ready_user(self.tournament_id, self.scope['user'].data['id'])
-			async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.ready", "player_id": user.data['id']})
-		elif payload['type'] == "tournament.unready":
-			lobby = TournamentLobby().unready_user(self.tournament_id, self.scope['user'].data['id'])
-			async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.unready", "player_id": user.data['id']})
-		else:
-			return self.send(text_data=json.dumps({"message": "Wrong Socket event"}))
+		pass
 
 	def disconnect(self, code):
 		TournamentLobby().disconect_user_from_lobby(self.tournament_id, self.scope['user'].data['id'])
 		return super().disconnect(code)
 
-	def lobby_join(self, event):
-		return self.send(text_data=json.dumps(event))
-	
-	def lobby_quit(self, event):
-		return self.send(text_data=json.dumps(event))
-
-	def lobby_start(self, event):
-		if event['game_id'] == self.game_id :
+	def game_lobby_start(self, event):
+		if self.waiting_for == None or event['game_id'] == self.game_id:
 			self.send(text_data=json.dumps(event))
 			return self.close(None, None)
 
 	def lobby_ready(self, event):
-		if (
-	  		self.is_host == True and 
-	  		TournamentLobby().player_is_ready(self.tournament_id, self.waiting_for) and 
-			TournamentLobby().player_is_ready(self.tournament_id, self.scope['user'].data['id'])
-		):
-			return async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "lobby.start", "game_id": self.game_id})
-		return self.send(text_data=json.dumps(event))
-
-	def lobby_unready(self, event):
-		return self.send(text_data=json.dumps(event))
+		if (event["broadcaster_id"] == self.scope['user'].data['id'] and TournamentLobby().player_is_ready(self.tournament_id, self.waiting_for) and TournamentLobby().player_is_ready(self.tournament_id, self.scope['user'].data['id'])) or (self.waiting_for == None and self.game_id != None):
+			return async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "game.lobby.start", "game_id": self.game_id})
 

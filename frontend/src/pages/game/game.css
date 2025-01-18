@@ -1,0 +1,79 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  background: #282c34;
+  color: #ffffff;
+
+  canvas {
+    display: none;
+
+
+    width: 100%;
+    height: 100%;
+    background-color: #1e1e1e;
+  }
+
+  button {
+    margin: 10px;
+    padding: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #45a049;
+    }
+  }
+}
+
+.start {
+  /* position: absolute; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100% - 80px);
+
+  gap: 10px;
+  padding: 10px;
+
+  .type{
+    cursor: pointer;
+    border-radius: 10px;
+
+    flex: 1;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    max-height: 400px;
+    
+    height: 100%;
+
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
+    color: var(--red0);
+
+    &:hover{
+      background-color: var(--red0);
+      color: var(--red2);
+    }
+  }
+}
+
+.loading{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100% - 80px);
+}

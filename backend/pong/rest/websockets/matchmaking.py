@@ -13,7 +13,7 @@ class MatchmakingSocket(WebsocketConsumer):
 			return self.close(90, "No valid User given in cookie")
 		try:
 			user :UserSerializer = self.scope['user']
-			user.enter_lobby()
+			# user.enter_lobby()
 			super().connect()
 			self.join_game_matchmaking()
 		except UserExceptions as e:
@@ -21,7 +21,7 @@ class MatchmakingSocket(WebsocketConsumer):
 	
 	def close(self, code=None, reason=None):
 		if self.scope['user'] != None:
-			self.scope['user'].connect()
+			# self.scope['user'].connect()
 			self.scope['user'] = None
 		response = {}
 		if code != None:

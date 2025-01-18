@@ -1,10 +1,11 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 from .user_serializers import UserSerializer
-from .tournament_serializers import TournamentSerializer
-from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES, TOURNAMENT_PHASE
+from .tournament_serializers import TournamentSerializer, Tournament
+from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES, TOURNAMENT_PHASE, GAME_GENRE
 from ..helpers import parse_uuid
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
+from channels.layers import get_channel_layer
 
 class GameException(APIException):
 	status_code = status.HTTP_400_BAD_REQUEST
@@ -31,6 +32,8 @@ class GameSerializer(serializers.Serializer):
 	winner = serializers.ChoiceField(choices=WINNER_CHOICES, required=False)
 	game_started = serializers.BooleanField(required=False)
 	game_ended = serializers.BooleanField(required=False)
+	type = serializers.ChoiceField(choices=GAME_TYPES, required=False)
+	genre = serializers.ChoiceField(choices=GAME_GENRE, required=False)
 	tournament_phase = serializers.ChoiceField(choices=TOURNAMENT_PHASE, default=TOURNAMENT_PHASE[0][0], required=False)
 	tournament = TournamentSerializer(required=False)
 
@@ -128,8 +131,6 @@ class GameSerializer(serializers.Serializer):
 		return quited_game
 		
 	def start_game(self):
-		# if user.data['id'] != self.data['owner']['id']:
-		# 	raise GameException("User is not the game owner", 85, status.HTTP_401_UNAUTHORIZED)
 		team_a_len = len(self.data['team_a'])
 		team_b_len = len(self.data['team_b'])
 		if team_a_len <= 0 or team_a_len != team_b_len:
@@ -146,15 +147,47 @@ class GameSerializer(serializers.Serializer):
 		db_game:Game = self.instance
 		db_game.delete()
 
-	def end_game(self, user:UserSerializer, team_a_score: int, team_b_score:int):
-		if user.data['id'] != self.data['owner']['id'] or self.data['game_started'] == False  or self.data['game_ended'] == True:
-			raise GameException("Can't End the game", 107, status.HTTP_401_UNAUTHORIZED)
+	def set_score(self, team_a_score: int, team_b_score:int):
 		try:
 			db_game:Game = self.instance
 			db_game.end_game(team_a_score, team_b_score)
 			return GameSerializer(db_game)
 		except Exception as e:
 			raise GameException("Error saving the game score", 108, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+	def make_tournament_next_phase(self):
+		tournament: TournamentSerializer = TournamentSerializer.fetch_tournament_by_id(self.data['tournament']['id'])
+		db_tournament_games = tournament.fetch_phase_games()
+		tournament_games = GameSerializer(db_tournament_games, many = True)
+		phase_not_done = False
+		for tourney_game in tournament_games.data:
+			if tourney_game['game_ended'] != True:
+				phase_not_done = True
+				break
+		if not phase_not_done:
+			if tournament.data['tournament_phase'] == TOURNAMENT_PHASE[3][0]:
+				return tournament.end_tournament()
+			winning_users = []
+			losing_users = []
+			for game in tournament_games.data:
+				if game['winner'] == WINNER_CHOICES[2][0]:
+					winning_users.append(game['team_a'][0]['id'])
+					losing_users.append(game['team_b'][0]['id'])
+				else:
+					winning_users.append(game['team_b'][0]['id'])
+					losing_users.append(game['team_a'][0]['id'])
+			final_game_db = tournament.create_tournament_finals(winning_users)
+			final_game = GameSerializer(final_game_db[0])
+			# channel_layer = get_channel_layer()
+			# async_to_sync(channel_layer.group_send)(tournament.data['id'], {"type": "game_lobby_start", "game_id": final_game.data['id']})
+
+	def end_game(self, team_a_score: int, team_b_score: int):
+		if self.data['game_started'] == False  or self.data['game_ended'] == True:
+			raise GameException("Can't End the game", 107, status.HTTP_401_UNAUTHORIZED)
+		resulted_game = self.set_score(team_a_score, team_b_score)
+		if self.data['tournament'] != None:
+			self.make_tournament_next_phase()
+		return resulted_game
 
 	def get_winning_users(self):
 		winning_users = []
@@ -171,7 +204,7 @@ class GameSerializer(serializers.Serializer):
 		return GameSerializer(db_games, many=True)
 
 	@staticmethod
-	def create_new_game(user:UserSerializer, type = GAME_TYPES[0][0]):
-		new_game =  Game.new_game(user.instance, type)
+	def create_new_game(user:UserSerializer, type = GAME_TYPES[0][0], genre = GAME_GENRE[0][0]):
+		new_game =  Game.new_game(user.instance, type, genre)
 		new_game = GameSerializer(new_game)
 		return new_game
