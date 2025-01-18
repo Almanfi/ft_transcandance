@@ -31,6 +31,7 @@ import Settings from "./settings/settings.js";
 import History from "./history/history.js";
 import ChooseGame from "./chooseGame/chooseGame.js";
 import Pong from "./pong/pong.js";
+import Osnier from "./osnier/osnier.js";
 
 Ura.setStyles([
   "/pages/home/home.css",
@@ -47,6 +48,7 @@ Ura.setStyles([
   "/pages/history/history.css",
   "/pages/chooseGame/chooseGame.css",
   "/pages/pong/pong.css",
+  "/pages/osnier/osnier.css",
   /* components */
   "/components/Toast.css",
   "/components/Navbar.css",
@@ -70,6 +72,7 @@ Ura.onNavigate(() => {
       "/settings": Settings,
       "/history": History,
       "/pong": Pong,
+      "/osnier":Osnier,
       "/choosegame": ChooseGame
     });
   }

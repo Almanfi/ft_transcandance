@@ -27,12 +27,11 @@ function Game() {
     }
   }
 
-  function handleGoToOsnier(e)
-  {
+  function handleGoToOsnier(e) {
     const data = JSON.parse(e.data);
     if (data['type'] === 'game.start') {
-      // Ura.navigate("/pong");
-      // events.emit("setPongData", data, "hello world");
+      Ura.navigate("/osnier");
+      events.emit("setOsnierData", data, "remote");
       console.log("Lobby Ready for Osnier");
     }
   }
@@ -114,25 +113,34 @@ function Game() {
         }
       }
       else if (name === "osnier") {
-        //
+        switch (type) {
+          case "match making":
+            handleOpenMatchMaking();
+            break;
+          case "tournament":
+            handleTournament();
+            break;
+          default:
+            break;
+        }
       }
-    }
-  };
+    };
+  }
 
   return render(() => (
     <root>
       <Navbar />
       {/* <h3>Game: {name}</h3> */}
       {/* <div if={getStart()} className="game" id="game-play">
-        <div id="menu">
-          <button id="play-local" onclick={() => playGame("", undefined, true, false)}>Play Locally</button>
-          <button id="play-local-ai" onclick={() => playGame("", undefined, true, true)}>Play vs AI</button>
-          <button id="play-remote" style={{ backgroundColor: getColor() }} onclick={() => playRemote()}>{getValue()}</button>
-          <button id="play-tournament" onclick={() => playTournament()}>Play Tournament</button>
-  
-        </div>
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-      </div> */}
+      <div id="menu">
+        <button id="play-local" onclick={() => playGame("", undefined, true, false)}>Play Locally</button>
+        <button id="play-local-ai" onclick={() => playGame("", undefined, true, true)}>Play vs AI</button>
+        <button id="play-remote" style={{ backgroundColor: getColor() }} onclick={() => playRemote()}>{getValue()}</button>
+        <button id="play-tournament" onclick={() => playTournament()}>Play Tournament</button>
+
+      </div>
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div> */}
       <div className="start">
         <div className="type" onclick={() => handleType("match making")}>
           <h3 >Match making </h3>
@@ -157,14 +165,12 @@ function Game() {
       </div>
 
       {/* <div if={getLoading() && !getStart()} className="loading">
-          <button onclick={() => setStart(true)}>
-            clique me
-          </button>
-        </div> */}
+        <button onclick={() => setStart(true)}>
+          clique me
+        </button>
+      </div> */}
     </root>
   ));
 }
-
-
 
 export default Game;

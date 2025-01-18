@@ -388,6 +388,30 @@ export class Connection {
         }, 400);
     }
 
+    setType(user, gameData) {
+        let users = [gameData.team_a[0], gameData.team_b[0]];
+    
+        let type = PeerType.none;
+        if (user.id === gameData.team_a[0].id)
+            this.setAsHost();
+        else if (user.id === gameData.team_b[0].id)
+            this.setAsClient();
+    }
+
+    setAsClient() {
+        this.type = PeerType.client;
+        this.isRecieverConnected = true;
+        this.isHost = false;
+        // this.send({sync: "ready", isHost: true});
+    }
+
+    setAsHost() {
+        this.type = PeerType.host;
+        this.isRecieverConnected = true;
+        this.isHost = true;
+        // this.send({sync: "ready"});
+    }
+
     setGameAsDone() {
         this.gameEndedHere = true;
         this.socket.send(JSON.stringify({done: "end", winner: this.winner}));

@@ -37,6 +37,7 @@ const Allowed = [
   "chat.message.retrieve",
   "chat.message",
   "setPongData",
+  "setOsnierData",
   "game_invite"
 ]
 

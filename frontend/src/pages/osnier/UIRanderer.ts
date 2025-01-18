@@ -138,7 +138,7 @@ export class UIRanderer {
     
     loadConterText(number: number) {
         let fontLoader = new FontLoader();
-        fontLoader.load( 'assets/font.json', ( font ) => {
+        fontLoader.load( './assets/font.json', ( font ) => {
             let geometry = new TextGeometry(number.toString(), {
                 font: font,
                 size: 40,
@@ -197,7 +197,7 @@ export class UIRanderer {
 
     loadText(position: THREE.Vector3, origin: number, text: string) {
         let fontLoader = new FontLoader();
-        fontLoader.load( 'assets/font.json', ( font ) => {
+        fontLoader.load( './assets/font.json', ( font ) => {
             let geometry = new TextGeometry(text, {
                 font: font,
                 size: 7,
