@@ -73,6 +73,7 @@ UIRander.loadPlayer1Text("player1");
 UIRander.loadPlayer2Text("player2333flkdfdsf");
 UIRander.loadPlayer1Image("assets/image.png");
 UIRander.loadPlayer2Image("assets/image.png")
+UIRander.loadCounter();
 UIRander.render();
 const keyControls = new KeyControls(camera, gameConvas);
 window.addEventListener('resize', () => {
@@ -398,13 +399,24 @@ function handleInputs(span: number, inputTimeStamp: number) {
 
 function startGame(timeStamp) {
     console.log('starting game in: ', timeStamp - new Date().valueOf());
-        musicSyncer.stopMusic();
-        turretBulletM.reset();
-        playerBulletM.reset();
-        player.reset();
-        foe.reset();
-        connection.reset();
+    musicSyncer.stopMusic();
+    turretBulletM.reset();
+    playerBulletM.reset();
+    player.reset();
+    foe.reset();
+    connection.reset();
+    UIRander.count(3);
     setTimeout(() => {
+        UIRander.count(2);
+    }, 1000);
+    setTimeout(() => {
+        UIRander.count(1);
+    }, 2000);
+    setTimeout(() => {
+        UIRander.count(0);
+    }, 3000);
+    setTimeout(() => {
+        gClock.start();
         // while(timeStamp > new Date().valueOf());
         gClock.setStartTime(musicSyncer.playMusic());
         gClock.frameCount = 0;
@@ -417,30 +429,28 @@ function startGame(timeStamp) {
     }, (timeStamp - new Date().valueOf()));
 }
 
+function stopRoutine() {
+    gClock.stop();
+    if (player.health === foe.health) {
+        connection.signalStart();
+        return ;
+    }
+    let winner = player.health > foe.health ? user : player2;
+    console.log('game ended');
+    console.log('winner: ', winner.id);
+    connection.send(JSON.stringify({sync: "end", winner: winner.id}));
+    // musicSyncer.stopMusic();
+    // connection.sendGameEndToServer(gameData, winner.id);
+}
+
 function signalEndGame(timeStamp: number) {
-    let winner = player.health > foe.health ? player : foe;
     if (timeStamp < connection.getLastReceiveTime() || connection.gameEnded === true) {
-        connection.send(JSON.stringify({sync: "end", winner: winner.name}));
-        musicSyncer.stopMusic();
-        connection.reset();
-        connection.setGameAsDone();
-        player.stop();
-        foe.stop();
-        console.log('game ended');
-        console.log('winner: ', winner.name);
+        stopRoutine();
     }
     else setTimeout(() => {
         if (player.health > 0 && foe.health > 0)
             return ;
-        let winner = player.health > foe.health ? player : foe;
-        connection.send(JSON.stringify({sync: "end", winner: winner.name}));
-        musicSyncer.stopMusic();
-        connection.reset();
-        connection.setGameAsDone();
-        player.stop(); 
-        foe.stop();
-        console.log('game ended here');
-        console.log('winner: ', winner.name);
+        stopRoutine();
     }, 100);
     
 }
@@ -452,11 +462,5 @@ function setPlaneVector(camera: THREE.Camera, player: Player, foe: Player) {
 }
 
 gClock.loop(animate, rollBack);
-// gClock.setStartTime(musicSyncer.playMusic());
+gClock.render();
 gClock.setStartTime(musicSyncer.startTime);
-
-// const connection = new Connection(keyControls, playerSyncData);
-// connection.connectToServer(friend.id);
-// connection.attatchGameStart(startGame);
-
-

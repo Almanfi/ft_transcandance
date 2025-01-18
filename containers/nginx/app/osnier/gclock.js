@@ -16,6 +16,7 @@ export class gameClock {
     startTime;
     saveTime;
     lastRanderTime;
+    runing = false;
     constructor(scene, camera, renderer) {
         this.setFps(60);
         this.msPrev = 0;
@@ -34,6 +35,12 @@ export class gameClock {
         this.startTime = new Date().valueOf();
         this.saveTime = this.startTime;
         this.lastRanderTime = 0;
+    }
+    start() {
+        this.runing = true;
+    }
+    stop() {
+        this.runing = false;
     }
     setFps(fps) {
         this.fps = fps;
@@ -91,8 +98,13 @@ export class gameClock {
     getLastRanderTime() {
         return this.lastRanderTime;
     }
+    render() {
+        this.renderer.render(this.scene, this.camera);
+    }
     loop(animate, rollBack) {
         window.requestAnimationFrame(() => this.loop(animate, rollBack));
+        if (this.runing === false)
+            return;
         this.msNow = new Date().valueOf() - this.startTime;
         this.msPassed = this.msNow - this.msPrev;
         this.msPrevTrue = this.msNow;

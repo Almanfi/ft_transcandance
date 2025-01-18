@@ -154,6 +154,7 @@ export class Player extends THREE.Object3D {
     plane: Plane | undefined;
     health: number ;
     maxHealth: number;
+    hits: Map<number, boolean> = new Map();
     alive: boolean;
     UiRenderer: UIRanderer;
     // planeRaycaster: THREE.Raycaster;
@@ -217,6 +218,23 @@ export class Player extends THREE.Object3D {
         this.inputs.reset();
     }
 
+    gotHit(time: number) {
+        console.log('$$$$$$got hit at time: ', time);
+        this.hits.set(time, true);
+    }
+
+    rollbackcheckHit(time: number, value: boolean) {
+        let oldValue =this.hits.get(time);
+        if (oldValue === undefined)
+            this.gotHit(time);
+        else if (value === false)
+            this.hits.delete(time);
+    }
+
+    countHits() {
+        return this.hits.size;
+    }
+
     attachEndGameSignal(signal: (timeStamp: number) => void) {
         this.signalEndGame = signal;
     }
@@ -225,16 +243,19 @@ export class Player extends THREE.Object3D {
         this.UiRenderer = uiRenderer;
     }
 
-    takeDamage(damage: number, timeStamp: number) {
-        if (!this.alive)
+    takeDamage(damage: number, timeStamp: number, scope: string = "animate") {
+        if(scope === "animate")
+            this.gotHit(timeStamp);
+        else if (scope === "rollback")
+            this.rollbackcheckHit(timeStamp, false);
+        this.health = this.maxHealth - this.countHits();
+        if (this.health < 0)
             return;
-        this.health -= damage;
         if (this.health <= 0) {
             this.alive = false;
             console.log('player died: ', this.name);
             this.signalEndGame(timeStamp);
         }
-        console.log(`${this.name} health: `, this.health);
         if (this.name === 'player')
             this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
         else if (this.name === 'foe')
@@ -475,7 +496,7 @@ export class Player extends THREE.Object3D {
         // let oldData = this.rollback.rollbackFrame(frameIndex - 1) as dataSaved;
         let input = this.inputs;
         input.deserialize(data.input[0]);
-
+        
         // this.oldPosition.copy(oldData.position);
         this.movementVector.copy(data.speed);
         this.position.copy(data.position);

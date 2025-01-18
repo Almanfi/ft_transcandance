@@ -124,6 +124,7 @@ export class Player extends THREE.Object3D {
     plane;
     health;
     maxHealth;
+    hits = new Map();
     alive;
     UiRenderer;
     // planeRaycaster: THREE.Raycaster;
@@ -176,22 +177,42 @@ export class Player extends THREE.Object3D {
     stop() {
         this.inputs.reset();
     }
+    gotHit(time) {
+        console.log('$$$$$$got hit at time: ', time);
+        this.hits.set(time, true);
+    }
+    rollbackcheckHit(time, value) {
+        let oldValue = this.hits.get(time);
+        if (oldValue === undefined)
+            this.gotHit(time);
+        else if (value === false)
+            this.hits.delete(time);
+    }
+    countHits() {
+        return this.hits.size;
+    }
     attachEndGameSignal(signal) {
         this.signalEndGame = signal;
     }
     addUIRenderer(uiRenderer) {
         this.UiRenderer = uiRenderer;
     }
-    takeDamage(damage, timeStamp) {
-        if (!this.alive)
+    takeDamage(damage, timeStamp, scope = "animate") {
+        // if (!this.alive)
+        //     return;
+        if (scope === "animate")
+            this.gotHit(timeStamp);
+        else if (scope === "rollback")
+            this.rollbackcheckHit(timeStamp, false);
+        this.health = this.maxHealth - this.countHits();
+        if (this.health < 0)
             return;
-        this.health -= damage;
         if (this.health <= 0) {
             this.alive = false;
             console.log('player died: ', this.name);
             this.signalEndGame(timeStamp);
         }
-        console.log(`${this.name} health: `, this.health);
+        console.log(`${scope},${this.name} health: `, this.health, "got hit at time: ", timeStamp);
         if (this.name === 'player')
             this.UiRenderer.updatePlayer1Health(this.health / this.maxHealth);
         else if (this.name === 'foe')

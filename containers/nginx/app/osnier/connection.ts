@@ -16,6 +16,16 @@ class WebSocketCnx {
         this.defaultEventHandler = handler;
     }
 
+    sendGameEnd(data: any) {
+        if (!this.connected) {
+            setTimeout(() => {
+                this.sendGameEnd(data);
+            }, 3000);
+            return;
+        }
+        this.socket?.send(JSON.stringify(data));
+    }
+
     send(msg: any) {
         let data = {
             "type": "chat.message",
@@ -378,6 +388,14 @@ export class Connection {
         this.socket.send(JSON.stringify({done: "end", winner: this.winner}));
     }
 
+    sendGameEndToServer(data: any, winnerId: string) {
+        if (winnerId === data.team_a[0].id)
+        data.team_a_score = 1;
+        else
+        data.team_b_score = 1;
+        this.socket.sendGameEnd(data);
+    }
+
     reset() {
         this.recievedData.clear();
         this.recievedDataOrder = 1;
@@ -393,12 +411,6 @@ export class Connection {
         else if (this.socket.connected) {
             this.activeProtocol = this.socket;
             this.checkReciever();
-        }
-        else {
-            let receiver = this.socket.receiver;
-            this.socket = new WebSocketCnx();
-            this.init(receiver);
-            this.activeProtocol = this.socket;
         }
     }
 
@@ -630,8 +642,8 @@ export class Connection {
     // }
 
     signalStart() {
-        console.log("signaling start");
-        let time = new Date().valueOf() + 1000;
+        let startTime = 4 * 1000;
+        let time = new Date().valueOf() + startTime;
         this.send(JSON.stringify({ sync: "sync", startAt: time}));
         this.startGame(time);
     }
@@ -658,6 +670,7 @@ export class Connection {
         }
 
         if (data.showTime) {
+            this.signalStart();
             this.showTime(data);
         }
 

@@ -11,6 +11,15 @@ class WebSocketCnx {
     changeDefaultEventHandler(handler) {
         this.defaultEventHandler = handler;
     }
+    sendGameEnd(data) {
+        if (!this.connected) {
+            setTimeout(() => {
+                this.sendGameEnd(data);
+            }, 3000);
+            return;
+        }
+        this.socket?.send(JSON.stringify(data));
+    }
     send(msg) {
         let data = {
             "type": "chat.message",
@@ -306,6 +315,13 @@ export class Connection {
         this.gameEndedHere = true;
         this.socket.send(JSON.stringify({ done: "end", winner: this.winner }));
     }
+    sendGameEndToServer(data, winnerId) {
+        if (winnerId === data.team_a[0].id)
+            data.team_a_score = 1;
+        else
+            data.team_b_score = 1;
+        this.socket.sendGameEnd(data);
+    }
     reset() {
         this.recievedData.clear();
         this.recievedDataOrder = 1;
@@ -320,12 +336,6 @@ export class Connection {
         else if (this.socket.connected) {
             this.activeProtocol = this.socket;
             this.checkReciever();
-        }
-        else {
-            let receiver = this.socket.receiver;
-            this.socket = new WebSocketCnx();
-            this.init(receiver);
-            this.activeProtocol = this.socket;
         }
     }
     init(receiver) {
@@ -528,8 +538,8 @@ export class Connection {
     //     this.send(JSON.stringify({ type: "sync", pingAvrg: this.pingAvrg, timestamp: new Date().valueOf()}));
     // }
     signalStart() {
-        console.log("signaling start");
-        let time = new Date().valueOf() + 1000;
+        let startTime = 4 * 1000;
+        let time = new Date().valueOf() + startTime;
         this.send(JSON.stringify({ sync: "sync", startAt: time }));
         this.startGame(time);
     }
@@ -553,6 +563,7 @@ export class Connection {
             this.initSync();
         }
         if (data.showTime) {
+            this.signalStart();
             this.showTime(data);
         }
         if (data.getTime) {

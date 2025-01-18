@@ -68,6 +68,7 @@ export class UIRanderer {
     healthBars;
     aspect;
     textureLoader;
+    counter;
     constructor(gameConvas) {
         this.scene = new THREE.Scene();
         let height = gameConvas.getBoundingClientRect().height;
@@ -86,9 +87,10 @@ export class UIRanderer {
         UIConvas.style.left = '0px';
         UIConvas.style.zIndex = '1';
         this.healthBars = {};
-        // this.craeteObject();
+        this.craeteObject();
         this.createPlayer1HealthBar();
         this.createPlayer2HealthBar();
+        this.counter = [];
         this.textureLoader = new THREE.TextureLoader();
     }
     resize(width, height) {
@@ -99,7 +101,7 @@ export class UIRanderer {
         const geometry = new THREE.BoxGeometry(1, 0, 1);
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const cube = new THREE.Mesh(geometry, material);
-        cube.position.set(95 * this.aspect, 0, -90);
+        cube.position.set(0, 0, 0);
         this.addMesh(cube);
     }
     render() {
@@ -110,6 +112,45 @@ export class UIRanderer {
     }
     removeMesh(mesh) {
         this.scene.remove(mesh);
+    }
+    loadConterText(number) {
+        let fontLoader = new FontLoader();
+        fontLoader.load('assets/font.json', (font) => {
+            let geometry = new TextGeometry(number.toString(), {
+                font: font,
+                size: 40,
+                height: 1,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 1,
+                bevelSize: 0.1,
+                bevelOffset: 0,
+                bevelSegments: 5
+            });
+            let material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+            let plane = new THREE.Mesh(geometry, material);
+            plane.rotateX(-Math.PI / 2);
+            plane.position.x -= 15;
+            plane.position.z += 15;
+            this.counter[number] = plane;
+            this.addMesh(plane);
+            plane.visible = false;
+            this.render();
+        });
+    }
+    loadCounter() {
+        let limit = 3;
+        for (let i = 0; i <= limit; i++) {
+            this.loadConterText(i);
+        }
+    }
+    count(number) {
+        this.counter[number].visible = true;
+        this.render();
+        setTimeout(() => {
+            this.counter[number].visible = false;
+            this.render();
+        }, 700);
     }
     loadPlayerImage(imagePath, position) {
         this.textureLoader.load(imagePath, (texture) => {
