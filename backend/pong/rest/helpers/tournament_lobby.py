@@ -35,14 +35,16 @@ class TournamentLobby:
 		for user in self._lobbys[tournament_id]:
 			if user[0] == user_id:
 				user[1] = False
-
 		return self.get_lobby(tournament_id)
 
 	def disconect_user_from_lobby(self, tournament_id, user_id):
-		if tournament_id in self._lobbys:
-			if len(self._lobbys[tournament_id]) == 1:
-				del self._lobbys[tournament_id]
-				return
-			self._lobbys[tournament_id].remove(user_id)
-			return self._lobbys[tournament_id]
+		try :
+			if tournament_id in self._lobbys:
+				if len(self._lobbys[tournament_id]) == 1:
+					del self._lobbys[tournament_id]
+					return
+				self._lobbys[tournament_id].remove(user_id)
+				return self._lobbys[tournament_id]
+		except:
+			return
 		

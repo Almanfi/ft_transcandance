@@ -634,7 +634,7 @@ function setEventListeners() {
     Ura.refresh()
   });
   window.addEventListener("popstate", () => {
-    console.error("popstate");
+    // console.error("popstate");
     Ura.refresh()
   });
 }

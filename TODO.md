@@ -7,6 +7,7 @@
     [ ] replace all jsx imports with .js
     [ ] update user statistic
     [ ] test starting game from user page, in friends
+    [ ] clean build code
 
 + Resources
     + animation: https://wpdean.com/css-hover-effects/

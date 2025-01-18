@@ -4,7 +4,8 @@ from .user_serializers import UserSerializer
 from .tournament_serializers import TournamentSerializer, Tournament
 from ..models.game_model import WINNER_CHOICES , Game, GAME_TYPES, TOURNAMENT_PHASE, GAME_GENRE
 from ..helpers import parse_uuid
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
+from channels.layers import get_channel_layer
 
 class GameException(APIException):
 	status_code = status.HTTP_400_BAD_REQUEST
@@ -167,12 +168,18 @@ class GameSerializer(serializers.Serializer):
 			if tournament.data['tournament_phase'] == TOURNAMENT_PHASE[3][0]:
 				return tournament.end_tournament()
 			winning_users = []
+			losing_users = []
 			for game in tournament_games.data:
 				if game['winner'] == WINNER_CHOICES[2][0]:
 					winning_users.append(game['team_a'][0]['id'])
+					losing_users.append(game['team_b'][0]['id'])
 				else:
 					winning_users.append(game['team_b'][0]['id'])
-			tournament.create_tournament_finals(winning_users)
+					losing_users.append(game['team_a'][0]['id'])
+			final_game_db = tournament.create_tournament_finals(winning_users)
+			final_game = GameSerializer(final_game_db[0])
+			# channel_layer = get_channel_layer()
+			# async_to_sync(channel_layer.group_send)(tournament.data['id'], {"type": "game_lobby_start", "game_id": final_game.data['id']})
 
 	def end_game(self, team_a_score: int, team_b_score: int):
 		if self.data['game_started'] == False  or self.data['game_ended'] == True:

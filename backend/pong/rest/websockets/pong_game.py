@@ -184,7 +184,7 @@ async def game_loop(game_id):
             dt = 1.0 / 60
 
             game.update(player1.input, player2.input, dt)
-            if (game.score1 >= 1 or game.score2 >= 1):
+            if (game.score1 >= 3 or game.score2 >= 3):
                 break 
             game_time += dt
             

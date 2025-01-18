@@ -603,56 +603,56 @@ function openGameSocket(game_id) {
   return gameSocket
 }
 
-let pongMatchmakingSocket = null
-export function openPongMatchMakingSocket() {
-  if (pongMatchmakingSocket) return pongMatchmakingSocket
-  pongMatchmakingSocket = new WebSocket(`${websocketApi}/ws/matchmaking/pong/`);
-  pongMatchmakingSocket.onopen = (e) => { console.log("Connected to matchmaking socket") };
-  pongMatchmakingSocket.onmessage = (e) => { console.log("Matchmaking Socket message", e.data) }
-  pongMatchmakingSocket.onclose = (e) => { pongMatchmakingSocket = null; }
-  return pongMatchmakingSocket
+let MatchmakingSocket = null
+export function openGameMatchMakingSocket(name) {
+  if (MatchmakingSocket) return MatchmakingSocket
+  MatchmakingSocket = new WebSocket(`${websocketApi}/ws/matchmaking/${name}/`);
+  MatchmakingSocket.onopen = (e) => { console.log("Connected to matchmaking socket") };
+  MatchmakingSocket.onmessage = (e) => { console.log("Matchmaking Socket message", e.data) }
+  MatchmakingSocket.onclose = (e) => { MatchmakingSocket = null; }
+  return MatchmakingSocket
 }
 
-export function closePongMatchMakingSocket() {
-  if (pongMatchmakingSocket && pongMatchmakingSocket.readyState === WebSocket.OPEN) {
-    pongMatchmakingSocket.close();
-    pongMatchmakingSocket = null;
+export function closeGameMatchMakingSocket() {
+  if (MatchmakingSocket && MatchmakingSocket.readyState === WebSocket.OPEN) {
+    MatchmakingSocket.close();
+    MatchmakingSocket = null;
     return;
   }
 }
 
-let pongTournamentMakingSocket = null
-export function openPongTournamentMakingSocket() {
-  if(pongTournamentMakingSocket) return pongTournamentMakingSocket;
-  pongTournamentMakingSocket = new WebSocket(`${websocketApi}/ws/tournamentmaking/pong/`)
-  pongTournamentMakingSocket.onopen = (e) => { console.log("Connected to tournament making socket") };
-  pongTournamentMakingSocket.onmessage = (e) => { console.log("Tournament Making Socket Message", e.data) }
-  pongTournamentMakingSocket.onclose = (e) => { pongTournamentMakingSocket = null }
-  return pongTournamentMakingSocket
+let TournamentMakingSocket = null
+export function openGameTournamentMakingSocket(name) {
+  if(TournamentMakingSocket) return TournamentMakingSocket;
+  TournamentMakingSocket = new WebSocket(`${websocketApi}/ws/tournamentmaking/${name}/`)
+  TournamentMakingSocket.onopen = (e) => { console.log("Connected to tournament making socket") };
+  TournamentMakingSocket.onmessage = (e) => { console.log("Tournament Making Socket Message", e.data) }
+  TournamentMakingSocket.onclose = (e) => { TournamentMakingSocket = null }
+  return TournamentMakingSocket
 }
 
-export function closePongTournamentMakingSocket() {
-  if (pongTournamentMakingSocket && pongTournamentMakingSocket.readyState === WebSocket.OPEN) {
-    pongTournamentMakingSocket.close()
-    pongTournamentMakingSocket = null
+export function closeGameTournamentMakingSocket() {
+  if (TournamentMakingSocket && TournamentMakingSocket.readyState === WebSocket.OPEN) {
+    TournamentMakingSocket.close()
+    TournamentMakingSocket = null
   }
 }
 
-let pongTournamentSocket = null;
+let TournamentSocket = null;
 export function openTournamentSocket(tournament_id)
 {
-  if (pongTournamentSocket) return pongTournamentSocket;
-  pongTournamentSocket = new WebSocket(`${websocketApi}/ws/tournament/${tournament_id}/`);
-  pongTournamentSocket.onopen = (e) => { console.log("Connected to tournament socket") };
-  pongTournamentSocket.onclose = (e) => { pongTournamentSocket = null };
-  return pongTournamentSocket
+  if (TournamentSocket) return TournamentSocket;
+  TournamentSocket = new WebSocket(`${websocketApi}/ws/tournament/${tournament_id}/`);
+  TournamentSocket.onopen = (e) => { console.log("Connected to tournament socket") };
+  TournamentSocket.onclose = (e) => { TournamentSocket = null };
+  return TournamentSocket
 }
 
 export function closeTournamentSocket()
 {
-  if (pongTournamentSocket && pongTournamentSocket.readyState === WebSocket.OPEN) {
-    pongTournamentSocket.close()
-    pongTournamentSocket= null
+  if (TournamentSocket && TournamentSocket.readyState === WebSocket.OPEN) {
+    TournamentSocket.close()
+    TournamentSocket= null
   }
 }
 
@@ -660,13 +660,13 @@ export function closeTournamentSocket()
 function closeSockets() {
   webSocket?.close();
   gameSocket?.close();
-  pongMatchmakingSocket?.close();
-  pongTournamentMakingSocket?.close();
+  MatchmakingSocket?.close();
+  TournamentMakingSocket?.close();
 
   webSocket = null;
   gameSocket = null;
-  pongMatchmakingSocket = null;
-  pongTournamentMakingSocket = null;
+  MatchmakingSocket = null;
+  TournamentMakingSocket = null;
 }
 
 const api = {
@@ -708,10 +708,10 @@ const api = {
   refuseGameInvite,
   cancelGameInvite,
 
-  openPongMatchMakingSocket,
-  closePongMatchMakingSocket,
-  openPongTournamentMakingSocket,
-  closePongTournamentMakingSocket,
+  openGameMatchMakingSocket,
+  closeGameMatchMakingSocket,
+  openGameTournamentMakingSocket,
+  closeGameTournamentMakingSocket,
   openTournamentSocket,
   closeTournamentSocket,
 

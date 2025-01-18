@@ -43,9 +43,10 @@ class TournamentSerializer(serializers.Serializer):
 	def create_tournament_finals(self, users):
 		users = parse_uuid(users)
 		users = User.fetch_users_by_id(users)
-		Game.create_tournament_games(users, self.instance, TOURNAMENT_PHASE[3][0], self.data['genre'])
+		final_game = Game.create_tournament_games(users, self.instance, TOURNAMENT_PHASE[3][0], self.data['genre'])
 		tournament :Tournament = self.instance
 		tournament.switch_phase(TOURNAMENT_PHASE[3][0])
+		return final_game
 
 	def end_tournament(self):
 		self.instance.save_end_time()

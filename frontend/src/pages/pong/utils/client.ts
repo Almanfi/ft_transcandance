@@ -172,7 +172,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
   let game_ending_time:any = undefined;
 
   function connectToServer() {
-    console.log(`game data: ${game_data}`)
+    // console.log(`game data: ${game_data}`)
     game_data = JSON.parse(game_data);
     
     let my_team = "A";
@@ -191,7 +191,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
       me = game_data.team_b[0];
       opp = game_data.team_a[0];
     }
-    console.log("ME: ", me);
+    // console.log("ME: ", me);
 
     game_started = false;
 
@@ -480,7 +480,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
 
   function tick(timestamp: number) {
     resizeCanvas(canvas);
-    console.log("TICKING ", game_ending_time);
+    // console.log("TICKING ", game_ending_time);
     if (socket !== undefined && game_started && socket.readyState == WebSocket.CLOSED)
         game_ending = true
     if (!local) {
@@ -488,15 +488,20 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
         || (!game_started && socket !== undefined && socket.readyState == WebSocket.CLOSED)
         || (game_ending && Date.now() - game_ending_time > 3000)
         ) {
-        if (socket !== undefined)
+        if (socket !== undefined) {
             socket.close();
+            socket = undefined;
+        }
         canvas.style.display = 'none';
 
         game_over = true;
         if (!game_started)
           game_cancel = true;
         console.log("EXITING!");
-        Ura.navigate("/game?name=pong")
+        if (game_data.type === "tournament" && game_data.tournament_phase === "semis")
+         Ura.navigate(`/game?name=pong&tournament_id=${game_data.tournament.id}`);
+        else
+          Ura.navigate("/game?name=pong");
         return ;
       }
     }

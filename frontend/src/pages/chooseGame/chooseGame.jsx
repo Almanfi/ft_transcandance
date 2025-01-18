@@ -3,7 +3,6 @@ import Navbar from '../../components/Navbar.js';
 
 function ChooseGame(props = {}) {
   const [render, State] = Ura.init();
-  const [getter, setter] = State(0);
 
   return render(() => (
     <root>

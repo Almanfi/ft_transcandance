@@ -7,210 +7,48 @@ import events from '../../services/events.js';
 
 // TODO: check query if is in friend and exsits etc ...
 function Game() {
-  const { id, name } = Ura.getQueries();
+  const { id, tournament_id, name } = Ura.getQueries();
   if (!["pong", "osnier"].includes(name)) {
     Ura.create(<Toast message={`Invalid game ${name}`} />);
     return Ura.navigate("/choosegame")
   }
-  // api.openGameSocket(id);
   const [render, State] = Ura.init(); 0
-  const [getColor, setColor] = State("#4CAF50");
-  const [getValue, setValue] = State("Play game");
-  const [getStart, setStart] = State(false);
   const [getMatchLoading, setMatchLoading] = State(false);
   const [getTournLoading, setTournLoading] = State(false);
-
-  //const [getStart, setStart] = State(false);
-
-
-  let waiting = false;
-  let cancel_search = false;
-
-  function playRemote() {
-    if (waiting) {
-      cancel_search = true;
-      //waiting = false;
-      return;
-    }
-    cancel_search = false;
-
-    setColor("red");
-    setValue("Cancel game")
-    waiting = true;
-
-    let game_id = undefined;
-
-    let last_match_time = undefined;
-    let match_socket = undefined;
-    let lobby_socket = undefined;
-    let lobby_enter_time = undefined;
-    let started_game = false;
+  const [getType, setType] = State("");
 
 
-    function reset() {
-      if (match_socket !== undefined && match_socket.readyState != WebSocket.CLOSED)
-        match_socket.close();
-      if (lobby_socket !== undefined && lobby_socket.readyState != WebSocket.CLOSED)
-        lobby_socket.close();
-      match_socket = lobby_socket = undefined;
-      game_id = undefined;
-      last_match_time = undefined;
-      started_game = false;
-      lobby_enter_time = undefined;
-    }
-    reset();
-    function tick(time) {
-      if (started_game && game_over) {
-        if (!game_cancel)
-          cancel_search = true;
-        reset();
-      }
-      if (started_game) {
-        requestAnimationFrame(tick);
-        return;
-      }
-      if (game_id === undefined && lobby_socket !== undefined) {
-        lobby_socket.close();
-        lobby_socket = undefined;
-        lobby_enter_time = undefined;
-      }
-      if (lobby_enter_time !== undefined
-        && Date.now() - lobby_enter_time > 3000) {
-        reset();
-      }
-      if (cancel_search) {
-        console.log("CANCELLING SEARCH!");
-        reset();
-        cancel_search = false;
-        waiting = false;
-        setColor("#4CAF50");
-        setValue("Play game")
-        return;
-      }
-
-      if (game_id === undefined) {
-        if ((match_socket === undefined || match_socket.readyState === WebSocket.CLOSED)
-          && (last_match_time === undefined
-            || Date.now() - last_match_time > 1000)) {
-          last_match_time = Date.now();
-          match_socket = new WebSocket(`${api.websocketApi}/ws/matchmaking/pong/`);
-
-          match_socket.onmessage = (e) => {
-            const data = JSON.parse(e.data);
-
-            if (data.type === "game.launch") {
-              game_id = data.game_id;
-            }
-            console.log("[MATCHMAKING SOCKET] RECEVIED: ", e.data);
-          };
-
-          match_socket.onopen = (e) => {
-            console.log("[MATCHMAKING SOCKET] CONNECTED");
-          };
-
-          match_socket.onclose = (e) => {
-            console.log("[MATCHMAKING SOCKET] DISCONNECTED ");
-          };
-        }
-      }
-      else {
-        if (lobby_socket === undefined ||
-          (lobby_socket.readyState === WebSocket.CLOSED && !started_game)) {
-          lobby_socket = new WebSocket(`${api.websocketApi}/ws/game/${game_id}/`);
-          lobby_socket.onopen = (e) => {
-            console.log("[LOBBY SOCKET] CONNECTED!");
-            lobby_enter_time = Date.now();
-          };
-
-          lobby_socket.onmessage = (e) => {
-            console.log("[LOBBY SOCKET] RECEIVED ", e);
-            const data = JSON.parse(e.data);
-            if (data.type === "game.start") {
-              started_game = true;
-
-              playGame(data.user_id, JSON.stringify(data.game), false, false);
-            }
-          };
-          lobby_socket.onclose = (e) => {
-            console.log("[LOBBY SOCKET] DISCONNECTED ", e);
-          };
-        }
-      }
-
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  function playTournament() {
-    const socket = new WebSocket(`${api.websocketApi}/ws/tournamentmaking/`);
-    let tournament_id = undefined;
-
-    socket.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      if (data.type === "tournament.found" && typeof data.tournament_id === "string") {
-        tournament_id = data.tournament_id;
-      }
-      console.log("[TOURNAMENTMAKING SOCKET] RECEVIED: ", e.data);
-    };
-
-    socket.onopen = (e) => {
-      console.log("[TOURNAMENTMAKING SOCKET] CONNECTED");
-      //socket.send(JSON.stringify({ message: "hello!" }));
-    };
-
-    socket.onclose = (e) => {
-      console.log("[TOURNAMENTMAKING SOCKET] DISCONNECTED ", e);
-    };
-    let lobby_socket = undefined;
-
-    function tick(time) {
-      if (tournament_id !== undefined) {
-        if (lobby_socket === undefined) {
-          lobby_socket = new WebSocket(`${api.websocketApi}/ws/tournament/${tournament_id}/`);
-          lobby_socket.onopen = (e) => {
-            console.log("[TOURNAMENT_LOBBY SOCKET] CONNECTED!");
-          };
-
-          lobby_socket.onmessage = (e) => {
-            console.log("[TOURNAMENT_LOBBY SOCKET] RECEIVED ", e);
-
-            const data = JSON.parse(e.data);
-            if (data.type === "lobby.matches") {
-              console.log("[TOURNAMENT_LOBBY SOCKET] MATCHES ", (data.matches.length));
-              for (let i = 0; i < data.matches.length; i++) {
-                console.log(`[MATCH ${i}] ${JSON.stringify(data.matches[i])}`);
-              }
-            }
-          };
-          lobby_socket.onclose = (e) => {
-            console.log("[TOURNAMENT_LOBBY SOCKET] DISCONNECTED ", e);
-          };
-        }
-      }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-
-  }
 
   function handleGoToPongGame(e) {
     const data = JSON.parse(e.data);
     if (data['type'] === 'game.start') {
       Ura.navigate("/pong");
-      events.emit("setPongData", data);
+      events.emit("setPongData", data, "remote");
+    }
+  }
+
+  function handleGoToOsnier(e)
+  {
+    const data = JSON.parse(e.data);
+    if (data['type'] === 'game.start') {
+      // Ura.navigate("/pong");
+      // events.emit("setPongData", data, "hello world");
+      console.log("Lobby Ready for Osnier");
     }
   }
 
   function handleGoToGameLobby(game_id) {
     const game_socket = api.openGameSocket(game_id);
-    game_socket.onmessage = handleGoToPongGame;
+    if (name === "pong")
+      game_socket.onmessage = handleGoToPongGame;
+    else if (name === "osnier")
+      game_socket.onmessage = handleGoToOsnier;
   }
 
   function handleOpenMatchMaking() {
     if (!getTournLoading()) {
       setMatchLoading(!getMatchLoading())
-      const matchmaking = api.openPongMatchMakingSocket();
+      const matchmaking = api.openGameMatchMakingSocket(name);
       matchmaking.onmessage = (e) => {
         const data = JSON.parse(e.data);
         if (data['type'] === "game.launch")
@@ -218,33 +56,69 @@ function Game() {
       }
     }
     else {
-      api.closePongMatchMakingSocket();
+      api.closeGameMatchMakingSocket();
     }
   }
 
-  function handleTournamentLobby(e) {
-    const data = JSON.parse(e.data);
-    if (data['type'] === "game.lobby.start")
-      handleGoToGameLobby(data['game_id']);
+  function handleTournamentLobby(tournament_id) {
+    const tournament_socket = api.openTournamentSocket(tournament_id);
+    tournament_socket.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      console.log("The tournament Lobby data here is: ", data)
+      if (data['type'] === "game.lobby.start")
+        handleGoToGameLobby(data['game_id']);
+    };
   }
 
   function handleTournament() {
     if (!getMatchLoading()) {
       setTournLoading(!getTournLoading())
-      const Tourmaking = api.openPongTournamentMakingSocket();
+      const Tourmaking = api.openGameTournamentMakingSocket(name);
       Tourmaking.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        console.log("Tournament loging", data);
-        if (data['type'] === "tournament.found") {
-          const tournament_socket = api.openTournamentSocket(data['tournament_id']);
-          tournament_socket.onmessage = handleTournamentLobby;
-        }
+        if (data['type'] === "tournament.found")
+          handleTournamentLobby(data['tournament_id']);
       }
     }
     else {
-      api.closePongTournamentMakingSocket()
+      api.closeGameTournamentMakingSocket()
     }
   }
+  if (tournament_id !== undefined)
+    handleTournamentLobby(tournament_id)
+
+  const handleType = (type) => {
+    if (getType() === type) setType("");
+    else if (getType() === "") {
+      setType(type);
+      if (name === "pong") {
+        switch (type) {
+          case "match making":
+            handleOpenMatchMaking();
+            break;
+          case "tournament":
+            handleTournament();
+            break
+          case "vs ai": {
+            Ura.navigate("/pong");
+            events.emit("setPongData", undefined, "ai");
+            break;
+          }
+          case "localy": {
+            Ura.navigate("/pong");
+            events.emit("setPongData", undefined, "local");
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      else if (name === "osnier") {
+        //
+      }
+    }
+  };
+
   return render(() => (
     <root>
       <Navbar />
@@ -260,15 +134,26 @@ function Game() {
         <canvas id="gameCanvas" width="800" height="600"></canvas>
       </div> */}
       <div className="start">
-        <div className="type" onclick={handleOpenMatchMaking}>
-          <h3 if={!getMatchLoading()}>Match making </h3>
-          <h1 if={getMatchLoading()}>Match making loading ... (clique to cancel)</h1>
+        <div className="type" onclick={() => handleType("match making")}>
+          <h3 >Match making </h3>
+          <h3 if={getType() === "match making"}>loading ... (clique to cancel)</h3>
         </div>
 
-        <div className="type" onclick={handleTournament}>
-          <h3 if={!getTournLoading()}>Tournament </h3>
-          <h1 if={getTournLoading()}>Tournament  loading ... (clique to cancel)</h1>
+        <div className="type" onclick={() => handleType("tournament")}>
+          <h3 >Tournament </h3>
+          <h3 if={getType() === "tournament"}>loading ... (clique to cancel)</h3>
         </div>
+
+        <div if={name === "pong"} className="type" onclick={() => handleType("vs ai")}>
+          <h3 >Play vs AI </h3>
+          <h3 if={getType() === "vs ai"}>loading ... (clique to cancel)</h3>
+        </div>
+
+        <div if={name === "pong"} className="type" onclick={() => handleType("localy")}>
+          <h3 >Play localy </h3>
+          <h3 if={getType() === "localy"}>loading ... (clique to cancel)</h3>
+        </div>
+
       </div>
 
       {/* <div if={getLoading() && !getStart()} className="loading">

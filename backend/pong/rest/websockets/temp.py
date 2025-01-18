@@ -3,42 +3,15 @@ from channels.exceptions import DenyConnection
 from channels.generic.websocket import WebsocketConsumer
 from ..serializers.user_serializers import UserSerializer, UserExceptions
 from ..serializers.tournament_serializers import TournamentSerializer, TOURNAMENT_PHASE
-from ..serializers.game_seralizers import GameSerializer, Game, GameException, WINNER_CHOICES
+from ..serializers.game_seralizers import GameSerializer, Game, GameException
 from ..serializers.invite_seralizers import InviteSerializer
 from ..helpers import TournamentLobby, parse_uuid
 import json
-import sys
 
 class TournamentSocket(WebsocketConsumer):
 
-	def user_won(self, game, user: UserSerializer):
-		if game['game_ended']:
-			if game['winner'] == WINNER_CHOICES[2][0]:
-				if game['team_a'][0]['id'] == user.data['id']:
-					return True
-			else:
-				if game['team_b'][0]['id'] == user.data['id']:
-					return True		
-		return False
-
-	def set_final_game(self, invites):
+	def user_invited(self, user:UserSerializer, invites:InviteSerializer):
 		for invite in invites.data:
-			print("Through invites")
-			if invite['game']['tournament_phase'] == TOURNAMENT_PHASE[3][0]:
-				print("found the final game")
-				self.game_id = invite['game']['id']
-				return
-
-	def user_invited(self, user:UserSerializer, invites:InviteSerializer, desired_phase):
-		for invite in invites.data:
-			if self.user_won(invite['game'], user):
-				self.waiting_for = None
-				self.game_id = None
-				self.set_final_game(invites)
-				print("Her the game id is: ", self.game_id)
-				return True
-			if invite['game']['tournament']['tournament_phase'] != desired_phase or invite['game']['game_ended']:
-				continue
 			if invite['inviter']['id'] == user.data['id']:
 				self.game_id = invite['game']['id']
 				self.waiting_for = invite['invited']['id']
@@ -61,8 +34,7 @@ class TournamentSocket(WebsocketConsumer):
 			invites = InviteSerializer(participation_data[1], many=True)
 			if len(invites.data) == 0 or invites.data[0]["game"]["tournament"]["done_at"] != None:
 				return self.close(120, "Not a valid Tournament")
-			tournament_phase = invites.data[0]['game']['tournament']['tournament_phase']
-			if not self.user_invited(user, invites, tournament_phase):
+			if not self.user_invited(user, invites):
 				return self.close(96, "Not a Tournament participant")
 			TournamentLobby().connect_user_to_lobby(self.tournament_id, user.data['id'])
 			super().connect()
@@ -90,12 +62,18 @@ class TournamentSocket(WebsocketConsumer):
 		TournamentLobby().disconect_user_from_lobby(self.tournament_id, self.scope['user'].data['id'])
 		return super().disconnect(code)
 
+	def tournament_finals(self, event):
+		# if self.scope['user'].data['id'] not in event['losing_users']:
+		# 	return self.send(text_data=json.dumps({"type": "game.lobby.start", "game_id": event['game_id'], "finals": True}))
+		# return self.close()
+		pass
+
 	def game_lobby_start(self, event):
-		if self.waiting_for == None or event['game_id'] == self.game_id:
+		if event['game_id'] == self.game_id:
 			self.send(text_data=json.dumps(event))
-			return self.close(None, None)
 
 	def lobby_ready(self, event):
-		if (event["broadcaster_id"] == self.scope['user'].data['id'] and TournamentLobby().player_is_ready(self.tournament_id, self.waiting_for) and TournamentLobby().player_is_ready(self.tournament_id, self.scope['user'].data['id'])) or (self.waiting_for == None and self.game_id != None):
+		if (event["broadcaster_id"] == self.scope['user'].data['id'] and TournamentLobby().player_is_ready(self.tournament_id, self.waiting_for) and TournamentLobby().player_is_ready(self.tournament_id, self.scope['user'].data['id'])):
 			return async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "game.lobby.start", "game_id": self.game_id})
+		return self.send(text_data=json.dumps(event))
 
