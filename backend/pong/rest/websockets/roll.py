@@ -19,7 +19,7 @@ class OsnierGame:
 
     def __new__(cls):
         if cls._instance == None:
-            cls._instance = super(GameMatchmaking, cls).__new__(cls)
+            cls._instance = super(OsnierGame, cls).__new__(cls)
         return cls._instance
 
     def get_games(self):
@@ -33,7 +33,7 @@ class OsnierGame:
         return None
 
     def add_game(self, gameId):
-        self._data[gameId] = {userId: None, won: False}
+        self._data[gameId] = {'userId': None, 'won': False}
         return self._data[gameId]
     
     def remove_game(self, gameId):
@@ -70,36 +70,63 @@ class RollSocket(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(friend.data['username'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
         return {"status": MESSAGE_STATUS[0][0], "message": new_message.content}
 
-    def handle_game_end(self, data):
+    def handle_game_end(self, payload_json):
         gameId = payload_json['game_id']
-        score = payload_json['score']
+        score = payload_json['won']
         from_user = self.scope['user'].instance
+        print("recieved game", gameId, from_user)
         ParsedGameId = parse_uuid([gameId])
         dbGame = Game.fetch_games_by_id(ParsedGameId)
         if len(dbGame) != 1:
             return {"error_code": 42, "message": "No Game With Such Id"}
         dbGame = GameSerializer(dbGame[0])
-        if (dbGame.data['team_a'][0] != from_user and dbGame.data['team_b'][0] != from_user) or dbGame.data['game_ended']:
+        print("game serialized")
+        print("user is ", from_user.id)
+        playerA = parse_uuid([dbGame.data['team_a'][0]['id']])[0]
+        playerB = parse_uuid([dbGame.data['team_b'][0]['id']])[0]
+        if (playerA != from_user.id and playerB != from_user.id):
+            print("^^user is not in game")
             return {"error_code": 43, "message": "cannot end game"}
+        print("player is in game")
         game = OsnierGame().get_game(gameId)
         if game == None:
             game = OsnierGame().add_game(gameId)
-            game["userId"] = from_user.id
-            game["won"] = score
+            game['userId'] = from_user.id
+            game['won'] = score
+            print("create osnir game in memory with score: ", score)
             return {"status": "Game Created", "game_id": gameId}
         if game["userId"] == from_user.id:
             return {"error_code": 44, "message": "Cannot End Game"}
+        print("player2 is updating")
         if game["won"] == score:
             return {"error_code": 45, "message": "Cannot End Game"}
             # async_to_sync(self.channel_layer.group_send)(friend.data['id'], {"type": data['type'], "from": self.scope['user'].data['id'] ,"message": new_message.content})
         teamAScore = 0
         teamBScore = 0
-        if dbGame.data['team_a'][0] == game["userId"] and game["won"] == True:
-            teamAScore = 1
-        elif dbGame.data['team_b'][0] == game["userId"] and game["won"] == True:
-            teamBScore = 1
-        dbGame.end_game(teamAScore, teamBScore)
+        if playerA == game["userId"]:
+            if game["won"] == True:
+                teamAScore = 1
+                teamBScore = 0
+            else:
+                teamAScore = 0
+                teamBScore = 1
+        else:
+            if game["won"] == True:
+                teamBScore = 1
+                teamAScore = 0
+            else:
+                teamBScore = 0
+                teamAScore = 1
+   
+        print("sending scores to db : ", teamAScore, teamBScore)
+        owner = dbGame.data['owner']
+        dbGame.end_game(owner, teamAScore, teamBScore)
+        print("done saving done")
         return {"status": "Game Ended", "winner": game.data['winner']}
+
+
+
+
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
@@ -110,8 +137,11 @@ class RollSocket(WebsocketConsumer):
             payload_json['friend_id'] = destination_uuid
             message_status = self.handle_friendship_message(payload_json)
         elif payload_json['type'] == "game.status":
+
+            print("My condition is true", payload_json)
             message_status = self.handle_game_end(payload_json)
         else:
+            print("wrong socket event: ", payload_json, file=sys.stderr)
             return self.send(text_data=json.dumps({"error_code":38, "message": "Wrong Socket Event"}))
 
     def chat_message(self, event):

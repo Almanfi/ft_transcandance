@@ -440,7 +440,8 @@ function stopRoutine() {
     console.log('winner: ', winner.id);
     connection.send(JSON.stringify({sync: "end", winner: winner.id}));
     // musicSyncer.stopMusic();
-    // connection.sendGameEndToServer(gameData, winner.id);
+    let score = winner.id === user.id ? true : false;
+    connection.sendGameEndToServer(gameData.id, score);
 }
 
 function signalEndGame(timeStamp: number) {

@@ -14,7 +14,6 @@ export class MusicSync {
     currBeat;
     nextBeat;
     currBeatIdx;
-    signalEndGame;
     // musicPlaying: boolean;
     // frequancies: Map<number, Uint8Array>;
     // chosenFreq: number;
@@ -22,7 +21,7 @@ export class MusicSync {
     // lastAmplitude: number;
     // keepFiring: boolean;
     // lastBeatTime: number;
-    constructor(camera, signalEndGame) {
+    constructor(camera) {
         this.listener = new THREE.AudioListener();
         camera.add(this.listener);
         this.music = new THREE.Audio(this.listener);
@@ -32,7 +31,6 @@ export class MusicSync {
         this.beat = new Map();
         this.currBeatIdx = 0;
         this.startTime = 0;
-        this.signalEndGame = signalEndGame;
     }
     addMusicMap(map) {
         this.musicMap = map;
@@ -134,10 +132,6 @@ export class MusicSync {
             if (this.music.source) {
                 this.music.source.connect(this.analyser);
                 this.music.source.onended = (e) => {
-                    console.log("music ended");
-                    // this.musicPlaying = false;
-                    console.log(this.beat);
-                    // this.keepFiring = false;
                 };
             }
             this.analyser.fftSize = 2048;

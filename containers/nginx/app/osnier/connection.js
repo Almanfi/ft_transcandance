@@ -125,6 +125,8 @@ class WebRtcCnx {
     handleIceCandidate(iceCandidate) {
         console.log('received ice candidate');
         console.log(iceCandidate);
+        if (this.remoteConnection.connectionState === 'closed')
+            return null;
         this.remoteConnection.addIceCandidate(iceCandidate);
         return null;
     }
@@ -315,11 +317,12 @@ export class Connection {
         this.gameEndedHere = true;
         this.socket.send(JSON.stringify({ done: "end", winner: this.winner }));
     }
-    sendGameEndToServer(data, winnerId) {
-        if (winnerId === data.team_a[0].id)
-            data.team_a_score = 1;
-        else
-            data.team_b_score = 1;
+    sendGameEndToServer(gameId, myScore) {
+        let data = {
+            "type": "game.status",
+            "game_id": gameId,
+            "won": myScore
+        };
         this.socket.sendGameEnd(data);
     }
     reset() {
@@ -374,11 +377,7 @@ export class Connection {
             let data = JSON.parse(e.data);
             this.handleData(data);
         }
-        catch (e) {
-            console.error("error parsing rtc message: ", e);
-        }
-        // let data = JSON.parse(e.data);
-        // this.handleData(data);
+        catch (e) { }
     }
     handleRtcIceCandidate(e) {
         let iceCandidate = e.candidate;
