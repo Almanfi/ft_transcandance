@@ -77,6 +77,19 @@ class GameView(ViewSet):
 	# 	return Response(ended_game.data, status=status.HTTP_200_OK)
 
 	@action(methods=['post'], detail=False)
+	def game_stats(self, request):
+		user = request.user
+		stats = Game.fetch_game_stats(user.instance)
+		return Response({"stats": stats}, status=status.HTTP_200_OK)
+
+	@action(methods=['get'], detail=False)
+	def games_history(self, request):
+		user = request.user
+		games = Game.fetch_user_games(user.instance)
+		games = GameSerializer(games, many=True)
+		return Response(games.data, status=status.HTTP_200_OK)
+
+	@action(methods=['post'], detail=False)
 	def invite_player(self, request):
 		auth_user:UserSerializer = request.user
 		if not "invited_id" in request.data or not "game_id" in request.data or request.data['invited_id'] == auth_user.data['id']:
@@ -87,7 +100,7 @@ class GameView(ViewSet):
 			return Response({"message": "Wrong invited_id or game_id", "error_code": 46}, status=status.HTTP_400_BAD_REQUEST)
 		game_invitation = InviteSerializer.invite_in_game(auth_user, invited_id, game_id)
 		channel_layer = get_channel_layer()
-		async_to_sync(channel_layer.group_send)(request.data['invited_id'], {"type": "game_invite", "invite": game_invitation.data['id']})
+		async_to_sync(channel_layer.group_send)(request.data['invited_id'], {"type": "game_invite", "invite": game_invitation.data})
 		return Response(game_invitation.data, status=status.HTTP_200_OK)
 	
 	@action(methods=['delete'], detail=False)

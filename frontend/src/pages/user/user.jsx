@@ -73,10 +73,10 @@ function User() {
           </div>
           <Relations />
         </div>
-
+{/* 
         <div>
           <OpenGame />
-        </div>
+        </div> */}
       </div>
     </root>
   ));

@@ -177,7 +177,7 @@ class GameSerializer(serializers.Serializer):
 					winning_users.append(game['team_b'][0]['id'])
 					losing_users.append(game['team_a'][0]['id'])
 			final_game_db = tournament.create_tournament_finals(winning_users)
-			final_game = GameSerializer(final_game_db[0])
+			# final_game = GameSerializer(final_game_db[0])
 			# channel_layer = get_channel_layer()
 			# async_to_sync(channel_layer.group_send)(tournament.data['id'], {"type": "game_lobby_start", "game_id": final_game.data['id']})
 

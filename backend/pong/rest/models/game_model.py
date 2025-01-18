@@ -2,6 +2,7 @@ from django.db import models
 from typing import List
 from django.db import transaction
 from .invite_model import Invite
+from django.db.models import Q
 import uuid
 
 WINNER_CHOICES = [
@@ -118,3 +119,23 @@ class Game(models.Model):
 		if phase != None:
 			return list(Game.objects.filter(tournament=tournament_id, tournament_phase=phase))
 		return list(Game.objects.filter(tournament=tournament_id))
+
+	@staticmethod 
+	def fetch_user_games(user):
+		return list(Game.objects.filter(Q(team_a=user) | Q(team_b=user)))
+
+	@staticmethod
+	def fetch_game_stats(user):
+		pong_games_count = Game.objects.filter((Q(team_a=user) | Q(team_b=user)) & Q(genre = GAME_GENRE[0][0])).count()
+		osnier_games_count = Game.objects.filter((Q(team_a=user) | Q(team_b=user)) & Q(genre = GAME_GENRE[1][0])).count()
+		pong_games_won_on_a = Game.objects.filter(team_a=user, genre=GAME_GENRE[0][0], winner=WINNER_CHOICES[2][0]).count()
+		pong_games_won_on_b = Game.objects.filter(team_b=user, genre=GAME_GENRE[0][0], winner=WINNER_CHOICES[3][0]).count()
+		pong_winrate = 0
+		if pong_games_count != 0:
+			pong_winrate = ((pong_games_won_on_a + pong_games_won_on_b) * 100) / pong_games_count;
+		osnier_games_won_on_a = Game.objects.filter(team_a=user, genre=GAME_GENRE[1][0], winner=WINNER_CHOICES[2][0]).count()
+		osnier_games_won_on_b = Game.objects.filter(team_b=user, genre=GAME_GENRE[1][0], winner=WINNER_CHOICES[2][0]).count()
+		osnier_winrate = 0
+		if osnier_games_count != 0:
+			osnier_winrate = ((osnier_games_won_on_a + osnier_games_won_on_b) * 100) / osnier_games_count
+		return [ pong_games_count , osnier_games_count, round(pong_winrate), round(osnier_winrate)]
