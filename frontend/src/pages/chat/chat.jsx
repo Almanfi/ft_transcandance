@@ -78,6 +78,33 @@ const SelectConv = (e, i) => {
   handleMessages();
 };
 
+const BlockUser = async (user) => {
+  try {
+    console.log("block", user);
+    await api.blockUser(user.id);
+    Ura.navigate("/user");
+  } catch (error) {
+    api.handleError(error)
+  }
+}
+
+const PlayGamee = async (user) => {
+  try {
+    const game = await api.createGame();
+    const res = await api.invitePlayer(game.id, user.id);
+    const game_socket = api.openGameSocket(game['id'])
+    game_socket.onmessage = (e) => {
+      const data = JSON.parse(e.data)
+      if (data['type'] === "game.start") {
+        Ura.navigate("/pong");
+        events.emit("setPongData", data, "remote");
+      }
+    }
+  } catch (error) {
+    api.handleError(error)
+  }
+}
+
 function Chat() {
   handleMessages();
 
@@ -102,8 +129,8 @@ function Chat() {
         <div className="right">
           {/* conversation */}
           <div className="title">
-            <h4>Play game</h4>
-            <h4>Block</h4>
+            <h4 onclick={() => PlayGamee(getUser())}>Play game</h4>
+            <h4 onclick={() => BlockUser(getUser())}>Block</h4>
           </div>
           <div className="up" loop={getConv()} id="conversation">
             {(e) => (

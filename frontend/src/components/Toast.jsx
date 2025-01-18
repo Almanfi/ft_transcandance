@@ -1,6 +1,6 @@
 import Ura from 'ura';
 
-function Toast({ message, delay = 1, color = "red", handler = null }) {
+function Toast({ message, delay = 0.5, color = "red", handler = null }) {
   const [render] = Ura.init();
   if (!handler) handler = () => { }
   return render(() => (

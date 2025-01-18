@@ -18,7 +18,7 @@ function check(children: any): any {
         }
       })
     }
-    else if (child) result.push(child);
+    else if (child !== undefined && child) result.push(child);
   });
   return result;
 }
@@ -26,7 +26,7 @@ function check(children: any): any {
 function fr(props: Props = {}, ...children: any) {
   return {
     type: FRAGMENT,
-    children: children || [],
+    children: check(children || []),
   };
 }
 
@@ -238,6 +238,7 @@ function createDOM(vdom): VDOM {
       if (vdom.props.value === undefined || vdom.props.value === "undefined") {
         console.error("TEXT: found undefiend");
       }
+
       vdom.dom = document.createTextNode(vdom.props.value);
       break;
     }
@@ -261,25 +262,30 @@ function createDOM(vdom): VDOM {
 }
 
 function removeProps(vdom: VDOM) {
-  const props = vdom.props;
-  Object.keys(props || {}).forEach((key) => {
-    if (vdom.dom) {
-      if (key.startsWith("on")) {
-        const eventType = key.slice(2).toLowerCase();
-        vdom.dom.removeEventListener(eventType, props[key]);
-      } else if (key === "style") {
-        Object.keys(props.style || {}).forEach((styleProp) => {
-          vdom.dom.style[styleProp] = "";
-        });
-      } else if (vdom.dom) {
-        if (vdom.dom[key] !== undefined) delete vdom.dom[key];
-        else vdom.dom.removeAttribute(key);
+  try {
+    const props = vdom.props;
+    Object.keys(props || {}).forEach((key) => {
+      if (vdom.dom) {
+        if (key.startsWith("on")) {
+          const eventType = key.slice(2).toLowerCase();
+          vdom.dom?.removeEventListener(eventType, props[key]);
+        } else if (key === "style") {
+          Object.keys(props.style || {}).forEach((styleProp) => {
+            vdom.dom.style[styleProp] = "";
+          });
+        } else if (vdom.dom) {
+          if (vdom.dom[key] !== undefined) delete vdom.dom[key];
+          else vdom.dom?.removeAttribute(key);
+        }
       }
-    }
-    else
-      delete props[key];
-  });
-  vdom.props = {};
+      else
+        delete props[key];
+    });
+    vdom.props = {};
+  } catch (error) {
+    console.log("remove props");
+
+  }
 }
 
 function destroy(vdom: VDOM): void {
@@ -305,7 +311,7 @@ function execute(mode: number, prev: VDOM, next: VDOM = null) {
     case REPLACE: {
       removeProps(prev);
       execute(CREATE, next);
-      if (prev.dom) prev.dom.replaceWith(next.dom);
+      if (prev.dom && next.dom) prev.dom.replaceWith(next.dom);
       prev.dom = next.dom;
       prev.children = next.children;
       // I commented it because it caused me an error
@@ -405,7 +411,7 @@ function reconciliate(prev: VDOM, next: VDOM) {
       if (child2.dom && prev.dom) {
         prevs.push(child2);
         if (child2.dom === undefined) console.error("CHILD 1: found undefiend");
-        prev.dom.appendChild(child2.dom);
+        if (child2.dom) prev.dom.appendChild(child2.dom);
       }
     } else if (child1 && !child2) {
       execute(REMOVE, child1 as VDOM);
@@ -467,7 +473,16 @@ export function init() {
     };
     return [getter, setter];
   };
+  const WeakState = (initValue) => {
+    const stateIndex = index++;
+    states[stateIndex] = initValue;
 
+    const getter = () => states[stateIndex];
+    const setter = (newValue) => {
+      states[stateIndex] = newValue;
+    };
+    return [getter, setter];
+  }
   const updateState = () => {
     const newVDOM = View();
     if (vdom !== null) reconciliate(vdom, newVDOM);
@@ -479,7 +494,7 @@ export function init() {
     updateState();
     return vdom;
   };
-  return [render, State, ForcedState];
+  return [render, State, ForcedState, WeakState];
 }
 
 // ROUTING

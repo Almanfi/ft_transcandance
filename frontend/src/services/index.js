@@ -75,6 +75,14 @@ create("signup").onclick = async () => {
   if (Selected.size == 0) console.error("Select at least one user");
 }
 
+create("game Stats").onclick = async() => {
+  await api.getStats()
+}
+
+create("game history").onclick = async () => {
+  await api.getHistory()
+}
+
 create("delete user").onclick = async () => {
   for (const i of Selected) {
     console.log("log in as", users[i].username);

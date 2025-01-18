@@ -110,7 +110,6 @@ function getAIMove(pong: Pong, ai_pong: Pong, player: number) {
     }
   }
 
-  //TODO: shouldn't check my y!
   let y = pong.p2_y;
   
 
@@ -172,7 +171,7 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
   let game_ending_time:any = undefined;
 
   function connectToServer() {
-    // console.log(`game data: ${game_data}`)
+    //console.log(`game data: ${game_data}`)
     game_data = JSON.parse(game_data);
     
     let my_team = "A";
@@ -180,8 +179,8 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
       my_team = "A";
     else if (my_id === game_data.team_b[0].id)
       my_team = "B";
-    else
-      console.error("BAD!1");
+    //else
+    //  console.error("BAD!1");
 
     if (my_team === "A") {
       me = game_data.team_a[0];
@@ -255,7 +254,6 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
   
 
   if (ctx == null) {
-    // TODO:!!
     return true;
   }
 
@@ -424,7 +422,11 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
         let username = me.display_name;
         if (pong.score1 < pong.score2)
             username = opp.display_name;
-        ctx.fillText(username + " Won!", x, y + meterToPixel*1.5);
+        let s = "";
+        if (game_data.tournament_phase == "finals")
+            s = " Tournament";
+
+        ctx.fillText(`${username} Won${s}!`, x, y + meterToPixel*1.5);
       }
 
     }
@@ -498,8 +500,9 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
         if (!game_started)
           game_cancel = true;
         console.log("EXITING!");
-        if (game_data.type === "tournament" && game_data.tournament_phase === "semis")
-         Ura.navigate(`/game?name=pong&tournament_id=${game_data.tournament.id}`);
+        if (game_data.type === "tournament" && game_data.tournament_phase === "semis" && pong.score1 > pong.score2) {
+          Ura.navigate(`/game?name=pong&tournament_id=${game_data.tournament.id}`);
+        }
         else
           Ura.navigate("/game?name=pong");
         return ;
@@ -549,7 +552,6 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
           //player1_input = getAIMove(pong, ai_pong_state, 1);
         }
         if (last_game_state !== undefined) {
-          // TODO: some kinda of interpolation here instead of just snapping to place!
           if (last_game_state.ball !== undefined &&
             last_game_state.ball.x !== undefined
             && last_game_state.ball.y !== undefined
@@ -574,7 +576,6 @@ export function playGame(my_id: string, game_data: any, local: boolean, against_
           if (last_game_state.time === undefined)
             last_game_state.time = Date.now() / 1000;
 
-          //TODO: check if game is over here and quit
         }
         if (socket.readyState === WebSocket.OPEN)
           socket.send(JSON.stringify({

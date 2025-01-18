@@ -36,7 +36,8 @@ const Allowed = [
   // "chat",
   "chat.message.retrieve",
   "chat.message",
-  "setPongData"
+  "setPongData",
+  "game_invite"
 ]
 
 const handlers = {
@@ -116,6 +117,14 @@ events.add("friendship_accepted", async (data) => {
     Ura.create(<Toast message={`${res[0].display_name} did accept invitation`} color="green" />);
   }
   Ura.refresh();
+})
+
+events.add("game_invite", async (data) => {
+  if (data.length) {
+    data = data[0];
+    // console.log("heyyyy:", data);
+    if (!Ura.In("/notifications")) Ura.create(<Toast message={`New game invitation from ${data.invite.inviter.display_name}`} color="green" />);
+  }
 })
 
 

@@ -34,6 +34,39 @@ async function login(user) {
   }
 }
 
+async function getStats() {
+	const res = await fetch(`${endpoint}/games/stats/`, {
+		method: "GET",
+		credentials: "include"
+	});
+	if (res.ok)
+	{
+		const body =await res.json()
+		console.log("The stats are,", body)
+		return body
+	} else {
+		const body = await res.json()
+		throw body
+	}
+}
+
+async function getHistory()
+{
+	const res = await fetch(`${endpoint}/games/history/`, {
+		method: "GET",
+		credentials: "include"
+	})
+	if (res.ok)
+	{
+		const body =await res.json()
+		console.log("The stats are,", body)
+		return body
+	} else {
+		const body = await res.json()
+		throw body
+	}
+}
+
 /**
  * User Information
  * -----------------
@@ -428,6 +461,10 @@ function openSocket() {
           events.emit("chat.message", data);
           break;
         }
+        case "game_invite":{
+          events.emit("game_invite", data);
+          break;
+        }
         default:
           console.error("unhanled event:", data.type);
           break;
@@ -497,7 +534,7 @@ async function getGameInvites() {
 }
 
 async function createGame() {
-  const response = await fetch(`${endpoint}/games/`, {
+  const response = await fetch(`${endpoint}/games/pong/`, {
     method: "POST",
     credentials: "include"
   })
@@ -594,7 +631,7 @@ function openGameSocket(game_id) {
   if (gameSocket) return gameSocket
   gameSocket = new WebSocket(`${websocketApi}/ws/game/${game_id}/`);
   gameSocket.onopen = (e) => { console.log("Connected to game Lobby") };
-  gameSocket.onmessage = (e) => { console.log("Game Lobby message: ", e.data) }
+  // gameSocket.onmessage = (e) => { console.log("Game Lobby message: ", e.data) }
   gameSocket.onclose = (e) => {
     console.log("Game Lobby quit");
     gameSocket = null;
@@ -608,7 +645,7 @@ export function openGameMatchMakingSocket(name) {
   if (MatchmakingSocket) return MatchmakingSocket
   MatchmakingSocket = new WebSocket(`${websocketApi}/ws/matchmaking/${name}/`);
   MatchmakingSocket.onopen = (e) => { console.log("Connected to matchmaking socket") };
-  MatchmakingSocket.onmessage = (e) => { console.log("Matchmaking Socket message", e.data) }
+  // MatchmakingSocket.onmessage = (e) => { console.log("Matchmaking Socket message", e.data) }
   MatchmakingSocket.onclose = (e) => { MatchmakingSocket = null; }
   return MatchmakingSocket
 }
@@ -626,7 +663,7 @@ export function openGameTournamentMakingSocket(name) {
   if(TournamentMakingSocket) return TournamentMakingSocket;
   TournamentMakingSocket = new WebSocket(`${websocketApi}/ws/tournamentmaking/${name}/`)
   TournamentMakingSocket.onopen = (e) => { console.log("Connected to tournament making socket") };
-  TournamentMakingSocket.onmessage = (e) => { console.log("Tournament Making Socket Message", e.data) }
+  // TournamentMakingSocket.onmessage = (e) => { console.log("Tournament Making Socket Message", e.data) }
   TournamentMakingSocket.onclose = (e) => { TournamentMakingSocket = null }
   return TournamentMakingSocket
 }
@@ -686,6 +723,8 @@ const api = {
   getBlocks,
   getFriends,
   getGameInvites,
+  getStats,
+  getHistory,
   // setEvent,
 
   inviteFriend,

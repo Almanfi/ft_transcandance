@@ -23,6 +23,9 @@ function User() {
   const fetchData = async () => {
     try {
       const res = await api.getUser();
+      const stats = await api.getStats();
+      console.log("stats:", stats);
+      res.stats = [{ title: "Played Games", pong: stats.stats[0], osnier: stats.stats[1] }, { title: "Winrate", pong: stats.stats[2], osnier: stats.stats[3] }]
       console.log("getUser:", res);
       setUserData(res);
     } catch (error) {
@@ -57,13 +60,13 @@ function User() {
         </button>
 
         <div id="bottom">
-          <div loop={[Swords, Award, WinCup]} id="games">
-            {(Elem) => (
+          <div loop={getUserData().stats} id="games">
+            {(e) => (
               <div id="history">
-                <h4 id="title"><Elem />Games</h4>
+                <h4 id="title">{e.title}</h4>
                 <div className="children">
-                  <div className="child"><o>42%</o><h4>Pongers</h4></div>
-                  <div className="child"><o>42%</o><h4>Pongers</h4></div>
+                  <div className="child"><o>{e.pong}</o><h4>Pongers</h4></div>
+                  <div className="child"><o>{e.osnier}</o><h4>Osnier</h4></div>
                 </div>
               </div>
             )}

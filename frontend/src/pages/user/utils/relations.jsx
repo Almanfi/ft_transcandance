@@ -33,7 +33,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       },
       refuse: async (e) => {
         try {
@@ -44,7 +44,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       },
     },
     invites: {
@@ -56,7 +56,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       }
     },
     blocks: {
@@ -69,7 +69,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       }
     },
     friends: {
@@ -77,12 +77,19 @@ function Relations() {
         try {
           const game = await api.createGame();
           const res = await api.invitePlayer(game.id, e.id);
-          navigate(`/game?id=${game.id}`)
+          const game_socket = api.openGameSocket(game['id'])
+          game_socket.onmessage = (e) => {
+            const data = JSON.parse(e.data)
+            if (data['type'] === "game.start") {
+              Ura.navigate("/pong");
+              events.emit("setPongData", data, "remote");
+            }
+          }
         } catch (error) {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       },
       chat: (e) => {
         console.log("chat", e)
@@ -97,7 +104,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       },
       unfriend: async (e) => {
         try {
@@ -108,7 +115,7 @@ function Relations() {
           api.handleError(error)
         }
         fetchRelations(getSelect());
-        events.emitChildren("friendship")
+        // events.emitChildren("friendship")
       },
     },
   };
