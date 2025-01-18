@@ -39,8 +39,10 @@ const NewMessage = async (param) => {
   else {
     try {
       const user = await api.getUsersById([data.from]);
-      
-      if (Ura.In("/notifications")) {
+
+      if (!Ura.In("/chat")) {
+        Ura.create(<Toast message={`${user[0].display_name} did send a message`} color="green" />);
+
         console.error("heloooooooo");
         const isTrue = getList().some((e) => e.type === "message" && e.content === `New message from ${user[0].display_name}`);
         if (!isTrue) {
@@ -57,9 +59,6 @@ const NewMessage = async (param) => {
           ]);
         }
         Ura.refresh();
-      }
-      else if (!Ura.In("/chat")) {
-        Ura.create(<Toast message={`${user[0].display_name} did send a message`} color="green" />);
       }
     } catch (error) {
       api.handleError(error)
@@ -80,13 +79,13 @@ const NewGameInvitation = async (param) => {
       content: `New game invitation from ${data.invite.inviter.display_name}`,
       index: index++, // Assign a unique index
       accept: async () => {
-        
+
         try {
           console.log("Accept game:", data);
           await api.acceptGameInvite(data.invite.id);
           const game_socket = api.openGameSocket(data.invite.game.id);
           game_socket.onmessage = (e) => {
-          console.log("game message", e);
+            console.log("game message", e);
             const info = JSON.parse(e.data);
             if (info.type === "game.start") {
               Ura.navigate("/pong");
@@ -137,7 +136,7 @@ function Notifications() {
               <h4>{e.content}</h4>
             </span>
             <span className="action">
-              <h4 if={e.accept} className="accept" onclick={e.accept}> 
+              <h4 if={e.accept} className="accept" onclick={e.accept}>
               </h4>
               <h4 if={e.refuse} className="refuse" onclick={e.refuse}>
               </h4>
