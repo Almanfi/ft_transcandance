@@ -1,4 +1,7 @@
-import * as THREE from 'three';
+// @ts-ignore
+// @ts-nocheck
+
+import * as THREE from './three/three.module.js';
 import { Player } from './player.js';
 
 

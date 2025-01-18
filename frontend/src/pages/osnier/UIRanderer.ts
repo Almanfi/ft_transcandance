@@ -1,7 +1,9 @@
-import * as THREE from 'three';
-// import { FontLoader, TextGeometry } from 'three/addons';
-import { FontLoader } from "./three/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "./three/examples/jsm/geometries/TextGeometry.js";
+// @ts-ignore
+// @ts-nocheck
+
+import * as THREE from './three/three.module.js';
+import { FontLoader } from "./three/FontLoader.js";
+import { TextGeometry } from "./three/TextGeometry.js";
 
 class HealthBar {
     bar: THREE.Mesh[];
@@ -140,7 +142,7 @@ export class UIRanderer {
             let geometry = new TextGeometry(number.toString(), {
                 font: font,
                 size: 40,
-                height: 1,
+                depth: 1,
                 curveSegments: 12,
                 bevelEnabled: true,
                 bevelThickness: 1,
@@ -149,7 +151,7 @@ export class UIRanderer {
                 bevelSegments: 5
             } );
             let material = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide } );
-            let plane = new THREE.Mesh( geometry, material );
+            let plane = new THREE.Mesh( geometry as unknown as THREE.BufferGeometry<THREE.NormalBufferAttributes>, material );
             plane.rotateX(-Math.PI / 2);
             plane.position.x -= 15;
             plane.position.z += 15;
@@ -199,7 +201,7 @@ export class UIRanderer {
             let geometry = new TextGeometry(text, {
                 font: font,
                 size: 7,
-                height: 1,
+                depth: 1,
                 curveSegments: 12,
                 bevelEnabled: true,
                 bevelThickness: 1,
@@ -208,7 +210,7 @@ export class UIRanderer {
                 bevelSegments: 5
             } );
             let material = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide } );
-            let plane = new THREE.Mesh( geometry, material );
+            let plane = new THREE.Mesh( geometry as unknown as THREE.BufferGeometry<THREE.NormalBufferAttributes>, material );
             plane.rotateX(-Math.PI / 2);
             plane.position.copy(position);
             if (origin == 1) {

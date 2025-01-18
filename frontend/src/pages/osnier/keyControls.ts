@@ -1,4 +1,7 @@
-import * as THREE from 'three';
+// @ts-ignore
+// @ts-nocheck
+
+import * as THREE from './three/three.module.js';
 
 function release() {
     if (!this.releaseVal)

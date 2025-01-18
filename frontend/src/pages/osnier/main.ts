@@ -1,4 +1,7 @@
-import * as THREE from 'three';
+// @ts-ignore
+// @ts-nocheck
+
+import * as THREE from './three/three.module.js';
 import { Plane, PlayersBulletManager, TurretBulletManager, Turret } from './assets.js';
 import { Player, Inputs } from './player.js';
 import { KeyControls, getCameraDir } from './keyControls.js';

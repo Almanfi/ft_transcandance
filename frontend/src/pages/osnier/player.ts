@@ -1,4 +1,7 @@
-import * as THREE from 'three';
+// @ts-ignore
+// @ts-nocheck
+
+import * as THREE from './three/three.module.js';
 import { Move, GameAction } from './keyControls.js';
 import { PlayersBulletManager, Plane } from './assets.js';
 import { Rollback, dataSaved, RollData } from './rollback.js';

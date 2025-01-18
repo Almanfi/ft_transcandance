@@ -1,3 +1,6 @@
+// @ts-ignore
+// @ts-nocheck
+
 import { Inputs } from "./player.js";
 
 class WebSocketCnx {
