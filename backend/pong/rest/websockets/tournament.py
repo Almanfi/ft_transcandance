@@ -23,9 +23,7 @@ class TournamentSocket(WebsocketConsumer):
 
 	def set_final_game(self, invites):
 		for invite in invites.data:
-			print("Through invites")
 			if invite['game']['tournament_phase'] == TOURNAMENT_PHASE[3][0]:
-				print("found the final game")
 				self.game_id = invite['game']['id']
 				return
 
@@ -35,7 +33,6 @@ class TournamentSocket(WebsocketConsumer):
 				self.waiting_for = None
 				self.game_id = None
 				self.set_final_game(invites)
-				print("Her the game id is: ", self.game_id)
 				return True
 			if invite['game']['tournament']['tournament_phase'] != desired_phase or invite['game']['game_ended']:
 				continue

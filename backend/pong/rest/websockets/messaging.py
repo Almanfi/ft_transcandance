@@ -74,7 +74,6 @@ class MessagingSocket(WebsocketConsumer):
 			payload_json['friend_id'] = source_uuid
 			messages_load = self.retrieve_messages(payload_json)
 			
-			print("The retrieving is working")
 			return self.send(text_data=json.dumps({"type": payload_json['type'], "messages": messages_load}))
 		else:
 			return self.send(text_data=json.dumps({"error_code":38, "message": "Wrong Socket Event"}))

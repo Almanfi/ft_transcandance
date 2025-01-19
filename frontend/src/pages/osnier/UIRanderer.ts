@@ -181,17 +181,14 @@ export class UIRanderer {
 
     loadPlayerImage(imagePath: string, position: THREE.Vector3) {
         this.textureLoader.load(imagePath, (texture) => {
-            console.log(texture);
             let material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-            // const material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
             let geometry = new THREE.PlaneGeometry( 10 * this.aspect, 10 * this.aspect );
             let plane = new THREE.Mesh( geometry, material );
             plane.rotateX(-Math.PI / 2);
             plane.position.copy(position);
-            console.log(this);
             this.addMesh(plane);
             this.render();
-        }, undefined, function ( err ) { console.error( 'An error happened.', err ); });
+        }, undefined, function ( err ) {});
 
     }
 

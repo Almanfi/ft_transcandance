@@ -23,7 +23,7 @@ class OsnierTournamentMakingSocket(WebsocketConsumer):
 		tournament_queue = OsnierTournamentMaking().add_player(tournament_node)
 		if tournament_queue == None:
 			self.close(105, "Duplicate Tournament participant")
-			return;
+			return
 		self.send(text_data=json.dumps({"message": "Entered Tournament Queue"}))
 		queue_len = len(tournament_queue)
 		if queue_len >= 4:

@@ -130,12 +130,6 @@ class Game(models.Model):
 		osnier_games_count = Game.objects.filter((Q(team_a=user) | Q(team_b=user)) & Q(genre = GAME_GENRE[1][0])).count()
 		pong_games_won_on_a = Game.objects.filter(team_a=user, genre=GAME_GENRE[0][0], winner=WINNER_CHOICES[2][0]).count()
 		pong_games_won_on_b = Game.objects.filter(team_b=user, genre=GAME_GENRE[0][0], winner=WINNER_CHOICES[3][0]).count()
-		pong_winrate = 0
-		if pong_games_count != 0:
-			pong_winrate = ((pong_games_won_on_a + pong_games_won_on_b) * 100) / pong_games_count;
 		osnier_games_won_on_a = Game.objects.filter(team_a=user, genre=GAME_GENRE[1][0], winner=WINNER_CHOICES[2][0]).count()
-		osnier_games_won_on_b = Game.objects.filter(team_b=user, genre=GAME_GENRE[1][0], winner=WINNER_CHOICES[2][0]).count()
-		osnier_winrate = 0
-		if osnier_games_count != 0:
-			osnier_winrate = ((osnier_games_won_on_a + osnier_games_won_on_b) * 100) / osnier_games_count
-		return [ pong_games_count , osnier_games_count, round(pong_winrate), round(osnier_winrate)]
+		osnier_games_won_on_b = Game.objects.filter(team_b=user, genre=GAME_GENRE[1][0], winner=WINNER_CHOICES[3][0]).count()
+		return [ pong_games_count , osnier_games_count, pong_games_won_on_a + pong_games_won_on_b, osnier_games_won_on_a + osnier_games_won_on_b]

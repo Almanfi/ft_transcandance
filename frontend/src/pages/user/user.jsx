@@ -21,7 +21,7 @@ function User() {
       const res = await api.getUser();
       const stats = await api.getStats();
       console.log("stats:", stats);
-      res.stats = [{ title: "Played Games", pong: stats.stats[0], osnier: stats.stats[1] }, { title: "Winrate", pong: stats.stats[2], osnier: stats.stats[3] }]
+      res.stats = [{ title: "Played Games", pong: stats.stats[0], osnier: stats.stats[1] }, { title: "Won Games", pong: stats.stats[2], osnier: stats.stats[3] }]
       console.log("getUser:", res);
       setUserData(res);
     } catch (error) {

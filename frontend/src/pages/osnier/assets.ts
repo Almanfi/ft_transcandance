@@ -93,8 +93,6 @@ export class Turret extends THREE.Mesh {
         props: TurretProps = { }) {
         let color = props.color  || 0x000000;
         let radius = props.radius || 2500;
-        console.log("^^^^^^^^^^^^^^^^^^radius : ", radius);
-        console.log('Turret props: ', props);
         const geometry = new THREE.SphereGeometry(radius);
         const material = new THREE.MeshPhysicalMaterial({ color });
         super(geometry, material);
@@ -162,8 +160,6 @@ export class Turret extends THREE.Mesh {
         let listen = true;
         if (listen && beat && beat.type && !beat.handled) {
             beat.handled = true;
-            // console.log('beat: ', beat);
-            // console.log(new Date().valueOf() - startTime);
             this.update(beat.time);
 
             switch (beat.type) {
@@ -212,7 +208,6 @@ abstract class ABullet extends THREE.Mesh {
 
     constructor(geometry: MyGeometry, material: THREE.Material) {
         super(geometry, material);
-        // this.oldPosition = new THREE.Vector3();
     }
 
     setOriginal(position: THREE.Vector3, speed: THREE.Vector3, spawnTime: number) {
@@ -242,7 +237,6 @@ abstract class ABullet extends THREE.Mesh {
     }
 
     lastPosition(s: number) {
-        // return this.oldPosition;
         let lastPosition = new THREE.Vector3();
         lastPosition.copy(this.position);
         lastPosition.addScaledVector(this.speed, - this.speedRate * s);
@@ -296,7 +290,6 @@ export class TurretBullet extends ABullet {
         let otherStart = other.getOldPosition(radius, s);
         let otherEnd = other.getCurrentPosition(radius);
         if (doIntersect(thisStart, thisEnd, otherStart, otherEnd)) {
-            // console.log(`doIntersect(${JSON.stringify(thisStart)}, ${JSON.stringify(thisEnd)}, ${JSON.stringify(otherStart)}, ${JSON.stringify(otherEnd)})`);
             return true;
         }
         return false;
@@ -332,7 +325,6 @@ export class PlayerBullet extends ABullet {
     }
 
     lastPosition(s: number) {
-        // return this.oldPosition;
         let lastPosition = new THREE.Vector3();
         lastPosition.copy(this.position);
         lastPosition.addScaledVector(this.speed, - this.speedRate * s);
@@ -363,15 +355,12 @@ export class PlayerBullet extends ABullet {
             return lineIntersectsCircle(thisStart, thisEnd, otherEnd, radius);
         }
         if (lineIntersectsCircle(thisStart, thisEnd, otherStart, radius)) {
-            console.log('lineIntersectsCircle(thisStart, thisEnd, otherStart, radius)');
             return true;
         }
         if (lineIntersectsCircle(thisStart, thisEnd, otherEnd, radius)) {
-            console.log('lineIntersectsCircle(thisStart, thisEnd, otherEnd, radius)');
             return true;
         }
         if (doIntersect(thisStart, thisEnd, otherStart, otherEnd)) {
-            console.log('doIntersect(thisStart, thisEnd, otherStart, otherEnd)');
             return true;
         }
         return false;
@@ -420,14 +409,11 @@ function lineIntersectsCircle(lineStart: THREE.Vector3, lineEnd: THREE.Vector3,
     const discriminant = B * B - 4 * A * C;
 
     if (discriminant < 0) {
-        // No intersection
         return false;
     } else {
-        // Check if the intersection points are within the segment
         const t1 = (-B - Math.sqrt(discriminant)) / (2 * A);
         const t2 = (-B + Math.sqrt(discriminant)) / (2 * A);
 
-        // Check if either t1 or t2 is within the range [0, 1]
         if ((t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1)) {
             return true;
         } else {
@@ -468,7 +454,8 @@ class ABulletManager {
     }
 
     createBulletsPool(poolSize: number) {
-        console.log('createBulletsPool of size: ', poolSize, "now pool has : ", this.bulletsPool.size, "and used bullets are : ", this.bullets.size);
+        if (poolSize > 1000)
+            poolSize = 1000;
         for (let i = 0; i < poolSize; i++) {
             let bullet = this.createBullet();
             bullet.visible = false;
@@ -567,10 +554,7 @@ export class PlayersBulletManager extends ABulletManager {
 
 
 
-    batchUndestroyBullet() {//this create problems
-        // this.destroyedBullets.forEach((elem) => {
-        //     this.undestroyBullet(elem);
-        // })
+    batchUndestroyBullet() {
     }
 
     checkRollbackCollision(other: Player | Turret, s: number, time: number) {
@@ -582,8 +566,6 @@ export class PlayersBulletManager extends ABulletManager {
             if (bullet.intersects(other, s, vex)) {
                 (other as Player).takeDamage(1, time + time, "rollback");
                 this.despawnBullet(bullet);
-                // bullet.material.color.set(0x00ff00);
-                // bullet.material.emissive.set(0x000000);
                 return;
             }
             for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
@@ -612,9 +594,6 @@ export class PlayersBulletManager extends ABulletManager {
             if (bullet.intersects(other, s, vex)) {
                 (other as Player).takeDamage(1, time + s, "rollback");
                 this.returnDestroyedBullet(bullet);
-                // this.undestroyBullet(bullet);
-                // bullet.material.color.set(0x00ff00);
-                // bullet.material.emissive.set(0x000000);
                 return;
             }
             for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
@@ -644,8 +623,6 @@ export class PlayersBulletManager extends ABulletManager {
             if (bullet.intersects(other, s, vex)) {
                 other.takeDamage(1, time + s, "animate");
                 this.despawnBullet(bullet);
-                // bullet.material.color.set(0x000000);
-                // bullet.material.emissive.set(0x000000);
                 return;
             }
             for(let [Pkey, otherBullet] of other.bulletManager.bullets) {
@@ -723,13 +700,8 @@ export class TurretBulletManager extends ABulletManager {
             if (bullet.intersects(player, s, vex)) {
                 player.takeDamage(1, time + s, "rollback");
                 this.returnDestroyedBullet(bullet);
-                // this.undestroyBullet(bullet);
-                // bullet.material.color.set(0x00ff00);
                 return;
             }
-            // no destroyed bullet is red
-            // if (this.bullets.get(key).material.color.getHex() === 0xff0000)
-            //     continue;
             for(let [Pkey, PlayerBullet] of player.bulletManager.bullets) {
                 if (PlayerBullet.date > time)
                     continue;
@@ -755,7 +727,6 @@ export class TurretBulletManager extends ABulletManager {
         var vex = new THREE.Vector3();
         for(var [key, bullet] of this.bullets) {
             if (bullet.intersects(player, s, vex)) {
-                // this.bullets.get(key).material.color.set(0x000000);
                 player.takeDamage(1, timeStamp + s, "animate");
                 this.despawnBullet(bullet);
                 return;

@@ -7,12 +7,15 @@ const [render, State] = Ura.init();
 const [getData, setData] = State(0);
 
 events.add("setOsnierData", async (arg) => {
-  console.log("osnier args ", arg);
+  let convasDiv = document.getElementById("osnier");
+  if (convasDiv)
+    convasDiv.innerHTML = "";
   switch (arg[1]) {
     case "remote": {
       let data = arg[0];
       let gameData = data.game;
       const userData = await api.getUser();
+      Ura.refresh();
       startGame(userData, gameData);
       break;
     }

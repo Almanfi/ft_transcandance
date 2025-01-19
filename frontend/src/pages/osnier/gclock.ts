@@ -66,25 +66,14 @@ export class gameClock {
 		return this.frameTimes[index];
 	}
 
-	// sameFrame(start: number, final: number): boolean {
-	// 	if (start > final)
-	// 		final += 60;
-	// 	if (final - start > 60)
-		
-	// }
-
 	getFrameIndex(currentTime: number): number {
 		let index = (this.frame - 1 + 60) % 60;
 		if (this.frameTimes[index] === currentTime) {
-			// console.log("frame time is the same as current time");
 			return index;
 		}
 		let maxIterate = 60;
 		while (this.frameTimes[index] > currentTime && --maxIterate) {
 			index = (index - 1 + 60) % 60;
-			// console.log('frame time: ', this.frameTimes[index]);
-			// if (--maxIterate)
-			// 	return -1;
 		}
 		if (maxIterate === 0)
 			return -1;
@@ -102,7 +91,6 @@ export class gameClock {
 
 	getFrameTimeRevrese(reverseIdx: number) {
 		if (reverseIdx > 60) {
-			console.log("invalid frame time index");// get rid of this
 			return ;
 		}
 		return this.frameTimes[(this.frame - reverseIdx + 59) % 60];
@@ -135,7 +123,6 @@ export class gameClock {
 		this.msPassed = this.msNow - this.msPrev;
 		this.msPrevTrue = this.msNow;
 		if (this.msPassed < this.msPerFrame) {
-			// rollBack(this.startTime, "fast");
 			return ;
 		}
 		

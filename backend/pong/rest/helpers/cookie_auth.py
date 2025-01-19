@@ -67,7 +67,6 @@ class ExceptionCatcher(BaseMiddleware):
         try:
             return await super().__call__(scope, receive, send)
         except Exception as e:
-            print(f"the error is {e}")
             return await send({
                 'type': "websocket.close",
                 'code': 1000,
